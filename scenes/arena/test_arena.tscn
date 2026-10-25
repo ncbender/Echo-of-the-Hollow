@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/arena_floor.gd" id="1_floor"]
+[ext_resource type="Script" path="res://scripts/arena/wall_block.gd" id="2_wall"]
+
+[node name="TestArena" type="Node2D"]
+
+[node name="Floor" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("1_floor")
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="North" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -208)
+script = ExtResource("2_wall")
+size = Vector2(672, 16)
+
+[node name="South" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 208)
+script = ExtResource("2_wall")
+size = Vector2(672, 16)
+
+[node name="West" type="StaticBody2D" parent="Walls"]
+position = Vector2(-328, 0)
+script = ExtResource("2_wall")
+size = Vector2(16, 400)
+
+[node name="East" type="StaticBody2D" parent="Walls"]
+position = Vector2(328, 0)
+script = ExtResource("2_wall")
+size = Vector2(16, 400)
+
+[node name="PillarA" type="StaticBody2D" parent="Walls"]
+position = Vector2(-160, -96)
+script = ExtResource("2_wall")
+size = Vector2(32, 32)
+
+[node name="PillarB" type="StaticBody2D" parent="Walls"]
+position = Vector2(160, 96)
+script = ExtResource("2_wall")
+size = Vector2(32, 32)
+
+[node name="LowWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(-176, 112)
+script = ExtResource("2_wall")
+size = Vector2(96, 16)
