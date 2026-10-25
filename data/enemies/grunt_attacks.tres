@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
+
+[sub_resource type="Resource" id="Attack_swipe"]
+script = ExtResource("2_attack")
+id = &"grunt_swipe"
+display_name = "Grunt Swipe"
+weapon_family_id = &"grunt_claws"
+input_type = 0
+startup = 0.45
+active = 0.1
+recovery = 0.5
+chain_delay = 0.0
+combo_window = 0.0
+damage = 12.0
+poise_damage = 10.0
+knockback = 70.0
+hitstop = 0.05
+reach = 30.0
+arc_degrees = 100.0
+move_multiplier = 0.0
+lunge_distance = 6.0
+dash_cancel_phases = 7
+effect_tags = Array[StringName]([&"enemy"])
+
+[resource]
+script = ExtResource("1_family")
+id = &"grunt_claws"
+display_name = "Grunt Claws"
+root_light = &"grunt_swipe"
+attacks = Array[ExtResource("2_attack")]([SubResource("Attack_swipe")])

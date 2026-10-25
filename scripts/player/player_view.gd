@@ -15,6 +15,7 @@ var _trail: Array[Vector2] = []
 var _tier_flash: float = 0.0
 
 @onready var player: Player = get_parent()
+@onready var _fx: HitReactionFx = $"../HitReactionFx"
 
 
 func _ready() -> void:
@@ -56,6 +57,9 @@ func _draw() -> void:
 		body_color = COLOR_IFRAME
 	elif player.dash.is_dashing():
 		body_color = COLOR_DASH
+	if player.health.is_dead():
+		body_color = Color(0.4, 0.4, 0.45, 0.6)
+	body_color = body_color.lerp(Color(1.0, 0.4, 0.35), _fx.flash)
 	draw_circle(Vector2(0, -2), BODY_RADIUS, body_color)
 	draw_circle(Vector2(0, -2) + player.aim_direction * 3.0, 2.0, Color("1d1b26"))
 

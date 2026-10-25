@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+move_speed = 70.0
+aggro_range = 260.0
+attack_range = 28.0
+stop_distance = 18.0
+attack_cooldown = 0.9
+knockback_resistance = 0.2
+knockback_scale = 3.0
+knockback_decay = 1000.0
+despawn_delay = 0.8

@@ -9,6 +9,8 @@ const DAMAGE_NUMBER: GDScript = preload("res://scripts/fx/damage_number.gd")
 @export var hurtbox: Hurtbox
 @export var flash_time: float = 0.12
 @export var max_offset: float = 5.0
+## Fixed damage-number colour (alpha 0 = colour by attack type and charge tier).
+@export var number_color: Color = Color(0, 0, 0, 0)
 
 ## 0..1, how strongly the entity should flash white.
 var flash: float = 0.0
@@ -39,6 +41,8 @@ func _spawn_number(hit: HitData) -> void:
 
 
 func _number_color(hit: HitData) -> Color:
+	if number_color.a > 0.0:
+		return number_color
 	if hit.charge_tier >= 2:
 		return Color("ffd84a")
 	if hit.charge_tier == 1:

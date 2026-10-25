@@ -1,0 +1,117 @@
+class_name Enemy
+extends CharacterBody2D
+## Simple melee enemy: chase, telegraphed attack, hit reaction, stagger, death.
+## The AI only produces InputFrames for its own CombatComponent, so enemy attacks
+## use exactly the same data, phases, hitboxes and hit pipeline as the player.
+## The telegraph is the (long) startup phase of the enemy's attack definition.
+
+signal defeated(enemy: Enemy)
+
+enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
+
+@export var config: EnemyConfig
+@export var attacks: WeaponFamily
+
+var target: Node2D
+var state: State = State.CHASE
+var _cooldown: float = 0.0
+var _knockback: Vector2 = Vector2.ZERO
+var dead_time: float = 0.0
+
+@onready var combat: CombatComponent = $CombatComponent
+@onready var health: HealthComponent = $HealthComponent
+@onready var hurtbox: Hurtbox = $Hurtbox
+
+
+func _ready() -> void:
+	if config == null:
+		config = EnemyConfig.new()
+	combat.set_weapon(attacks)
+	combat.attack_finished.connect(func(_attack: AttackDefinition) -> void: _cooldown = config.attack_cooldown)
+	hurtbox.invulnerability_check = health.is_dead
+	hurtbox.hit_received.connect(_on_hit_received)
+	health.poise_broken.connect(_on_poise_broken)
+	health.died.connect(_on_died)
+	if target == null:
+		target = get_tree().get_first_node_in_group(&"player") as Node2D
+
+
+func _physics_process(delta: float) -> void:
+	physics_step(delta)
+
+
+func physics_step(delta: float) -> void:
+	if state == State.DEAD:
+		dead_time += delta
+		if dead_time >= config.despawn_delay:
+			queue_free()
+		return
+
+	_cooldown = maxf(0.0, _cooldown - delta)
+	var to_target := _to_target()
+	var frame := InputFrame.new()
+	frame.aim_direction = to_target.normalized()
+
+	if state == State.STAGGERED:
+		if not health.is_staggered():
+			state = State.CHASE
+	elif combat.state == CombatComponent.State.IDLE and _cooldown <= 0.0 \
+			and to_target != Vector2.ZERO and to_target.length() <= config.attack_range:
+		frame.light_pressed = true
+
+	combat.step(delta, frame, frame.aim_direction, state == State.STAGGERED)
+	_sync_state()
+	_move(to_target, delta)
+
+
+func _to_target() -> Vector2:
+	if target == null or not is_instance_valid(target) or not _target_alive():
+		return Vector2.ZERO
+	return target.global_position - global_position
+
+
+func _target_alive() -> bool:
+	var target_health := target.get_node_or_null("HealthComponent") as HealthComponent
+	return target_health == null or not target_health.is_dead()
+
+
+func _sync_state() -> void:
+	if state == State.STAGGERED:
+		return
+	if combat.state != CombatComponent.State.ATTACKING:
+		state = State.CHASE
+	elif combat.phase == CombatComponent.Phase.STARTUP:
+		state = State.TELEGRAPH
+	else:
+		state = State.ATTACKING
+
+
+func _move(to_target: Vector2, delta: float) -> void:
+	var desired := Vector2.ZERO
+	var distance := to_target.length()
+	if state == State.CHASE and distance > config.stop_distance and distance < config.aggro_range:
+		desired = to_target.normalized() * config.move_speed
+	elif combat.state == CombatComponent.State.ATTACKING:
+		desired = combat.get_lunge_velocity()
+	velocity = desired + _knockback
+	_knockback = _knockback.move_toward(Vector2.ZERO, config.knockback_decay * delta)
+	move_and_slide()
+
+
+func _on_hit_received(hit: HitData) -> void:
+	_knockback += hit.knockback * (1.0 - config.knockback_resistance) * config.knockback_scale
+	health.apply_hit(hit)
+
+
+func _on_poise_broken() -> void:
+	if state == State.DEAD:
+		return
+	combat.cancel(&"stagger")   # interrupts telegraph/attack, pending hit is discarded
+	state = State.STAGGERED
+
+
+func _on_died() -> void:
+	combat.cancel(&"death")
+	state = State.DEAD
+	$CollisionShape2D.set_deferred(&"disabled", true)
+	defeated.emit(self)

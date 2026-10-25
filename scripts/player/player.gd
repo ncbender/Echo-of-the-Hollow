@@ -4,12 +4,17 @@ extends CharacterBody2D
 ## and combat components and moves the body. Gameplay rules live in the components.
 
 signal weapon_equipped(weapon: WeaponFamily)
+signal respawned
 
 const DASH_BUFFER_ACTION := &"dash"
 
 @export var input_buffer_time: float = 0.12
 ## Weapon loadout; slot keys 1/2 switch between entries.
 @export var weapons: Array[WeaponFamily] = []
+## Prototype: seconds until the player stands up again at the spawn point after dying.
+@export var respawn_delay: float = 1.5
+## px/s² decay of knockback received from enemy hits.
+@export var knockback_decay: float = 900.0
 
 ## When true, physics ticks consume frames given via feed_input() instead of devices
 ## (used by tests and scripted playtests).
@@ -19,19 +24,27 @@ var aim_direction: Vector2 = Vector2.RIGHT
 var _external_frame := InputFrame.new()
 var _locomotion_velocity: Vector2 = Vector2.ZERO
 var _dash_buffer: InputBuffer
+var _knockback: Vector2 = Vector2.ZERO
+var _spawn_position: Vector2
+var _respawn_left: float = 0.0
 
 @onready var input: PlayerInput = $PlayerInput
 @onready var movement: MovementComponent = $MovementComponent
 @onready var dash: DashComponent = $DashComponent
 @onready var combat: CombatComponent = $CombatComponent
 @onready var hurtbox: Hurtbox = $Hurtbox
+@onready var health: HealthComponent = $HealthComponent
 
 
 func _ready() -> void:
 	_dash_buffer = InputBuffer.new(input_buffer_time)
 	combat.input_buffer_time = input_buffer_time
 	combat.buffer.window = input_buffer_time
-	hurtbox.invulnerability_check = dash.is_invulnerable
+	add_to_group(&"player")
+	_spawn_position = global_position
+	hurtbox.invulnerability_check = func() -> bool: return dash.is_invulnerable() or health.is_dead()
+	hurtbox.hit_received.connect(_on_hit_received)
+	health.died.connect(_on_died)
 	if not weapons.is_empty():
 		equip_weapon(0)
 
@@ -60,6 +73,9 @@ func equip_weapon(slot: int) -> bool:
 
 
 func physics_step(frame: InputFrame, delta: float) -> void:
+	if health.is_dead():
+		_step_down(delta)
+		return
 	if frame.aim_direction.length_squared() > 0.0001:
 		aim_direction = frame.aim_direction.normalized()
 	if frame.weapon_slot >= 0 and not dash.is_dashing():
@@ -84,6 +100,8 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		_locomotion_velocity = movement.compute_velocity(
 				_locomotion_velocity, frame.move, combat.get_move_multiplier(), delta)
 		velocity = _locomotion_velocity + combat.get_lunge_velocity()
+	velocity += _knockback
+	_knockback = _knockback.move_toward(Vector2.ZERO, knockback_decay * delta)
 	move_and_slide()
 
 
@@ -91,3 +109,25 @@ func _start_dash(frame: InputFrame) -> void:
 	# No movement input: dash backwards relative to the aim direction.
 	var direction := frame.move if frame.move.length_squared() > 0.01 else -aim_direction
 	dash.try_start(direction.normalized())
+
+
+## Design has no player stagger yet: hits deal damage and knockback but never
+## interrupt the current action (see docs/COMBAT_DESIGN.md, open questions).
+func _on_hit_received(hit: HitData) -> void:
+	health.apply_hit(hit)
+	_knockback += hit.knockback
+
+
+func _on_died() -> void:
+	combat.cancel(&"death")
+	_respawn_left = respawn_delay
+
+
+func _step_down(delta: float) -> void:
+	velocity = Vector2.ZERO
+	_respawn_left -= delta
+	if _respawn_left <= 0.0:
+		global_position = _spawn_position
+		_knockback = Vector2.ZERO
+		health.reset()
+		respawned.emit()

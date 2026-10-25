@@ -25,6 +25,7 @@ func _lines() -> PackedStringArray:
 	var lines: PackedStringArray = []
 	var weapon_name := combat.weapon.display_name if combat.weapon != null else "-"
 	lines.append("Weapon   %s  [%d/%d]" % [weapon_name, player.weapons.find(combat.weapon) + 1, player.weapons.size()])
+	lines.append("HP       %.0f / %.0f%s" % [player.health.health, player.health.max_health, "  (DOWN)" if player.health.is_dead() else ""])
 
 	var state := "%s" % STATE_NAMES[combat.state]
 	if dash.is_dashing():

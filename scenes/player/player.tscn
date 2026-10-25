@@ -14,6 +14,8 @@
 [ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="12_family"]
 [ext_resource type="Resource" path="res://data/weapons/one_handed_sword.tres" id="13_sword"]
 [ext_resource type="Resource" path="res://data/weapons/two_handed_sword.tres" id="14_greatsword"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="15_health"]
+[ext_resource type="Script" path="res://scripts/fx/hit_reaction_fx.gd" id="16_fx"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
@@ -61,6 +63,16 @@ team = &"player"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
 position = Vector2(0, -2)
 shape = SubResource("CircleShape2D_hurt")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("15_health")
+max_health = 100.0
+max_poise = 999.0
+
+[node name="HitReactionFx" type="Node2D" parent="." node_paths=PackedStringArray("hurtbox")]
+script = ExtResource("16_fx")
+hurtbox = NodePath("../Hurtbox")
+number_color = Color(1, 0.35, 0.3, 1)
 
 [node name="PlayerView" type="Node2D" parent="."]
 script = ExtResource("5_view")

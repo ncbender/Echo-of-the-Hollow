@@ -46,8 +46,10 @@ func validate() -> PackedStringArray:
 			errors.append("%s: heavy attack %s has no charge profile" % [id, attack.id])
 		if attack.startup < 0.0 or attack.active <= 0.0 or attack.recovery < 0.0:
 			errors.append("%s: %s has invalid phase timings" % [id, attack.id])
-	_check_link(errors, seen, root_light, AttackDefinition.InputType.LIGHT, "root_light")
-	_check_link(errors, seen, root_heavy, AttackDefinition.InputType.HEAVY, "root_heavy")
+	if root_light == &"" and root_heavy == &"":
+		errors.append("%s: needs at least one root attack" % id)
+	_check_link(errors, seen, root_light, AttackDefinition.InputType.LIGHT, "root_light", true)
+	_check_link(errors, seen, root_heavy, AttackDefinition.InputType.HEAVY, "root_heavy", true)
 	for attack in attacks:
 		if attack == null:
 			continue

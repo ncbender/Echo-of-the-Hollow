@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/grunt_config.tres" id="2_cfg"]
+[ext_resource type="Resource" path="res://data/enemies/grunt_attacks.tres" id="3_attacks"]
+[ext_resource type="Script" path="res://scripts/combat/combat_component.gd" id="4_combat"]
+[ext_resource type="Script" path="res://scripts/combat/attack_hitbox.gd" id="5_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="6_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="7_health"]
+[ext_resource type="Script" path="res://scripts/fx/hit_reaction_fx.gd" id="8_fx"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_view.gd" id="9_view"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 6.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 8.0
+
+[node name="Grunt" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_enemy")
+config = ExtResource("2_cfg")
+attacks = ExtResource("3_attacks")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("7_health")
+max_health = 90.0
+max_poise = 35.0
+stagger_duration = 0.9
+
+[node name="AttackHitbox" type="Node2D" parent="."]
+z_index = 5
+script = ExtResource("5_hitbox")
+team = &"enemy"
+
+[node name="CombatComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
+script = ExtResource("4_combat")
+hitbox = NodePath("../AttackHitbox")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("6_hurtbox")
+team = &"enemy"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -4)
+shape = SubResource("CircleShape2D_hurt")
+
+[node name="HitReactionFx" type="Node2D" parent="." node_paths=PackedStringArray("hurtbox")]
+script = ExtResource("8_fx")
+hurtbox = NodePath("../Hurtbox")
+
+[node name="View" type="Node2D" parent="."]
+script = ExtResource("9_view")
