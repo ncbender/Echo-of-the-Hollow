@@ -8,15 +8,24 @@
 [ext_resource type="Script" path="res://scripts/fx/camera_shake.gd" id="6_cam"]
 [ext_resource type="Resource" path="res://data/player/movement_config.tres" id="7_mcfg"]
 [ext_resource type="Resource" path="res://data/player/dash_config.tres" id="8_dcfg"]
+[ext_resource type="Script" path="res://scripts/combat/combat_component.gd" id="9_combat"]
+[ext_resource type="Script" path="res://scripts/combat/attack_hitbox.gd" id="10_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="11_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="12_family"]
+[ext_resource type="Resource" path="res://data/weapons/one_handed_sword.tres" id="13_sword"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 7.0
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_player")
+weapons = Array[ExtResource("12_family")]([ExtResource("13_sword")])
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_body")
@@ -31,6 +40,26 @@ config = ExtResource("7_mcfg")
 [node name="DashComponent" type="Node" parent="."]
 script = ExtResource("4_dash")
 config = ExtResource("8_dcfg")
+
+[node name="AttackHitbox" type="Node2D" parent="."]
+z_index = 5
+script = ExtResource("10_hitbox")
+team = &"player"
+
+[node name="CombatComponent" type="Node" parent="." node_paths=PackedStringArray("hitbox")]
+script = ExtResource("9_combat")
+hitbox = NodePath("../AttackHitbox")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("11_hurtbox")
+team = &"player"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -2)
+shape = SubResource("CircleShape2D_hurt")
 
 [node name="PlayerView" type="Node2D" parent="."]
 script = ExtResource("5_view")
