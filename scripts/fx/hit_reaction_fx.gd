@@ -1,0 +1,57 @@
+class_name HitReactionFx
+extends Node2D
+## Visual hit reaction for any entity with a Hurtbox: flash amount, shake/knock
+## offset and floating damage numbers. Views read `flash` and `offset`.
+## Purely cosmetic; never changes gameplay state.
+
+const DAMAGE_NUMBER: GDScript = preload("res://scripts/fx/damage_number.gd")
+
+@export var hurtbox: Hurtbox
+@export var flash_time: float = 0.12
+@export var max_offset: float = 5.0
+
+## 0..1, how strongly the entity should flash white.
+var flash: float = 0.0
+## Visual displacement from knockback/shake in local space.
+var offset: Vector2 = Vector2.ZERO
+var _offset_velocity: Vector2 = Vector2.ZERO
+
+
+func _ready() -> void:
+	if hurtbox != null:
+		hurtbox.hit_received.connect(_on_hit_received)
+
+
+func _on_hit_received(hit: HitData) -> void:
+	flash = 1.0
+	var push := hit.knockback.normalized() * minf(max_offset, 2.0 + hit.knockback.length() / 25.0)
+	_offset_velocity += push * 30.0
+	_spawn_number(hit)
+
+
+func _spawn_number(hit: HitData) -> void:
+	var number: Node2D = DAMAGE_NUMBER.new()
+	number.text = str(roundi(hit.damage))
+	number.color = _number_color(hit)
+	number.global_position = global_position + Vector2(randf_range(-4, 4), -18)
+	var world := get_tree().current_scene if get_tree().current_scene != null else get_tree().root
+	world.add_child(number)
+
+
+func _number_color(hit: HitData) -> Color:
+	if hit.charge_tier >= 2:
+		return Color("ffd84a")
+	if hit.charge_tier == 1:
+		return Color("ff9a3c")
+	if hit.attack != null and hit.attack.input_type == AttackDefinition.InputType.HEAVY:
+		return Color("ffc2a0")
+	return Color("f4f0e6")
+
+
+func _process(delta: float) -> void:
+	flash = maxf(0.0, flash - delta / flash_time)
+	# Damped spring back to rest.
+	_offset_velocity += -offset * 400.0 * delta
+	_offset_velocity *= exp(-14.0 * delta)
+	offset += _offset_velocity * delta
+	offset = offset.limit_length(max_offset)

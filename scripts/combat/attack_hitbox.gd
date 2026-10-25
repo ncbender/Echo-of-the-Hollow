@@ -71,8 +71,9 @@ func hit_count() -> int:
 
 
 ## Sector polygon in local space, pointing along +X (rotated by `direction` when queried).
+## The apex sits 1 px behind the origin so a 180° sector stays strictly convex.
 func sector_points() -> PackedVector2Array:
-	var points := PackedVector2Array([Vector2.ZERO])
+	var points := PackedVector2Array([Vector2(-1.0, 0.0)])
 	var half := deg_to_rad(arc_degrees) * 0.5
 	for i in ARC_SEGMENTS + 1:
 		var angle := -half + (2.0 * half) * float(i) / ARC_SEGMENTS

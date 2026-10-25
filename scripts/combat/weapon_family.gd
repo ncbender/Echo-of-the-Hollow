@@ -8,6 +8,11 @@ extends Resource
 @export var root_heavy: StringName
 @export var attacks: Array[AttackDefinition] = []
 
+@export_group("Presentation")
+## Placeholder-visual hints only; gameplay never reads these.
+@export var display_color: Color = Color("e8e3d0")
+@export var visual_blade_length: float = 14.0
+
 var _by_id: Dictionary = {}
 
 

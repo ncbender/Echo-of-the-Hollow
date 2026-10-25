@@ -11,7 +11,7 @@ if (-not $Godot) { $Godot = Join-Path $project "..\tools\godot\Godot_v4.7.2-stab
 
 $importLog = & $Godot --headless --path $project --import 2>&1 | Out-String
 $runLog = & $Godot --headless --path $project --fixed-fps 60 --quit-after $Frames 2>&1 | Out-String
-$problems = ($importLog + $runLog) -split "`n" | Where-Object { $_ -match "ERROR|SCRIPT ERROR|Parse Error|WARNING: .*res://" }
+$problems = ($importLog + $runLog) -split "`n" | Where-Object { $_ -match "ERROR|Parse Error|WARNING:" }
 if ($problems) {
     Write-Output "Startup check found problems:"
     $problems | ForEach-Object { Write-Output "  $_" }
