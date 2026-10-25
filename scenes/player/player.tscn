@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2_input"]
+[ext_resource type="Script" path="res://scripts/player/movement_component.gd" id="3_move"]
+[ext_resource type="Script" path="res://scripts/player/dash_component.gd" id="4_dash"]
+[ext_resource type="Script" path="res://scripts/player/player_view.gd" id="5_view"]
+[ext_resource type="Script" path="res://scripts/fx/camera_shake.gd" id="6_cam"]
+[ext_resource type="Resource" path="res://data/player/movement_config.tres" id="7_mcfg"]
+[ext_resource type="Resource" path="res://data/player/dash_config.tres" id="8_dcfg"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 6.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("2_input")
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("3_move")
+config = ExtResource("7_mcfg")
+
+[node name="DashComponent" type="Node" parent="."]
+script = ExtResource("4_dash")
+config = ExtResource("8_dcfg")
+
+[node name="PlayerView" type="Node2D" parent="."]
+script = ExtResource("5_view")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.25, 1.25)
+position_smoothing_enabled = true
+position_smoothing_speed = 12.0
+script = ExtResource("6_cam")

@@ -1,0 +1,26 @@
+class_name InputFrame
+extends RefCounted
+## Player intent for one physics tick. Produced by PlayerInput from real devices,
+## or built directly by tests and scripted playtests.
+
+var move: Vector2 = Vector2.ZERO
+## Normalized direction from the character towards the mouse cursor.
+var aim_direction: Vector2 = Vector2.RIGHT
+## Edge flags: true only on the tick the physical press/release happened.
+var light_pressed: bool = false
+var heavy_pressed: bool = false
+var heavy_released: bool = false
+var dash_pressed: bool = false
+## Level flag: right mouse button currently held.
+var heavy_held: bool = false
+## Weapon loadout slot requested this tick, -1 = none.
+var weapon_slot: int = -1
+
+
+## Clears one-shot flags after the frame was consumed; level state (move, aim, held) stays.
+func clear_edges() -> void:
+	light_pressed = false
+	heavy_pressed = false
+	heavy_released = false
+	dash_pressed = false
+	weapon_slot = -1

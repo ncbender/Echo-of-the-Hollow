@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/arena/arena_floor.gd" id="1_floor"]
 [ext_resource type="Script" path="res://scripts/arena/wall_block.gd" id="2_wall"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3_player"]
 
 [node name="TestArena" type="Node2D"]
 
@@ -45,3 +46,6 @@ size = Vector2(32, 32)
 position = Vector2(-176, 112)
 script = ExtResource("2_wall")
 size = Vector2(96, 16)
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+position = Vector2(0, 40)
