@@ -17,6 +17,9 @@ var state: State = State.CHASE
 var _cooldown: float = 0.0
 var _knockback: Vector2 = Vector2.ZERO
 var dead_time: float = 0.0
+## Remaining local hitstop; while > 0 the enemy (AI, combat, movement) is frozen.
+var hitstop_left: float = 0.0
+var _attacks_started: int = 0
 
 @onready var combat: CombatComponent = $CombatComponent
 @onready var health: HealthComponent = $HealthComponent
@@ -46,6 +49,10 @@ func physics_step(delta: float) -> void:
 		if dead_time >= config.despawn_delay:
 			queue_free()
 		return
+	if hitstop_left > 0.0:
+		hitstop_left = maxf(0.0, hitstop_left - delta)
+		velocity = Vector2.ZERO
+		return
 
 	_cooldown = maxf(0.0, _cooldown - delta)
 	var to_target := _to_target()
@@ -57,11 +64,21 @@ func physics_step(delta: float) -> void:
 			state = State.CHASE
 	elif combat.state == CombatComponent.State.IDLE and _cooldown <= 0.0 \
 			and to_target != Vector2.ZERO and to_target.length() <= config.attack_range:
-		frame.light_pressed = true
+		_attacks_started += 1
+		var interval := config.heavy_attack_interval
+		if interval > 0 and _attacks_started % interval == 0 and attacks.root_heavy != &"":
+			frame.heavy_pressed = true   # tap: AI heavies are never charged
+		else:
+			frame.light_pressed = true
 
 	combat.step(delta, frame, frame.aim_direction, state == State.STAGGERED)
 	_sync_state()
 	_move(to_target, delta)
+
+
+## Local hitstop (see HitstopController). Overlapping requests never add up.
+func apply_hitstop(duration: float) -> void:
+	hitstop_left = maxf(hitstop_left, duration)
 
 
 func _to_target() -> Vector2:
@@ -93,7 +110,7 @@ func _move(to_target: Vector2, delta: float) -> void:
 		desired = to_target.normalized() * config.move_speed
 	elif combat.state == CombatComponent.State.ATTACKING:
 		desired = combat.get_lunge_velocity()
-	velocity = desired + _knockback
+	velocity = BodyContact.strip_push(self, desired + _knockback, delta)
 	_knockback = _knockback.move_toward(Vector2.ZERO, config.knockback_decay * delta)
 	move_and_slide()
 

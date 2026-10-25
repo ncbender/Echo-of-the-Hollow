@@ -26,6 +26,8 @@ func _lines() -> PackedStringArray:
 	var weapon_name := combat.weapon.display_name if combat.weapon != null else "-"
 	lines.append("Weapon   %s  [%d/%d]" % [weapon_name, player.weapons.find(combat.weapon) + 1, player.weapons.size()])
 	lines.append("HP       %.0f / %.0f%s" % [player.health.health, player.health.max_health, "  (DOWN)" if player.health.is_dead() else ""])
+	var reacting := player.reaction.is_reacting()
+	lines.append("Reaction %s%s" % [HitReaction.name_of(player.reaction.current) if reacting else "-", "  (hitstop)" if player.hitstop_left > 0.0 else ""])
 
 	var state := "%s" % STATE_NAMES[combat.state]
 	if dash.is_dashing():
@@ -59,5 +61,5 @@ func _lines() -> PackedStringArray:
 	var hitbox_active := combat.hitbox != null and combat.hitbox.is_active()
 	lines.append("Hitbox   %s" % ("ACTIVE" if hitbox_active else "off"))
 	lines.append("Mastery  %s" % ("unlocked" if combat.combo.unlocks.has(mastery_requirement) else "locked"))
-	lines.append("FPS      %d   time x%.2f" % [Engine.get_frames_per_second(), Engine.time_scale])
+	lines.append("FPS      %d" % Engine.get_frames_per_second())
 	return lines

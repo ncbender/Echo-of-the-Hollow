@@ -3,6 +3,7 @@ extends Node2D
 
 const COLOR_BODY := Color("b5524a")
 const COLOR_TELEGRAPH := Color(1.0, 0.45, 0.2)
+const COLOR_TELEGRAPH_HEAVY := Color(1.0, 0.15, 0.15)
 const COLOR_STAGGER := Color("9fc8ff")
 
 @onready var enemy: Enemy = get_parent()
@@ -61,6 +62,7 @@ func _draw() -> void:
 
 func _draw_telegraph(combat: CombatComponent) -> void:
 	var attack := combat.current_attack
+	var color := COLOR_TELEGRAPH if attack.input_type == AttackDefinition.InputType.LIGHT else COLOR_TELEGRAPH_HEAVY
 	var progress := clampf(combat.phase_time / maxf(attack.startup, 0.001), 0.0, 1.0)
 	var reach := combat.get_reach(attack, 0)
 	var half := deg_to_rad(attack.arc_degrees) * 0.5
@@ -71,6 +73,6 @@ func _draw_telegraph(combat: CombatComponent) -> void:
 		var a := angle - half + 2.0 * half * i / 12.0
 		outline.append(Vector2.from_angle(a) * reach)
 		fill.append(Vector2.from_angle(a) * reach * progress)
-	draw_colored_polygon(fill, Color(COLOR_TELEGRAPH, 0.35))
+	draw_colored_polygon(fill, Color(color, 0.35))
 	outline.append(Vector2.ZERO)
-	draw_polyline(outline, Color(COLOR_TELEGRAPH, 0.8), 1.0)
+	draw_polyline(outline, Color(color, 0.8), 1.0 if color == COLOR_TELEGRAPH else 2.0)

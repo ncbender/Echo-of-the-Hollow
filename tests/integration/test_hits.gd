@@ -108,23 +108,55 @@ func test_modifiers_and_hit_event_hook() -> void:
 		check(landed[0].attacker == player, "attacker is the player")
 
 
-func test_hitstop_on_heavy_hit_restores_time() -> void:
+func test_hitstop_is_local_to_attacker_and_target() -> void:
 	spawn_player()
-	add_target(Vector2(24, 0))
+	var target := _spawn_dummy(Vector2(24, 0))
+	var bystander: Enemy = load("res://scenes/enemies/grunt.tscn").instantiate()
+	bystander.position = Vector2(-150, 0)
+	bystander.target = player
+	add_child(bystander)
 	var hitstop := HitstopController.new()
 	add_child(hitstop)
 	hitstop.watch(player.combat)
 	await wait_physics(2)
-	# Connected after the controller, so this sees the state right after its reaction.
-	var scale_on_hit: Array[float] = []
-	player.combat.hit_landed.connect(func(_hit: HitData) -> void: scale_on_hit.append(Engine.time_scale))
+	var frozen_on_hit: Array[float] = []
+	player.combat.hit_landed.connect(func(_hit: HitData) -> void: frozen_on_hit.append(player.hitstop_left))
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	await tick(heavy_down(f))
-	await tick(heavy_up(f))
+	f.heavy_pressed = true
+	await tick(f)
+	while frozen_on_hit.is_empty():
+		await tick(f)
+	check(frozen_on_hit[0] > 0.0, "attacker frozen by its own heavy hit")
+	check(frozen_on_hit[0] <= hitstop.max_hitstop + 0.0001, "hitstop capped")
+	check_eq(Engine.time_scale, 1.0, "global time untouched")
+	var bystander_start := bystander.global_position
+	var phase_time := player.combat.phase_time
+	await tick(f, 2)
+	check_eq(player.combat.phase_time, phase_time, "attacker combat timers paused while frozen")
+	check(bystander.global_position.distance_to(bystander_start) > 1.0, "unrelated enemy keeps moving")
+	check(target.hits_taken == 1, "target hit once")
 	await tick(f, 20)
-	if check_eq(scale_on_hit.size(), 1, "heavy connected once"):
-		check(scale_on_hit[0] < 1.0, "heavy hit triggered hitstop")
-	for i in 30:
-		await get_tree().process_frame
-	check(not hitstop.is_active(), "hitstop over")
-	check_eq(Engine.time_scale, 1.0, "time scale restored")
+	check_eq(player.hitstop_left, 0.0, "hitstop over")
+
+
+func test_hitstop_requests_do_not_stack() -> void:
+	spawn_player()
+	await wait_physics(1)
+	player.apply_hitstop(0.08)
+	player.apply_hitstop(0.08)
+	player.apply_hitstop(0.05)
+	check_near(player.hitstop_left, 0.08, 0.0001, "max, not sum")
+
+
+func test_inputs_during_hitstop_are_kept_and_combo_survives() -> void:
+	spawn_player()
+	await wait_physics(1)
+	var f := frame(Vector2.ZERO, Vector2.RIGHT)
+	await tick(light(f))
+	await tick(f, 23)   # first light finished, combo window open
+	check(player.combat.combo.window_open, "combo window open")
+	player.apply_hitstop(0.5)   # much longer than the 0.35 s combo window
+	await tick(f, 10)
+	await tick(light(f))        # click while frozen
+	await tick(f, 25)
+	check_eq(player.combat.combo.path, [&"sword_light_1", &"sword_light_2"] as Array[StringName], "click during freeze continued the combo")

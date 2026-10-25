@@ -47,6 +47,13 @@ func try_start(dash_direction: Vector2) -> bool:
 	return true
 
 
+## Ends a running dash immediately (heavy hit reactions). No charge is refunded.
+func stop() -> void:
+	if _dashing:
+		_dashing = false
+		dash_ended.emit()
+
+
 func get_velocity() -> Vector2:
 	if not _dashing:
 		return Vector2.ZERO

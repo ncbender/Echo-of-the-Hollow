@@ -16,6 +16,8 @@
 [ext_resource type="Resource" path="res://data/weapons/two_handed_sword.tres" id="14_greatsword"]
 [ext_resource type="Script" path="res://scripts/combat/health_component.gd" id="15_health"]
 [ext_resource type="Script" path="res://scripts/fx/hit_reaction_fx.gd" id="16_fx"]
+[ext_resource type="Script" path="res://scripts/combat/hit_reaction_component.gd" id="17_reaction"]
+[ext_resource type="Resource" path="res://data/player/hit_reaction_config.tres" id="18_reaction_cfg"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
@@ -25,7 +27,7 @@ radius = 7.0
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 5
 motion_mode = 1
 script = ExtResource("1_player")
 weapons = Array[ExtResource("12_family")]([ExtResource("13_sword"), ExtResource("14_greatsword")])
@@ -68,6 +70,10 @@ shape = SubResource("CircleShape2D_hurt")
 script = ExtResource("15_health")
 max_health = 100.0
 max_poise = 999.0
+
+[node name="HitReactionComponent" type="Node" parent="."]
+script = ExtResource("17_reaction")
+config = ExtResource("18_reaction_cfg")
 
 [node name="HitReactionFx" type="Node2D" parent="." node_paths=PackedStringArray("hurtbox")]
 script = ExtResource("16_fx")

@@ -15,5 +15,7 @@ var damage_type: StringName = &"physical"
 var poise_damage: float = 0.0
 var knockback: Vector2 = Vector2.ZERO
 var hitstop: float = 0.0
+var reaction: HitReaction.Type = HitReaction.Type.NONE
+var reaction_duration: float = 0.0
 var position: Vector2 = Vector2.ZERO
 var tags: Array[StringName] = []

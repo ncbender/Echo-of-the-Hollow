@@ -84,13 +84,7 @@ func is_busy() -> bool:
 ## still buffered, but no new action starts.
 func step(delta: float, input: InputFrame, aim: Vector2, blocked: bool = false) -> void:
 	buffer.step(delta)
-	if input.light_pressed:
-		buffer.push(BUFFER_LIGHT)
-	if input.heavy_pressed:
-		buffer.push(BUFFER_HEAVY)
-		_heavy_hold_pending = true
-	if not input.heavy_held:
-		_heavy_hold_pending = false
+	record_inputs(input)
 
 	match state:
 		State.IDLE:
@@ -104,6 +98,25 @@ func step(delta: float, input: InputFrame, aim: Vector2, blocked: bool = false) 
 		return
 	if state == State.IDLE or (state == State.ATTACKING and _can_chain()):
 		_try_begin_action(input, aim)
+
+
+## Buffers this tick's presses without advancing time (also used while the
+## owner is frozen by hitstop, so clicks during a freeze are not lost).
+func record_inputs(input: InputFrame) -> void:
+	if input.light_pressed:
+		buffer.push(BUFFER_LIGHT)
+	if input.heavy_pressed:
+		buffer.push(BUFFER_HEAVY)
+		_heavy_hold_pending = true
+	if not input.heavy_held:
+		_heavy_hold_pending = false
+
+
+## False while the running attack is in an uninterruptible (hyper armor) phase.
+func is_interruptible() -> bool:
+	if state != State.ATTACKING:
+		return true
+	return (current_attack.uninterruptible_phases & PHASE_CANCEL_FLAGS[phase]) == 0
 
 
 func can_dash_cancel() -> bool:
@@ -308,6 +321,8 @@ func _build_hit(hurtbox: Hurtbox) -> HitData:
 	hit.damage_type = attack.damage_type
 	hit.knockback = attack_direction * attack.knockback
 	hit.hitstop = attack.hitstop * (profile.hitstop_multiplier(charge_tier) if profile else 1.0)
+	hit.reaction = attack.hit_reaction
+	hit.reaction_duration = attack.reaction_duration
 	hit.position = hurtbox.global_position
 	hit.tags = attack.effect_tags.duplicate()
 	for modifier in modifiers:

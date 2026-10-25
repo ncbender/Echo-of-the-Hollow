@@ -11,6 +11,8 @@ extends Resource
 @export var stop_distance: float = 18.0
 ## Pause after an attack before the next one may start.
 @export var attack_cooldown: float = 0.9
+## Every n-th attack uses the family's heavy root (0 = never).
+@export var heavy_attack_interval: int = 3
 ## 0 = full knockback, 1 = immovable.
 @export_range(0.0, 1.0) var knockback_resistance: float = 0.2
 ## Converts HitData.knockback (attack data) into launch speed for this enemy.

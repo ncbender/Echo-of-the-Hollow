@@ -38,6 +38,12 @@ const CANCEL_RECOVERY := 4
 ## Opening angle of the hit sector in degrees (max 180).
 @export_range(10.0, 180.0) var arc_degrees: float = 100.0
 
+@export_group("Hit Reaction")
+## Reaction this attack requests from targets that support hit reactions (player).
+@export var hit_reaction: HitReaction.Type = HitReaction.Type.NONE
+## Reaction duration in seconds; 0 = the target's configured default for the type.
+@export var reaction_duration: float = 0.0
+
 @export_group("Movement")
 ## Multiplier on base move speed while this attack runs.
 @export var move_multiplier: float = 0.85
@@ -49,6 +55,8 @@ const CANCEL_RECOVERY := 4
 @export var next_light: StringName
 @export var next_heavy: StringName
 @export_flags("Startup", "Active", "Recovery") var dash_cancel_phases: int = 7
+## Phases in which hit reactions cannot interrupt this attack (hyper armor). 0 = always interruptible.
+@export_flags("Startup", "Active", "Recovery") var uninterruptible_phases: int = 0
 ## Requirement id that must be unlocked (e.g. weapon mastery). Empty = always available.
 @export var unlock_requirement: StringName
 ## Heavy attacks reference their charge tiers here; null for light attacks.

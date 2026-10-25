@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="HitReactionConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/hit_reaction_config.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+flinch_duration = 0.12
+interrupt_lockout = 0.25
+knockback_duration = 0.35
+knockback_multiplier = 1.8
+stun_duration = 0.6
+resistance = 0

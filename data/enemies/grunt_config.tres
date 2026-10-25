@@ -9,6 +9,7 @@ aggro_range = 260.0
 attack_range = 28.0
 stop_distance = 18.0
 attack_cooldown = 0.9
+heavy_attack_interval = 3
 knockback_resistance = 0.2
 knockback_scale = 3.0
 knockback_decay = 1000.0
