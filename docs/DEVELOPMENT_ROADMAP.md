@@ -3,12 +3,12 @@
 ## Meilenstein 0.1 – Combat Prototype (aktuell)
 | Phase | Inhalt | Status → siehe `OVERNIGHT_REPORT.md` |
 |---|---|---|
-| A | Projekt, Testarena, Doku, Git, Testrunner | |
-| B | Player, WASD, Mausziel, Kamera, Kollision, Dash (2 Ladungen) | |
-| C | AttackDefinition, Light/Heavy, Charge, Phasen, Combo-Baum, Buffer, Cancels | |
-| D | Einhandschwert, Trainingspuppe, Schaden/HP, Feedback, Debug-Overlay | |
-| E (optional) | Zweihandschwert, Waffenwechsel | |
-| F (optional) | Einfacher Nahkampfgegner, Telegraph, Tod, Debug-Spawn | |
+| A | Projekt, Testarena, Doku, Git, Testrunner | ✅ abgeschlossen |
+| B | Player, WASD, Mausziel, Kamera, Kollision, Dash (2 Ladungen) | ✅ abgeschlossen |
+| C | AttackDefinition, Light/Heavy, Charge, Phasen, Combo-Baum, Buffer, Cancels | ✅ abgeschlossen |
+| D | Einhandschwert, Trainingspuppe, Schaden/HP, Feedback, Debug-Overlay | ✅ abgeschlossen |
+| E (optional) | Zweihandschwert, Waffenwechsel | ✅ abgeschlossen |
+| F (optional) | Einfacher Nahkampfgegner, Telegraph, Tod, Debug-Spawn | ✅ abgeschlossen |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen

@@ -18,7 +18,7 @@
 
 ## Suites (Name = `test_<name>.gd`)
 `project`, `combat_data`, `combo`, `dash`, `movement`, `light_attack`, `heavy_attack`, `hits`,
-`weapon_switch` (Phase E), `enemy` (Phase F).
+`weapon_switch` (Phase E), `enemy` (Phase F), `input` (Geräte-Eingabe → Flanken).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -36,5 +36,17 @@
 | `combat_component.gd` | light_attack, heavy_attack, combo |
 | `attack_hitbox.gd`, `hurtbox.gd`, `health_component.gd` | hits |
 | `dash_component.gd` | dash |
-| `movement_component.gd`, `player.gd` | movement, dash |
+| `movement_component.gd` | movement |
+| `player.gd` (Kompositionswurzel) | movement, dash + alle Player-basierten Integrations-Suites |
 | Gegner | enemy, hits |
+| `player_input.gd` | input |
+| Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
+
+## Visueller Playtest
+```
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/visual_playtest.gd
+  [-- --weapon=1]   # Zweihänder
+  [-- --enemy]      # Gegner: Telegraph, Dash-Ausweichen, Kampf bis zum Tod
+```
+Öffnet ein Fenster, spielt eine feste Eingabesequenz, schreibt Screenshots und ein Event-Log nach
+`tests/output/` (git-ignoriert). Prüft Lesbarkeit, nicht das Spielgefühl unter echter Maus/Tastatur.

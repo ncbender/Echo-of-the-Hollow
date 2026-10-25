@@ -71,7 +71,22 @@ Regeln:
 | `sword_llh_crush` | L→L→H | langsamer 180°-Schlag, sehr hoher Haltungsschaden und Knockback |
 
 ### Zweihandschwert (`data/weapons/two_handed_sword.tres`) – Phase E
-Langsamer, größere Reichweite, deutlich stärkere Heavies, eigene Combo-Definitionen.
+Langsamer (Light ~0,58 s statt 0,38 s), Reichweite 44–58 px statt 30–42 px, Charge-Multiplikatoren bis
+×2,3 Schaden / ×3 Haltung, Charge-Bewegung 45 %, Light-Bewegung 70 %.
+
+| ID | Pfad | Charakter |
+|---|---|---|
+| `greatsword_light_1` | L | schwerer Querschwung |
+| `greatsword_light_2` | L→L | Rückschwung |
+| `greatsword_light_3` | L→L→L | 180°-Ernte-Bogen, Finisher |
+| `greatsword_heavy` | H | Grund-Heavy |
+| `greatsword_lh_overhead` | L→H | schmaler, weiter Überkopfschlag |
+| `greatsword_llh_whirl` | L→L→H | 180°-Wirbel mit großem Vorstoß |
+
+### Gegner „Grunt“ (`data/enemies/`) – Phase F
+Verfolgt den Spieler, greift in Reichweite mit `grunt_swipe` an (0,45 s Startup = Telegraph,
+12 Schaden), 0,9 s Cooldown. Haltungsbruch unterbricht Telegraph/Angriff (Treffer verfällt),
+Tod → 0,8 s Ausblenden, danach entfernt. Debug-Spawn mit F2.
 
 ## Animation-Cancelling
 - Light Attacks: in allen Phasen per Dash abbrechbar.
@@ -98,8 +113,15 @@ optionaler Knockback, kurzer Hitstop bei schweren Treffern, Kamera-Shake, Debug-
 - **Treffer während iFrames** werden nicht registriert; derselbe Schwung kann nach Ende der iFrames
   noch treffen, falls sein Active-Fenster dann noch läuft.
 - **Waffenwechsel** nur im Leerlauf, setzt die Combo zurück.
+- **Hitstop** ist eine Feel-Schicht (globales `Engine.time_scale`), begrenzt auf 0,15 s pro Treffer.
+- **Spieler-Leben (Phase F):** 100 HP, bei 0 HP nach 1,5 s Respawn am Startpunkt (Prototyp-Lösung).
+- **Gegner-Knockback** = `HitData.knockback × (1 − Resistenz) × knockback_scale` (Daten: `grunt_config.tres`).
 
 ## Offene Designfragen
+- **Heavy-Startup des Zweihänders** ist per Dash abbrechbar (wie beim Schwert). Falls Zweihand-Heavies
+  stärker „committen“ sollen, nur `dash_cancel_phases` in den Daten ändern.
+- **Spieler und Gegner überlappen**, weil der Spielerkörper nicht mit Gegnern kollidiert (sonst bleibt
+  man an Gegnern hängen). Für Gruppenkämpfe neu bewerten (Soft-Collision).
 - Mehrere Klicks innerhalb eines einzelnen Physik-Frames (16 ms) zählen als eine Eingabe. Bei 60 Hz
   praktisch irrelevant; falls nötig, Physik-Tickrate erhöhen.
 - Player-Treffer-Reaktion (Stagger/Hyperarmor) ist im Design nicht definiert; Prototyp: Spieler wird
