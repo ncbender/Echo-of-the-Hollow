@@ -7,6 +7,8 @@ extends Node
 @export var slow_time_scale: float = 0.05
 @export var camera: CameraShake
 @export var shake_per_hitstop: float = 40.0
+## Upper bound so stacked tier multipliers never freeze the game noticeably.
+@export var max_hitstop: float = 0.15
 
 ## Remaining hitstop in unscaled seconds.
 var _left: float = 0.0
@@ -20,7 +22,7 @@ func watch(combat: CombatComponent) -> void:
 func request(duration: float) -> void:
 	if duration <= 0.0:
 		return
-	_left = maxf(_left, duration)
+	_left = maxf(_left, minf(duration, max_hitstop))
 	Engine.time_scale = slow_time_scale
 
 

@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="11_hurtbox"]
 [ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="12_family"]
 [ext_resource type="Resource" path="res://data/weapons/one_handed_sword.tres" id="13_sword"]
+[ext_resource type="Resource" path="res://data/weapons/two_handed_sword.tres" id="14_greatsword"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
@@ -25,7 +26,7 @@ collision_layer = 2
 collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_player")
-weapons = Array[ExtResource("12_family")]([ExtResource("13_sword")])
+weapons = Array[ExtResource("12_family")]([ExtResource("13_sword"), ExtResource("14_greatsword")])
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_body")

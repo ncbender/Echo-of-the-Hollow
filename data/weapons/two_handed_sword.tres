@@ -1,0 +1,160 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
+[ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
+
+[sub_resource type="Resource" id="Charge_greatsword"]
+script = ExtResource("3_charge")
+tier_names = PackedStringArray("Normal", "Empowered", "Full")
+tier_thresholds = PackedFloat32Array(0.25, 0.7)
+damage_multipliers = PackedFloat32Array(1.0, 1.5, 2.3)
+poise_multipliers = PackedFloat32Array(1.0, 1.8, 3.0)
+reach_multipliers = PackedFloat32Array(1.0, 1.15, 1.35)
+hitstop_multipliers = PackedFloat32Array(1.0, 1.4, 2.0)
+move_multiplier = 0.45
+
+[sub_resource type="Resource" id="Attack_l1"]
+script = ExtResource("2_attack")
+id = &"greatsword_light_1"
+display_name = "Heavy Swing"
+weapon_family_id = &"two_handed_sword"
+input_type = 0
+startup = 0.16
+active = 0.1
+recovery = 0.32
+chain_delay = 0.04
+combo_window = 0.4
+damage = 22.0
+poise_damage = 16.0
+knockback = 50.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.7
+lunge_distance = 8.0
+next_light = &"greatsword_light_2"
+next_heavy = &"greatsword_lh_overhead"
+dash_cancel_phases = 7
+
+[sub_resource type="Resource" id="Attack_l2"]
+script = ExtResource("2_attack")
+id = &"greatsword_light_2"
+display_name = "Return Swing"
+weapon_family_id = &"two_handed_sword"
+input_type = 0
+startup = 0.14
+active = 0.1
+recovery = 0.34
+chain_delay = 0.04
+combo_window = 0.4
+damage = 22.0
+poise_damage = 18.0
+knockback = 55.0
+reach = 44.0
+arc_degrees = 140.0
+move_multiplier = 0.7
+lunge_distance = 12.0
+next_light = &"greatsword_light_3"
+next_heavy = &"greatsword_llh_whirl"
+dash_cancel_phases = 7
+
+[sub_resource type="Resource" id="Attack_l3"]
+script = ExtResource("2_attack")
+id = &"greatsword_light_3"
+display_name = "Reaping Arc"
+weapon_family_id = &"two_handed_sword"
+input_type = 0
+startup = 0.22
+active = 0.14
+recovery = 0.45
+chain_delay = 0.12
+combo_window = 0.3
+damage = 34.0
+poise_damage = 34.0
+knockback = 100.0
+hitstop = 0.06
+reach = 50.0
+arc_degrees = 180.0
+move_multiplier = 0.7
+lunge_distance = 16.0
+dash_cancel_phases = 7
+effect_tags = Array[StringName]([&"finisher"])
+
+[sub_resource type="Resource" id="Attack_heavy"]
+script = ExtResource("2_attack")
+id = &"greatsword_heavy"
+display_name = "Sundering Blow"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.26
+active = 0.12
+recovery = 0.55
+chain_delay = 0.2
+combo_window = 0.3
+damage = 48.0
+poise_damage = 50.0
+knockback = 140.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.25
+lunge_distance = 10.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_greatsword")
+effect_tags = Array[StringName]([&"heavy"])
+
+[sub_resource type="Resource" id="Attack_lh"]
+script = ExtResource("2_attack")
+id = &"greatsword_lh_overhead"
+display_name = "Overhead Slam"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.3
+active = 0.1
+recovery = 0.55
+chain_delay = 0.2
+combo_window = 0.3
+damage = 55.0
+poise_damage = 60.0
+knockback = 120.0
+hitstop = 0.1
+reach = 58.0
+arc_degrees = 60.0
+move_multiplier = 0.2
+lunge_distance = 20.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_greatsword")
+effect_tags = Array[StringName]([&"heavy"])
+
+[sub_resource type="Resource" id="Attack_llh"]
+script = ExtResource("2_attack")
+id = &"greatsword_llh_whirl"
+display_name = "Whirlwind Cleave"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.28
+active = 0.2
+recovery = 0.6
+chain_delay = 0.25
+combo_window = 0.3
+damage = 60.0
+poise_damage = 70.0
+knockback = 160.0
+hitstop = 0.11
+reach = 56.0
+arc_degrees = 180.0
+move_multiplier = 0.3
+lunge_distance = 24.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_greatsword")
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+
+[resource]
+script = ExtResource("1_family")
+id = &"two_handed_sword"
+display_name = "Two-Handed Sword"
+display_color = Color(0.72, 0.84, 1, 1)
+visual_blade_length = 22.0
+root_light = &"greatsword_light_1"
+root_heavy = &"greatsword_heavy"
+attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])

@@ -10,6 +10,26 @@ func test_sword_data_is_valid() -> void:
 		check_eq(attack.weapon_family_id, SWORD.id, "%s family" % attack.id)
 
 
+func test_all_weapon_files_are_valid() -> void:
+	var dir := "res://data/weapons"
+	var family_ids := {}
+	var attack_ids := {}
+	for file in DirAccess.get_files_at(dir):
+		if not file.ends_with(".tres"):
+			continue
+		var family := load(dir.path_join(file)) as WeaponFamily
+		if not check(family != null, "%s is a WeaponFamily" % file):
+			continue
+		var errors := family.validate()
+		check(errors.is_empty(), "%s validates: %s" % [file, errors])
+		check(not family_ids.has(family.id), "unique family id %s" % family.id)
+		family_ids[family.id] = true
+		for attack in family.attacks:
+			check(not attack_ids.has(attack.id), "attack id %s unique across families" % attack.id)
+			attack_ids[attack.id] = true
+	check(family_ids.size() >= 2, "at least two weapon families")
+
+
 func test_validation_detects_broken_trees() -> void:
 	var family := WeaponFamily.new()
 	family.id = &"broken"
