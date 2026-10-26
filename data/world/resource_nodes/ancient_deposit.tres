@@ -10,3 +10,6 @@ yield_item_id = &"iron_ore"
 yield_quantity = 3
 respawn_seconds = 0.0
 look = 2
+profession_id = &"mining"
+required_level = 1
+gather_xp = 12

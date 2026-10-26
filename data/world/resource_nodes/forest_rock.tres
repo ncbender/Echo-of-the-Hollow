@@ -10,3 +10,6 @@ yield_item_id = &"stone"
 yield_quantity = 3
 respawn_seconds = 90.0
 look = 1
+profession_id = &"mining"
+required_level = 1
+gather_xp = 5

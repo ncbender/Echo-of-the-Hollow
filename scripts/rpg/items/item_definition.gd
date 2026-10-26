@@ -24,6 +24,8 @@ const RARITY_COLORS := {
 ## Currency (gold): kept in the inventory like any stack (save format unchanged),
 ## but shown as a wallet counter and it takes no bag slot.
 @export var is_currency: bool = false
+## Recipe item: using it teaches this profession recipe (ProfessionService.learn_from_item).
+@export var teaches_recipe_id: StringName
 
 @export_group("Equipment")
 @export var slot_kind: SlotKind = SlotKind.NONE

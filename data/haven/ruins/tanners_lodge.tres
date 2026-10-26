@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"tanners_lodge"
+display_name = "The Tanner's Lodge"
+description = "Drying racks without hides and a cracked tanning vat. Its workbench still serves - restoring the lodge comes later."
+profession_id = &"leatherworking"
+footprint = Vector2(64, 42)

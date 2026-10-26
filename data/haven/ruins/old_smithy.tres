@@ -44,6 +44,7 @@ restorable = true
 condition = SubResource("C_haven")
 costs = Array[ExtResource("2_cost")]([SubResource("Cost_crates")])
 building_id = &"smithy"
+profession_id = &"blacksmithing"
 event_id = &"restore:old_smithy"
 completion_dialogue = SubResource("D_fire")
 footprint = Vector2(60, 40)

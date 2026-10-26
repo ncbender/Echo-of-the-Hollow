@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"weavers_house"
+display_name = "The Weaver's House"
+description = "A loom missing half its threads under a sagging roof. The loom still works - restoring the house comes later."
+profession_id = &"tailoring"
+footprint = Vector2(64, 42)

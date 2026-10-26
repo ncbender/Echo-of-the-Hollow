@@ -40,7 +40,11 @@ func interact(hud: GameHud) -> void:
 	var error := gather()
 	if error == "":
 		var item := _session.database.get_item(definition.yield_item_id)
-		hud.notify("Gathered %s x%d" % [item.display_name, definition.yield_quantity])
+		var text := "Gathered %s x%d" % [item.display_name, definition.yield_quantity]
+		var profession: ProfessionDefinition = _session.database.professions.get(definition.profession_id)
+		if profession != null:
+			text += "  ·  %s %d" % [profession.display_name, _session.get_character().professions.level(profession.id)]
+		hud.notify(text)
 	else:
 		hud.notify(error)
 
@@ -97,6 +101,18 @@ func _draw() -> void:
 			for i in points.size():
 				points[i] *= shrink
 			draw_colored_polygon(points, color)
+		ResourceNodeDefinition.Look.HERB:   # a clump of stalks, blossoms while available
+			var stalk := Color(0.32, 0.5, 0.26) if available else Color(0.33, 0.3, 0.22)
+			for i in 5:
+				var x := -8.0 + i * 4.0
+				draw_line(Vector2(x, 4), Vector2(x * 0.6, -9 - (i % 2) * 4), stalk, 2.0)
+				if available:
+					draw_circle(Vector2(x * 0.6, -10 - (i % 2) * 4), 2.0, Color(0.78, 0.74, 0.5))
+		ResourceNodeDefinition.Look.CARCASS:   # remains of a beast; picked clean when depleted
+			var body := Color(0.45, 0.32, 0.22) if available else Color(0.42, 0.4, 0.36)
+			draw_colored_polygon(PackedVector2Array([Vector2(-12, 3), Vector2(-9, -5), Vector2(4, -7), Vector2(12, -2), Vector2(10, 4)]), body)
+			draw_line(Vector2(9, -5), Vector2(14, -12), Color(0.82, 0.78, 0.68), 2.0)   # antler
+			draw_line(Vector2(12, -9), Vector2(16, -9), Color(0.82, 0.78, 0.68), 1.5)
 		ResourceNodeDefinition.Look.ORE:
 			draw_colored_polygon(PackedVector2Array([Vector2(-11, 5), Vector2(-8, -9), Vector2(4, -12),
 				Vector2(11, -3), Vector2(9, 5)]), Color(0.36, 0.33, 0.36))

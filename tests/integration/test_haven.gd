@@ -75,7 +75,7 @@ func _talk(npc: StoryNpc) -> PackedStringArray:
 
 
 func test_ruin_data() -> void:
-	check_eq(db.ruins.size(), 6, "six ruins")
+	check_eq(db.ruins.size(), 10, "six original buildings + four Artisan Quarter workshops")
 	var names: Array = []
 	for ruin_id: StringName in [&"old_smithy", &"old_storehouse", &"fallen_barracks", &"common_hall", &"trading_house", &"forgotten_study"]:
 		var ruin: RuinDefinition = db.ruins.get(ruin_id)
@@ -86,6 +86,12 @@ func test_ruin_data() -> void:
 	var restorable: Array = db.ruins.values().filter(func(r: RuinDefinition) -> bool: return r.restorable)
 	check_eq(restorable.size(), 2, "only the smithy and the storehouse can be restored in this slice")
 	check(RestorationService.validate_data(db).is_empty(), "ruin data valid")
+	var workshops: Dictionary = {}
+	for ruin: RuinDefinition in db.ruins.values():
+		if ruin.profession_id != &"":
+			workshops[ruin.id] = ruin.profession_id
+	check_eq(workshops, {&"old_smithy": &"blacksmithing", &"tanners_lodge": &"leatherworking", &"weavers_house": &"tailoring",
+		&"woodwrights_workshop": &"woodworking", &"alchemists_cottage": &"alchemy"}, "workstations only in the five workshops")
 
 
 func test_a_fire_rekindled_is_atomic() -> void:

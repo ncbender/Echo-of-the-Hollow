@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"alchemists_cottage"
+display_name = "The Alchemist's Cottage"
+description = "Shattered alembics and a cold athanor. One table is still usable - restoring the cottage comes later."
+profession_id = &"alchemy"
+footprint = Vector2(64, 42)

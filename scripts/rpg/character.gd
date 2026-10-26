@@ -21,6 +21,8 @@ var world: WorldState
 var builds: ClassBuilds
 ## Prologue trials and the permanent starting class choice.
 var prologue := PrologueState.new()
+## The nine professions: levels, XP, learned recipes (class-independent).
+var professions: CharacterProfessions
 ## Class unlock quests.
 var quests := QuestLog.new()
 ## Raw saved items that could not be restored (e.g. definition removed from the
@@ -46,6 +48,8 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	equipment = CharacterEquipment.new(db, inventory, classes)
 	world = WorldState.new()
 	builds = ClassBuilds.new(db, classes)
+	professions = CharacterProfessions.new(db)
+	ProfessionService.learn_automatic(self)   # level-1 recipes of every profession
 	# Method callables (not lambdas): they do not keep this RefCounted alive,
 	# so Character <-> sub-system signal links never form a reference cycle.
 	classes.leveled_up.connect(_on_class_leveled_up)
@@ -143,6 +147,7 @@ func to_dict() -> Dictionary:
 		"mastery": mastery.to_dict(),
 		"inventory": inventory.to_array(),
 		"stash": {"items": stash.to_array()},
+		"professions": professions.to_dict(),
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
 		"class_builds": builds.to_dict(),
@@ -180,6 +185,8 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 		if character.builds.has_build(class_id):
 			warnings.append_array(TalentService.sanitize_build(character, class_id))
 	character.world.from_dict(_dict(data, "world"), warnings)
+	character.professions.from_dict(_dict(data, "professions"), warnings)
+	ProfessionService.learn_automatic(character)   # recipes the saved levels allow
 	character.refresh_inventory_capacity()
 	character.invalidate_stats()
 	return character

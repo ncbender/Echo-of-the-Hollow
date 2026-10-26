@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"stoneskin_draught"
+display_name = "Stoneskin Draught"
+description = "A bitter draught said to harden the skin. (Potions cannot be used yet.)"
+category = 5
+rarity = 1
+max_stack = 10
+slot_kind = 0
+

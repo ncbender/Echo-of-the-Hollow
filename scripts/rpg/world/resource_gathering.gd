@@ -31,12 +31,17 @@ static func seconds_left(world: WorldState, map_id: StringName, node_id: StringN
 	return maxf(0.0, float(value) - now)
 
 
-## Gathers once: adds the yield to the inventory and depletes the node.
+## Gathers once: adds the yield to the inventory, depletes the node and gives
+## the node profession's XP. The depletion is world state (saved), so loading
+## a save never makes a node gatherable again before its time.
 ## Refused (nothing changes) when depleted or when the inventory has no room.
 static func gather(character: Character, map_id: StringName, node_id: StringName,
 		definition: ResourceNodeDefinition, now: float) -> String:
 	if definition == null or character.database.get_item(definition.yield_item_id) == null:
 		return "invalid resource node"
+	if definition.profession_id != &"" and character.professions.level(definition.profession_id) < definition.required_level:
+		var profession: ProfessionDefinition = character.database.professions.get(definition.profession_id)
+		return "Requires %s level %d" % [profession.display_name if profession != null else "profession", definition.required_level]
 	if not is_available(character.world, map_id, node_id, now):
 		return "%s is depleted" % definition.display_name
 	if character.inventory.room_for(definition.yield_item_id) < definition.yield_quantity:
@@ -44,4 +49,5 @@ static func gather(character: Character, map_id: StringName, node_id: StringName
 	character.inventory.add_item(definition.yield_item_id, definition.yield_quantity)
 	var until := PERMANENT if definition.respawn_seconds <= 0.0 else now + definition.respawn_seconds
 	character.world.set_map_value(map_id, state_key(node_id), until)
+	ProfessionService.gather_xp(character, definition)   # only after a successful gather
 	return ""

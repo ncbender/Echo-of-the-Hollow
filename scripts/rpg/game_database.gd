@@ -33,6 +33,8 @@ const DIRS := {
 	&"npcs": "res://data/npcs",
 	&"ruins": "res://data/haven/ruins",
 	&"waystones": "res://data/world/waystones",
+	&"professions": "res://data/professions/professions",
+	&"profession_recipes": "res://data/professions/recipes",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -70,6 +72,8 @@ var story_quests: Dictionary = {}     # quest id -> StoryQuestDefinition (prolog
 var npcs: Dictionary = {}             # npc id -> NpcDefinition (dialogues inline)
 var ruins: Dictionary = {}            # ruin id -> RuinDefinition (Haven restoration)
 var waystones: Dictionary = {}        # waystone id -> WaystoneDefinition (fast travel)
+var professions: Dictionary = {}      # profession id -> ProfessionDefinition (nine, class-independent)
+var profession_recipes: Dictionary = {}   # recipe id -> ProfessionRecipeDefinition
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -146,6 +150,10 @@ func register(resource: Resource) -> bool:
 		table = npcs; key = resource.id
 	elif resource is RuinDefinition:
 		table = ruins; key = resource.id
+	elif resource is ProfessionDefinition:
+		table = professions; key = resource.id
+	elif resource is ProfessionRecipeDefinition:
+		table = profession_recipes; key = resource.id
 	elif resource is WaystoneDefinition:
 		table = waystones; key = resource.id
 	elif resource is ClassQuestDefinition:
@@ -245,6 +253,8 @@ func validate() -> PackedStringArray:
 	errors.append_array(DialogueService.validate_data(self))
 	errors.append_array(RestorationService.validate_data(self))
 	errors.append_array(WaystoneService.validate_data(self))
+	errors.append_array(ProfessionService.validate_data(self))
+	errors.append_array(ProfessionService.validate_data(self))
 	return errors
 
 

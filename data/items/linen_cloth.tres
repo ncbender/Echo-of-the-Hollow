@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"linen_cloth"
+display_name = "Linen Cloth"
+description = "A bolt of plain, sturdy linen."
+category = 4
+rarity = 0
+max_stack = 50
+slot_kind = 0
+

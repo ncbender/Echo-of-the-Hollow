@@ -10,3 +10,6 @@ yield_item_id = &"timber"
 yield_quantity = 3
 respawn_seconds = 90.0
 look = 0
+profession_id = &"woodcutting"
+required_level = 1
+gather_xp = 6

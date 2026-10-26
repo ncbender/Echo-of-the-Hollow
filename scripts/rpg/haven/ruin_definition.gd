@@ -24,6 +24,9 @@ extends Resource
 @export var footprint: Vector2 = Vector2(60, 40)
 ## The Haven stash is used here - already while ruined (StashService).
 @export var stash_access: bool = false
+## Workstation of this profession (Old Smithy: Blacksmithing; the Artisan
+## Quarter workshops) - usable in every stage, also while ruined.
+@export var profession_id: StringName
 
 
 func restored_flag() -> StringName:

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ProfessionRecipeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/professions/profession_recipe_definition.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Cost_1"]
+script = ExtResource("2_cost")
+item_id = &"oak_plank"
+quantity = 4
+
+[sub_resource type="Resource" id="Cost_2"]
+script = ExtResource("2_cost")
+item_id = &"cured_leather"
+quantity = 1
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"ww_oak_shield"
+display_name = "Oak Shield"
+profession_id = &"woodworking"
+required_level = 1
+xp = 30
+is_processing = false
+output_item_id = &"oak_shield"
+output_quantity = 1
+inputs = Array[ExtResource("2_cost")]([SubResource("Cost_1"), SubResource("Cost_2")])
+

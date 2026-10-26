@@ -17,6 +17,7 @@ static func _steps() -> Dictionary:
 		3: _v3_to_v4,
 		4: _v4_to_v5,
 		5: _v5_to_v6,
+		6: _v6_to_v7,
 	}
 
 
@@ -176,4 +177,13 @@ static func _v5_to_v6(data: Dictionary) -> Dictionary:
 		data["stash"] = {"items": []}
 	elif not (data["stash"] as Dictionary).get("items") is Array:
 		data["stash"]["items"] = []
+	return data
+
+
+## v7 (Professions Foundation 1.0): profession progress - every profession at
+## level 1 without XP; the level-1 recipes are learned on load
+## (ProfessionService.learn_automatic). Nothing else changes.
+static func _v6_to_v7(data: Dictionary) -> Dictionary:
+	if not data.get("professions") is Dictionary:
+		data["professions"] = {"levels": {}, "known_recipes": [], "first_crafts": []}
 	return data

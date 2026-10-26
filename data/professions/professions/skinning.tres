@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ProfessionDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/professions/profession_definition.gd" id="1_prof"]
+
+[resource]
+script = ExtResource("1_prof")
+id = &"skinning"
+display_name = "Skinning"
+description = "Takes hides and pelts from slain beasts."
+kind = 1
+color = Color(0.7, 0.45, 0.4, 1)
+station_id = &""
