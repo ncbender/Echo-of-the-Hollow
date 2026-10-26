@@ -107,7 +107,9 @@ func test_full_loop() -> void:
 	var plot := home.get_node("Ruins/OldStorehouse") as RuinSite
 	await _teleport(home, plot.global_position + Vector2(0, 26))
 	plot.interact(home.hud)
-	check(home.hud.restoration_panel.visible, "restoration window at the ruin")
+	check(home.hud.stash_panel.visible, "the ruined storehouse opens the Haven stash")
+	(home.hud.stash_panel.find_child("RestoreStorehouse", true, false) as Button).pressed.emit()
+	check(home.hud.restoration_panel.visible, "restoration window from the stash")
 	check_eq(home.hud.restoration_panel.restore(), "", "storehouse restored from gathered materials")
 	check_eq(character.inventory.capacity, capacity_before + 10, "storehouse adds inventory slots")
 	var timber_after_build := character.inventory.count(&"timber")

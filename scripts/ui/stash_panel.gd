@@ -11,7 +11,11 @@ extends UiWindow
 
 const BAG_COLUMNS := 7
 const STASH_COLUMNS := 9
+## Column counts (bag, stash) tried from wide to narrow until both fit side by side.
+const COLUMN_STEPS: Array[Vector2i] = [Vector2i(7, 9), Vector2i(6, 8), Vector2i(5, 7), Vector2i(4, 6), Vector2i(4, 5), Vector2i(3, 4)]
 const MIN_ROWS := 4
+## Smallest visible height of one grid (at least one row of cells).
+const MIN_ZONE_HEIGHT := 72.0
 
 var character: Character
 var site: RuinSite
@@ -19,6 +23,7 @@ var hud: GameHud
 var category: StringName = StashService.EQUIPMENT
 
 var _columns: BoxContainer
+var _zone_scrolls: Array[ScrollContainer] = []
 var _state: Label
 var _restore: Button
 var _bag_title: Label
@@ -134,7 +139,6 @@ func rebuild() -> void:
 	if character == null or not is_inside_tree() or not visible:
 		return
 	tooltip.hide_tooltip()   # cells are rebuilt; the next hover shows it again
-	_arrange()
 	var upgraded := StashService.is_upgraded(character)
 	var ruin := site.ruin() if site != null and is_instance_valid(site) else null
 	var ruin_name := ruin.display_name if ruin != null else "The Old Storehouse"
@@ -148,8 +152,12 @@ func rebuild() -> void:
 	_capacity.text = "%s  %d / %d" % [StashService.display_name(category), used, limit] if limit >= 0 \
 		else "%s  ·  %d stacks  ·  no slot limit" % [StashService.display_name(category), used]
 	_capacity.add_theme_color_override(&"font_color", UiTheme.WARNING if limit >= 0 and used >= limit else UiTheme.TEXT_SECONDARY)
-	_fill(_bag_grid, _bag_items(), null, BAG_COLUMNS, character.inventory.free_slots())
-	_fill(_stash_grid, StashService.items(character, category), character.stash, STASH_COLUMNS, maxi(0, limit - used) if limit >= 0 else STASH_COLUMNS)
+	var stash_free := maxi(0, limit - used) if limit >= 0 else _stash_grid.columns
+	_fill(_bag_grid, _bag_items(), null, _bag_grid.columns, character.inventory.free_slots())
+	_fill(_stash_grid, StashService.items(character, category), character.stash, _stash_grid.columns, stash_free)
+	if _arrange():   # after filling: the decision needs the real grid sizes
+		_fill(_bag_grid, _bag_items(), null, _bag_grid.columns, character.inventory.free_slots())
+		_fill(_stash_grid, StashService.items(character, category), character.stash, _stash_grid.columns, stash_free)
 
 
 func _gold_amount() -> int:
@@ -280,7 +288,12 @@ func _drop_zone(zone_name: String, grid: GridContainer, handler: Callable) -> Co
 	zone.name = zone_name
 	zone.theme_type_variation = &"InsetPanel"
 	zone.drop_handler = handler
-	zone.add_child(grid)
+	var scroll := ScrollContainer.new()   # each grid scrolls on its own (_fit_zones)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.add_child(grid)
+	zone.add_child(scroll)
+	_zone_scrolls.append(scroll)
 	return zone
 
 
@@ -310,9 +323,39 @@ class DropZone:
 		drop_handler.call(null, data)
 
 
-## Bag and stash side by side when the canvas has room, otherwise one above
-## the other (high UI scale) - the window then scrolls.
-func _arrange() -> void:
+## Bag and stash side by side; on narrow canvases (high UI scale) with fewer
+## columns, stacked only if even the narrowest grids do not fit. Each grid
+## scrolls on its own and both are sized to stay in view together - dragging
+## between them never needs the window to scroll.
+## Returns true if the column counts changed (the grids are filled again).
+func _arrange() -> bool:
+	for scroll in _zone_scrolls:
+		scroll.custom_minimum_size.y = 0
+	var before := Vector2i(_bag_grid.columns, _stash_grid.columns)
 	_columns.vertical = false
-	var wide := _columns.get_combined_minimum_size().x + _chrome_size().x <= max_window_size().x
-	_columns.vertical = not wide
+	var fits := false
+	# narrower grids before stacking: side by side keeps both in view for dragging
+	for counts: Vector2i in COLUMN_STEPS:
+		_bag_grid.columns = counts.x
+		_stash_grid.columns = counts.y
+		if _columns.get_combined_minimum_size().x + _chrome_size().x <= max_window_size().x:
+			fits = true
+			break
+	if not fits:
+		_bag_grid.columns = BAG_COLUMNS
+		_stash_grid.columns = STASH_COLUMNS
+		_columns.vertical = true
+	_fit_zones.call_deferred()
+	return before != Vector2i(_bag_grid.columns, _stash_grid.columns)
+
+
+func _fit_zones() -> void:
+	if not visible or not is_inside_tree():
+		return
+	# the grid scrolls are 0 high here (_arrange), so the body is everything else
+	var room := max_window_size().y - _chrome_size().y - body.get_combined_minimum_size().y - 8.0
+	var each := room / 2.0 if _columns.vertical else room
+	for scroll in _zone_scrolls:
+		var grid := scroll.get_child(0) as Control
+		scroll.custom_minimum_size.y = minf(grid.get_combined_minimum_size().y, maxf(MIN_ZONE_HEIGHT, each))
+	queue_fit()
