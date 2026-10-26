@@ -38,8 +38,10 @@
 | UI/UX Polish 1.1 | Kompakte Klassenkarten, Talentbäume als Knotengraph nebeneinander, sofortiger Item-Tooltip mit Vergleich, Rechtsklick-Ausrüsten, Gold als Zähler, Dash nach WASD (sonst Maus), Rezeptkarten, Toasts, Forge-Ergebnisse sichtbar | `UI_UX_POLISH_11_REPORT.md` |
 | Talent UI Polish 1.2 | Book Tabs links am Klassenfenster, einzeiliger Kopf, Talentseite mit drei vollständigen Bäumen ohne Scrollen bei 1080p/100 %, Sofort-Tooltip statt Detailleiste | `TALENT_UI_POLISH_12_REPORT.md` |
 | Inventory & Haven Stash 1.0 | Haven-Lager am Old Storehouse (schon als Ruine): Equipment Chest, Material Vault, Collection Vault als Ansichten eines Besitzcontainers, atomare Transfers, Rechtsklick und Drag & Drop, Deposit All, Sort, Save v6 | `INVENTORY_HAVEN_STASH_01_REPORT.md` |
+| Professions Foundation 1.0 | UI-Skalierung 75–150 %; neun klassenunabhängige Berufe (5 Herstellung, 4 Sammeln) mit Stufen 1–100, Rängen, XP-Bändern und Erstherstellungsbonus; datengetriebene Rezepte (inkl. Verarbeitung), dauerhaftes Lernen, atomares Herstellen mit Lager-Materialien in Haven; Artisan Quarter mit vier Werkstätten; Berufefenster (P); Save v7 | `PROFESSIONS_FOUNDATION_01_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
+- **Berufe 1.1:** Revitalized-Stufen und Restaurierung der Werkstätten, Trainer-/Quest-/Drop-Quellen für Rezepte,  Verbrauchsgüter (dann Alchemie herstellbar), weitere Rezepte bis Master, Material-Parameter/Affixe aus  `output_parameters`, Rezeptgegenstände in Beutetabellen, Salvaging.
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von
   Monstern, Balance nach menschlichem Playtest, VFX/SFX für Entladung und Resonanz, Respec-Regeln.
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen

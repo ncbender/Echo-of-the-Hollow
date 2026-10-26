@@ -32,9 +32,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 6) ✅
+## Format (Version 7) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 6, "saved_at": 1761460000, "order": 1761460000123,
+{ "format": "echoes_of_the_hollow_save", "version": 7, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
   "meta": { "location": "Haven", "class": "Warrior", "level": 3, "play_time": 812,
             "kind": "manual|autosave|milestone", "reason": "..." } }
@@ -59,6 +59,7 @@ Payload (nur Quelldaten):
 | `class_builds` | pro freigeschalteter Klasse: Talentränge, 4 Skill-Slots, Mods je Skill, Sonder-Freischaltungen, Respec-Zähler, 5 Presets (v4) |
 | `prologue` | Stufe (not_started/in_progress/completed), abgeschlossene Trials, gewählte Klasse (v4) |
 | `quests` | Klassen- und Storyquests: Zustand, `step` (v5), Zielfortschritt des aktuellen Schritts |
+| `professions` | Berufe (v7): `levels` Beruf → {level, xp}, `known_recipes` (dauerhaft gelernte Rezepte), `first_crafts` (Rezepte mit bereits vergebenem Erstherstellungsbonus); siehe `docs/PROFESSIONS.md` |
 
 **Nicht gespeichert (rekonstruiert):** Stats, aktuelle HP, Klassenressource, Cooldowns, Buffs, aktive
 Effekte/Modifier, Combat-Waffe, Combo-Freischaltungen, Statuseffekte auf Gegnern, **laufende Prolog-Trials**
@@ -87,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 6.
+Aktuell: Version 7.
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
@@ -115,6 +116,7 @@ Aktuell: Version 6.
   Klassen und Talente bleiben unverändert. Beim Laden wird eine Instanz-ID, die schon in der Tasche liegt,
   nicht ein zweites Mal aus dem Lager geladen: Diese Kopie wird als `orphaned_items` aufbewahrt (nie gelöscht)
   und als Warnung gemeldet.
+- 6→7 (Professions Foundation 1.0): leeres `professions` (`{"levels": {}, "known_recipes": [], "first_crafts": []}`).  Beim Laden starten alle neun Berufe auf Stufe 1, automatische Stufe-1-Rezepte werden gelernt. Tasche, Lager,  Restaurierungen, Klassen, Talente und Builds bleiben unverändert. Unbekannte Berufe werden mit Warnung  ignoriert, Stufe/XP auf gültige Werte begrenzt, unbekannte Rezept-IDs bleiben erhalten (aber unbenutzbar).
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

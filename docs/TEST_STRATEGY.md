@@ -229,3 +229,9 @@ Spielt in der Arena im Fenster:
 - das Aufräumen der Effekte und einen Szenenwechsel
 
 Protokolliert die abgespielten Audio-Cues. Screenshots liegen in `tests/output/feedback/`.
+Professions Foundation 1.0: `professions` (neun Berufe, Ränge, XP-Bänder, Erstherstellungsbonus, Lernen/Doppellernen,
+Rezeptgegenstand, abgelehnte Herstellungen ändern nichts, schnelle Wiederholungen, kompletter Vertical Slice,
+Lager-Materialien an Haven-Werkbänken, Sammel-XP und Erschöpfung über Save/Load, Save/Load, Migration v6→v7),
+`professions_ui` (zehn Gebäude, Artisan Quarter zu Fuß erreichbar, alte Orte unverändert, Westtor erreichbar,
+Werkstatt öffnet ihren Beruf, Herstellen und Lernen per Mausklick, Sperrgründe, P ohne Station, Old Smithy
+ruiniert/restauriert, Fenster bei 75–150 %). Galerie-Screens `professions*` und `hud_artisan_quarter`.

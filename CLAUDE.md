@@ -5,7 +5,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
 + Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine)
 + UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1 + Talent UI Polish 1.2
-+ Inventory & Haven Stash 1.0 (Haven-Lager, Save v6).
++ Inventory & Haven Stash 1.0 (Haven-Lager, Save v6) + Professions Foundation 1.0 (neun Berufe, Artisan Quarter, Save v7).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -68,6 +68,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   Daten (`data/story`, `data/npcs`, `data/haven/ruins`, `data/world/waystones`); Platzierung/Sichtbarkeit
   über `StoryCondition`, nie über questspezifischen Code. Haven hat feste Ruinen (`RestorationService`,
   atomar), keine freien Bauplätze. Design: `docs/PROLOGUE_AND_HAVEN.md`.
+- Berufe (`docs/PROFESSIONS.md`): Regeln nur in `ProfessionService` (Lernen, XP, Herstellen als Transaktion mit  einem Materialplan für Zählen und Verbrauchen), Zustand in `Character.professions`; Berufe, Rezepte, Sammelknoten  sind Daten (`data/professions`, `data/world/resource_nodes`); Werkbänke sind Haven-Ruinen mit `profession_id`.
 - Saves nur über `SaveCoordinator` (manuell/periodisch/Meilenstein); Meilensteine nie unterdrücken,
   Erfolg erst nach erfolgreichem Schreiben anzeigen. Tod/Respawn speichert nie.
 
