@@ -45,7 +45,7 @@ const COLOR_WINDOW := Color(0.145, 0.18, 0.157, 0.99)
 const COLOR_BORDER := BRONZE_DARK
 const COLOR_BUTTON := Color("2c3630")
 const COLOR_BUTTON_HOVER := Color("37443b")
-const COLOR_BUTTON_PRESSED := Color("33474a")
+const COLOR_BUTTON_PRESSED := Color("3d3a2c")
 const COLOR_BUTTON_DISABLED := Color("1f2622")
 const COLOR_FOCUS := Color(RESONANCE, 0.95)
 
@@ -310,7 +310,7 @@ static func _button_styles(theme: Theme, type: StringName, pad_x: int, pad_y: in
 	hover.border_color = BRONZE_DIM
 	var pressed := normal.duplicate() as StyleBoxFlat
 	pressed.bg_color = COLOR_BUTTON_PRESSED
-	pressed.border_color = RESONANCE
+	pressed.border_color = BRONZE   # selected = bronze, keyboard focus = resonance outline
 	var disabled := normal.duplicate() as StyleBoxFlat
 	disabled.bg_color = COLOR_BUTTON_DISABLED if fill.a > 0.0 else Color(0, 0, 0, 0)
 	disabled.border_color = Color(BRONZE_DARK, 0.5)

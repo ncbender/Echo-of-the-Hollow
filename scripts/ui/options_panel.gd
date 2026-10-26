@@ -1,11 +1,27 @@
 class_name OptionsPanel
 extends UiWindow
-## Options (key O): UI scale, window mode, effects volume, autosave and save
-## indicator, reset to defaults.
-## Edits the session's UserSettings; SessionState applies and saves them.
+## Options (O): Display · Audio · Gameplay · Accessibility · Controls.
+## Edits the session's UserSettings (installation-wide, never part of a save);
+## SessionState applies and stores them. Controls lists the real key bindings
+## from the InputMap (read-only - rebinding is not available yet).
+
+const PAGES := ["Display", "Audio", "Gameplay", "Accessibility", "Controls"]
+const WIDTH := 640
+## Action -> label, in the order shown on the Controls page.
+const CONTROLS := [
+	[&"move_up", "Move up"], [&"move_down", "Move down"], [&"move_left", "Move left"], [&"move_right", "Move right"],
+	[&"attack_light", "Light attack"], [&"attack_heavy", "Heavy attack (hold to charge)"], [&"dash", "Dash (towards the cursor)"],
+	[&"defensive", "Block / parry"], [&"ability_1", "Skill 1"], [&"ability_2", "Skill 2"], [&"ability_3", "Skill 3"],
+	[&"ability_4", "Skill 4"], [&"weapon_slot_1", "Weapon 1"], [&"weapon_slot_2", "Weapon 2"], [&"interact", "Interact / talk / continue"],
+	[&"ui_inventory", "Inventory"], [&"ui_character", "Character, talents and skills"], [&"ui_journal", "Journal"],
+	[&"ui_map", "Map"], [&"ui_options", "Options"], [&"ui_cancel", "Pause menu / close"], [&"toggle_fullscreen", "Fullscreen"],
+]
 
 var settings: UserSettings
+var page: String = "Display"
 
+var _tabs: UiTabs
+var _pages: Dictionary = {}   # page -> VBoxContainer
 var _scale_buttons: Dictionary = {}   # float -> Button
 var _windowed: Button
 var _fullscreen: Button
@@ -20,7 +36,40 @@ var _motion: CheckButton
 func _ready() -> void:
 	set_title("Options")
 	set_close_text("Close [O / Esc]")
-	body.add_child(UiTheme.label("UI scale"))
+	_tabs = UiTabs.new()
+	for id in PAGES:
+		_tabs.add_tab(id, id)
+	_tabs.tab_selected.connect(show_page)
+	body.add_child(_tabs)
+	for id in PAGES:
+		var box := VBoxContainer.new()
+		box.name = "Page%s" % id
+		box.custom_minimum_size = Vector2(WIDTH, 0)
+		box.add_theme_constant_override(&"separation", UiTheme.GAP)
+		body.add_child(box)
+		_pages[id] = box
+	_build_display(_pages["Display"])
+	_build_audio(_pages["Audio"])
+	_build_gameplay(_pages["Gameplay"])
+	_build_accessibility(_pages["Accessibility"])
+	_build_controls(_pages["Controls"])
+	var reset := UiTheme.button("Reset to defaults", &"DangerButton", _on_reset)
+	reset.name = "Reset"
+	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	body.add_child(reset)
+	show_page("Display")
+
+
+func show_page(id: String) -> void:
+	page = id
+	_tabs.select(id)
+	for key: String in _pages:
+		(_pages[key] as Control).visible = key == id
+	queue_fit()
+
+
+func _build_display(box: VBoxContainer) -> void:
+	box.add_child(UiTheme.section("UI scale"))
 	var scales := HFlowContainer.new()
 	var group := ButtonGroup.new()
 	for value in UserSettings.UI_SCALES:
@@ -32,56 +81,100 @@ func _ready() -> void:
 		button.pressed.connect(_on_scale.bind(value))
 		scales.add_child(button)
 		_scale_buttons[value] = button
-	body.add_child(scales)
-	body.add_child(UiTheme.label("Window"))
+	box.add_child(scales)
+	box.add_child(UiTheme.section("Window"))
 	var modes := HBoxContainer.new()
 	var mode_group := ButtonGroup.new()
 	_windowed = _mode_button("Windowed", mode_group, UserSettings.WindowMode.WINDOWED)
 	_fullscreen = _mode_button("Fullscreen [F11]", mode_group, UserSettings.WindowMode.FULLSCREEN)
 	modes.add_child(_windowed)
 	modes.add_child(_fullscreen)
-	body.add_child(modes)
-	body.add_child(UiTheme.label("Effects volume"))
+	box.add_child(modes)
+	_info = UiTheme.wrapped("", UiTheme.TEXT_MUTED, WIDTH)
+	_info.theme_type_variation = &"SmallLabel"
+	box.add_child(_info)
+
+
+func _build_audio(box: VBoxContainer) -> void:
+	box.add_child(UiTheme.section("Effects volume"))
 	var volume_row := HBoxContainer.new()
 	_volume = HSlider.new()
 	_volume.name = "EffectsVolume"
 	_volume.min_value = 0.0
 	_volume.max_value = 100.0
 	_volume.step = 5.0
-	_volume.custom_minimum_size = Vector2(320, 24)
+	_volume.custom_minimum_size = Vector2(360, 24)
 	_volume.value_changed.connect(func(value: float) -> void: settings.set_sfx_volume(value / 100.0))
 	volume_row.add_child(_volume)
-	_volume_label = UiTheme.label("", UiTheme.COLOR_DIM)
+	_volume_label = UiTheme.label("", UiTheme.TEXT_SECONDARY)
 	volume_row.add_child(_volume_label)
-	body.add_child(volume_row)
-	body.add_child(UiTheme.label("Saving"))
+	box.add_child(volume_row)
+	box.add_child(_small("Music and ambience will get their own sliders once they exist."))
+
+
+func _build_gameplay(box: VBoxContainer) -> void:
+	box.add_child(UiTheme.section("Saving"))
 	_autosave = CheckButton.new()
 	_autosave.name = "PeriodicAutosave"
 	_autosave.text = "Periodic Autosave"
 	_autosave.toggled.connect(func(on: bool) -> void: settings.set_periodic_autosave(on))
-	body.add_child(_autosave)
-	var autosave_info := UiTheme.wrapped("Automatically saves every 5 minutes. Important progression milestones are always saved.", UiTheme.COLOR_DIM)
-	autosave_info.theme_type_variation = &"SmallLabel"
-	body.add_child(autosave_info)
+	box.add_child(_autosave)
+	box.add_child(_small("Automatically saves every 5 minutes. Important progression milestones are always saved."))
 	_indicator = CheckButton.new()
 	_indicator.name = "ShowSaveIndicator"
 	_indicator.text = "Show Save Indicator"
 	_indicator.toggled.connect(func(on: bool) -> void: settings.set_show_save_indicator(on))
-	body.add_child(_indicator)
-	body.add_child(UiTheme.label("Accessibility"))
+	box.add_child(_indicator)
+	box.add_child(_small("A failed save is always shown."))
+
+
+func _build_accessibility(box: VBoxContainer) -> void:
+	box.add_child(UiTheme.section("Motion"))
 	_motion = CheckButton.new()
 	_motion.name = "ReduceMotion"
 	_motion.text = "Reduce Motion"
 	_motion.tooltip_text = "Windows and panels appear instantly instead of fading in."
 	_motion.toggled.connect(func(on: bool) -> void: settings.set_reduce_motion(on))
-	body.add_child(_motion)
-	var reset := Button.new()
-	reset.text = "Reset to defaults"
-	reset.pressed.connect(_on_reset)
-	body.add_child(reset)
-	_info = UiTheme.wrapped("", UiTheme.COLOR_DIM)
-	_info.theme_type_variation = &"SmallLabel"
-	body.add_child(_info)
+	box.add_child(_motion)
+	box.add_child(_small("Windows and panels appear instantly instead of fading in."))
+	box.add_child(UiTheme.section("Readability"))
+	box.add_child(_small("Text size follows the UI scale on the Display page (up to 200 %). Rarity, states and warnings are always written out, never shown by colour alone."))
+
+
+func _build_controls(box: VBoxContainer) -> void:
+	box.add_child(_small("Mouse and keyboard. Rebinding keys is not available yet."))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP * 4)
+	grid.add_theme_constant_override(&"v_separation", 4)
+	for entry: Array in CONTROLS:
+		if not InputMap.has_action(entry[0]):
+			continue
+		var label := UiTheme.label(entry[1], UiTheme.TEXT_SECONDARY)
+		label.custom_minimum_size = Vector2(300, 0)
+		grid.add_child(label)
+		grid.add_child(UiTheme.key_chip(binding_text(entry[0])))
+	box.add_child(grid)
+
+
+## Human-readable keys of an action ("W", "LMB", "Shift", "Esc").
+static func binding_text(action: StringName) -> String:
+	var parts: PackedStringArray = []
+	for event in InputMap.action_get_events(action):
+		var key := event as InputEventKey
+		var mouse := event as InputEventMouseButton
+		if key != null:
+			var code := key.physical_keycode if key.physical_keycode != 0 else key.keycode
+			parts.append({KEY_ESCAPE: "Esc", KEY_SHIFT: "Shift", KEY_SPACE: "Space"}.get(code, OS.get_keycode_string(code)))
+		elif mouse != null:
+			parts.append({MOUSE_BUTTON_LEFT: "LMB", MOUSE_BUTTON_RIGHT: "RMB", MOUSE_BUTTON_MIDDLE: "MMB"}.get(mouse.button_index, "Mouse %d" % mouse.button_index))
+	return " / ".join(parts) if not parts.is_empty() else "-"
+
+
+func _small(text: String) -> Label:
+	var label := UiTheme.wrapped(text, UiTheme.TEXT_MUTED, WIDTH)
+	label.theme_type_variation = &"SmallLabel"
+	return label
 
 
 func open(target_settings: UserSettings) -> void:

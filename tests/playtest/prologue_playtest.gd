@@ -325,6 +325,10 @@ func _autosave_probe() -> void:
 func _continue_from_title() -> void:
 	await _press(&"ui_cancel")
 	_click_button(map.hud.pause_menu, "Quit to Title")
+	await process_frame
+	_check(map.hud.confirm_dialog.visible, "quitting asks first")
+	await _shot("p19b_quit_confirm")
+	_click_button(map.hud.confirm_dialog, "Quit to Title")
 	await _ticks(20)
 	var title := current_scene as TitleScreen
 	_check(title != null and not (title.find_child("Continue", true, false) as Button).disabled, "title: Continue available")

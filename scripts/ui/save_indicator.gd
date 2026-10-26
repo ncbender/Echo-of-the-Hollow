@@ -15,6 +15,7 @@ var _left: float = 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # also while the pause menu saves
+	theme_type_variation = &"HudPanel"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_label = UiTheme.label("", UiTheme.COLOR_TEXT)
 	add_child(_label)
