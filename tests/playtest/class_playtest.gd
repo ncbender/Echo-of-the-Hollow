@@ -349,7 +349,7 @@ func _polish() -> void:
 	pool.spend(pool.value)
 	for i in 60:
 		await physics_frame
-	_check(absf(pool.value - 8.0) < 0.5, "focus regenerates while idle (%.1f after 1 s)" % pool.value)
+	_check(absf(pool.value - 6.0) < 0.5, "focus regenerates while idle (%.1f after 1 s)" % pool.value)
 	# no target: Shadowstep refused, nothing spent
 	player.global_position = Vector2(-200, 150)
 	frame.aim_direction = Vector2.DOWN
@@ -395,7 +395,7 @@ func _polish() -> void:
 	for i in 60:
 		frame.light_pressed = i % 15 == 0
 		await physics_frame
-	_check(absf(pool.value - regen_start - 8.0) < 0.6, "in combat: +8 focus per second, nothing from hits (%.1f)" % (pool.value - regen_start))
+	_check(absf(pool.value - regen_start - 6.0) < 0.6, "in combat: +6 focus per second, nothing from hits (%.1f)" % (pool.value - regen_start))
 	# Space dash unchanged
 	frame.aim_direction = Vector2.LEFT
 	frame.dash_pressed = true

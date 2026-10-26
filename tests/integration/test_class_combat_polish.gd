@@ -9,6 +9,8 @@ const DUMMY_SCENE: PackedScene = preload("res://scenes/dummy/training_dummy.tscn
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const BOSS_CONFIG: EnemyConfig = preload("res://data/enemies/grove_warden_config.tres")
 const SAVE := "user://test_saves/class_combat_polish.save.json"
+## Passive Shadowrunner Focus regeneration per second (Combat Defense & Feedback 0.4).
+const REGEN := 6.0
 
 var db: GameDatabase
 var character: Character
@@ -86,7 +88,8 @@ func _cast(skill_id: StringName, aim: Vector2, wait: int = 20) -> void:
 
 func test_focus_data_regenerates_and_has_no_hit_gains() -> void:
 	var focus: ClassResourceDefinition = db.get_class_def(&"shadowrunner").resource
-	check_eq(focus.regen_per_second, 8.0, "8 focus per second")
+	check_eq(focus.regen_per_second, REGEN, "6 focus per second (0.4: was 8)")
+	check_eq(focus.start_value, 50.0, "starts at 50")
 	check_eq(focus.regen_delay, 0.0, "regenerates in combat too (no delay)")
 	check_eq(focus.gain_per_hit_dealt, 0.0, "no focus per hit")
 	check(focus.gain_per_tag.is_empty(), "no focus per finisher / weak point / crit")
@@ -102,7 +105,11 @@ func test_focus_regenerates_idle_and_in_combat_without_hit_gains() -> void:
 	var pool := bridge.class_runtime.pool
 	pool.spend(pool.value)
 	await tick(frame(), 60)
-	check_near(pool.value, 8.0, 0.3, "idle: +8 in one second")
+	check_near(pool.value, REGEN, 0.3, "idle: +6 in one second")
+	await tick(frame(), 90)
+	check_near(pool.value, REGEN * 2.5, 0.3, "idle: +15 after 2.5 s")
+	await tick(frame(), 150)
+	check_near(pool.value, REGEN * 5.0, 0.4, "idle: +30 after 5 s (linear, delta based)")
 	var before := pool.value
 	var f := frame(Vector2(0.3, 0.0), Vector2.RIGHT)   # moving and attacking
 	for i in 4:
@@ -110,7 +117,7 @@ func test_focus_regenerates_idle_and_in_combat_without_hit_gains() -> void:
 		await tick(f, 14)
 	var seconds := 60.0 / 60.0
 	check(dispatched.size() >= 6, "the light chain hit the dummies (%d hits)" % dispatched.size())
-	check_near(pool.value - before, 8.0 * seconds, 0.3, "in combat: exactly the regeneration, no focus from hits")
+	check_near(pool.value - before, REGEN * seconds, 0.3, "in combat: exactly the regeneration, no focus from hits")
 	pool.gain(500.0)
 	await tick(frame(), 30)
 	check_eq(pool.value, pool.max_value(), "never above the maximum")
@@ -163,7 +170,7 @@ func test_focused_strikes_procs_only_on_direct_weapon_hits() -> void:
 	var swing_hits := dispatched.filter(func(h: HitData) -> bool: return h.is_direct()).size()
 	check(swing_hits >= 2, "one swing hit several dummies (%d)" % swing_hits)
 	check_eq(bridge.effects.source_state(key).get("triggers", 0), 1, "one proc per swing, not per target")
-	check_near(pool.value - regen_before, 9.0 + 8.0 * 15.0 / 60.0, 0.3, "3 ranks x 3 bonus focus + regeneration")
+	check_near(pool.value - regen_before, 9.0 + REGEN * 15.0 / 60.0, 0.3, "3 ranks x 3 bonus focus + regeneration")
 	for source: HitData.Source in [HitData.Source.SKILL, HitData.Source.TRIGGERED, HitData.Source.STATUS]:
 		var other := HitData.new()
 		other.source = source
@@ -185,7 +192,7 @@ func test_shadowstep_needs_a_target_and_spends_nothing_without_one() -> void:
 	var start := player.global_position
 	await _cast(&"shadowstep", Vector2.RIGHT, 1)
 	check_eq(bridge.class_runtime.cooldown_left(&"shadowstep"), 0.0, "no cooldown without a target")
-	check_near(pool.value, focus + 8.0 * 2.0 / 60.0, 0.05, "no focus spent")
+	check_near(pool.value, focus + REGEN * 2.0 / 60.0, 0.05, "no focus spent")
 	check_eq(player.global_position, start, "no movement")
 	check(messages.any(func(m: String) -> bool: return m.contains("No enemy")), "reason shown: %s" % [messages])
 	_dummy(Vector2(-90, 0))   # behind the aim: outside the cone
