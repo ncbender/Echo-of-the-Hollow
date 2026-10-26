@@ -98,6 +98,22 @@ Alte Namen (`COLOR_TEXT`, `COLOR_ACCENT` …) sind Aliase dieser Tokens.
 - `ToastFeed`: kompakte HUD-Paneele mit Farbakzent; gleiche Meldungen werden zusammengefasst („x2“).
 - `BuildPanel`: Rezeptkarten (Ausgabe-Icon, „have / need“, Grund bei Sperre).
 
+### Komponenten aus Talent UI Polish 1.2
+- `BookTabs`: senkrechte Seitenregister außen am linken Fensterrand (Leder, Bronze-Kante, Naht,
+  Niete; aktives Register Pergament und weiter herausragend). Gleiche API wie `UiTabs`
+  (`Tab<Id>`). Ein `UiWindow` nimmt sie über `set_side_tabs` auf und hält Fenster plus Register im Bild.
+  Bisher nur im Charakter-/Klassenfenster.
+- Klassenfenster: Kopf in einer Zeile (Klasse · Lv. + XP-Strich · Ressource · Talentpunkte ·
+  Stationsstatus mit Tooltip … Respec). Ergebnis-Meldungen unten links neben „Close“ (top level), damit
+  nichts verrutscht.
+- Talentseite: gemeinsame `TalentTierScale` plus drei `TalentTreeView`-Spalten auf denselben Zeilen.
+  `TalentLayout.pick` füllt den freien Platz (normal mit Namen, Zeilen 78–118 px; kompakt ohne Namen ab
+  150 %; erst darunter scrollt der Baumbereich). Knoten-Zustände auch ohne Farbe erkennbar (Maxed:
+  Doppelrahmen und Raute, Available: „+“, Locked: Schloss).
+- `TalentTooltip`: sofort bei Hover oder Fokus; Name, Art, Tier, Rang, aktueller und nächster Effekt,
+  Voraussetzungen (erfüllt/fehlend), Sperrgrund, Kosten, Capstone-Regel. Neben dem Knoten, immer im
+  Bild, nimmt keine Maus an. Nach dem Lernen erscheint er für denselben Knoten wieder.
+
 ## HUD-Layout
 - Oben Mitte: Ziel-/Bossrahmen, darunter Hinweis. Breite nie größer als der Raum zwischen den Spalten.
 - Oben rechts: Quest-Tracker. Unten links: Spielerrahmen. Unten rechts: Loot-Feed über der

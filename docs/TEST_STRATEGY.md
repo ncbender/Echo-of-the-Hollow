@@ -44,6 +44,10 @@ Tiers/Linien/Detailleiste), `inventory_ui` (echte Mausereignisse über `push_inp
 mit Ring-/Waffen-Slotwahl, Hover-Tooltip mit Vergleich im Bild, Gold-Zähler, Save/Load nach Wechsel),
 `dash` (WASD-Richtung in vier Richtungen und Diagonalen, Maus-Fallback), `forge_ui` (+ Ergebnisse neben
 den Aktionen, Rezeptkarten, Toasts).
+Talent UI Polish 1.2: `class_ui` (3 neu, 1 umgeschrieben: Book Tabs ohne Zustandsänderung, Tooltip bei Hover/Fokus, Lernen per
+Mausereignis ohne Layoutsprung mit Save/Load, **Abnahme: alle 39 Talente aller Klassen bei 1920×1080/100 % ohne
+Scrollen, Tiers ausgerichtet, keine Überlappung**). `class_playtest.gd` jetzt 720p, 1080p, 1440p, 4K × 100 %
+sowie 1080p/4K × 150 %, mit echtem Hover an fünf Randknoten, Klick-Lernen und Register-Klicks.
 
 **Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
 `-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte
