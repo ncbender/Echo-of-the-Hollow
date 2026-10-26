@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_ww3yh"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_1uflb"]
+
+[sub_resource type="Resource" id="Resource_l4aed"]
+script = ExtResource("1_ww3yh")
+item_id = &"imprint_shard"
+
+[sub_resource type="Resource" id="Resource_mtnup"]
+script = ExtResource("1_ww3yh")
+item_id = &"focus_catalyst"
+
+[resource]
+script = ExtResource("2_1uflb")
+id = &"imprint"
+display_name = "Imprint"
+description = "Set the main material and roll the first affix."
+costs = Array[ExtResource("1_ww3yh")]([SubResource("Resource_l4aed")])
+allows_focus = true
+focus_costs = Array[ExtResource("1_ww3yh")]([SubResource("Resource_mtnup")])

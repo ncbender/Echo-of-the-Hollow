@@ -222,6 +222,8 @@ func _validate_crafting() -> PackedStringArray:
 		for cost in operation.costs + operation.focus_costs:
 			if not items.has(cost.item_id):
 				errors.append("operation %s costs unknown item %s" % [operation.id, cost.item_id])
+			elif items[cost.item_id].is_equippable():
+				errors.append("operation %s must not consume equipment (%s)" % [operation.id, cost.item_id])
 	for evolution: EvolutionDefinition in evolutions.values():
 		errors.append_array(evolution.validate())
 		for stage in evolution.stages:

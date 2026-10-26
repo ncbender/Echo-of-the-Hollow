@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_qgcoy"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_cfrs0"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_dswgx"]
+
+[resource]
+script = ExtResource("3_dswgx")
+id = &"imprint_shard"
+display_name = "Imprint Shard"
+description = "Crafting currency. Imprints a main material and adds affixes."
+rarity = 1
+max_stack = 99
+tags = Array[StringName]([&"crafting", &"currency"])

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_cq685"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_qwr25"]
+
+[sub_resource type="Resource" id="Resource_51lk7"]
+script = ExtResource("1_cq685")
+item_id = &"imprint_shard"
+quantity = 2
+
+[sub_resource type="Resource" id="Resource_1twlo"]
+script = ExtResource("1_cq685")
+item_id = &"focus_catalyst"
+
+[resource]
+script = ExtResource("2_qwr25")
+id = &"augment"
+display_name = "Augment"
+description = "Add one more affix to a free affix slot."
+costs = Array[ExtResource("1_cq685")]([SubResource("Resource_51lk7")])
+allows_focus = true
+focus_costs = Array[ExtResource("1_cq685")]([SubResource("Resource_1twlo")])

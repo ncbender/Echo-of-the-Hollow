@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CraftingCurrencyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_currency_definition.gd" id="1_45mcs"]
+
+[resource]
+script = ExtResource("1_45mcs")
+id = &"transmute_core"
+item_id = &"transmute_core"
+description = "Crafting currency. Reforges one chosen affix - instantly, no undo."

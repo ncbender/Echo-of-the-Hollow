@@ -72,6 +72,15 @@ func discard_item(instance_id: String) -> bool:
 	return inventory.remove_instance(instance_id) != null
 
 
+## A crafting operation changed an item instance: if it is equipped in the active
+## loadout, stats and item effects are rebuilt (equipment.changed); the inventory
+## UI refreshes through inventory.changed.
+func notify_item_changed(instance_id: String) -> void:
+	if equipment.is_equipped(instance_id):
+		equipment.changed.emit()
+	inventory.changed.emit()
+
+
 func get_stat(stat: StringName) -> float:
 	return get_stats().get(stat, 0.0)
 

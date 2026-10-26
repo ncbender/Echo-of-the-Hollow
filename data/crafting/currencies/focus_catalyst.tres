@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingCurrencyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_currency_definition.gd" id="1_mlwar"]
+
+[resource]
+script = ExtResource("1_mlwar")
+id = &"focus_catalyst"
+item_id = &"focus_catalyst"
+kind = 2
+description = "Catalyst. Makes affixes with the chosen tag four times as likely."
