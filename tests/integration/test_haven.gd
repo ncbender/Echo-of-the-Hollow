@@ -84,7 +84,7 @@ func test_ruin_data() -> void:
 	check_eq(names, ["The Old Smithy", "The Old Storehouse", "The Fallen Barracks", "The Common Hall", "The Trading House",
 		"The Forgotten Study"], "English ruin names")
 	var restorable: Array = db.ruins.values().filter(func(r: RuinDefinition) -> bool: return r.restorable)
-	check_eq(restorable.size(), 2, "only the smithy and the storehouse can be restored in this slice")
+	check_eq(restorable.size(), 6, "the smithy, the storehouse and the four Artisan Quarter workshops can be restored")
 	check(RestorationService.validate_data(db).is_empty(), "ruin data valid")
 	var workshops: Dictionary = {}
 	for ruin: RuinDefinition in db.ruins.values():

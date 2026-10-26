@@ -165,8 +165,14 @@ func _ruin_card(ruin: RuinDefinition) -> Control:
 	head.add_child(title)
 	head.add_child(StageTrack.make(stage))
 	box.add_child(head)
-	var error := RestorationService.restore_error(character, ruin)
-	var status := "Restored." if stage != RestorationService.RUINED else (error if error != "" else "Ready to restore - visit the ruin in Haven.")
+	var next := RestorationService.next_stage(character, ruin)
+	var status := "Revitalized." if stage == RestorationService.REVITALIZED else "Restored."
+	if next != &"":
+		var error := RestorationService.advance_error(character, ruin, next)
+		var verb := "revitalize" if next == RestorationService.REVITALIZED else "restore"
+		status = error if error != "" else "Ready to %s - visit the ruin in Haven." % verb
+		if stage == RestorationService.RESTORED:
+			status = "Restored. " + status
 	box.add_child(UiTheme.styled(status, &"SmallLabel"))
 	return card
 

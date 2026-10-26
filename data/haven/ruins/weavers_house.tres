@@ -1,11 +1,53 @@
 [gd_resource type="Resource" script_class="RuinDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+
+[sub_resource type="Resource" id="R_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 6
+
+[sub_resource type="Resource" id="R_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 3
+
+[sub_resource type="Resource" id="R_flax_fiber"]
+script = ExtResource("2_cost")
+item_id = &"flax_fiber"
+quantity = 4
+
+[sub_resource type="Resource" id="V_oak_plank"]
+script = ExtResource("2_cost")
+item_id = &"oak_plank"
+quantity = 4
+
+[sub_resource type="Resource" id="V_linen_cloth"]
+script = ExtResource("2_cost")
+item_id = &"linen_cloth"
+quantity = 3
+
+[sub_resource type="Resource" id="V_cured_leather"]
+script = ExtResource("2_cost")
+item_id = &"cured_leather"
+quantity = 1
+
+[sub_resource type="Resource" id="C_haven"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
 [resource]
 script = ExtResource("1_ruin")
 id = &"weavers_house"
 display_name = "The Weaver's House"
-description = "A loom missing half its threads under a sagging roof. The loom still works - restoring the house comes later."
+description = "A loom missing half its threads under a sagging roof. The loom still works while the house lies in ruins."
+restorable = true
+condition = SubResource("C_haven")
+costs = Array[ExtResource("2_cost")]([SubResource("R_timber"),SubResource("R_stone"),SubResource("R_flax_fiber")])
 profession_id = &"tailoring"
 footprint = Vector2(64, 42)
+restored_text = "The roof is closed and the loom strung anew: spools of fibre line a dry shelf."
+revitalize_costs = Array[ExtResource("2_cost")]([SubResource("V_oak_plank"),SubResource("V_linen_cloth"),SubResource("V_cured_leather")])
+revitalized_text = "Warm lamplight, bolts of linen on the shelves and a second loom by the window: the house hums with work again."

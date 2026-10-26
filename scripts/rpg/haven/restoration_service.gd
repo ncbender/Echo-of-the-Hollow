@@ -1,15 +1,22 @@
 class_name RestorationService
 extends RefCounted
 ## Hybrid restoration of Haven's ruins. Stateless: stages live in
-## WorldState.restoration. A restoration is atomic: everything is checked
-## first, the costs are consumed once, then the stage switches (the world shows
-## the restored building), its services apply (inventory capacity ...), the
-## story hears of it and WorldState.restoration_changed makes the session write
-## a milestone (critical) save.
+## WorldState.restoration. Stages: ruined -> restored -> revitalized (the
+## second step only where the ruin's data has revitalize_costs).
+## Every step is atomic and names its target stage: everything is checked
+## first (the target is exactly the next stage, story condition, materials),
+## the costs are consumed once from the material plan, then the stage
+## switches (the world shows it), its services apply (inventory capacity ...),
+## the story hears of it and WorldState.restoration_changed makes the session
+## write a milestone (critical) save. A repeated or stale request (double
+## click) is refused and changes nothing - a stage is never skipped.
+## Materials: the same plan as profession crafting (ProfessionService.material_plan);
+## shown, checked and consumed from one plan.
 
 const RUINED := &"ruined"
 const RESTORED := &"restored"
 const REVITALIZED := &"revitalized"
+const STAGES: Array[StringName] = [RUINED, RESTORED, REVITALIZED]
 const UNAVAILABLE := "Restoration unavailable for now."
 
 
@@ -25,33 +32,93 @@ static func is_restored(character: Character, ruin_id: StringName) -> bool:
 	return stage(character, ruin_id) != RUINED
 
 
-## "" if `ruin` can be restored now, otherwise the reason shown to the player.
-static func restore_error(character: Character, ruin: RuinDefinition) -> String:
+static func is_revitalized(character: Character, ruin_id: StringName) -> bool:
+	return stage(character, ruin_id) == REVITALIZED
+
+
+## The stage the next step leads to, or &"" when there is none (done, or the
+## data offers no further step).
+static func next_stage(character: Character, ruin: RuinDefinition) -> StringName:
+	if ruin == null:
+		return &""
+	match stage(character, ruin.id):
+		RUINED:
+			return RESTORED
+		RESTORED:
+			return REVITALIZED if ruin.can_revitalize() else &""
+	return &""
+
+
+## Costs of the step that leads to `target`.
+static func costs_for(ruin: RuinDefinition, target: StringName) -> Array[ItemCost]:
+	if target == REVITALIZED:
+		return ruin.revitalize_costs
+	return ruin.costs
+
+
+## True when restoring may draw on the Haven stash (bag first).
+static func uses_stash(_character: Character) -> bool:
+	return false
+
+
+## The material plan of the step to `target` ({"plan", "missing"} as in
+## ProfessionService.material_plan): display, check and consumption use it.
+static func material_plan(character: Character, ruin: RuinDefinition, target: StringName) -> Dictionary:
+	return ProfessionService.material_plan(character, costs_for(ruin, target), uses_stash(character))
+
+
+## "" if `ruin` can advance to `target` now, otherwise the reason shown to the player.
+static func advance_error(character: Character, ruin: RuinDefinition, target: StringName) -> String:
 	if ruin == null:
 		return "Unknown ruin."
-	if is_restored(character, ruin.id):
-		return "%s is already restored." % ruin.display_name
+	var current := stage(character, ruin.id)
+	match target:
+		RESTORED:
+			if current != RUINED:
+				return "%s is already restored." % ruin.display_name
+		REVITALIZED:
+			if current == REVITALIZED:
+				return "%s is already revitalized." % ruin.display_name
+			if current != RESTORED:
+				return "Restore %s first." % ruin.display_name
+			if not ruin.can_revitalize():
+				return "%s cannot be revitalized." % ruin.display_name
+		_:
+			return "Unknown stage."
 	if not ruin.restorable or not StoryCondition.check(ruin.condition, character):
 		return UNAVAILABLE
-	var missing := BaseBuilder.missing_items(character, ruin.costs)
+	var missing: PackedStringArray = material_plan(character, ruin, target).missing
 	if not missing.is_empty():
 		return "Missing: %s" % ", ".join(missing)
 	return ""
 
 
-## Restores `ruin`. Returns "" on success or the reason (then nothing changed).
-static func restore(character: Character, ruin: RuinDefinition) -> String:
-	var error := restore_error(character, ruin)
+## Advances `ruin` to `target` (exactly the next stage). Returns "" on success
+## or the reason (then nothing changed).
+static func advance(character: Character, ruin: RuinDefinition, target: StringName) -> String:
+	var error := advance_error(character, ruin, target)
 	if error != "":
 		return error
-	for cost in ruin.costs:
-		character.inventory.remove_quantity(cost.item_id, cost.quantity)
-	character.world.set_flag(ruin.restored_flag())
-	character.world.set_restoration(ruin.id, RESTORED)   # requests the milestone save (written next frame)
+	ProfessionService.consume_plan(character, material_plan(character, ruin, target).plan)
+	if target == RESTORED:
+		character.world.set_flag(ruin.restored_flag())
+	else:
+		character.world.set_flag(ruin.revitalized_flag())
+	character.world.set_restoration(ruin.id, target)   # requests the milestone save (written next frame)
 	character.refresh_inventory_capacity()
-	if ruin.event_id != &"":
+	if target == RESTORED and ruin.event_id != &"":
 		StoryService.notify(character, ruin.event_id)
 	return ""
+
+
+## "" if `ruin` can be restored now, otherwise the reason shown to the player.
+static func restore_error(character: Character, ruin: RuinDefinition) -> String:
+	return advance_error(character, ruin, RESTORED)
+
+
+## Restores `ruin`. Returns "" on success or the reason (then nothing changed).
+static func restore(character: Character, ruin: RuinDefinition) -> String:
+	return advance(character, ruin, RESTORED)
 
 
 ## The building a restored ruin provides (null while ruined or without one).
@@ -77,7 +144,11 @@ static func validate_data(db: GameDatabase) -> PackedStringArray:
 	for ruin: RuinDefinition in db.ruins.values():
 		if ruin.building_id != &"" and not db.buildings.has(ruin.building_id):
 			errors.append("ruin %s provides unknown building %s" % [ruin.id, ruin.building_id])
-		for cost in ruin.costs:
+		for cost in ruin.costs + ruin.revitalize_costs:
 			if not db.items.has(cost.item_id):
 				errors.append("ruin %s costs unknown item %s" % [ruin.id, cost.item_id])
+			if cost.quantity < 1:
+				errors.append("ruin %s: cost %s needs a positive quantity" % [ruin.id, cost.item_id])
+		if ruin.can_revitalize() and not ruin.restorable:
+			errors.append("ruin %s: revitalize costs on a ruin that cannot be restored" % ruin.id)
 	return errors

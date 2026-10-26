@@ -10,6 +10,9 @@ extends UiWindow
 ## Gathering professions list their resource nodes. Read-only over
 ## CharacterProfessions; every change goes through ProfessionService.
 
+## The workshop's restoration window was asked for (GameHud opens it).
+signal restoration_requested(site: RuinSite)
+
 const PAGES := ["Crafting", "Gathering"]
 const CARD_WIDTH := 260
 const DETAIL_WIDTH := 600
@@ -217,6 +220,8 @@ func _build_recipes(profession: ProfessionDefinition) -> void:
 		if ProfessionService.uses_stash(character, station_id):
 			where += "  ·  stash materials in reach"
 	_detail.add_child(UiTheme.styled(where, &"SmallLabel"))
+	if here:
+		_add_workshop_stage(profession.station_id)
 	_detail.add_child(UiTheme.section("Recipes"))
 	var recipes := ProfessionService.recipes_of(db, profession.id)
 	if recipe_id == &"" or not db.profession_recipes.has(recipe_id) or (db.profession_recipes[recipe_id] as ProfessionRecipeDefinition).profession_id != profession.id:
@@ -234,6 +239,31 @@ func _build_recipes(profession: ProfessionDefinition) -> void:
 	var selected: ProfessionRecipeDefinition = db.profession_recipes.get(recipe_id)
 	if selected != null:
 		_detail.add_child(_recipe_card(selected))
+
+
+## Stage of the workshop the window was opened at and, while a next step exists,
+## the button to the restoration window (an Artisan Quarter workshop opens its
+## bench first; restoring is offered here). Never blocks crafting.
+func _add_workshop_stage(workshop_id: StringName) -> void:
+	var ruin: RuinDefinition = character.database.ruins.get(workshop_id)
+	var ruin_site := site as RuinSite
+	if ruin == null or ruin_site == null or not ruin_site.is_workshop():
+		return
+	var row := HBoxContainer.new()
+	row.name = "WorkshopStage"
+	row.add_theme_constant_override(&"separation", UiTheme.GAP)
+	var stage := RestorationService.stage(character, ruin.id)
+	var track := JournalPanel.StageTrack.make(stage)
+	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(track)
+	var next := RestorationService.next_stage(character, ruin)
+	if next != &"":
+		var verb := "Revitalize" if next == RestorationService.REVITALIZED else "Restore"
+		var button := UiTheme.button("%s the workshop" % verb, &"", func() -> void: restoration_requested.emit(ruin_site))
+		button.name = "RestoreWorkshop"
+		button.tooltip_text = RestorationService.advance_error(character, ruin, next)
+		row.add_child(button)
+	_detail.add_child(row)
 
 
 func _recipe_row(recipe: ProfessionRecipeDefinition) -> Control:

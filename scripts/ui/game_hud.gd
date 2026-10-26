@@ -189,6 +189,7 @@ func _ready() -> void:
 	confirm_dialog = _add_window(UiConfirmDialog.new()) as UiConfirmDialog
 	crafting_panel.recipes_requested.connect(open_build_panel)
 	crafting_panel.workbench_requested.connect(_open_smithy_workbench)
+	professions_panel.restoration_requested.connect(open_restoration)
 	var session := SessionState.find(get_tree())
 	if session != null:
 		settings = session.settings

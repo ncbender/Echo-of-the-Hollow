@@ -1,11 +1,53 @@
 [gd_resource type="Resource" script_class="RuinDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+
+[sub_resource type="Resource" id="R_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 6
+
+[sub_resource type="Resource" id="R_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 3
+
+[sub_resource type="Resource" id="R_raw_hide"]
+script = ExtResource("2_cost")
+item_id = &"raw_hide"
+quantity = 2
+
+[sub_resource type="Resource" id="V_oak_plank"]
+script = ExtResource("2_cost")
+item_id = &"oak_plank"
+quantity = 4
+
+[sub_resource type="Resource" id="V_cured_leather"]
+script = ExtResource("2_cost")
+item_id = &"cured_leather"
+quantity = 3
+
+[sub_resource type="Resource" id="V_iron_ingot"]
+script = ExtResource("2_cost")
+item_id = &"iron_ingot"
+quantity = 2
+
+[sub_resource type="Resource" id="C_haven"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
 [resource]
 script = ExtResource("1_ruin")
 id = &"tanners_lodge"
 display_name = "The Tanner's Lodge"
-description = "Drying racks without hides and a cracked tanning vat. Its workbench still serves - restoring the lodge comes later."
+description = "Drying racks without hides and a cracked tanning vat. Its workbench still serves while the lodge lies in ruins."
+restorable = true
+condition = SubResource("C_haven")
+costs = Array[ExtResource("2_cost")]([SubResource("R_timber"),SubResource("R_stone"),SubResource("R_raw_hide")])
 profession_id = &"leatherworking"
 footprint = Vector2(64, 42)
+restored_text = "Walls patched, a new roof and a sound tanning vat: the lodge is dry again and its racks hold fresh hides."
+revitalize_costs = Array[ExtResource("2_cost")]([SubResource("V_oak_plank"),SubResource("V_cured_leather"),SubResource("V_iron_ingot")])
+revitalized_text = "Lantern light, hides hanging in neat rows and a tool rack for every knife and awl: a tanner's lodge as it once was."

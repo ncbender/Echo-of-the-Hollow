@@ -1,11 +1,48 @@
 [gd_resource type="Resource" script_class="RuinDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+
+[sub_resource type="Resource" id="R_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 8
+
+[sub_resource type="Resource" id="R_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 4
+
+[sub_resource type="Resource" id="V_oak_plank"]
+script = ExtResource("2_cost")
+item_id = &"oak_plank"
+quantity = 6
+
+[sub_resource type="Resource" id="V_iron_ingot"]
+script = ExtResource("2_cost")
+item_id = &"iron_ingot"
+quantity = 2
+
+[sub_resource type="Resource" id="V_cured_leather"]
+script = ExtResource("2_cost")
+item_id = &"cured_leather"
+quantity = 1
+
+[sub_resource type="Resource" id="C_haven"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
 [resource]
 script = ExtResource("1_ruin")
 id = &"woodwrights_workshop"
 display_name = "The Woodwright's Workshop"
-description = "Sawdust gone grey and a saw bench split in two. The bench still holds - restoring the workshop comes later."
+description = "Sawdust gone grey and a saw bench split in two. The bench still holds while the workshop lies in ruins."
+restorable = true
+condition = SubResource("C_haven")
+costs = Array[ExtResource("2_cost")]([SubResource("R_timber"),SubResource("R_stone")])
 profession_id = &"woodworking"
 footprint = Vector2(64, 42)
+restored_text = "A mended saw bench under a sound roof, timber stacked dry along the wall."
+revitalize_costs = Array[ExtResource("2_cost")]([SubResource("V_oak_plank"),SubResource("V_iron_ingot"),SubResource("V_cured_leather")])
+revitalized_text = "Lanterns over the bench, planks sorted by length and every saw on its hook: the workshop smells of fresh oak again."

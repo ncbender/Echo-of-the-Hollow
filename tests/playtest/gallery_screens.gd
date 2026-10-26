@@ -7,6 +7,7 @@ const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory"
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
 	"professions", "professions_locked", "professions_tooltip", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
+	"hud_artisan_stages", "restoration_revitalize",
 	"pause", "save", "load", "options", "confirm"]
 
 
@@ -199,6 +200,20 @@ static func open(gallery: Object, screen: String) -> String:
 		"hud_artisan_quarter":
 			map.player.global_position = Vector2(-560, 0)
 			await gallery.frames(12)   # the old station's prompt has left
+		"hud_artisan_stages":   # Tanner's Lodge ruined, Weaver's House restored, the other two revitalized
+			character.world.restoration.erase(&"tanners_lodge")
+			character.world.set_restoration(&"tanners_lodge", RestorationService.RUINED)
+			character.world.set_restoration(&"weavers_house", RestorationService.RESTORED)
+			character.world.set_restoration(&"woodwrights_workshop", RestorationService.REVITALIZED)
+			character.world.set_restoration(&"alchemists_cottage", RestorationService.REVITALIZED)
+			map.player.global_position = Vector2(-560, 0)
+			await gallery.frames(12)
+		"restoration_revitalize":
+			character.world.set_restoration(&"tanners_lodge", RestorationService.RESTORED)
+			var lodge := map.get_node("Ruins/TannersLodge") as RuinSite
+			await _stand_at(gallery, lodge)
+			hud.open_restoration(lodge)
+			await gallery.frames(3)
 		"pause":
 			hud.open_pause_menu()
 		"save":

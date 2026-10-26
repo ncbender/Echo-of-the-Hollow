@@ -1,11 +1,53 @@
 [gd_resource type="Resource" script_class="RuinDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+
+[sub_resource type="Resource" id="R_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 6
+
+[sub_resource type="Resource" id="R_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 3
+
+[sub_resource type="Resource" id="R_duskleaf"]
+script = ExtResource("2_cost")
+item_id = &"duskleaf"
+quantity = 2
+
+[sub_resource type="Resource" id="V_oak_plank"]
+script = ExtResource("2_cost")
+item_id = &"oak_plank"
+quantity = 4
+
+[sub_resource type="Resource" id="V_linen_cloth"]
+script = ExtResource("2_cost")
+item_id = &"linen_cloth"
+quantity = 2
+
+[sub_resource type="Resource" id="V_duskleaf"]
+script = ExtResource("2_cost")
+item_id = &"duskleaf"
+quantity = 4
+
+[sub_resource type="Resource" id="C_haven"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
 [resource]
 script = ExtResource("1_ruin")
 id = &"alchemists_cottage"
 display_name = "The Alchemist's Cottage"
-description = "Shattered alembics and a cold athanor. One table is still usable - restoring the cottage comes later."
+description = "Shattered alembics and a cold athanor. One table is still usable while the cottage lies in ruins."
+restorable = true
+condition = SubResource("C_haven")
+costs = Array[ExtResource("2_cost")]([SubResource("R_timber"),SubResource("R_stone"),SubResource("R_duskleaf")])
 profession_id = &"alchemy"
 footprint = Vector2(64, 42)
+restored_text = "The walls stand again, the athanor is swept and the table cleared for careful work."
+revitalize_costs = Array[ExtResource("2_cost")]([SubResource("V_oak_plank"),SubResource("V_linen_cloth"),SubResource("V_duskleaf")])
+revitalized_text = "Glowing coals in the athanor, herbs drying from the beams and clean glass on every shelf: the cottage breathes again."

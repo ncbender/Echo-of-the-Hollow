@@ -164,6 +164,25 @@ static func material_plan(character: Character, inputs: Array[ItemCost], with_st
 	return {"plan": plan, "missing": missing}
 
 
+## Consumes a checked material plan (bag part from the bag, stash part from the
+## stash). Only call it after the plan reported nothing missing.
+static func consume_plan(character: Character, plan: Array) -> void:
+	for entry: Dictionary in plan:
+		if int(entry.bag) > 0:
+			character.inventory.remove_quantity(entry.item_id, int(entry.bag))
+		if int(entry.stash) > 0:
+			character.stash.remove_quantity(entry.item_id, int(entry.stash))
+
+
+## Gives a consumed plan back where it came from (rollback of a failed step).
+static func refund_plan(character: Character, plan: Array) -> void:
+	for entry: Dictionary in plan:
+		if int(entry.bag) > 0:
+			character.inventory.add_item(entry.item_id, int(entry.bag))
+		if int(entry.stash) > 0:
+			character.stash.add_item(entry.item_id, int(entry.stash))
+
+
 ## Units of `item_id` available for a craft at `station_id` (same rule as the plan).
 static func available(character: Character, item_id: StringName, station_id: StringName) -> int:
 	return character.inventory.count(item_id) + (character.stash.count(item_id) if uses_stash(character, station_id) else 0)
@@ -208,19 +227,11 @@ static func craft(character: Character, recipe_id: StringName, station_id: Strin
 	var plan: Array = material_plan(character, recipe.inputs, uses_stash(character, station_id)).plan
 	var xp := craft_xp(character, recipe)
 	var first := not character.professions.crafted_before(recipe_id)
-	for entry: Dictionary in plan:
-		if int(entry.bag) > 0:
-			character.inventory.remove_quantity(entry.item_id, int(entry.bag))
-		if int(entry.stash) > 0:
-			character.stash.remove_quantity(entry.item_id, int(entry.stash))
+	consume_plan(character, plan)
 	var added := character.inventory.add_item(recipe.output_item_id, recipe.output_quantity)
 	if added.is_empty():
 		# cannot happen after the room check - give everything back, change nothing
-		for entry: Dictionary in plan:
-			if int(entry.bag) > 0:
-				character.inventory.add_item(entry.item_id, int(entry.bag))
-			if int(entry.stash) > 0:
-				character.stash.add_item(entry.item_id, int(entry.stash))
+		refund_plan(character, plan)
 		return {"error": "Your bag is full.", "xp": 0, "levels": 0, "first": false}
 	character.professions.mark_crafted(recipe_id)
 	var levels := character.professions.add_xp(recipe.profession_id, xp)
