@@ -42,7 +42,7 @@ func interact(hud: GameHud) -> void:
 			return   # nothing taken, nothing marked: read it again later
 	character.world.set_flag(read_flag())
 	for reward in rewards:
-		character.inventory.add_item(reward.item_id, reward.quantity)
+		character.inventory.add_item(reward.item_id, reward.quantity, ItemInstance.ORIGIN_FOUND)
 		var definition := character.database.get_item(reward.item_id)
 		hud.notify("Found: %d x %s" % [reward.quantity, definition.display_name if definition != null else String(reward.item_id)])
 	if event_id != &"":

@@ -30,6 +30,20 @@ var progress: Dictionary = {}
 ## Increments with every crafting change. Crafting requests carry the revision
 ## they were previewed for, so a repeated click on a stale preview never applies twice.
 var revision: int = 0
+## Player protection (docs/ITEM_SYSTEM.md, Item Integrity): a favourite or a
+## locked item is never salvaged. Only single items (not stacks) carry them.
+var favorite: bool = false
+var locked: bool = false
+## Where the item came from (ORIGINS); &"" = not tracked (stacks, debug and
+## test items). Old saves get ORIGIN_LEGACY - never guessed.
+var origin: StringName = &""
+
+const ORIGIN_FOUND := &"found"
+const ORIGIN_CRAFTED := &"crafted"
+const ORIGIN_QUEST := &"quest_reward"
+const ORIGIN_STARTING := &"starting"
+const ORIGIN_LEGACY := &"unknown_legacy"
+const ORIGINS: Array[StringName] = [ORIGIN_FOUND, ORIGIN_CRAFTED, ORIGIN_QUEST, ORIGIN_STARTING, ORIGIN_LEGACY]
 
 
 static func create(item_id: StringName, amount: int = 1, id: String = "") -> ItemInstance:
@@ -87,6 +101,12 @@ func to_dict() -> Dictionary:
 		data["progress"] = progress.duplicate(true)
 	if revision != 0:
 		data["rev"] = revision
+	if favorite:
+		data["fav"] = true
+	if locked:
+		data["lock"] = true
+	if origin != &"":
+		data["origin"] = String(origin)
 	return data
 
 
@@ -116,6 +136,10 @@ static func from_dict(data: Variant) -> ItemInstance:
 	if data.get("progress") is Dictionary:
 		item.progress = data["progress"]
 	item.revision = maxi(0, _int(data.get("rev", 0), 0))
+	item.favorite = data.get("fav") == true
+	item.locked = data.get("lock") == true
+	var saved_origin := StringName(str(data.get("origin", ""))) if data.get("origin") is String else &""
+	item.origin = saved_origin if saved_origin in ORIGINS else (ORIGIN_LEGACY if saved_origin != &"" else &"")
 	return item
 
 

@@ -37,7 +37,7 @@ func try_pick_up(player: Node) -> bool:
 	var bridge := player.get_node_or_null("ProgressionBridge") as PlayerProgressionBridge
 	if bridge == null or not bridge.is_bound():
 		return false
-	if bridge.character.inventory.add_item(item_id, quantity).is_empty():
+	if bridge.character.inventory.add_item(item_id, quantity, ItemInstance.ORIGIN_FOUND).is_empty():
 		bridge.message.emit("Inventory full - %s stays on the ground" % _name())
 		return false
 	_taken = true

@@ -109,7 +109,7 @@ func _ready() -> void:
 	_grid.columns = BAG_COLUMNS
 	bag_panel.get_node("Box").add_child(_grid)
 	middle.add_child(bag_panel)
-	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip  ·  Drag onto a slot to choose it (Ring 2, Off Hand)", &"CaptionLabel")
+	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip  ·  Drag onto a slot to choose it (Ring 2, Off Hand)  ·  Ctrl+click: favourite  ·  Alt+click: lock", &"CaptionLabel")
 	_bag_hint = hint
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP), 0)

@@ -60,6 +60,13 @@ extends Resource
 ## Items every new character starts with (ids from data/items).
 @export var starting_items: Array[ItemCost] = []
 
+@export_group("Salvaging")
+## Share of an item base's raw materials returned by salvaging, per rarity
+## (index = ItemDefinition.Rarity: Normal, Magic, Rare, Epic, Legendary) as
+## (min %, max %). Provisional balance (Item Integrity 1.0). Unique and Set
+## items are never salvaged.
+@export var salvage_return_percent: PackedVector2Array = PackedVector2Array([Vector2(20, 30), Vector2(20, 30), Vector2(25, 35), Vector2(25, 35), Vector2(30, 40)])
+
 @export_group("Class XP")
 ## Class XP for an accepted hit on a non-training target.
 @export var class_xp_per_hit: int = 1

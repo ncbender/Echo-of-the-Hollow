@@ -59,7 +59,7 @@ static func craft(character: Character, recipe: RecipeDefinition) -> String:
 		return error
 	for input in recipe.inputs:
 		character.inventory.remove_quantity(input.item_id, input.quantity)
-	character.inventory.add_item(recipe.output_item_id, recipe.output_quantity)
+	character.inventory.add_item(recipe.output_item_id, recipe.output_quantity, ItemInstance.ORIGIN_CRAFTED)
 	return ""
 
 

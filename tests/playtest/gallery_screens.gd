@@ -6,7 +6,7 @@ extends RefCounted
 const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
-	"professions", "professions_locked", "professions_tooltip", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
+	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
 	"hud_artisan_stages", "restoration_revitalize",
 	"pause", "save", "load", "options", "confirm"]
 
@@ -185,6 +185,16 @@ static func open(gallery: Object, screen: String) -> String:
 				var output := hud.professions_panel.find_child("Output", true, false) as Control
 				if output != null:
 					hud.professions_panel._show_item(output, &"leather_gloves", 1)
+		"professions_salvage":   # a found cloak to salvage, a locked one, the Salvage page at the Weaver's House
+			var house := map.get_node("Ruins/WeaversHouse") as RuinSite
+			if character.inventory.count(&"traveler_cloak") < 2:
+				character.inventory.add_item(&"traveler_cloak", 1, ItemInstance.ORIGIN_FOUND)
+				var locked: ItemInstance = character.inventory.add_item(&"traveler_cloak", 1, ItemInstance.ORIGIN_CRAFTED)[0]
+				ItemProtection.set_locked(character, locked.instance_id, true)
+			await _stand_at(gallery, house)
+			house.interact(hud)
+			hud.professions_panel.show_page("Salvage")
+			await gallery.frames(3)
 		"professions_gathering":
 			hud.toggle_professions()
 			hud.professions_panel.show_page("Gathering")

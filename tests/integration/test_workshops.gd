@@ -254,7 +254,7 @@ func test_v7_save_without_workshop_stages_loads_ruined() -> void:
 	character.inventory.add_item(&"timber", 7)
 	var data := character.to_dict()
 	(data.world as Dictionary)["restoration"] = {"old_smithy": "restored"}   # a v7 save from before this change
-	check_eq(int(SaveSystem.VERSION), 7, "save format stays version 7")
+	check(int(SaveSystem.VERSION) >= 7, "workshops needed no save change (v8 only adds item integrity)")
 	var warnings: PackedStringArray = []
 	var loaded := Character.from_dict(data, db, warnings)
 	check(warnings.is_empty(), "no warnings: %s" % [warnings])

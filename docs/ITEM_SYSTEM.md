@@ -68,3 +68,18 @@ Debug **F4**: Crafting-Kit.
 ## Offen
 ⬜ Loot-Generator mit Affix-Rolls (Crafting-Rolls ✅), ⬜ Verbrauchsgüter benutzen, ⬜ Sortieren/Stapel
 teilen in der UI. Essenzen, Sockel, Evolution ✅ (`CRAFTING_DESIGN.md`).
+
+## Item Integrity 1.0 ✅ (Overnight Systems 02)
+- `ItemInstance` trägt `favorite`, `locked` (Save: `fav`, `lock`) und `origin` (`found`, `crafted`, `quest_reward`,
+  `starting`, `unknown_legacy`; `""` = nicht erfasst). Nur Einzelitems tragen sie, Stapel nie (sonst würden sie
+  nicht mehr zusammenfallen).
+- Herkunft wird beim Entstehen gesetzt: Herstellen (Beruf, Schmiede-Rezept) → `crafted`, Startausrüstung →
+  `starting`, Welt-Pickups/Lesbares/Story-Pickups → `found`. Quest-Belohnungen mit Items gibt es noch nicht
+  (`quest_reward` ist vorbereitet). Debug- und Testitems bleiben `""`. Alte Saves (v7→v8): `unknown_legacy`.
+  Unbekannte Werte beim Laden → `unknown_legacy`.
+- Markieren nur über `ItemProtection` (Tasche und Lager): Inventar/Lager **Strg+Klick = Favorit, Alt+Klick =
+  Sperre** (Rechtsklick bleibt Ausrüsten/Einlagern), auf der Salvage-Seite Knöpfe „Favourite“/„Lock“.
+  Symbole am Item: bronzene Raute (Favorit), Schloss (gesperrt). Tooltip: „Favourite · Locked · Origin: …“.
+- `ItemProtection.destroy_block` (Reihenfolge): Questitem, Unique/Set (immer gesperrt), ausgerüstet in
+  irgendeinem Klassen-Loadout, in einem Build-Preset, gesperrt, Favorit.
+- Salvaging: `docs/PROFESSIONS.md`.

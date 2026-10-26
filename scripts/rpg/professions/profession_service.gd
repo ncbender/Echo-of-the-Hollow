@@ -228,7 +228,7 @@ static func craft(character: Character, recipe_id: StringName, station_id: Strin
 	var xp := craft_xp(character, recipe)
 	var first := not character.professions.crafted_before(recipe_id)
 	consume_plan(character, plan)
-	var added := character.inventory.add_item(recipe.output_item_id, recipe.output_quantity)
+	var added := character.inventory.add_item(recipe.output_item_id, recipe.output_quantity, ItemInstance.ORIGIN_CRAFTED)
 	if added.is_empty():
 		# cannot happen after the room check - give everything back, change nothing
 		refund_plan(character, plan)

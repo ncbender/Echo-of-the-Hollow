@@ -195,7 +195,7 @@ static func _move(source: Inventory, target: Inventory, instance_id: String, db:
 static func _plain(item: ItemInstance, definition: ItemDefinition) -> bool:
 	return definition != null and definition.is_stackable() and item.affixes.is_empty() and item.essences.is_empty() \
 		and item.sockets.is_empty() and item.quality == 0 and item.material_id == &"" and item.evolution.is_empty() \
-		and item.progress.is_empty()
+		and item.progress.is_empty() and not item.favorite and not item.locked
 
 
 ## True if `item` would be merged into existing stash stacks without needing a slot.

@@ -102,7 +102,7 @@ func _ready() -> void:
 	_stash_grid.columns = STASH_COLUMNS
 	stash.add_child(_drop_zone("StashZone", _stash_grid, _drop_on_stash))
 
-	var hint := UiTheme.styled("Right-click: store / take  ·  Drag between bag and stash  ·  Equipped items and gold stay with you", &"CaptionLabel")
+	var hint := UiTheme.styled("Right-click: store / take  ·  Drag between bag and stash  ·  Ctrl+click: favourite  ·  Alt+click: lock  ·  Equipped items and gold stay with you", &"CaptionLabel")
 	hint.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
 	body.add_child(hint)
 	_status = UiTheme.styled("", &"SmallLabel")

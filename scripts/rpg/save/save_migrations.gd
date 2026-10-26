@@ -18,6 +18,7 @@ static func _steps() -> Dictionary:
 		4: _v4_to_v5,
 		5: _v5_to_v6,
 		6: _v6_to_v7,
+		7: _v7_to_v8,
 	}
 
 
@@ -186,4 +187,21 @@ static func _v5_to_v6(data: Dictionary) -> Dictionary:
 static func _v6_to_v7(data: Dictionary) -> Dictionary:
 	if not data.get("professions") is Dictionary:
 		data["professions"] = {"levels": {}, "known_recipes": [], "first_crafts": []}
+	return data
+
+
+## v8 (Item Integrity 1.0): item protection and origin. Every saved item of
+## the bag, the stash and the kept orphans is marked "unknown_legacy" - its
+## origin is never guessed. No item is favourite or locked; all other item
+## data (id, affixes, quality, essences, sockets ...) stays as it is.
+static func _v7_to_v8(data: Dictionary) -> Dictionary:
+	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
+	if data.get("stash") is Dictionary:
+		lists.append(data["stash"].get("items"))
+	for list: Variant in lists:
+		if not list is Array:
+			continue
+		for entry: Variant in list:
+			if entry is Dictionary and not (entry as Dictionary).has("origin"):
+				entry["origin"] = "unknown_legacy"
 	return data

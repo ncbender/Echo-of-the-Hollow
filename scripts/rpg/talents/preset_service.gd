@@ -175,3 +175,15 @@ static func _probe(character: Character, class_id: StringName, build: ClassBuild
 static func _skill_name(db: GameDatabase, skill_id: StringName) -> String:
 	var skill: SkillDefinition = db.skills.get(skill_id)
 	return skill.display_name if skill != null else String(skill_id)
+
+
+## True if a saved build preset of any unlocked class lists `instance_id` in its
+## equipment (presets reference bag items; Item Integrity protects them).
+static func references_item(character: Character, instance_id: String) -> bool:
+	for class_id in character.classes.unlocked_class_ids():
+		if not character.builds.has_build(class_id):
+			continue
+		for preset: Variant in character.builds.get_build(class_id).presets:
+			if preset is Dictionary and preset.get("equipment") is Dictionary and instance_id in (preset["equipment"] as Dictionary).values():
+				return true
+	return false

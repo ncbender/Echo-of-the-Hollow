@@ -132,3 +132,25 @@ Ergebnis (kein Verbrauchsgut-System).
 - ausgewähltes Rezept: Ergebnis mit Item-Tooltip, Werkbank, Stufe, XP-Vorschau, Materialien mit Bestand
   (inkl. Lager), Craft, Learn (Rezeptgegenstand), Rückmeldung
 - Sammelseite: Knoten mit Stufe, Ertrag, XP
+
+## Salvaging 1.0 (Overnight Systems 02)
+Regeln nur in `SalvageService`, Schutz über `ItemProtection.destroy_block` (`docs/ITEM_SYSTEM.md`).
+- **Werkstatt:** die Werkbank des Berufs, dessen Rezept das Item herstellt. Old Smithy (Militia Sword), Tanner's
+  Lodge (Gloves, Bracers, Worn Boots), Weaver's House (Trousers, Rope Belt, Padded Mantle, Traveler's Cloak),
+  Woodwright's Workshop (Oak Shield). Items ohne eindeutiges, herstellbares Berufsrezept (z. B. Iron Sword aus dem
+  Schmiede-Rezept der Forge, Fundstücke, Alchemie) sind gesperrt: „This item cannot be salvaged.“
+- **Rückgewinnung:** Rohmaterial der Itembasis (Rezeptinputs, verarbeitete Inputs über ihre Verarbeitungsrezepte
+  zurückgerechnet) × Anteil je Seltenheit aus `rules.salvage_return_percent` (Normal/Magic 20–30 %, Rare/Epic
+  25–35 %, Legendary 30–40 %, provisorisch). Der Anteil wird einmal pro Instanz aus ihrer ID gewürfelt
+  (deterministisch): Die Vorschau zeigt genau das Ergebnis, Save/Load würfelt nicht neu. Abgerundet; ergibt das
+  nichts, wird abgelehnt und das Item bleibt (z. B. Rope Belt: 4 Flax × ≤ 30 % < 2).
+- **Nicht zurück:** Affixe, Qualität, Essenzen, Sockel, Imprint, Evolution, Katalysatoren, Gold. Keine Rückstände
+  (Residues), keine Beruf-XP.
+- **Ablauf:** Seite „Salvage“ im Berufefenster (an der Werkbank): Liste der passenden Taschenitems mit Ertrag oder
+  Schutzgrund, Karte mit Ertrag, Herkunft, Hinweis auf verlorene Upgrades, Favourite/Lock; Knopf „Salvage“ in der
+  festen Fußzeile → `UiConfirmDialog` (Cancel hat den Fokus) → `SalvageService.salvage`.
+- **Transaktion:** alles vorab prüfen (Schutz, Werkstatt, Ertrag, Platz für alle Erträge nach Freiwerden des
+  Item-Slots); dann Item entfernen und Erträge gutschreiben; schlägt die Gutschrift fehl, werden die Erträge
+  zurückgenommen und dieselbe Instanz kehrt zurück. Wiederholte Klicks finden das Item nicht mehr.
+- **Keine Schleife:** höchstens 40 % des Rohmaterials kommen zurück; der Test stellt jedes Rezept zehnmal her und
+  verwertet es (Rohmaterial sinkt immer).

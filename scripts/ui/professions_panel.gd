@@ -13,7 +13,7 @@ extends UiWindow
 ## The workshop's restoration window was asked for (GameHud opens it).
 signal restoration_requested(site: RuinSite)
 
-const PAGES := ["Crafting", "Gathering"]
+const PAGES := ["Crafting", "Gathering", "Salvage"]
 const CARD_WIDTH := 260
 const DETAIL_WIDTH := 600
 const RECIPE_ROW_HEIGHT := 40
@@ -26,6 +26,10 @@ var site: Node2D
 var page: String = "Crafting"
 var profession_id: StringName = &"blacksmithing"
 var recipe_id: StringName = &""
+## Bag item selected on the Salvage page ("" = none).
+var salvage_id: String = ""
+## Set by GameHud: the confirmation dialog for salvaging.
+var hud: GameHud
 ## Result line of the last action ("" = none).
 var last_message: String = ""
 var last_ok: bool = true
@@ -128,7 +132,9 @@ func rebuild() -> void:
 	var definition: ProfessionDefinition = character.database.professions.get(profession_id)
 	if definition != null:
 		_build_header(definition)
-		if definition.is_crafting():
+		if definition.is_crafting() and page == "Salvage":
+			_build_salvage(definition)
+		elif definition.is_crafting():
 			_build_recipes(definition)
 		else:
 			_build_gathering(definition)
@@ -483,6 +489,233 @@ func _build_gathering(profession: ProfessionDefinition) -> void:
 		row.add_child(req)
 		(card.get_node("Box") as VBoxContainer).add_child(row)
 		_detail.add_child(card)
+
+
+# --- salvage ----------------------------------------------------------------------
+
+## Salvage page: the bag items this profession's workshop can break down, each
+## with what it returns or why it is protected; the selected item with its
+## exact return, its marks (Favourite / Lock) and the Salvage action in the
+## footer (asks for confirmation; the destruction cannot be undone).
+func _build_salvage(profession: ProfessionDefinition) -> void:
+	var db := character.database
+	if not profession.id in SalvageService.SALVAGE_PROFESSIONS:
+		_detail.add_child(UiTheme.wrapped("%s items cannot be salvaged." % profession.display_name, UiTheme.TEXT_SECONDARY, DETAIL_WIDTH))
+		return
+	var workshop := ProfessionService.station_name(db, profession.station_id)
+	var where := "Salvage at: %s (Haven)" % workshop
+	if station_id == profession.station_id:
+		where += "  ·  you are here"
+	_detail.add_child(UiTheme.styled(where, &"SmallLabel"))
+	_detail.add_child(UiTheme.wrapped("Breaks an item down into part of the raw materials of its recipe. Affixes, quality, essences, sockets and other upgrades are lost. Equipped, preset, favourite and locked items are protected.",
+		UiTheme.TEXT_MUTED, DETAIL_WIDTH))
+	_detail.add_child(UiTheme.section("Items in your bag"))
+	var candidates: Array[ItemInstance] = []
+	for item in character.inventory.items():
+		if SalvageService.station_for(db, item.definition_id) == profession.station_id:
+			candidates.append(item)
+	if candidates.is_empty():
+		_detail.add_child(UiTheme.label("Nothing in your bag can be salvaged here.", UiTheme.TEXT_MUTED))
+		salvage_id = ""
+		return
+	if candidates.all(func(i: ItemInstance) -> bool: return i.instance_id != salvage_id):
+		salvage_id = candidates[0].instance_id
+	var list := VBoxContainer.new()
+	list.name = "SalvageItems"
+	list.add_theme_constant_override(&"separation", 2)
+	for item in candidates:
+		list.add_child(_salvage_row(item))
+	_detail.add_child(list)
+	var selected := character.inventory.find(salvage_id)
+	if selected != null:
+		_detail.add_child(_salvage_card(selected))
+
+
+func _salvage_row(item: ItemInstance) -> Control:
+	var definition := character.database.get_item(item.definition_id)
+	var button := Button.new()
+	button.name = "Salvage_%s" % item.instance_id
+	button.toggle_mode = true
+	button.button_pressed = item.instance_id == salvage_id
+	button.theme_type_variation = &"InventorySlot"
+	button.custom_minimum_size = Vector2(DETAIL_WIDTH, RECIPE_ROW_HEIGHT)
+	button.pressed.connect(select_salvage.bind(item.instance_id))
+	var row := HBoxContainer.new()
+	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = 10
+	row.offset_right = -10
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override(&"separation", UiTheme.GAP)
+	var block := ItemProtection.destroy_block(character, item.instance_id)
+	var icon := ItemIcon.new().setup(definition, item.quantity)
+	icon.favorite = item.favorite
+	icon.locked = item.locked
+	icon.custom_minimum_size = Vector2(28, 28)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.modulate.a = 1.0 if block == "" else 0.45
+	row.add_child(icon)
+	var name_label := UiTheme.label(definition.display_name, UiTheme.rarity_color(definition.rarity) if block == "" else UiTheme.TEXT_MUTED)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
+	row.add_child(name_label)
+	var tag := UiTheme.styled(_short_block(item, block) if block != "" else _yield_text(SalvageService.outputs(character, item)), &"CaptionLabel")
+	if block != "":
+		tag.add_theme_color_override(&"font_color", UiTheme.WARNING)
+	row.add_child(tag)
+	button.add_child(row)
+	button.tooltip_text = block
+	return button
+
+
+func _short_block(item: ItemInstance, block: String) -> String:
+	if item.locked:
+		return "Locked"
+	if item.favorite:
+		return "Favourite"
+	if character.equipment.is_referenced(item.instance_id):
+		return "Equipped"
+	if PresetService.references_item(character, item.instance_id):
+		return "In a preset"
+	return "Protected" if block != "" else ""
+
+
+func _yield_text(gained: Array[Dictionary]) -> String:
+	var parts: PackedStringArray = []
+	for entry: Dictionary in gained:
+		var definition := character.database.get_item(entry.item_id)
+		parts.append("%d x %s" % [entry.quantity, definition.display_name if definition else String(entry.item_id)])
+	return ", ".join(parts) if not parts.is_empty() else "nothing"
+
+
+func _salvage_card(item: ItemInstance) -> Control:
+	var definition := character.database.get_item(item.definition_id)
+	var card := UiTheme.card(&"CardPanel")
+	card.name = "SalvageCard"
+	var box := card.get_node("Box") as VBoxContainer
+	box.add_theme_constant_override(&"separation", 6)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override(&"separation", UiTheme.GAP)
+	var chip := Button.new()
+	chip.name = "SalvageItem"
+	chip.theme_type_variation = &"InventorySlot"
+	chip.custom_minimum_size = Vector2(48, 48)
+	var icon := ItemIcon.new().setup(definition, item.quantity)
+	icon.favorite = item.favorite
+	icon.locked = item.locked
+	icon.custom_minimum_size = Vector2.ZERO
+	icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	icon.offset_left = 4
+	icon.offset_top = 4
+	icon.offset_right = -4
+	icon.offset_bottom = -4
+	chip.add_child(icon)
+	chip.mouse_entered.connect(_show_instance.bind(chip, item.instance_id))
+	chip.focus_entered.connect(_show_instance.bind(chip, item.instance_id))
+	chip.mouse_exited.connect(tooltip.hide_tooltip)
+	chip.focus_exited.connect(tooltip.hide_tooltip)
+	head.add_child(chip)
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	titles.add_child(UiTheme.styled(definition.display_name, &"SubheadingLabel"))
+	titles.add_child(UiTheme.styled("%s  ·  Origin: %s" % [UiTheme.rarity_name(definition.rarity), ItemProtection.origin_name(item.origin)], &"SmallLabel"))
+	head.add_child(titles)
+	box.add_child(head)
+	box.add_child(UiTheme.section("You receive"))
+	var gained := SalvageService.outputs(character, item)
+	for entry: Dictionary in gained:
+		var material := character.database.get_item(entry.item_id)
+		var row := UiTheme.stat_row(material.display_name if material else String(entry.item_id), "%d" % entry.quantity, UiTheme.SUCCESS)
+		row.name = "Gain_%s" % entry.item_id
+		box.add_child(row)
+	if gained.is_empty():
+		box.add_child(UiTheme.label("Nothing could be recovered.", UiTheme.TEXT_MUTED))
+	if SalvageService.has_investments(item):
+		box.add_child(UiTheme.wrapped("Its upgrades (affixes, quality, essences, sockets) are lost.", UiTheme.WARNING, DETAIL_WIDTH - 30))
+	var marks := HBoxContainer.new()
+	marks.add_theme_constant_override(&"separation", UiTheme.GAP)
+	var favorite := UiTheme.button("Unfavourite" if item.favorite else "Favourite", &"", _toggle_mark.bind(item.instance_id, &"favorite"))
+	favorite.name = "MarkFavorite"
+	marks.add_child(favorite)
+	var lock := UiTheme.button("Unlock" if item.locked else "Lock", &"", _toggle_mark.bind(item.instance_id, &"locked"))
+	lock.name = "MarkLocked"
+	marks.add_child(lock)
+	box.add_child(marks)
+	# the action sits in the fixed footer
+	var error := SalvageService.salvage_error(character, item.instance_id, station_id)
+	var bar := HBoxContainer.new()
+	bar.name = "SalvageBar"
+	bar.add_theme_constant_override(&"separation", UiTheme.GAP)
+	bar.add_child(UiTheme.styled(definition.display_name, &"SubheadingLabel"))
+	var hint := UiTheme.wrapped(error, UiTheme.TEXT_MUTED, DETAIL_WIDTH - 220)
+	hint.name = "SalvageHint"
+	hint.theme_type_variation = &"SmallLabel"
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(hint)
+	var action := UiTheme.button("Salvage", &"DangerButton", request_salvage)
+	action.name = "Salvage"
+	action.disabled = error != ""
+	action.tooltip_text = error
+	action.custom_minimum_size = Vector2(160, 40)
+	bar.add_child(action)
+	footer.add_child(HSeparator.new())
+	footer.add_child(bar)
+	var result := UiTheme.wrapped(last_message, UiTheme.SUCCESS if last_ok else UiTheme.DANGER, CARD_WIDTH + DETAIL_WIDTH)
+	result.name = "Result"
+	result.visible = last_message != ""
+	footer.add_child(result)
+	footer.visible = true
+	return card
+
+
+func _show_instance(anchor: Control, instance_id: String) -> void:
+	var item := character.inventory.find(instance_id)
+	if _auto_focusing or item == null or not is_instance_valid(anchor) or not anchor.is_inside_tree():
+		return
+	tooltip.show_for(character, item, anchor)
+
+
+func select_salvage(instance_id: String) -> void:
+	salvage_id = instance_id
+	rebuild()
+
+
+func _toggle_mark(instance_id: String, field: StringName) -> void:
+	var item := character.inventory.find(instance_id)
+	if item == null:
+		return
+	var error := ItemProtection.set_locked(character, instance_id, not item.locked) if field == &"locked" \
+		else ItemProtection.set_favorite(character, instance_id, not item.favorite)
+	last_ok = error == ""
+	last_message = error
+	rebuild()
+
+
+## Salvage button: asks for confirmation (the item is destroyed), then salvages
+## exactly the item that was shown. Without a HUD (tests) it salvages at once.
+func request_salvage() -> void:
+	var item := character.inventory.find(salvage_id)
+	if item == null:
+		return
+	var definition := character.database.get_item(item.definition_id)
+	var target := salvage_id
+	var message := "%s is destroyed for good. You receive: %s." % [definition.display_name, _yield_text(SalvageService.outputs(character, item))]
+	if SalvageService.has_investments(item):
+		message += " Its upgrades are lost."
+	if hud == null:
+		salvage_item(target)
+		return
+	hud.confirm_dialog.ask("Salvage %s?" % definition.display_name, message, "Salvage", salvage_item.bind(target), true)
+
+
+## Salvages `instance_id` at the current workstation (UI and tests).
+func salvage_item(instance_id: String) -> Dictionary:
+	var result := SalvageService.salvage(character, instance_id, station_id)
+	last_ok = result.error == ""
+	last_message = result.error if not last_ok else "Salvaged: %s." % _yield_text(result.outputs)
+	if last_ok and salvage_id == instance_id:
+		salvage_id = ""
+	rebuild()
+	return result
 
 
 # --- actions -----------------------------------------------------------------------

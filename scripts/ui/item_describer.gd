@@ -101,6 +101,16 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 			names.append(class_def.display_name if class_def != null else String(class_id))
 		var allowed := character.classes.active_class_id in definition.required_class_ids
 		result.append(_l("Requires: %s" % ", ".join(names), "line" if allowed else "bad"))
+	# protection and origin (single items; stacks carry neither; not on recipe previews)
+	if not definition.is_stackable() and item.instance_id != "preview":
+		var marks: PackedStringArray = []
+		if item.favorite:
+			marks.append("Favourite")
+		if item.locked:
+			marks.append("Locked")
+		marks.append("Origin: %s" % ItemProtection.origin_name(item.origin))
+		var marked := item.favorite or item.locked
+		result.append(_l("  ·  ".join(marks), "line" if marked else "dim", UiTheme.BRONZE if marked else UiTheme.TEXT_MUTED))
 	if definition.description != "":
 		result.append(_l(definition.description, "dim"))
 	# 9 comparison

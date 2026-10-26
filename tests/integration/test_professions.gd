@@ -205,4 +205,4 @@ func test_save_load_and_migration() -> void:
 	check_eq(old.stash.to_array(), character.stash.to_array(), "stash untouched")
 	check_eq(old.world.restoration, character.world.restoration, "restorations untouched")
 	check_eq(JSON.stringify(old.builds.to_dict()), JSON.stringify(character.builds.to_dict()), "talents and builds untouched")
-	check_eq(SaveSystem.VERSION, 7, "save version 7")
+	check(SaveSystem.VERSION >= 7, "save version 7 or later (v8: item integrity)")

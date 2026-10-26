@@ -32,9 +32,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 7) ✅
+## Format (Version 8) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 7, "saved_at": 1761460000, "order": 1761460000123,
+{ "format": "echoes_of_the_hollow_save", "version": 8, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
   "meta": { "location": "Haven", "class": "Warrior", "level": 3, "play_time": 812,
             "kind": "manual|autosave|milestone", "reason": "..." } }
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 7.
+Aktuell: Version 8.
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
@@ -117,6 +117,9 @@ Aktuell: Version 7.
   nicht ein zweites Mal aus dem Lager geladen: Diese Kopie wird als `orphaned_items` aufbewahrt (nie gelöscht)
   und als Warnung gemeldet.
 - 6→7 (Professions Foundation 1.0): leeres `professions` (`{"levels": {}, "known_recipes": [], "first_crafts": []}`).  Beim Laden starten alle neun Berufe auf Stufe 1, automatische Stufe-1-Rezepte werden gelernt. Tasche, Lager,  Restaurierungen, Klassen, Talente und Builds bleiben unverändert. Unbekannte Berufe werden mit Warnung  ignoriert, Stufe/XP auf gültige Werte begrenzt, unbekannte Rezept-IDs bleiben erhalten (aber unbenutzbar).
+- 7→8 (Item Integrity 1.0): jeder Item-Eintrag in `inventory`, `stash.items` und `orphaned_items` ohne Herkunft bekommt
+  `"origin": "unknown_legacy"` (nie geraten). Keine Markierungen; ID, Affixe, Qualität, Essenzen, Sockel, Evolution bleiben.
+  Beim Laden verlieren Stapel Herkunft und Markierungen (nur Einzelitems tragen sie).
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

@@ -57,7 +57,7 @@ func take() -> String:
 	if item_id != &"" and character.inventory.room_for(item_id) < quantity:
 		return "Your pack is full."
 	if item_id != &"":
-		character.inventory.add_item(item_id, quantity)
+		character.inventory.add_item(item_id, quantity, ItemInstance.ORIGIN_FOUND)
 	character.world.set_flag(taken_flag())
 	if event_id != &"":
 		StoryService.notify(character, event_id)

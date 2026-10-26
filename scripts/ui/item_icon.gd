@@ -13,6 +13,9 @@ var definition: ItemDefinition
 var texture: Texture2D
 var quantity: int = 1
 var equipped: bool = false
+## Item Integrity marks (drawn in the top right corner).
+var favorite: bool = false
+var locked: bool = false
 
 
 func _init() -> void:
@@ -53,6 +56,13 @@ func _draw() -> void:
 	if equipped:
 		draw_rect(Rect2(Vector2(2, 2), Vector2(9, 9)), UiTheme.RESONANCE_DIM)
 		draw_string(ThemeDB.fallback_font, Vector2(3, 10), "E", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiTheme.PARCHMENT)
+	if favorite:   # a bronze diamond
+		var at := Vector2(size.x - 7, 7)
+		draw_colored_polygon(PackedVector2Array([at + Vector2(0, -5), at + Vector2(5, 0), at + Vector2(0, 5), at + Vector2(-5, 0)]), UiTheme.BRONZE)
+	if locked:   # a small padlock
+		var at := Vector2(size.x - (17 if favorite else 7), 8)
+		draw_arc(at + Vector2(0, -2), 2.5, PI, TAU, 8, UiTheme.PARCHMENT, 1.5)
+		draw_rect(Rect2(at + Vector2(-4, -1), Vector2(8, 6)), UiTheme.PARCHMENT)
 
 
 func _draw_glyph(c: Vector2, s: float, color: Color) -> void:

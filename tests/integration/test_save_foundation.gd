@@ -206,7 +206,10 @@ func test_migration_v4_to_v5() -> void:
 	check_eq(data.world.restoration, {"old_smithy": "restored", "old_storehouse": "restored"}, "plot buildings -> restored ruins")
 	check_eq(data.world.waystones, ["haven", "whispering_stone"], "Haven active; finished prologue also has the stone")
 	check_eq(data.quests.the_first_signs.state, "active", "finished prologue -> main quest active")
-	check_eq(data.inventory, old.inventory, "items untouched")
+	for entry: Dictionary in data.inventory:
+		check_eq(entry.get("origin"), "unknown_legacy", "v8 marks the origin unknown")
+		entry.erase("origin")
+	check_eq(data.inventory, old.inventory, "items otherwise untouched")
 	var unfinished: Dictionary = SaveMigrations.migrate({"world": {}, "prologue": {"stage": "not_started"}}, 4, errors)
 	check_eq(unfinished.quests.the_whispering_stone.state, "active", "unfinished prologue continues at the shrine")
 	check_eq(unfinished.quests.a_road_forgotten.state, "completed", "the road part is done for an old character")

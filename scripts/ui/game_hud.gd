@@ -190,6 +190,7 @@ func _ready() -> void:
 	crafting_panel.recipes_requested.connect(open_build_panel)
 	crafting_panel.workbench_requested.connect(_open_smithy_workbench)
 	professions_panel.restoration_requested.connect(open_restoration)
+	professions_panel.hud = self
 	var session := SessionState.find(get_tree())
 	if session != null:
 		settings = session.settings

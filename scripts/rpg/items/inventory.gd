@@ -85,7 +85,8 @@ func room_for(item_id: StringName) -> int:
 
 ## Adds `amount` of a definition: fills existing stacks, then creates new
 ## instances. All-or-nothing; returns the touched instances (empty on failure).
-func add_item(item_id: StringName, amount: int = 1) -> Array[ItemInstance]:
+## `origin` (ItemInstance.ORIGIN_*) is recorded on new single items, never on stacks.
+func add_item(item_id: StringName, amount: int = 1, origin: StringName = &"") -> Array[ItemInstance]:
 	var touched: Array[ItemInstance] = []
 	var definition := _db.get_item(item_id)
 	if definition == null or amount <= 0 or room_for(item_id) < amount:
@@ -105,6 +106,8 @@ func add_item(item_id: StringName, amount: int = 1) -> Array[ItemInstance]:
 		var item := ItemInstance.create(item_id, stack)
 		if definition.crafting != null:
 			item.item_level = definition.crafting.base_item_level
+		if not definition.is_stackable():
+			item.origin = origin
 		_insert(item)
 		touched.append(item)
 		left -= stack
@@ -250,6 +253,10 @@ func from_array(data: Array, warnings: PackedStringArray, orphans: Array) -> voi
 			orphans.append(entry)
 		else:
 			ItemStats.sanitize(item, _db, warnings)   # crafting state vs. current data
+			if _db.get_item(item.definition_id).is_stackable():
+				item.origin = &""   # stacks carry no origin or marks (Item Integrity)
+				item.favorite = false
+				item.locked = false
 	changed.emit()
 
 
