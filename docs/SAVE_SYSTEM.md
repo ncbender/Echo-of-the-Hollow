@@ -32,9 +32,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 5) ✅
+## Format (Version 6) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 5, "saved_at": 1761460000, "order": 1761460000123,
+{ "format": "echoes_of_the_hollow_save", "version": 6, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
   "meta": { "location": "Haven", "class": "Warrior", "level": 3, "play_time": 812,
             "kind": "manual|autosave|milestone", "reason": "..." } }
@@ -51,6 +51,7 @@ Payload (nur Quelldaten):
 | `classes` | aktive Klasse, pro Klasse unlocked/level/xp |
 | `mastery` | pro Familie level/xp |
 | `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, material, affixes, essences, sockets, evolution, progress, rev) |
+| `stash` | Haven-Lager (v6): `{"items": [...]}`, Iteminstanzen im selben Format wie `inventory`; die Kategorien werden nicht gespeichert, sondern aus der Definition abgeleitet (`docs/STASH.md`) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
 | `world` | Map-ID, Spawnpunkt-ID, Flags (inkl. Story-Flags `prologue.*`, `haven.*`, Zähler `count.<event>`), Gebäude, `waystones` (v5), `restoration` Ruine → ruined/restored/revitalized (v5) |
@@ -86,7 +87,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 5.
+Aktuell: Version 6.
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
@@ -110,6 +111,10 @@ Aktuell: Version 5.
   - Items, Klassen, Builds und Loadouts bleiben unverändert.
   - Geprüft wurde auch der echte v2-Spielstand des Nutzers, und zwar als Kopie unter `test_saves`: Er lädt
     ohne Warnungen.
+- 5→6 (Inventory & Haven Stash 1.0): leerer `stash` (`{"items": []}`). Inventar, Loadouts, Quests,
+  Klassen und Talente bleiben unverändert. Beim Laden wird eine Instanz-ID, die schon in der Tasche liegt,
+  nicht ein zweites Mal aus dem Lager geladen: Diese Kopie wird als `orphaned_items` aufbewahrt (nie gelöscht)
+  und als Warnung gemeldet.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

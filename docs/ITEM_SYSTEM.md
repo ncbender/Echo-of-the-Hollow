@@ -40,6 +40,8 @@ Ausrüstbare Items stapeln nie (validiert). Datenprüfung in `ItemDefinition.val
 - Garantien (`integrity_errors()`): keine doppelten IDs, keine Mengen ≤ 0 oder > max_stack, keine
   unbekannten Definitionen, Kapazität eingehalten. Zufalls-Fuzztest mit 500 Operationen.
 - Ausgerüstete Items **bleiben im Inventar** (Ausrüstung referenziert nur) → zählen zur Kapazität.
+- Zweiter besitzender Container: das Haven-Lager (`Character.stash`, `docs/STASH.md`). Jede Instanz liegt in
+  genau einem der beiden; Loadouts und Presets referenzieren nur Tasche-Items.
 
 ## Welt ✅
 - `ItemPickup`: Berühren → Inventar; bei vollem Inventar bleibt es liegen (nie Verlust).

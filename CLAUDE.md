@@ -4,7 +4,8 @@
 Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1
 + Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
 + Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine)
-+ UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1 + Talent UI Polish 1.2.
++ UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1 + Talent UI Polish 1.2
++ Inventory & Haven Stash 1.0 (Haven-Lager, Save v6).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -18,6 +19,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   `prologue_playtest.gd` (kompletter Prolog ab Titel, `--fixed-fps 60`),
   `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen), `prologue_playtest.gd`
   (`--fixed-fps 60`), `ui_gallery.gd` (alle Bildschirme, `-- --res=... --scale=... --only=...`).
+  `stash_playtest.gd` (Haven-Lager, echte Maus, 720p/1080p/4K × 100/150/200 %).
   Veraltet: `loop_playtest.gd`, `crafting_playtest.gd` ohne `--loop` (Bauplätze entfallen).
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
@@ -31,7 +33,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   Dash: mit WASD in Bewegungsrichtung, ohne WASD in Blickrichtung (Maus) - nur über `DashComponent.direction_for`.
 - Combat ↔ RPG nur über `PlayerProgressionBridge`; Items wirken über `AttackModifier`, nie über
   geänderte `AttackDefinition`-Daten oder eigene Schadenslogik.
-- Items existieren nur im `Inventory`; Loadouts referenzieren Instanz-IDs (Shared-Item-Policy).
+- Items existieren nur in einem besitzenden `Inventory` (Tasche oder Haven-Lager `Character.stash`); Loadouts und
+  Presets referenzieren Instanz-IDs der Tasche (Shared-Item-Policy). Lagertransfers nur über `StashService`
+  (atomar, Kategorien sind Ansichten; `docs/STASH.md`).
 - Stats immer über `StatResolver` neu berechnen, nie inkrementell addieren.
 - Einziges Autoload: `GameSession` (hält den Character über Szenenwechsel). Keine weiteren ohne Begründung.
 - Signale langlebiger RefCounted-Objekte: Methoden-Callables statt Lambdas mit `self` (sonst Leck).

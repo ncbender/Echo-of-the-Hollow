@@ -48,6 +48,12 @@ Talent UI Polish 1.2: `class_ui` (3 neu, 1 umgeschrieben: Book Tabs ohne Zustand
 Mausereignis ohne Layoutsprung mit Save/Load, **Abnahme: alle 39 Talente aller Klassen bei 1920×1080/100 % ohne
 Scrollen, Tiers ausgerichtet, keine Überlappung**). `class_playtest.gd` jetzt 720p, 1080p, 1440p, 4K × 100 %
 sowie 1080p/4K × 150 %, mit echtem Hover an fünf Randknoten, Klick-Lernen und Register-Klicks.
+Inventory & Haven Stash 1.0: `stash` (Kategorien, Identität und Crafting-Zustand, Stapel-Mischen, volle Container, ausgerüstete
+und Preset-Items, schnelle Wiederholungen, Deposit All, Sort, Kapazität vor/nach Restaurierung, Save/Load, Migration
+v5→v6, beschädigter Save), `stash_ui` (Rechtsklick und Drag & Drop über echte Mausereignisse, Ablehnungsgründe,
+Restaurierung aus dem Lager, Save/Load mitten in der Nutzung, Inventar-Rechtsklick außerhalb bleibt Equip).
+`stash_playtest.gd` (Fenster, 720p/1080p/4K × 100/150/200 %, echter Cursor: Hover, Rechtsklick, Drag in beide Richtungen,
+Deposit All, Sort, Tabs, Mengenbilanz).
 
 **Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
 `-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte

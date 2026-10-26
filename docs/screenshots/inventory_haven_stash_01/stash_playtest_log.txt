@@ -1,0 +1,163 @@
+PASS 720p_100 stash opens at the ruined storehouse
+PASS 720p_100 layout ()
+PASS 720p_100 tooltip on hover
+PASS 720p_100 tooltip on screen
+screenshot 720p_100_01_tooltip.png
+PASS 720p_100 real right click stores
+PASS 720p_100 real right click takes
+PASS 720p_100 real drag into the stash
+PASS 720p_100 the unique shows in the Collection Vault
+PASS 720p_100 real drag back into the bag
+PASS 720p_100 Deposit All Materials
+PASS 720p_100 Sort
+PASS 720p_100 materials layout ()
+screenshot 720p_100_02_materials.png
+PASS 720p_100 Equipment Chest tab
+PASS 720p_100 no item created or lost (133 -> 133)
+PASS 720p_100 ownership consistent
+screenshot 720p_100_03_chest.png
+PASS 720p_150 stash opens at the ruined storehouse
+PASS 720p_150 layout ()
+PASS 720p_150 tooltip on hover
+PASS 720p_150 tooltip on screen
+screenshot 720p_150_01_tooltip.png
+PASS 720p_150 real right click stores
+PASS 720p_150 real right click takes
+PASS 720p_150 real drag into the stash
+PASS 720p_150 the unique shows in the Collection Vault
+PASS 720p_150 real drag back into the bag
+PASS 720p_150 Deposit All Materials
+PASS 720p_150 Sort
+PASS 720p_150 materials layout ()
+screenshot 720p_150_02_materials.png
+PASS 720p_150 Equipment Chest tab
+PASS 720p_150 no item created or lost (133 -> 133)
+PASS 720p_150 ownership consistent
+screenshot 720p_150_03_chest.png
+PASS 720p_200 stash opens at the ruined storehouse
+PASS 720p_200 layout ()
+PASS 720p_200 tooltip on hover
+PASS 720p_200 tooltip on screen
+screenshot 720p_200_01_tooltip.png
+PASS 720p_200 real right click stores
+PASS 720p_200 real right click takes
+PASS 720p_200 real drag into the stash
+PASS 720p_200 the unique shows in the Collection Vault
+PASS 720p_200 real drag back into the bag
+PASS 720p_200 Deposit All Materials
+PASS 720p_200 Sort
+PASS 720p_200 materials layout ()
+screenshot 720p_200_02_materials.png
+PASS 720p_200 Equipment Chest tab
+PASS 720p_200 no item created or lost (133 -> 133)
+PASS 720p_200 ownership consistent
+screenshot 720p_200_03_chest.png
+PASS 1080p_100 stash opens at the ruined storehouse
+PASS 1080p_100 layout ()
+PASS 1080p_100 tooltip on hover
+PASS 1080p_100 tooltip on screen
+screenshot 1080p_100_01_tooltip.png
+PASS 1080p_100 real right click stores
+PASS 1080p_100 real right click takes
+PASS 1080p_100 real drag into the stash
+PASS 1080p_100 the unique shows in the Collection Vault
+PASS 1080p_100 real drag back into the bag
+PASS 1080p_100 Deposit All Materials
+PASS 1080p_100 Sort
+PASS 1080p_100 materials layout ()
+screenshot 1080p_100_02_materials.png
+PASS 1080p_100 Equipment Chest tab
+PASS 1080p_100 no item created or lost (133 -> 133)
+PASS 1080p_100 ownership consistent
+screenshot 1080p_100_03_chest.png
+PASS 1080p_150 stash opens at the ruined storehouse
+PASS 1080p_150 layout ()
+PASS 1080p_150 tooltip on hover
+PASS 1080p_150 tooltip on screen
+screenshot 1080p_150_01_tooltip.png
+PASS 1080p_150 real right click stores
+PASS 1080p_150 real right click takes
+PASS 1080p_150 real drag into the stash
+PASS 1080p_150 the unique shows in the Collection Vault
+PASS 1080p_150 real drag back into the bag
+PASS 1080p_150 Deposit All Materials
+PASS 1080p_150 Sort
+PASS 1080p_150 materials layout ()
+screenshot 1080p_150_02_materials.png
+PASS 1080p_150 Equipment Chest tab
+PASS 1080p_150 no item created or lost (133 -> 133)
+PASS 1080p_150 ownership consistent
+screenshot 1080p_150_03_chest.png
+PASS 1080p_200 stash opens at the ruined storehouse
+PASS 1080p_200 layout ()
+PASS 1080p_200 tooltip on hover
+PASS 1080p_200 tooltip on screen
+screenshot 1080p_200_01_tooltip.png
+PASS 1080p_200 real right click stores
+PASS 1080p_200 real right click takes
+PASS 1080p_200 real drag into the stash
+PASS 1080p_200 the unique shows in the Collection Vault
+PASS 1080p_200 real drag back into the bag
+PASS 1080p_200 Deposit All Materials
+PASS 1080p_200 Sort
+PASS 1080p_200 materials layout ()
+screenshot 1080p_200_02_materials.png
+PASS 1080p_200 Equipment Chest tab
+PASS 1080p_200 no item created or lost (133 -> 133)
+PASS 1080p_200 ownership consistent
+screenshot 1080p_200_03_chest.png
+PASS 2160p_100 stash opens at the ruined storehouse
+PASS 2160p_100 layout ()
+PASS 2160p_100 tooltip on hover
+PASS 2160p_100 tooltip on screen
+screenshot 2160p_100_01_tooltip.png
+PASS 2160p_100 real right click stores
+PASS 2160p_100 real right click takes
+PASS 2160p_100 real drag into the stash
+PASS 2160p_100 the unique shows in the Collection Vault
+PASS 2160p_100 real drag back into the bag
+PASS 2160p_100 Deposit All Materials
+PASS 2160p_100 Sort
+PASS 2160p_100 materials layout ()
+screenshot 2160p_100_02_materials.png
+PASS 2160p_100 Equipment Chest tab
+PASS 2160p_100 no item created or lost (133 -> 133)
+PASS 2160p_100 ownership consistent
+screenshot 2160p_100_03_chest.png
+PASS 2160p_150 stash opens at the ruined storehouse
+PASS 2160p_150 layout ()
+PASS 2160p_150 tooltip on hover
+PASS 2160p_150 tooltip on screen
+screenshot 2160p_150_01_tooltip.png
+PASS 2160p_150 real right click stores
+PASS 2160p_150 real right click takes
+PASS 2160p_150 real drag into the stash
+PASS 2160p_150 the unique shows in the Collection Vault
+PASS 2160p_150 real drag back into the bag
+PASS 2160p_150 Deposit All Materials
+PASS 2160p_150 Sort
+PASS 2160p_150 materials layout ()
+screenshot 2160p_150_02_materials.png
+PASS 2160p_150 Equipment Chest tab
+PASS 2160p_150 no item created or lost (133 -> 133)
+PASS 2160p_150 ownership consistent
+screenshot 2160p_150_03_chest.png
+PASS 2160p_200 stash opens at the ruined storehouse
+PASS 2160p_200 layout ()
+PASS 2160p_200 tooltip on hover
+PASS 2160p_200 tooltip on screen
+screenshot 2160p_200_01_tooltip.png
+PASS 2160p_200 real right click stores
+PASS 2160p_200 real right click takes
+PASS 2160p_200 real drag into the stash
+PASS 2160p_200 the unique shows in the Collection Vault
+PASS 2160p_200 real drag back into the bag
+PASS 2160p_200 Deposit All Materials
+PASS 2160p_200 Sort
+PASS 2160p_200 materials layout ()
+screenshot 2160p_200_02_materials.png
+PASS 2160p_200 Equipment Chest tab
+PASS 2160p_200 no item created or lost (133 -> 133)
+PASS 2160p_200 ownership consistent
+screenshot 2160p_200_03_chest.png
+RESULT: OK (135 checks, 0 failed)

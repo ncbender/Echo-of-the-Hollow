@@ -37,6 +37,7 @@
 | UI/UX Redesign 1.0 | Designsystem „The Forgotten Chronicle“, Inventar/Paperdoll, Forge 2.0, Klassenstation, neues HUD mit Ziel-/Bossrahmen und Loot-Feed, Journal, Karte, Dialog, Menüs, Optionen, UI-Galerie | `UI_UX_REDESIGN_01_REPORT.md` |
 | UI/UX Polish 1.1 | Kompakte Klassenkarten, Talentbäume als Knotengraph nebeneinander, sofortiger Item-Tooltip mit Vergleich, Rechtsklick-Ausrüsten, Gold als Zähler, Dash nach WASD (sonst Maus), Rezeptkarten, Toasts, Forge-Ergebnisse sichtbar | `UI_UX_POLISH_11_REPORT.md` |
 | Talent UI Polish 1.2 | Book Tabs links am Klassenfenster, einzeiliger Kopf, Talentseite mit drei vollständigen Bäumen ohne Scrollen bei 1080p/100 %, Sofort-Tooltip statt Detailleiste | `TALENT_UI_POLISH_12_REPORT.md` |
+| Inventory & Haven Stash 1.0 | Haven-Lager am Old Storehouse (schon als Ruine): Equipment Chest, Material Vault, Collection Vault als Ansichten eines Besitzcontainers, atomare Transfers, Rechtsklick und Drag & Drop, Deposit All, Sort, Save v6 | `INVENTORY_HAVEN_STASH_01_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von
