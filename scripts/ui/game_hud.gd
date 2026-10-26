@@ -52,6 +52,7 @@ var _prompt_key: Label
 var _prompt: Label
 var _windows: Array[UiWindow] = []
 var _bottom: VBoxContainer
+var _hint_spacer: Control
 
 
 func _ready() -> void:
@@ -76,7 +77,11 @@ func _ready() -> void:
 	target_frame.name = "TargetFrame"
 	target_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	top.add_child(target_frame)
+	_hint_spacer = Control.new()
+	_hint_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(_hint_spacer)
 	hint_panel = PanelContainer.new()
+	hint_panel.name = "Hint"
 	hint_panel.theme_type_variation = &"HudPanel"
 	hint_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -480,3 +485,25 @@ func _layout_bottom() -> void:
 	_bottom.offset_left = -half + shift
 	_bottom.offset_right = half + shift
 	_bottom.offset_bottom = -margin - lift
+	# lifted skill bar: the corner right of the player frame is free for the loot feed
+	var cramped := lift > 0.0
+	loot_feed.max_rows = 2 if cramped else LootFeed.MAX_ROWS
+	loot_feed.offset_bottom = -margin if cramped else -margin - 160
+	save_indicator.offset_top = -margin - (160 if cramped else 150)
+	save_indicator.offset_bottom = -margin - (112 if cramped else 102)
+	_layout_hint(canvas, margin)
+
+
+## The hint sits under the target frame between the side columns; where that
+## room is too small (200 %), it moves below the quest tracker instead.
+func _layout_hint(canvas: float, margin: float) -> void:
+	var padding := 24.0
+	var room := canvas - 2.0 * (objectives.size.x + margin + UiTheme.GAP)
+	var below := room < 420.0
+	var width := minf(640.0, (canvas - margin * 2.0 if below else room) - padding)
+	if not is_equal_approx(_hint_label.custom_minimum_size.x, width):
+		_hint_label.custom_minimum_size.x = width
+	var above := target_frame.size.y if target_frame.visible else 0.0
+	var spacer := maxf(0.0, objectives.position.y + objectives.size.y + UiTheme.GAP - margin - above) if below else 0.0
+	_hint_spacer.custom_minimum_size.y = spacer
+	_hint_spacer.visible = spacer > 0.0

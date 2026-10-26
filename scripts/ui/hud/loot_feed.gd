@@ -7,6 +7,8 @@ const LIFETIME := 4.0
 const MAX_ROWS := 5
 
 var bridge: PlayerProgressionBridge
+## Fewer rows when the HUD is cramped (set by GameHud at high UI scale).
+var max_rows: int = MAX_ROWS
 
 
 func _ready() -> void:
@@ -34,7 +36,11 @@ func push(item_id: StringName, quantity: int) -> void:
 		box.add_child(UiTheme.styled(UiTheme.rarity_name(definition.rarity), &"CaptionLabel"))
 	row.set_meta(&"age", 0.0)
 	add_child(row)
-	while get_child_count() > MAX_ROWS:
+	_trim()
+
+
+func _trim() -> void:
+	while get_child_count() > max_rows:
 		var oldest := get_child(0)
 		remove_child(oldest)
 		oldest.queue_free()
@@ -45,6 +51,7 @@ func rows() -> int:
 
 
 func _process(delta: float) -> void:
+	_trim()
 	for row: Control in get_children():
 		var age: float = row.get_meta(&"age") + delta
 		row.set_meta(&"age", age)

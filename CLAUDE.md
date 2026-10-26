@@ -3,7 +3,8 @@
 2D-Pixel-Art-Action-RPG, schräge Top-Down-Perspektive. **Godot 4.7.2, ausschließlich GDScript.**
 Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1
 + Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
-+ Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine).
++ Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine)
++ UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD; Rezeptfenster `build_panel` nur über das Theme).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -15,7 +16,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - Playtests (Fenster): `-s res://tests/playtest/visual_playtest.gd` (Combat), `rpg_playtest.gd` (RPG),
   `loop_playtest.gd` (Gameplay-Loop), `ui_playtest.gd` (Auflösungen/UI-Skalierung),
   `prologue_playtest.gd` (kompletter Prolog ab Titel, `--fixed-fps 60`),
-  `crafting_playtest.gd` (Forge), `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen)
+  `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen), `prologue_playtest.gd`
+  (`--fixed-fps 60`), `ui_gallery.gd` (alle Bildschirme, `-- --res=... --scale=... --only=...`).
+  Veraltet: `loop_playtest.gd`, `crafting_playtest.gd` ohne `--loop` (Bauplätze entfallen).
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
 ## Feste Regeln
@@ -37,6 +40,8 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - UI: Maße nur in Design-Px (1920×1080) über `UiTheme`-Konstanten; Fenster erben von `UiWindow`;
   nie `Control.scale` für UI; Welttexte über `WorldText`. Display-Einstellungen nur in `UserSettings`
   (`user://settings.cfg`, nie im Save). Standard: `docs/DISPLAY_AND_UI_STANDARD.md`.
+  Farben/Schriften/Komponenten nur aus `UiTheme` (Designsystem: `docs/UI_DESIGN_SYSTEM.md`); Item-Texte nur
+  über `ItemDescriber`; Bestätigungen nur über `UiConfirmDialog`; neue Bildschirme in `GalleryScreens` eintragen.
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
   Revision); gewürfelte Werte nie neu berechnen; Uniques nur über `CraftingProfile.allowed_operations`;
   Combat-Wirkung nur als `ItemEffect`/`AttackModifier`. Design: `docs/CRAFTING_DESIGN.md`.

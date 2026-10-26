@@ -100,12 +100,18 @@ Stand: UI Foundation 0.1. Gilt für alle neuen Maps, HUD-Elemente und RPG-Fenste
 | 3840×2160 | 1920×1080 | 7,5 | ✅ (Fenster randlos und echtes Vollbild) |
 | 2880×1620 (Zweitmonitor des Testsystems) | 1920×1080 | 5,625 | ✅ (Vollbild, unbeabsichtigt mitgetestet) |
 
+UI/UX Redesign 1.0 hat alle Bildschirme zusätzlich bei 1080p und 4K mit 100 % und 150 % sowie bei 720p
+geprüft (UI-Galerie, `UI_UX_REDESIGN_01_REPORT.md`). Farben, Schriften und Komponenten:
+`UI_DESIGN_SYSTEM.md`.
+
 ## 8. Bekannte Probleme / Grenzen
 - **80 % auf 720p:** Kleinschrift ist dort nur noch ~8 physische Px hoch, funktional, aber kaum lesbar.
   80 % ist für 1440p/4K gedacht; bei 720p mindestens 100 % verwenden.
 - Bei 150 %/200 % nimmt die rechte HUD-Spalte einen großen Teil der Breite ein (bei 200 % auf jeder
   Auflösung ~37 %).
 - Welt-Pixelmaßstab nicht ganzzahlig (s. 3). Ohne echte Sprites derzeit unsichtbar.
-- Das Debug-Overlay ist Entwicklerwerkzeug und liegt unter den Fenstern. Bei 200 % überlappt es die
-  Spielwelt deutlich.
+- Das Debug-Overlay ist Entwicklerwerkzeug, seit dem Redesign standardmäßig aus (F12 schaltet es ein).
+- Bei 200 % steht die Skillleiste über dem Spielerrahmen, der Loot-Feed (max. 2 Zeilen) unten rechts
+  und der Hinweis unter dem Quest-Tracker. Überlappungsfrei geprüft, aber das HUD bedeckt dann etwa die
+  Hälfte der Spielfläche.
 - Exklusives Vollbild (Modus 4) wird nicht angeboten, nur randloses Vollbild.

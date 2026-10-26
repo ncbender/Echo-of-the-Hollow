@@ -140,7 +140,7 @@ func _check_layout(label: String) -> void:
 	_check_list(controls, label)
 	# HUD elements never cover each other
 	var hud := map.hud
-	var parts: Array[Control] = [hud.player_frame, hud.skill_bar, hud.objectives, hud.target_frame, hud.loot_feed, hud.save_indicator]
+	var parts: Array[Control] = [hud.player_frame, hud.skill_bar, hud.objectives, hud.target_frame, hud.hint_panel, hud.loot_feed, hud.save_indicator]
 	var overlaps: PackedStringArray = []
 	for a in parts.size():
 		for b in range(a + 1, parts.size()):

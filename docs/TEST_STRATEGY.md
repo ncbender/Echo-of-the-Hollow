@@ -35,7 +35,10 @@ v4→v5, Anzeige, Pausemenü), `story` (Questkette, Events, Flags, Save/Load in 
 temporär), `old_road` (echte Map: Trigger, Hinweise, Varianten, Mara, Kisten, Eskorte, Save/Load mitten im
 Wagen, Straße bleibt offen), `haven` (Ruinen, atomare Restaurierung, Dialoge, Nordtor, sicher, Migration),
 `shrine` (Echos, Wellen, Tod/Abbruch, Wahl erst nach Save, Save-Fehler, Wegsteine, Rückkehr, kein
-Guardian/Soulbinder).
+Guardian/Soulbinder). UI/UX Redesign 1.0: `inventory_ui` (Paperdoll, Kategorien, Ausrüsten/Ablegen über
+die Fensteraktionen, Verwerfen fragt nach), `forge_ui` (sieben Bereiche, Wahrscheinlichkeiten aus dem
+echten System), `hud` (Rahmen, Ziel/Boss, Loot-Feed, Tod, Debug aus), `world_ui` (Journal, Karte,
+Dialog-Schutz, Wegsteine, Restaurierung), `menus_ui` (Titel, Laden, Pausemenü fragt nach, Optionen).
 
 **Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
 `-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte
@@ -137,6 +140,22 @@ Vollbild ↔ Fenster und Reset. Prüft automatisch:
 
 Screenshots und Log liegen in `tests/output/ui/`. **Bewegt den echten Mauszeiger und belegt kurz den
 Bildschirm.**
+
+## UI-Galerie (UI/UX Redesign 1.0)
+```
+Godot_v4.7.2-stable_win64_console.exe --path . -s res://tests/playtest/ui_gallery.gd -- --res=1920x1080,3840x2160,1280x720 --scale=1.0,1.5,2.0 [--only=hud,inventory]
+```
+Öffnet jeden Spieler-Bildschirm (`GalleryScreens.ALL`, 32 Stück) mit einem reichen Charakter (echte
+Crafting-Aufrufe, Talente, Preset, Quest). Prüft je Bildschirm:
+- das Fenster ist wirklich offen
+- Controls im Bild und im Rand, nichts gestaucht
+- keine Überlappung der HUD-Teile
+
+Zwischen den Bildschirmen räumt sie Gegner weg und wartet auf den Respawn. Screenshots und Log:
+`tests/output/gallery/`. Belegt kurz den Bildschirm.
+
+**Veraltet:** `loop_playtest.gd` und `crafting_playtest.gd` (ohne `--loop`) nutzen die Bauplätze
+(`Plots/PlotWest`), die mit Prologue & Haven 0.1 entfallen sind. Die Forge-Ansicht deckt die Galerie ab.
 
 ## Crafting-Playtests (Crafting Foundation 0.1)
 ```

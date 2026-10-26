@@ -67,6 +67,29 @@ Alte Namen (`COLOR_TEXT`, `COLOR_ACCENT` …) sind Aliase dieser Tokens.
   - Panels: `WindowPanel`, `HudPanel`, `CardPanel`, `SelectedCardPanel`, `InsetPanel`, `KeyChip`
   - Buttons: `PrimaryButton`, `DangerButton`, `TabButton`, `InventorySlot`, `FlatButton`
 - Zustände Hover, Pressed, Focus (Cyan-Rahmen) und Disabled sind für jeden Button-Typ definiert.
+  „Ausgewählt“ (toggle pressed) hat einen Bronze-Rahmen und ist damit vom Fokus (Cyan) unterscheidbar.
+
+### Komponenten der Phasen B–G
+- `ItemCell` (Inventar- und Paperdoll-Zelle): Icon, Menge, Seltenheitsrahmen, Drag & Drop. Drop ruft nur
+  die vorhandenen Equipment-Aufrufe auf, nie direkte Datenänderungen.
+- `ItemDescriber`: einzige Quelle für Item-Texte (Tooltip, Detailkarte, Vergleich). Feste Reihenfolge:
+  Kopf, Basis, Material, Affixe, Essenzen, Sockel, Qualität, Unique/Set/Evolution, Vergleich.
+- HUD-Teile unter `scripts/ui/hud/`: `PlayerFrame`, `ChargeMeter`, `TargetFrame` (Gegner/Boss),
+  `LootFeed`, `DeathOverlay`; dazu `SkillBar`, `ObjectivePanel` (Tracker), `SaveIndicator`.
+  Nur lesend; die Knoten tragen feste Namen (`PlayerFrame`, `SkillBar`, `QuestTracker`, …).
+- `JournalPanel` (`StageTrack`), `WorldMapPanel` (`MapGraph` aus `MapDefinition.map_cell/neighbors`),
+  `SaveSlotList` (gemeinsame Slotliste für Titel und Pausemenü).
+
+## HUD-Layout
+- Oben Mitte: Ziel-/Bossrahmen, darunter Hinweis. Breite nie größer als der Raum zwischen den Spalten.
+- Oben rechts: Quest-Tracker. Unten links: Spielerrahmen. Unten rechts: Loot-Feed über der
+  Save-Anzeige.
+- Unten Mitte: Spalte mit Toasts, Charge-Leiste, Interaktionshinweis und Skillleiste (Inhaltsbreite).
+  Auf schmalen Canvases (150 %/200 %) rückt die Spalte nach rechts, bis sie den Spielerrahmen nicht mehr
+  berührt. Passt die Skillleiste gar nicht daneben, steht sie zentriert über dem Rahmen
+  (`GameHud._layout_bottom`); dann wandert der Loot-Feed (2 Zeilen) in die freie Ecke unten rechts und
+  der Hinweis unter den Quest-Tracker (`_layout_hint`).
+- Die Galerie prüft paarweise, dass sich diese HUD-Teile nicht überlappen.
 
 ## Seltenheit
 | Seltenheit | Wort | Punkte |
