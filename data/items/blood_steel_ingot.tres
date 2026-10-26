@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_301ia"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_h6oea"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_j53va"]
+
+[resource]
+script = ExtResource("3_j53va")
+id = &"blood_steel_ingot"
+display_name = "Bloodsteel Ingot"
+description = "Main material. Physical and blood-leaning resonance."
+rarity = 1
+max_stack = 99
+tags = Array[StringName]([&"crafting"])

@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_tcpj0"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_c3sne"]
+
+[sub_resource type="Resource" id="Resource_vk2de"]
+script = ExtResource("2_c3sne")
+tier = 3
+min_value = 10.0
+max_value = 15.0
+
+[sub_resource type="Resource" id="Resource_7liww"]
+script = ExtResource("2_c3sne")
+tier = 2
+min_item_level = 10
+min_value = 16.0
+max_value = 25.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_mfiat"]
+script = ExtResource("2_c3sne")
+min_item_level = 20
+min_value = 26.0
+max_value = 35.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_tcpj0")
+id = &"cruel"
+display_name = "Cruel"
+stat = &"crit_damage"
+tags = Array[StringName]([&"crit", &"physical"])
+group = &"crit_damage"
+allowed_slot_kinds = Array[int]([10, 11])
+tiers = Array[ExtResource("2_c3sne")]([SubResource("Resource_vk2de"), SubResource("Resource_7liww"), SubResource("Resource_mfiat")])

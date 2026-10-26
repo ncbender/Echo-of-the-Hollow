@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MaterialDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_8ddxm"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/material_definition.gd" id="2_c1n0y"]
+
+[sub_resource type="Resource" id="Resource_a3avm"]
+script = ExtResource("1_8ddxm")
+stat = &"physical_damage"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_wsmwg"]
+script = ExtResource("1_8ddxm")
+stat = &"life_on_hit"
+flat = 1.0
+
+[resource]
+script = ExtResource("2_c1n0y")
+id = &"blood_steel"
+display_name = "Bloodsteel"
+description = "Physical, bleeding-leaning resonance."
+item_id = &"blood_steel_ingot"
+allowed_slot_kinds = Array[int]([10, 11])
+imprint_modifiers = Array[ExtResource("1_8ddxm")]([SubResource("Resource_a3avm"), SubResource("Resource_wsmwg")])
+preferred_tags = Array[StringName]([&"blood", &"physical", &"crit"])
+tag_weight_multipliers = Dictionary[StringName, float]({
+&"blood": 3.0,
+&"crit": 1.5,
+&"physical": 2.0
+})
+color = Color(0.76862746, 0.27058825, 0.2901961, 1)

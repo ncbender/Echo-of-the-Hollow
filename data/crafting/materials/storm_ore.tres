@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MaterialDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_mgvon"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/material_definition.gd" id="2_l6t5e"]
+
+[sub_resource type="Resource" id="Resource_4htpx"]
+script = ExtResource("1_mgvon")
+stat = &"shock_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_m41ub"]
+script = ExtResource("1_mgvon")
+stat = &"attack_speed"
+flat = 3.0
+
+[resource]
+script = ExtResource("2_l6t5e")
+id = &"storm_ore"
+display_name = "Storm Ore"
+description = "Shock and speed-leaning resonance."
+item_id = &"storm_ore"
+allowed_slot_kinds = Array[int]([10, 11])
+imprint_modifiers = Array[ExtResource("1_mgvon")]([SubResource("Resource_4htpx"), SubResource("Resource_m41ub")])
+preferred_tags = Array[StringName]([&"shock", &"speed", &"crit"])
+tag_weight_multipliers = Dictionary[StringName, float]({
+&"crit": 1.5,
+&"shock": 3.0,
+&"speed": 2.0
+})
+color = Color(0.43529412, 0.7137255, 1, 1)

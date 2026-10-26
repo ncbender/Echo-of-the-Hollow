@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_m1qx3"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_ks0wb"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_3smvy"]
+
+[resource]
+script = ExtResource("3_3smvy")
+id = &"frost_glass"
+display_name = "Frost Glass"
+description = "Main material. Control and poise-leaning resonance."
+rarity = 1
+max_stack = 99
+tags = Array[StringName]([&"crafting"])

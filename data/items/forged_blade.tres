@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_cxndb"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_profile.gd" id="2_iir01"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="3_be2j6"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="4_6yqfl"]
+
+[sub_resource type="Resource" id="Resource_kbi4o"]
+script = ExtResource("1_cxndb")
+stat = &"physical_damage"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_fhkvl"]
+script = ExtResource("1_cxndb")
+stat = &"poise_damage"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_oqp5e"]
+script = ExtResource("2_iir01")
+allowed_operations = Array[StringName]([&"imprint", &"augment", &"reforge", &"essence_insert", &"essence_extract", &"socket_open", &"socket_insert", &"socket_remove", &"quality"])
+affix_slots = 4
+essence_slots = 2
+socket_slots = 2
+base_item_level = 12
+
+[resource]
+script = ExtResource("4_6yqfl")
+id = &"forged_blade"
+display_name = "Forged Blade"
+description = "Craftable weapon base for the Resonance Forge."
+category = 0
+slot_kind = 10
+weapon_family_id = &"one_handed_sword"
+base_stats = Array[ExtResource("1_cxndb")]([SubResource("Resource_kbi4o"), SubResource("Resource_fhkvl")])
+crafting = SubResource("Resource_oqp5e")

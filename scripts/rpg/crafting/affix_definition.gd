@@ -3,12 +3,14 @@ extends Resource
 ## A rollable item property. Rolled values are stored on the ItemInstance and
 ## never re-rolled on load.
 
+## FLAT adds points to the stat (all current stats are point or percent-point
+## stats, e.g. +6 "Physical Damage %"); PERCENT multiplies the stat total.
 enum ValueKind { FLAT, PERCENT }
 
 @export var id: StringName
 @export var display_name: String
 @export var stat: StringName
-@export var value_kind: ValueKind = ValueKind.PERCENT
+@export var value_kind: ValueKind = ValueKind.FLAT
 @export var tags: Array[StringName] = []
 ## Affix family: an item never has two affixes of the same group.
 @export var group: StringName
@@ -53,8 +55,8 @@ func roll(tier: AffixTier, rng: RandomNumberGenerator) -> Dictionary:
 
 
 func describe_range(tier: AffixTier) -> String:
-	var unit := "%" if value_kind == ValueKind.PERCENT else ""
-	return "+%d-%d%s %s" % [roundi(tier.min_value), roundi(tier.max_value), unit, Stats.display_name(stat).trim_suffix(" %")]
+	var suffix := " (x%)" if value_kind == ValueKind.PERCENT else ""
+	return "+%d-%d %s%s" % [roundi(tier.min_value), roundi(tier.max_value), Stats.display_name(stat), suffix]
 
 
 func validate() -> PackedStringArray:

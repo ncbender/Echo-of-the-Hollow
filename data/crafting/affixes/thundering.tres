@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_wv6la"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_lunl5"]
+
+[sub_resource type="Resource" id="Resource_oikiu"]
+script = ExtResource("2_lunl5")
+tier = 3
+min_value = 10.0
+max_value = 15.0
+
+[sub_resource type="Resource" id="Resource_5lsh2"]
+script = ExtResource("2_lunl5")
+tier = 2
+min_item_level = 10
+min_value = 16.0
+max_value = 25.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_aiwis"]
+script = ExtResource("2_lunl5")
+min_item_level = 20
+min_value = 26.0
+max_value = 40.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_wv6la")
+id = &"thundering"
+display_name = "Thundering"
+stat = &"shock_damage"
+tags = Array[StringName]([&"shock", &"elemental"])
+group = &"shock_damage"
+exclusion_group = &"element_core"
+allowed_slot_kinds = Array[int]([10, 11])
+tiers = Array[ExtResource("2_lunl5")]([SubResource("Resource_oikiu"), SubResource("Resource_5lsh2"), SubResource("Resource_aiwis")])

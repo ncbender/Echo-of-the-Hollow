@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_4ht6e"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_jef3c"]
+
+[sub_resource type="Resource" id="Resource_ekg5q"]
+script = ExtResource("2_jef3c")
+tier = 3
+min_value = 4.0
+max_value = 7.0
+
+[sub_resource type="Resource" id="Resource_b3wgo"]
+script = ExtResource("2_jef3c")
+tier = 2
+min_item_level = 10
+min_value = 8.0
+max_value = 12.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_dds3b"]
+script = ExtResource("2_jef3c")
+min_item_level = 20
+min_value = 13.0
+max_value = 18.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_4ht6e")
+id = &"sharpened"
+display_name = "Sharpened"
+stat = &"physical_damage"
+tags = Array[StringName]([&"physical", &"attack"])
+group = &"physical_damage"
+allowed_slot_kinds = Array[int]([10, 11])
+tiers = Array[ExtResource("2_jef3c")]([SubResource("Resource_ekg5q"), SubResource("Resource_b3wgo"), SubResource("Resource_dds3b")])

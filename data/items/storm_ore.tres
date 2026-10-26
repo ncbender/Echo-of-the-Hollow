@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_kcosb"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_eiicb"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_67qwi"]
+
+[resource]
+script = ExtResource("3_67qwi")
+id = &"storm_ore"
+display_name = "Storm Ore"
+description = "Main material. Shock and speed-leaning resonance."
+rarity = 1
+max_stack = 99
+tags = Array[StringName]([&"crafting"])

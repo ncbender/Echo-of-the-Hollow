@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_t7xn8"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_fubmf"]
+
+[sub_resource type="Resource" id="Resource_2ibs0"]
+script = ExtResource("2_fubmf")
+tier = 3
+min_value = 8.0
+max_value = 12.0
+
+[sub_resource type="Resource" id="Resource_3khap"]
+script = ExtResource("2_fubmf")
+tier = 2
+min_item_level = 10
+min_value = 13.0
+max_value = 20.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_nwcb0"]
+script = ExtResource("2_fubmf")
+min_item_level = 20
+min_value = 21.0
+max_value = 30.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_t7xn8")
+id = &"executioner"
+display_name = "Executioner's"
+stat = &"finisher_power"
+tags = Array[StringName]([&"finisher", &"heavy"])
+group = &"finisher_power"
+allowed_slot_kinds = Array[int]([10, 11])
+tiers = Array[ExtResource("2_fubmf")]([SubResource("Resource_2ibs0"), SubResource("Resource_3khap"), SubResource("Resource_nwcb0")])

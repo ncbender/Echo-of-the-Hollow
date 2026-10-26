@@ -167,13 +167,21 @@ func _track(sig: Signal, callable: Callable) -> void:
 
 
 func _on_player_hit_landed(_hit: HitData) -> void:
+	var stats := character.get_stats()
 	if resource_pool != null:
-		resource_pool.gain(resource_pool.definition.gain_per_hit_dealt)
+		resource_pool.gain(resource_pool.definition.gain_per_hit_dealt * _resource_gain_factor())
+	var life: float = stats.get(Stats.LIFE_ON_HIT, 0.0)
+	if life > 0.0:
+		player.health.heal(life)
 
 
 func _on_player_hit_taken(_hit: HitData) -> void:
 	if resource_pool != null:
-		resource_pool.gain(resource_pool.definition.gain_per_hit_taken)
+		resource_pool.gain(resource_pool.definition.gain_per_hit_taken * _resource_gain_factor())
+
+
+func _resource_gain_factor() -> float:
+	return 1.0 + character.get_stat(Stats.RESOURCE_GAIN) / 100.0
 
 
 func _on_mastery_leveled_up(family_id: StringName, level: int) -> void:

@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_ks5mh"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_phknt"]
+
+[sub_resource type="Resource" id="Resource_y7a3g"]
+script = ExtResource("2_phknt")
+tier = 3
+min_value = 8.0
+max_value = 14.0
+
+[sub_resource type="Resource" id="Resource_4derk"]
+script = ExtResource("2_phknt")
+tier = 2
+min_item_level = 10
+min_value = 15.0
+max_value = 24.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_802s5"]
+script = ExtResource("2_phknt")
+min_item_level = 20
+min_value = 25.0
+max_value = 36.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_ks5mh")
+id = &"vital"
+display_name = "Vital"
+stat = &"max_health"
+tags = Array[StringName]([&"defense", &"life"])
+group = &"max_health"
+tiers = Array[ExtResource("2_phknt")]([SubResource("Resource_y7a3g"), SubResource("Resource_4derk"), SubResource("Resource_802s5")])

@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_w80s5"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_aje7p"]
+
+[sub_resource type="Resource" id="Resource_qdaow"]
+script = ExtResource("2_aje7p")
+tier = 3
+min_value = 2.0
+max_value = 3.0
+
+[sub_resource type="Resource" id="Resource_xfxky"]
+script = ExtResource("2_aje7p")
+tier = 2
+min_item_level = 10
+min_value = 4.0
+max_value = 5.0
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_ho1mi"]
+script = ExtResource("2_aje7p")
+min_item_level = 20
+min_value = 6.0
+max_value = 8.0
+weight = 25.0
+
+[resource]
+script = ExtResource("1_w80s5")
+id = &"keen"
+display_name = "Keen"
+stat = &"crit_chance"
+tags = Array[StringName]([&"crit"])
+group = &"crit_chance"
+allowed_slot_kinds = Array[int]([10, 11, 14, 15])
+tiers = Array[ExtResource("2_aje7p")]([SubResource("Resource_qdaow"), SubResource("Resource_xfxky"), SubResource("Resource_ho1mi")])
