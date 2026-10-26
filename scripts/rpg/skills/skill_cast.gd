@@ -16,6 +16,9 @@ var cast_id: int = 0
 ## Damage factor for this cast only (empowered follow-ups).
 var damage_scale: float = 1.0
 var hits_landed: int = 0
+## Runs once the caster arrived (movement actions); then `pending` follow.
+var arrival: Callable
+var pending: Array[SkillAction] = []
 ## Targets hit per key ("strike", "zone:3" ...): instance id -> hit count.
 var _hit_counts: Dictionary = {}
 
@@ -103,3 +106,44 @@ func deliver(hurtbox: Hurtbox, spec: SkillHitSpec, from: Vector2, key: String = 
 ## Adds a purely visual or runtime node (projectile, zone, fx) to the world.
 func spawn(node: Node2D, at: Vector2) -> void:
 	runtime.effects.spawn_fx(node, at)
+
+
+## Executes `actions` in order; a movement action defers the rest until arrival.
+func run_actions(actions: Array[SkillAction]) -> void:
+	for index in actions.size():
+		var action := actions[index]
+		if action.defers_following():
+			pending.assign(actions.slice(index + 1))
+			action.execute(self)
+			return
+		action.execute(self)
+
+
+## Skill movement of `motion` at `speed` px/s through Player.start_skill_motion
+## (exact distance, walls/bodies block, no dash charge, no iFrames).
+func move(motion: Vector2, speed: float) -> void:
+	var player_node := player()
+	if motion.length() < 0.5 or speed <= 0.0:
+		arrive(true)
+		return
+	runtime.hold_cast(self)
+	player_node.skill_motion_finished.connect(arrive, CONNECT_ONE_SHOT)
+	player_node.start_skill_motion(motion.normalized() * speed, motion.length() / speed)
+
+
+## End of the movement: on arrival the arrival hit and the pending actions run;
+## an interrupted movement (hit reaction, death) drops them.
+func arrive(completed: bool) -> void:
+	runtime.release_cast(self)
+	if not completed or player() == null:
+		pending.clear()
+		arrival = Callable()
+		return
+	origin = player().global_position
+	if arrival.is_valid():
+		var callback := arrival
+		arrival = Callable()
+		callback.call()
+	var rest: Array[SkillAction] = pending.duplicate()
+	pending.clear()
+	run_actions(rest)

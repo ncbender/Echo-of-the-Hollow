@@ -8,7 +8,7 @@
 script = ExtResource("3_dlcig")
 id = &"step_far"
 display_name = "Far Step"
-description = "Shadowstep travels 50% further."
+description = "Shadowstep reaches targets 50% further away."
 skill_ids = Array[StringName]([&"shadowstep"])
 unlock_level = 7
 range_multiplier = 1.5

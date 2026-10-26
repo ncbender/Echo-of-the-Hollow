@@ -1,8 +1,8 @@
 extends GameplayTestCase
-## Class Foundation E: Shadowrunner vertical slice with the real data - focus
-## gains, Weak Points from finishers and Expose Weakness, Execution consuming
-## them, Shadowstep as a skill movement (walls, no dash charge, no iFrames, dash
-## unchanged), talents, class switching and save/load.
+## Class Foundation E: Shadowrunner vertical slice with the real data - Weak
+## Points from finishers and Expose Weakness, Execution consuming them, talents,
+## class switching and save/load. Focus regeneration and the Shadowstep gap
+## closer (Class Combat Polish 0.3): test_class_combat_polish.gd.
 
 const DUMMY_SCENE: PackedScene = preload("res://scenes/dummy/training_dummy.tscn")
 const SAVE := "user://test_saves/shadowrunner.save.json"
@@ -77,23 +77,6 @@ func test_shadowrunner_data() -> void:
 	check(skills.size() >= 6, "six+ skills (%d)" % skills.size())
 
 
-func test_finishers_expose_weak_points_and_precise_hits_build_focus() -> void:
-	_bind()
-	var dummy := _dummy(Vector2(22, 0))
-	await wait_physics(2)
-	await _lll()
-	var status := StatusComponent.of(dummy)
-	check(status.has(&"weak_point"), "light finisher exposed a Weak Point")
-	var focus := bridge.class_runtime.pool
-	var before := focus.value
-	dispatched.clear()
-	await tick(light(frame()))
-	await tick(frame(), 14)
-	if check(dispatched.size() == 1, "one hit"):
-		check(&"weak_point_hit" in dispatched[0].tags, "precise hit on the Weak Point")
-	check(focus.value - before >= 5.0 + 10.0 - 0.01, "precise hit gives extra focus (%.1f)" % (focus.value - before))
-
-
 func test_execution_consumes_weak_point_and_costs_focus() -> void:
 	_level(8)
 	_bind()
@@ -119,45 +102,6 @@ func test_execution_consumes_weak_point_and_costs_focus() -> void:
 	var plain := dispatched.filter(func(h: HitData) -> bool: return h.skill_id == &"execution")
 	if check(plain.size() == 1, "second execution"):
 		check(not &"consumed_weak_point" in plain[0].tags, "no weak point - no bonus")
-
-
-func test_shadowstep_is_a_skill_not_the_dash() -> void:
-	_level(5)
-	_bind()
-	add_wall(Vector2(80, -60), Vector2(200, 10))
-	await wait_physics(2)
-	bridge.class_runtime.pool.gain(50.0)
-	var start := player.global_position
-	var charges := player.dash.charges
-	var slot := character.builds.get_build(&"shadowrunner").slot_of(&"shadowstep")
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	f.ability_slot = slot
-	await tick(f)
-	var invulnerable := false
-	for i in 10:
-		invulnerable = invulnerable or player.hurtbox.is_invulnerable()
-		await tick(frame(Vector2.ZERO, Vector2.RIGHT))
-	check_near(player.global_position.x - start.x, 80.0, 3.0, "Shadowstep moves 80 px towards the aim")
-	check_eq(player.dash.charges, charges, "no dash charge used")
-	check(not player.dash.is_dashing(), "not a dash")
-	check(not invulnerable, "no invulnerability frames")
-	check_near(character.get_stat(Stats.CRIT_CHANCE), 5.0 + 15.0, 0.001, "+15% crit after the step")
-	await tick(frame(), seconds_to_ticks(3.2))
-	check_near(character.get_stat(Stats.CRIT_CHANCE), 5.0, 0.001, "buff expired")
-	# walls stop it
-	bridge.class_runtime.cooldowns.clear()
-	var before_wall := player.global_position
-	var up := frame(Vector2.ZERO, Vector2.UP)
-	up.ability_slot = slot
-	await tick(up)
-	await tick(frame(Vector2.ZERO, Vector2.UP), 12)
-	check(player.global_position.y > -60.0 + 5.0, "the wall stops Shadowstep (y = %.1f)" % player.global_position.y)
-	check(before_wall.y - player.global_position.y < 80.0, "shorter than the full distance")
-	# the normal dash is unchanged: two charges, aim direction
-	await tick(dash_press(frame(Vector2.ZERO, Vector2.DOWN)))
-	check(player.dash.is_dashing(), "Space still dashes")
-	check_eq(player.dash.direction, Vector2.DOWN, "dash in aim direction")
-	check_eq(player.dash.charges, player.dash.config.max_charges - 1, "dash uses its own charges")
 
 
 func test_class_switch_swaps_mechanics() -> void:

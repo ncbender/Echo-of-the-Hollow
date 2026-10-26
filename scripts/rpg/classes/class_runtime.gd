@@ -31,6 +31,8 @@ var empowered: Dictionary = {}
 var pressure: int = 0
 var _pressure_left: float = 0.0
 var _casts: int = 0
+## Casts whose movement is still running (kept alive until they arrive).
+var _held_casts: Array[SkillCast] = []
 var _class_id: StringName
 
 
@@ -73,7 +75,9 @@ func clear_buffs() -> void:
 
 func step(delta: float) -> void:
 	time += delta
-	if pool != null:
+	# Regeneration/decay is time based (delta) and runs in and out of combat, but
+	# not while the player is dead (respawn delay); a paused tree runs no ticks.
+	if pool != null and not (player != null and is_instance_valid(player) and player.health.is_dead()):
 		pool.step(delta)
 	for key: StringName in buffs.keys():
 		if time >= buffs[key]:
@@ -122,6 +126,10 @@ func cast_error(slot: int) -> String:
 		return "Not enough %s." % (pool.definition.display_name if pool != null else "resource")
 	if player == null or not player.can_start_skill():
 		return "Busy."
+	for action in params.actions:
+		var action_error := action.cast_error(self, params)
+		if action_error != "":
+			return action_error   # e.g. no target: nothing is spent
 	return ""
 
 
@@ -152,8 +160,7 @@ func try_cast(slot: int) -> bool:
 		if params.has_tag(tag):
 			cast.damage_scale *= empowered[tag]
 			empowered.erase(tag)
-	for action in params.actions:
-		action.execute(cast)
+	cast.run_actions(params.actions)
 	var recent: Dictionary = effects.shared_state(&"class").get("recent_casts", {})
 	for tag in params.tags:
 		recent[tag] = time
@@ -243,3 +250,12 @@ func _write_state() -> void:
 	state["resource_ratio"] = pool.ratio() if pool != null else 0.0
 	state["pressure"] = pressure
 	state["time"] = time
+
+
+func hold_cast(cast: SkillCast) -> void:
+	if not cast in _held_casts:
+		_held_casts.append(cast)
+
+
+func release_cast(cast: SkillCast) -> void:
+	_held_casts.erase(cast)

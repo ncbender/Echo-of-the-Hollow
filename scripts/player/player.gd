@@ -5,6 +5,8 @@ extends CharacterBody2D
 
 signal weapon_equipped(weapon: WeaponFamily)
 signal respawned
+## A skill movement ended: completed = covered its distance, false = interrupted.
+signal skill_motion_finished(completed: bool)
 
 const DASH_BUFFER_ACTION := &"dash"
 
@@ -41,6 +43,7 @@ var _ability_buffer: InputBuffer
 var _motion_velocity: Vector2 = Vector2.ZERO
 var _motion_left: float = 0.0
 var _motion_distance_left: float = 0.0
+var _motion_arrived: bool = false
 var knockback := KnockbackMotion.new()
 var _spawn_position: Vector2
 var _respawn_left: float = 0.0
@@ -148,7 +151,11 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		# Exact distance like the attack lunge: never more than the skill asked for.
 		var travel := minf(_motion_velocity.length() * delta, _motion_distance_left)
 		_motion_distance_left -= travel
-		_motion_left = 0.0 if _motion_distance_left <= 0.001 else maxf(_motion_left - delta, 0.0001)
+		if _motion_distance_left <= 0.001:
+			_motion_left = 0.0
+			_motion_arrived = true
+		else:
+			_motion_left = maxf(_motion_left - delta, 0.0001)
 		velocity = _motion_velocity.normalized() * travel / delta if delta > 0.0 else Vector2.ZERO
 		_locomotion_velocity = Vector2.ZERO
 	else:
@@ -161,6 +168,9 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 	velocity += knockback.step(delta)
 	velocity = BodyContact.strip_push(self, velocity, delta)
 	move_and_slide()
+	if _motion_arrived:
+		_motion_arrived = false
+		skill_motion_finished.emit(true)
 
 
 func _step_frozen(frame: InputFrame, delta: float) -> void:
@@ -212,8 +222,12 @@ func start_skill_motion(motion_velocity: Vector2, duration: float) -> void:
 
 
 func stop_skill_motion() -> void:
+	var was_moving := is_in_skill_motion()
 	_motion_left = 0.0
 	_motion_distance_left = 0.0
+	_motion_arrived = false
+	if was_moving:
+		skill_motion_finished.emit(false)
 
 
 func is_in_skill_motion() -> bool:

@@ -21,7 +21,7 @@ Details: `TALENT_SYSTEM.md` (Talente, Respec, Presets), `SKILL_SYSTEM.md` (Skill
 | Basic Adventurer | ✅ Start, max. Lv 10 | – | neutral, keine Schilde, keine Skills | – |
 | Warrior | ✅ spielbar | **Rage** (zerfällt nach 3 s) | Combat Pressure: aufeinanderfolgende Treffer (≤ 2 s) beschleunigen den Rage-Aufbau (+10 %/Stack, max. 5) | Berserker (Unbound Fury, aktiv) · Warbreaker (Worldbreaker, transformativ) · Bloodblade (Blood Oath) |
 | Arcanist | ✅ spielbar | **Mana** (regeneriert 8/s) | Arcane Marks (bis 3 Stacks), von Mana Pulse / Rune Sigil / Astral Lance detoniert | Elemental Weaver (Winter's Grasp) · Runemaster (Glyph Cascade) · Astral Scholar (Astral Ascension, aktiv) |
-| Shadowrunner | ✅ spielbar | **Focus** (zerfällt nach 4 s) | Weak Points: Light-Finisher legen sie frei, Treffer darauf +10 % und Fokus-Bonus, Execution verbraucht sie | Assassin (Death Mark, aktiv) · Bladestorm (Thousand Cuts) · Night Hunter (Nightfall) |
+| Shadowrunner | ✅ spielbar | **Focus** (regeneriert passiv 8/s, seit 0.3) | Weak Points: Light-Finisher legen sie frei, Treffer darauf +10 %, Execution verbraucht sie; Shadowstep = zielgebundener Gap-Closer | Assassin (Death Mark, aktiv) · Bladestorm (Thousand Cuts) · Night Hunter (Nightfall) |
 | Guardian | 🔧 vorbereitet (`playable = false`) | Resolve | später: talentabhängige heilige Eide | – |
 | Soulbinder | 🔧 vorbereitet (`playable = false`) | Soul Energy | später: Seelenenergie, Echos | – |
 
@@ -31,11 +31,11 @@ Shadowrunner Einhandschwert, Dual Wield, keine Schilde.
 ## Ressourcen (`ClassResourceDefinition`, datengetrieben) ✅
 | | Rage | Mana | Focus |
 |---|---|---|---|
-| Start / Max | 0 / 100 | 100 / 100 | 0 / 100 |
-| Regeneration | −10/s nach 3 s | +8/s | −8/s nach 4 s |
-| Treffer | +8 (+6 Finisher, +4 Heavy) | +3 | +5 (+8 Finisher, +10 Weak Point, +5 Krit) |
+| Start / Max | 0 / 100 | 100 / 100 | 50 / 100 |
+| Regeneration | −10/s nach 3 s | +8/s | **+8/s immer** (auch im Kampf und in Bewegung, nicht im Tod) |
+| Treffer | +8 (+6 Finisher, +4 Heavy) | +3 | **keine** (nur über Talente, z. B. Focused Strikes) |
 | Getroffen | +5 | – | – |
-| Haltungsbruch / Kill | +10 / +8 | – / +10 | +8 / +12 |
+| Haltungsbruch / Kill | +10 / +8 | – / +10 | – / – (Talente: Opportunist, Killing Edge, Death Mark) |
 | Combat Pressure | 5 Stacks, 2 s, +10 % | – | 5 Stacks, 1,5 s, +5 % |
 
 Max. Ressource durch Stat `max_resource` (Talente), Gewinn durch `resource_gain`, Kosten durch
@@ -63,3 +63,14 @@ Q/E/R/F (Kosten, Cooldown), Ziele-Panel (Trial/Quests).
 ## Erweiterbarkeit
 Neue Klasse = `ClassDefinition` + Ressource + 3 `TalentTreeDefinition` + Skills/Mods als Daten.
 Klassenmechaniken als `innate_effects` (Effekte wie Talente). Kein Klassencode in Systemen.
+
+## Class Combat Polish 0.3
+- **Focus:** passive Regeneration von 8/s statt Aufbau durch Treffer. Expose Weakness (+15 je Ziel)
+  und die Mod „Focus Return“ bleiben Skill-Quellen. Treffer-Focus gibt es nur noch über Talente:
+  - **Focused Strikes**, ehemals Dancing Blades: 25 % Chance, 3 Focus pro Rang, höchstens einmal
+    pro Schwung, nur direkte Waffentreffer.
+  - Opportunist, Killing Edge und Death Mark.
+- **Bewegungs-Skills:** keine freien Ausweich-Dashes auf Q/E/R/F.
+  - Shadowstep und Blade Rush sind zielgebundene Gap-Closer.
+  - Shadow Strike und Piercing Lunge sind kurze Angriffs-Lunges (≤ 40 px).
+  - Details in `SKILL_SYSTEM.md` und `CLASS_COMBAT_POLISH_03_REPORT.md`.

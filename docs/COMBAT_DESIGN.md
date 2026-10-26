@@ -251,4 +251,6 @@ Neu (Details in `SKILL_SYSTEM.md`):
   auf Level 12 läuft. Für einen echten Lerneffekt eventuell mehr oder zähere Gegner.
 - **Arcane Bolt:** 0,45 s Cooldown und 8 Mana bei 8 Mana/s Regeneration. Prüfen, ob die
   Rotation ohne Nahkampf trägt.
-- **Shadowstep:** prüfen, ob 80 px genug Abstand zum normalen Dash (110 px, iFrames) haben.
+- ~~Shadowstep als freier 80-px-Schritt~~ → Class Combat Polish 0.3: zielgebundener Gap-Closer (Playtest-Feedback:
+  freie Skill-Dashes neben den zwei Universal-Dashes störten). Blade Rush ebenso; Shadow Strike/Piercing Lunge
+  sind kurze Angriffs-Lunges (≤ 40 px). Prüfen: Reichweiten 130/110 px und Kegel 70°/50° im Gefecht.

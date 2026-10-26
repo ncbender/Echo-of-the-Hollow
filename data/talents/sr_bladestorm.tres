@@ -49,21 +49,27 @@ max_rank = 3
 column = 1
 effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_8l03g")])
 
-[sub_resource type="Resource" id="Resource_cihsy"]
-script = ExtResource("4_f0ysi")
-stat = &"resource_gain"
-flat = 5.0
+[sub_resource type="Resource" id="Cond_focused_strikes"]
+script = ExtResource("5_1at1p")
+
+[sub_resource type="Resource" id="Effect_focused_strikes"]
+script = ExtResource("9_sh4xy")
+condition = SubResource("Cond_focused_strikes")
+chance = 0.25
+once_per_swing = true
+resource_gain = 3.0
+effect_id = &"sr_focused_strikes"
 
 [sub_resource type="Resource" id="Resource_3msqv"]
 script = ExtResource("1_clk1v")
 id = &"sr_bs_dance"
 class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
-display_name = "Dancing Blades"
-description = "+5% focus gain per rank."
+display_name = "Focused Strikes"
+description = "Direct weapon hits have a 25% chance to grant 3 bonus Focus per rank (at most once per swing; skills, statuses and triggered hits never count)."
 tier = 2
 max_rank = 3
-stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_cihsy")])
+effects = Array[ExtResource("2_ebvwv")]([SubResource("Effect_focused_strikes")])
 
 [sub_resource type="Resource" id="Resource_xcibj"]
 script = ExtResource("1_clk1v")

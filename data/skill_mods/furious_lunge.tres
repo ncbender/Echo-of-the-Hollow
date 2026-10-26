@@ -14,7 +14,7 @@ knockback = 12.0
 
 [sub_resource type="Resource" id="Resource_5xj8v"]
 script = ExtResource("4_l87yn")
-distance = 45.0
+distance = 36.0
 duration = 0.12
 hit = SubResource("Resource_0vodl")
 trail_color = Color(0.86, 0.3, 0.22, 1)
@@ -23,7 +23,7 @@ trail_color = Color(0.86, 0.3, 0.22, 1)
 script = ExtResource("5_c3n84")
 id = &"furious_lunge"
 display_name = "Piercing Lunge"
-description = "Transformation: Furious Strike becomes a lunging thrust that carries you forward and hits everything in your path."
+description = "Transformation: Furious Strike becomes a lunging thrust (36 px, like the sword's thrust) that hits everything in its path."
 skill_ids = Array[StringName]([&"furious_strike"])
 incompatible_with = Array[StringName]([&"furious_rage_refund"])
 transformative = true

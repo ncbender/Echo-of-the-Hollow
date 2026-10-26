@@ -8,7 +8,7 @@
 script = ExtResource("3_yd5y7")
 id = &"rush_long_charge"
 display_name = "Long Charge"
-description = "Blade Rush travels 50% further."
+description = "Blade Rush reaches targets 50% further away."
 skill_ids = Array[StringName]([&"blade_rush"])
 unlock_level = 7
 range_multiplier = 1.5

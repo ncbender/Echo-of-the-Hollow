@@ -60,6 +60,8 @@ Vollständige Werte stehen in den `.tres` und in den Tooltips. Beispiele:
   **Astral Ascension** [A].
 - **Assassin:** Precision, Keen Eye, Opportunist, Guillotine [T], Swift Kill, **Death Mark** [A]
   (+60 % gegen markierte Ziele, Kill → Cooldowns −4 s, +30 Fokus).
+- **Bladestorm (0.3):** Dancing Blades (+% Focus-Gewinn) wurde zu **Focused Strikes** (gleiche ID
+  `sr_bs_dance`): direkte Waffentreffer haben 25 % Chance auf 3 Bonus-Focus pro Rang, max. einmal pro Schwung.
 - **Bladestorm:** Quick Hands, Flurry, Blade Fan [A], Fan of Knives [T], Piercing Blades [T],
   **Thousand Cuts** (Light-Finisher → Klingenring 50 %, Blutung).
 - **Night Hunter:** Ambush, Smoke Veil [A], Choking Smoke [T], Phantom Step [T], **Nightfall**.

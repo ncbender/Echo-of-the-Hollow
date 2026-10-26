@@ -9,6 +9,9 @@ extends SceneTree
 ## --prologue: the whole prologue in a window - all three class trials fought
 ## by a scripted player against real grunts, the permanent choice at the altar,
 ## F6 save, F9 load and a check that exactly the chosen class is unlocked.
+## --polish (Class Combat Polish 0.3): Shadowrunner in the arena - Focus regenerates
+## while idle and fighting, Shadowstep is refused without a target (nothing spent)
+## and closes in on a real grunt, Space dash unchanged; Warrior Blade Rush charge.
 ## Screenshots and log: tests/output/classes/.
 
 const OUTPUT := "res://tests/output/classes"
@@ -31,11 +34,13 @@ func _run() -> void:
 	session.save_path = "user://test_saves/class_playtest.save.json"
 	if "--prologue" in OS.get_cmdline_user_args():
 		await _prologue()
+	elif "--polish" in OS.get_cmdline_user_args():
+		await _polish()
 	else:
 		for pass_spec: Array in PASSES:
 			await _ui_pass(pass_spec[0], pass_spec[1])
 	_log("RESULT: %s (%d checks, %d failed)" % ["OK" if failures == 0 else "FAILED", checks, failures])
-	var file := FileAccess.open(OUTPUT.path_join("class_playtest_log%s.txt" % ("_prologue" if "--prologue" in OS.get_cmdline_user_args() else "")), FileAccess.WRITE)
+	var file := FileAccess.open(OUTPUT.path_join("class_playtest_log%s.txt" % ("_" + OS.get_cmdline_user_args()[0].trim_prefix("--") if not OS.get_cmdline_user_args().is_empty() else "")), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
 	file.close()
 	quit(0 if failures == 0 else 1)
@@ -321,3 +326,104 @@ func _check(ok: bool, text: String) -> void:
 func _log(text: String) -> void:
 	print(text)
 	log_lines.append(text)
+
+
+# --- Class Combat Polish 0.3 -------------------------------------------------------------
+
+func _polish() -> void:
+	root.mode = Window.MODE_WINDOWED
+	root.size = Vector2i(1600, 900)
+	var character := CharacterFactory.create_new(session.database)
+	for class_id: StringName in [&"shadowrunner", &"warrior"]:
+		character.classes.unlock(class_id)
+		character.classes.add_xp(class_id, 1500)   # level 8+: all base skills
+	character.classes.set_active(&"shadowrunner")
+	session.set_character(character)
+	await _load_map("res://scenes/arena/test_arena.tscn", &"test_arena")
+	var player := map.player
+	var frame := InputFrame.new()
+	player.feed_input(frame)
+	map.bridge.message.connect(func(text: String) -> void: _log("message: " + text))
+	var runtime := map.bridge.class_runtime
+	var pool := runtime.pool
+	pool.spend(pool.value)
+	for i in 60:
+		await physics_frame
+	_check(absf(pool.value - 8.0) < 0.5, "focus regenerates while idle (%.1f after 1 s)" % pool.value)
+	# no target: Shadowstep refused, nothing spent
+	player.global_position = Vector2(-200, 150)
+	frame.aim_direction = Vector2.DOWN
+	await _frames(4)
+	pool.gain(50.0)   # enough focus: the only reason to refuse is the missing target
+	var reasons: Array[String] = []
+	map.bridge.message.connect(func(text: String) -> void: reasons.append(text))
+	var focus := pool.value
+	var start := player.global_position
+	frame.ability_slot = character.builds.get_build().slot_of(&"shadowstep")
+	await physics_frame
+	for i in 10:
+		await physics_frame
+	_check(runtime.cooldown_left(&"shadowstep") == 0.0 and pool.value >= focus and player.global_position.distance_to(start) < 0.5 \
+		and reasons.any(func(r: String) -> bool: return r.contains("No enemy")), "Shadowstep without a target: refused (%s), no cost, no movement" % [reasons])
+	await _shot("polish", "01_shadowstep_no_target")
+	# real grunt in front: close in, arrival hit
+	player.global_position = Vector2(0, 150)   # away from the arena dummies
+	var grunt := map.spawn_enemy(Vector2(110, 150))
+	grunt.config = grunt.config.duplicate()
+	grunt.config.move_speed = 0.0
+	grunt.config.attack_range = 0.0
+	frame.aim_direction = Vector2.RIGHT
+	await _frames(6)
+	pool.gain(100.0)
+	var charges := player.dash.charges
+	frame.ability_slot = character.builds.get_build().slot_of(&"shadowstep")
+	await physics_frame
+	for i in 4:
+		await physics_frame
+	await _shot("polish", "02_shadowstep_moving")
+	for i in 20:
+		await physics_frame
+	var gap := player.global_position.distance_to(grunt.global_position)
+	_check(gap < 26.0, "Shadowstep closed in on the grunt (gap %.1f)" % gap)
+	_check(StatusComponent.of(grunt).has(&"weak_point"), "arrival exposed a Weak Point")
+	_check(player.dash.charges == charges, "no dash charge used")
+	await _shot("polish", "03_shadowstep_arrived")
+	# fight: regeneration continues, hits add nothing
+	pool.spend(pool.value)
+	var regen_start := pool.value
+	# the player consumes edge flags itself (physics_frame fires before node processing)
+	for i in 60:
+		frame.light_pressed = i % 15 == 0
+		await physics_frame
+	_check(absf(pool.value - regen_start - 8.0) < 0.6, "in combat: +8 focus per second, nothing from hits (%.1f)" % (pool.value - regen_start))
+	# Space dash unchanged
+	frame.aim_direction = Vector2.LEFT
+	frame.dash_pressed = true
+	await physics_frame
+	_check(player.dash.is_dashing() and player.dash.direction == Vector2.LEFT, "Space dash unchanged (towards the aim)")
+	for i in 40:
+		await physics_frame
+	# Warrior Blade Rush
+	grunt.queue_free()
+	character.classes.set_active(&"warrior")
+	await _frames(4)
+	runtime = map.bridge.class_runtime
+	runtime.pool.gain(100.0)
+	player.global_position = Vector2(-60, -150)
+	var dummy_target := map.spawn_enemy(Vector2(40, -150))
+	dummy_target.config = dummy_target.config.duplicate()
+	dummy_target.config.move_speed = 0.0
+	dummy_target.config.attack_range = 0.0
+	frame.aim_direction = Vector2.RIGHT
+	await _frames(6)
+	frame.ability_slot = character.builds.get_build().slot_of(&"blade_rush")
+	await physics_frame
+	for i in 4:
+		await physics_frame
+	await _shot("polish", "04_blade_rush")
+	for i in 25:
+		await physics_frame
+	_check(player.global_position.distance_to(dummy_target.global_position) < 26.0, "Blade Rush charged to the grunt")
+	_check(runtime.cooldown_left(&"blade_rush") > 0.0, "Blade Rush cast")
+	await _shot("polish", "05_blade_rush_arrived")
+	player.use_external_input = false

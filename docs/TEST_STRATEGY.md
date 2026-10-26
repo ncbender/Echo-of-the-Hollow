@@ -26,7 +26,8 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 `crafting_save`, `affix_pool`, `crafting_stats`, `crafting_ops`, `essences`, `sockets_quality`,
 `evolution`, `crafting_loop` (E2E). Class Foundation 0.2: `attack_speed`, `status_effects`, `talents`, `skills`, `warrior`,
 `arcanist`, `shadowrunner`, `prologue` (Trials, Wahl, Klassenquests, Migration v3→v4, Prolog-Map), `presets`,
-`class_ui` (Klassenstation-Fenster bedient die echten Dienste).
+`class_ui` (Klassenstation-Fenster bedient die echten Dienste). Class Combat Polish 0.3: `class_combat_polish`
+(Focus-Regeneration, Focused Strikes, Gap-Closer, Lunge-Deckel).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -65,7 +66,7 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 | `item_effect_runner.gd` (dispatch_hit), `hit_data.gd` | status_effects, item_effects, essences, talents |
 | Talent-/Skill-Code (`scripts/rpg/talents`, `skills`), `class_runtime.gd` | talents, skills, presets (+ betroffene Klassen-Suite) |
 | Klassendaten (`data/skills`, `skill_mods`, `talents`, `classes`) | warrior / arcanist / shadowrunner (die betroffene Klasse) |
-| `player.gd` Skill-Hooks / Skill-Bewegung | skills, shadowrunner, movement, dash |
+| `player.gd` Skill-Hooks / Skill-Bewegung, `gap_closer_action.gd`, `move_action.gd` | class_combat_polish, skills, shadowrunner, warrior, movement, dash (+ `class_playtest.gd -- --polish`) |
 | Prolog / Quests / Trials, `character_classes.gd` | prologue, classes |
 | `class_station_panel.gd`, `talent_tree_view.gd`, HUD | class_ui, ui_layout (+ `class_playtest.gd`) |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
@@ -147,6 +148,11 @@ Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/pla
 - einen Hover-Tooltip auf einem Talent mit echter Maus
 - einen echten Mausklick, der einen Rang lernt
 - Layoutprüfungen: im Bild, nicht gequetscht, Fensterrand
+
+**`--polish`** (`--fixed-fps 60`, Class Combat Polish 0.3) spielt in der Arena:
+- Focus-Regeneration im Leerlauf und im Kampf (keine Treffergewinne)
+- Shadowstep ohne Ziel (abgelehnt, nichts verbraucht) und gegen einen echten Grunt
+- Space-Dash unverändert, Blade Rush als Ansturm
 
 **`--prologue`** spielt den kompletten Prolog im Fenster:
 - G am Tor

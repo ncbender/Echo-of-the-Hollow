@@ -13,3 +13,15 @@ func execute(_cast: SkillCast) -> void:
 ## Short rules text for tooltips.
 func describe(_params: SkillParams) -> String:
 	return ""
+
+
+## Movement actions return true: the skill's following actions run when the
+## movement arrived (SkillCast.arrive), so hits land where the caster is.
+func defers_following() -> bool:
+	return false
+
+
+## Checked before a cast spends anything: "" or the reason it cannot run now
+## (e.g. a gap closer without a reachable target).
+func cast_error(_runtime: ClassRuntime, _params: SkillParams) -> String:
+	return ""

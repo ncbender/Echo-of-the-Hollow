@@ -42,7 +42,8 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
   `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).
   Skill-Treffer nur über `SkillCast.deliver`, alle Treffer des Charakters über `ItemEffectRunner.dispatch_hit`
   (Quelle/Tiefe in `HitData`). Skills nutzen Player-Hooks (`ability_handler`, `begin_skill`,
-  `start_skill_motion`) - nie den Dash. Trials sind temporär (nie speichern, nie freischalten).
+  `start_skill_motion`) - nie den Dash. Freie Skill-Bewegung nur als kurze Angriffs-Lunge (`MoveAction`, ≤ 40 px);
+  längere Bewegung nur zielgebunden (`GapCloserAction`, Prüfung vor Kosten). Trials sind temporär.
   Spielerseitige Texte Englisch; neue UI-Chrome-Texte über `localization/ui.csv` (`tr("UI_...")`).
 - Neue Maps erben von `GameMap`, brauchen `Player`, `GameHud`, `SpawnPoint` "default" und eine `MapDefinition`.
   Übergänge nur über `SessionState.travel()`. Weltzustand nur in `WorldState`.

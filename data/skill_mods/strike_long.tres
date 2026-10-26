@@ -8,7 +8,7 @@
 script = ExtResource("3_8l30r")
 id = &"strike_long"
 display_name = "Long Strike"
-description = "Shadow Strike travels 50% further."
+description = "Shadow Strike lunges 50% further (36 px)."
 skill_ids = Array[StringName]([&"shadow_strike"])
 unlock_level = 6
 range_multiplier = 1.5

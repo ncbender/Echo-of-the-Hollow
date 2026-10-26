@@ -21,7 +21,8 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
   ab wie ein Dash.
 - Cast-Lock: keine Angriffe/Skills, Bewegung × `cast_move_multiplier`. **Dash beendet den Lock.**
 - Skill-Bewegung (`Player.start_skill_motion`, Blade Rush, Shadowstep, Shadow Strike): exakte
-  Distanz, Wände/Körper stoppen sie, **keine Dash-Ladung, keine iFrames**. Der Dash bleibt
+  Distanz, Wände/Körper stoppen sie, **keine Dash-Ladung, keine iFrames**. Seit Class Combat Polish 0.3 gibt es
+  nur zwei Arten (siehe unten): zielgebundene Gap-Closer und kurze Angriffs-Lunges. Der Dash bleibt
   unverändert (Space, Mausrichtung, 2 Ladungen, 300 ms, 180 ms iFrames) – getestet.
 - Skill-Treffer = `HitData` mit `source = SKILL`, über die Hurtbox des Ziels (gleiche HP-, Haltungs-,
   Knockback- und Schadenszahlen-Logik). Stats wirken über `CharacterStatModifier` (Skill Damage %,
@@ -98,3 +99,27 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
   - Treffer mit `depth > MAX_TRIGGER_DEPTH (1)` werden verworfen.
 - Kills durch Skills oder Status geben Klassen-XP (einmal pro Ziel, keine Waffenbeherrschung).
 - Block und Parry existieren noch nicht. Shift (`defensive`) bleibt ohne Funktion (⬜).
+
+## Bewegung: Dash, Gap-Closer, Lunge (Class Combat Polish 0.3) ✅
+| Art | Wer | Regeln |
+|---|---|---|
+| **Universal Dash** | Space, alle Klassen | unverändert: 2 Ladungen, 300 ms, 180 ms iFrames, Richtung = Maus |
+| **Attack Lunge** (Waffe) | Light-/Heavy-Combos (`AttackDefinition.lunge_distance`) | unverändert |
+| **Attack Lunge** (Skill, `MoveAction`) | Shadow Strike (24 px), Piercing Lunge (36 px) | Teil des Angriffs, Obergrenze `MoveAction.MAX_LUNGE` = 40 px auch mit Mods; der Schlag folgt bei Ankunft |
+| **Offensiver Gap-Closer** (`GapCloserAction`) | Shadowstep (130 px, 70°-Kegel), Blade Rush (110 px, 50°) | braucht ein lebendes Ziel im Mauskegel und in Reichweite; Zielpunkt frei vor dem Gegner; freier Weg (Wände **und** Körper, Ziel ausgenommen); sonst Abbruch **vor** Kosten/Cooldown mit Meldung |
+
+- Gap-Closer und Lunges laufen über `Player.start_skill_motion`: exakte Distanz, Kollision über
+  `move_and_slide`, keine Dash-Ladung, keine iFrames, kein Teleport.
+- `Player.skill_motion_finished(completed)` meldet die Ankunft. Ankunftstreffer und alle folgenden
+  Aktionen des Skills (Buff, Phantom-Step-Schlag …) laufen erst dann (`SkillAction.defers_following`).
+- Wird die Bewegung unterbrochen (Trefferreaktion, Tod), entfallen sie. Der Ankunftstreffer landet
+  nur, wenn man wirklich beim Ziel angekommen ist.
+- `SkillAction.cast_error` prüft Bedingungen vor jedem Verbrauch. Erste Nutzerin ist die Zielsuche
+  der Gap-Closer.
+- Mods: Long Charge und Far Step vergrößern die Zielreichweite. Long Strike verlängert die Lunge
+  (gedeckelt).
+
+Geprüft und **unverändert**:
+- Arcanist: keine Bewegungsskills.
+- Warrior: Furious Strike, Warbreaker, Whirlwind (rotiert am Ort), Battle Cry, Blood Frenzy, Unbound Fury.
+- Shadowrunner: Expose Weakness, Execution, Blade Fan, Smoke Veil, Death Mark.
