@@ -16,6 +16,10 @@ var attack_modifiers: Array[AttackModifier] = []
 var state: Dictionary = {}
 var time: float = 0.0
 var player: Player
+## Resolved character stats (set by the bridge; e.g. shock damage for discharges).
+var stats: Dictionary = {}
+## Short-lived combat marks: mark id -> {target instance id: expires at (runner time)}.
+var marks: Dictionary = {}
 
 var _dispatching: bool = false
 
@@ -71,6 +75,35 @@ func source_state(key: String) -> Dictionary:
 	if not state.has(key):
 		state[key] = {}
 	return state[key]
+
+
+## State shared by all sources of one effect id (e.g. two items with the same
+## essence still trigger once per swing).
+func shared_state(effect_id: StringName) -> Dictionary:
+	return source_state("shared:%s" % effect_id)
+
+
+## Marks `target` with `mark_id` for `duration` seconds (refreshes, never stacks).
+func mark(target: Node, mark_id: StringName, duration: float) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	if not marks.has(mark_id):
+		marks[mark_id] = {}
+	marks[mark_id][target.get_instance_id()] = time + duration
+
+
+func has_mark(target: Node, mark_id: StringName) -> bool:
+	if target == null or not is_instance_valid(target) or not marks.has(mark_id):
+		return false
+	return marks[mark_id].get(target.get_instance_id(), -1.0) > time
+
+
+## Removes the mark and returns whether it was active (one use per mark).
+func consume_mark(target: Node, mark_id: StringName) -> bool:
+	var active := has_mark(target, mark_id)
+	if marks.has(mark_id) and target != null and is_instance_valid(target):
+		marks[mark_id].erase(target.get_instance_id())
+	return active
 
 
 ## Strength of a source (1.0, or more for essences attuned to the item material).

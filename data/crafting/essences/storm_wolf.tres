@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EssenceDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/effects/essence_discharge_effect.gd" id="1_ohhci"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/essence_definition.gd" id="2_qxs3x"]
+
+[sub_resource type="Resource" id="Resource_6g4wq"]
+script = ExtResource("1_ohhci")
+effect_id = &"storm_wolf_discharge"
+description = "Heavy finishers release an electric discharge around the target (shock damage, marks enemies as charged)."
+
+[resource]
+script = ExtResource("2_qxs3x")
+id = &"storm_wolf"
+display_name = "Essence of the Storm Wolf"
+description = "Heavy finishers release an electric discharge around the target (shock damage, marks enemies as charged)."
+item_id = &"storm_wolf_essence"
+effect = SubResource("Resource_6g4wq")
+allowed_slot_kinds = Array[int]([10, 11])
+color = Color(0.55, 0.8, 1, 1)

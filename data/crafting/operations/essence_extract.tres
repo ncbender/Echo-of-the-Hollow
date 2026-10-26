@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_3apyl"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_3m36f"]
+
+[sub_resource type="Resource" id="Resource_726lg"]
+script = ExtResource("1_3apyl")
+item_id = &"essence_siphon"
+
+[resource]
+script = ExtResource("2_3m36f")
+id = &"essence_extract"
+display_name = "Extract Essence"
+description = "Return a bound essence to the inventory."
+costs = Array[ExtResource("1_3apyl")]([SubResource("Resource_726lg")])

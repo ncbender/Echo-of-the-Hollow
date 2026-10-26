@@ -108,6 +108,8 @@ static func _checks() -> Dictionary:
 		CraftingOps.IMPRINT: _check_imprint,
 		CraftingOps.AUGMENT: _check_augment,
 		CraftingOps.REFORGE: _check_reforge,
+		CraftingOps.ESSENCE_INSERT: _check_essence_insert,
+		CraftingOps.ESSENCE_EXTRACT: _check_essence_extract,
 	}
 
 
@@ -122,6 +124,8 @@ static func _appliers() -> Dictionary:
 		CraftingOps.IMPRINT: _apply_imprint,
 		CraftingOps.AUGMENT: _apply_augment,
 		CraftingOps.REFORGE: _apply_reforge,
+		CraftingOps.ESSENCE_INSERT: _apply_essence_insert,
+		CraftingOps.ESSENCE_EXTRACT: _apply_essence_extract,
 	}
 
 
@@ -213,6 +217,94 @@ static func _roll_pool(context: Context, replace_index: int) -> void:
 	preview.outcomes = AffixPool.compute(context.item, context.definition, context.material, db, focus, multiplier, replace_index)
 	if preview.outcomes.is_empty():
 		preview.error = "No affix can roll on this item."
+
+
+# --- essences -------------------------------------------------------------------
+
+static func _essence_limit(context: Context) -> int:
+	return mini(2, context.profile.essence_slots)   # design maximum: two essences
+
+
+static func _check_essence_insert(context: Context) -> void:
+	var preview := context.preview
+	var item := context.item
+	var essence: EssenceDefinition = context.character.database.essences.get(context.request.essence_id)
+	if essence == null:
+		preview.error = "Choose an essence."
+		return
+	var limit := _essence_limit(context)
+	if limit <= 0:
+		preview.error = "%s has no essence slots." % context.definition.display_name
+		return
+	if not essence.allowed_slot_kinds.is_empty() and not context.definition.slot_kind in essence.allowed_slot_kinds:
+		preview.error = "%s cannot be bound to this kind of item." % essence.display_name
+		return
+	if essence.id in item.essences:
+		preview.error = "%s is already bound to this item." % essence.display_name
+		return
+	var slot := context.request.slot_index
+	if slot < 0:
+		if item.essences.size() >= limit:
+			preview.error = "All %d essence slots are used. Choose a slot to replace." % limit
+			return
+		slot = item.essences.size()
+	if slot >= limit or slot > item.essences.size():
+		preview.error = "Invalid essence slot."
+		return
+	context.request.slot_index = slot
+	preview.add_cost(essence.item_id, 1)
+	if slot < item.essences.size():
+		preview.notes.append("Replaces %s - the old essence is consumed. Extract it first to keep it." % _essence_name(context, item.essences[slot]))
+	var after := item.essences.duplicate()
+	if slot < after.size():
+		after[slot] = essence.id
+	else:
+		after.append(essence.id)
+	for resonance: EssenceResonanceDefinition in context.character.database.resonances.values():
+		if resonance.matches(after) and not resonance.matches(item.essences):
+			preview.notes.append("Activates resonance: %s - %s" % [resonance.display_name, resonance.description])
+	var material := context.material
+	if material != null and essence.id in material.essence_affinity:
+		preview.notes.append("%s resonates with %s: effect x%.2f." % [material.display_name, essence.display_name, material.affinity_power])
+
+
+static func _check_essence_extract(context: Context) -> void:
+	var slot := context.request.slot_index
+	if slot < 0 or slot >= context.item.essences.size():
+		context.preview.error = "Choose a bound essence to extract."
+		return
+	var essence: EssenceDefinition = context.character.database.essences.get(context.item.essences[slot])
+	if essence == null:
+		context.preview.error = "This essence is unknown and cannot be extracted."
+		return
+	var back := ItemCost.new()
+	back.item_id = essence.item_id
+	back.quantity = 1
+	context.returns.append(back)
+	context.preview.notes.append("Returns %s to the inventory." % essence.display_name)
+
+
+static func _apply_essence_insert(context: Context, _rolled: Dictionary) -> String:
+	var item := context.item
+	var slot := context.request.slot_index
+	var name := _essence_name(context, context.request.essence_id)
+	if slot < item.essences.size():
+		var old := _essence_name(context, item.essences[slot])
+		item.essences[slot] = context.request.essence_id
+		return "Bound %s (replaced and consumed %s)." % [name, old]
+	item.essences.append(context.request.essence_id)
+	return "Bound %s." % name
+
+
+static func _apply_essence_extract(context: Context, _rolled: Dictionary) -> String:
+	var essence_id := context.item.essences[context.request.slot_index]
+	context.item.essences.remove_at(context.request.slot_index)
+	return "Extracted %s." % _essence_name(context, essence_id)
+
+
+static func _essence_name(context: Context, essence_id: StringName) -> String:
+	var essence: EssenceDefinition = context.character.database.essences.get(essence_id)
+	return essence.display_name if essence != null else String(essence_id)
 
 
 # --- helpers ----------------------------------------------------------------------

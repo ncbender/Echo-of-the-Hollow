@@ -1,8 +1,10 @@
 extends Node2D
-## Expanding ring for the Echo Shockwave. Purely visual; frees itself.
+## Expanding ring for area item effects (Echo Shockwave, essence discharge).
+## Purely visual; frees itself.
 
 var radius: float = 52.0
 var lifetime: float = 0.3
+var color: Color = Color(1.0, 0.7, 0.3)
 var _age: float = 0.0
 
 
@@ -19,7 +21,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var t := clampf(_age / lifetime, 0.0, 1.0)
-	var color := Color(1.0, 0.7, 0.3, 1.0 - t)
+	var ring := Color(color, 1.0 - t)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.6))
-	draw_arc(Vector2.ZERO, radius * (0.3 + 0.7 * t), 0.0, TAU, 40, color, 3.0 * (1.0 - t) + 1.0)
-	draw_circle(Vector2.ZERO, radius * 0.3 * (1.0 - t), Color(1.0, 0.85, 0.5, 0.4 * (1.0 - t)))
+	draw_arc(Vector2.ZERO, radius * (0.3 + 0.7 * t), 0.0, TAU, 40, ring, 3.0 * (1.0 - t) + 1.0)
+	draw_circle(Vector2.ZERO, radius * 0.3 * (1.0 - t), Color(color.lightened(0.4), 0.4 * (1.0 - t)))

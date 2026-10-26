@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_ekbyt"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_03jjw"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_04wnq"]
+
+[resource]
+script = ExtResource("3_04wnq")
+id = &"storm_wolf_essence"
+display_name = "Essence of the Storm Wolf"
+description = "Heavy finishers release an electric discharge around the target (shock damage, marks enemies as charged)."
+rarity = 3
+max_stack = 20
+tags = Array[StringName]([&"crafting", &"essence"])

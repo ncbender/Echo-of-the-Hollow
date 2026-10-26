@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EssenceResonanceDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/effects/essence_resonance_effect.gd" id="1_cgtu1"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/essence_resonance_definition.gd" id="2_cbf6a"]
+
+[sub_resource type="Resource" id="Resource_e4mxn"]
+script = ExtResource("1_cgtu1")
+effect_id = &"thunder_quake"
+description = "Enemies charged by a discharge take +50% poise damage from your next hit."
+
+[resource]
+script = ExtResource("2_cbf6a")
+id = &"thunder_quake"
+display_name = "Thunderquake"
+description = "Enemies charged by a discharge take +50% poise damage from your next hit."
+essence_a = &"storm_wolf"
+essence_b = &"stone_golem"
+effect = SubResource("Resource_e4mxn")

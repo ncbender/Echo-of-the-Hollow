@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_731kd"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_yxtj3"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_uuw5c"]
+
+[resource]
+script = ExtResource("3_uuw5c")
+id = &"stone_golem_essence"
+display_name = "Essence of the Stone Golem"
+description = "Fully charged heavy finishers deal +60% poise damage."
+rarity = 3
+max_stack = 20
+tags = Array[StringName]([&"crafting", &"essence"])

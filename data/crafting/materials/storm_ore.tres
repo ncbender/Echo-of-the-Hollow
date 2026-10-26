@@ -27,4 +27,5 @@ tag_weight_multipliers = Dictionary[StringName, float]({
 &"shock": 3.0,
 &"speed": 2.0
 })
+essence_affinity = Array[StringName]([&"storm_wolf"])
 color = Color(0.43529412, 0.7137255, 1, 1)

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EssenceDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/effects/essence_poise_effect.gd" id="1_2gqfh"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/essence_definition.gd" id="2_bkilx"]
+
+[sub_resource type="Resource" id="Resource_dhwsu"]
+script = ExtResource("1_2gqfh")
+effect_id = &"stone_golem_crush"
+description = "Fully charged heavy finishers deal +60% poise damage."
+
+[resource]
+script = ExtResource("2_bkilx")
+id = &"stone_golem"
+display_name = "Essence of the Stone Golem"
+description = "Fully charged heavy finishers deal +60% poise damage."
+item_id = &"stone_golem_essence"
+effect = SubResource("Resource_dhwsu")
+allowed_slot_kinds = Array[int]([10, 11])
+color = Color(0.75, 0.68, 0.55, 1)

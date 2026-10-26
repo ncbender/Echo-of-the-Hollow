@@ -27,4 +27,5 @@ tag_weight_multipliers = Dictionary[StringName, float]({
 &"defense": 1.5,
 &"poise": 2.0
 })
+essence_affinity = Array[StringName]([&"stone_golem"])
 color = Color(0.65882355, 0.9019608, 0.9411765, 1)

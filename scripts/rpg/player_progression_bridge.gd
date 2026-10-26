@@ -85,6 +85,7 @@ func refresh_unlocks() -> void:
 func apply_stats() -> void:
 	var stats := character.get_stats()
 	stat_modifier.stats = stats
+	effects.stats = stats
 	player.health.set_max_health(stats.get(Stats.MAX_HEALTH, 100.0))
 	var armor := maxf(0.0, stats.get(Stats.ARMOR, 0.0))
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
