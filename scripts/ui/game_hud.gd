@@ -49,7 +49,7 @@ func _ready() -> void:
 	_prompt.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_prompt.offset_left = -120
 	_prompt.offset_right = 120
-	_prompt.offset_top = -48
+	_prompt.offset_top = -128
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.add_theme_color_override(&"font_outline_color", Color.BLACK)
 	_prompt.add_theme_constant_override(&"outline_size", 3)

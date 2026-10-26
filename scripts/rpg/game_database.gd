@@ -14,6 +14,7 @@ const DIRS := {
 	&"maps": "res://data/world/maps",
 	&"buildings": "res://data/base/buildings",
 	&"plots": "res://data/base/plots",
+	&"resource_nodes": "res://data/world/resource_nodes",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -28,6 +29,7 @@ var regions: Dictionary = {}          # region id -> RegionDefinition
 var maps: Dictionary = {}             # map id -> MapDefinition
 var buildings: Dictionary = {}        # building id -> BuildingDefinition
 var plots: Dictionary = {}            # plot id -> BuildingPlotDefinition
+var resource_nodes: Dictionary = {}   # node definition id -> ResourceNodeDefinition
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -72,6 +74,8 @@ func register(resource: Resource) -> bool:
 		table = buildings; key = resource.id
 	elif resource is BuildingPlotDefinition:
 		table = plots; key = resource.id
+	elif resource is ResourceNodeDefinition:
+		table = resource_nodes; key = resource.id
 	else:
 		load_errors.append("unsupported resource %s" % resource.resource_path)
 		return false
@@ -139,6 +143,9 @@ func validate() -> PackedStringArray:
 			for input in recipe.inputs:
 				if not items.has(input.item_id):
 					errors.append("recipe %s needs unknown item %s" % [recipe.id, input.item_id])
+	for node_def: ResourceNodeDefinition in resource_nodes.values():
+		if not items.has(node_def.yield_item_id) or node_def.yield_quantity < 1:
+			errors.append("resource node %s has an invalid yield" % node_def.id)
 	for plot: BuildingPlotDefinition in plots.values():
 		if not maps.has(plot.map_id):
 			errors.append("plot %s on unknown map %s" % [plot.id, plot.map_id])

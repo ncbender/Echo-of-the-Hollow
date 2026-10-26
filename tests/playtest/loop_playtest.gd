@@ -25,9 +25,13 @@ func _run() -> void:
 	session.set_character(CharacterFactory.create_new(session.database))
 	change_scene_to_file("res://scenes/maps/home_base.tscn")
 	await _await_map(&"home_base")
-	await _world_tour()
 	if "--build-only" in OS.get_cmdline_user_args():
+		await _world_tour()
 		await _build_check()
+	elif "--tour" in OS.get_cmdline_user_args():
+		await _world_tour()
+	else:
+		await _gameplay_loop()
 	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
 	var file := FileAccess.open(OUTPUT.path_join("loop_playtest_log.txt"), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
@@ -52,6 +56,74 @@ func _world_tour() -> void:
 	await _walk_into_door("ToHomeBase")
 	await _await_map(&"home_base")
 	_check(_at_spawn(&"from_arena"), "home: arrived at the north door")
+
+
+func _gameplay_loop() -> void:
+	var character := session.character
+	await _shot("g01_start_in_base")
+	_check(map.map_id == &"home_base", "1. starts in the home base")
+	await _walk_into_door("ToForest")
+	await _await_map(&"whisper_forest")
+	_check(map.map_id == &"whisper_forest", "2. entered the forest")
+	# 3. fight the nearest grunt with light attacks
+	var grunt := map.get_node("Enemies/GruntA") as Enemy
+	var hp_before := grunt.health.health
+	for i in 1500:
+		if grunt.health.is_dead():
+			break
+		var to := grunt.global_position - map.player.global_position
+		f.aim_direction = to.normalized()
+		f.move = to.normalized() if to.length() > 24.0 else Vector2.ZERO
+		if map.player.combat.state == CombatComponent.State.IDLE and to.length() < 34.0:
+			f.light_pressed = true
+		if i == 60:
+			await _shot("g02_forest_fight")
+		await physics_frame
+	f.move = Vector2.ZERO
+	_check(grunt.health.is_dead(), "3. grunt defeated by player attacks (hp %d -> 0)" % hp_before)
+	await _ticks(10)
+	for pickup: ItemPickup in map.find_children("*", "ItemPickup", true, false):
+		await _walk_to(pickup.global_position)
+	# 4. gather by walking to every node and pressing G
+	var ore_before := character.inventory.count(&"iron_ore")
+	for node: ResourceNode in map.find_children("*", "ResourceNode", true, false):
+		await _walk_to(node.global_position + Vector2(0, 16))
+		if node.player_inside:
+			await _press(&"interact")
+	await _shot("g03_forest_gathered")
+	var timber := character.inventory.count(&"timber")
+	var stone := character.inventory.count(&"stone")
+	_check(timber >= 6 and stone >= 4 and character.inventory.count(&"iron_ore") >= 3,
+		"5. resources in inventory (timber %d, stone %d, ore %d -> %d)" % [timber, stone, ore_before, character.inventory.count(&"iron_ore")])
+	# 6. back home
+	await _walk_to(Vector2(-280, 0))
+	await _walk_into_door("ToHomeBase")
+	await _await_map(&"home_base")
+	_check(map.map_id == &"home_base", "6. returned to the base")
+	# 7./8. choose a plot and build with the gathered materials
+	var plot := map.get_node("Plots/PlotWest") as BuildPlot
+	await _walk_to(plot.global_position + Vector2(0, 30))
+	await _press(&"interact")
+	_check(map.hud.build_panel.visible, "7. build menu opened at the plot")
+	await _shot("g04_build_menu")
+	_click_button(map.hud.build_panel, "Build")
+	await _ticks(3)
+	_check(plot.built_building() != null, "8. building constructed")
+	await _press(&"interact")
+	await _shot("g05_smithy_standing")
+	# 9. save and reload
+	var snapshot := character.to_dict()
+	await _press(&"debug_save")
+	_check(FileAccess.file_exists(TEST_SAVE), "9. F6 saved (test slot)")
+	session.set_character(CharacterFactory.create_new(session.database))
+	await _press(&"debug_load")
+	await _await_map(&"home_base")
+	# 10. everything is still there
+	var loaded := session.character
+	_check(comparable(loaded.to_dict()) == comparable(snapshot), "10. loaded state equals the saved state (except visit counters)")
+	var plot_after := map.get_node("Plots/PlotWest") as BuildPlot
+	_check(plot_after.built_building() != null, "10. smithy still standing after load")
+	await _shot("g06_after_load")
 
 
 func _build_check() -> void:
@@ -164,3 +236,11 @@ func _log(text: String) -> void:
 	var line := "[%5d] %s" % [Engine.get_physics_frames(), text]
 	log_lines.append(line)
 	print(line)
+
+
+## Character data without the per-visit counters that entering a map updates.
+static func comparable(data: Dictionary) -> Dictionary:
+	var copy := data.duplicate(true)
+	for map: String in copy.world.map_states:
+		(copy.world.map_states[map] as Dictionary).erase("visits")
+	return copy

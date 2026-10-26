@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/resource_node_definition.gd" id="1_node"]
+
+[resource]
+script = ExtResource("1_node")
+id = &"oak_tree"
+display_name = "Oak Tree"
+yield_item_id = &"timber"
+yield_quantity = 3
+respawn_seconds = 90.0
+look = 0

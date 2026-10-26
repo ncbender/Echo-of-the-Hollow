@@ -146,15 +146,20 @@ func _save_load_flow() -> void:
 	# Change the live state after saving; loading must restore the snapshot.
 	character.discard_item(_instance_of(&"echo_blade"))
 	character.mastery.add_xp(&"two_handed_sword", 500)
+	var old_arena := arena
 	await _press(&"debug_load")
-	await _ticks(10)
+	for i in 300:
+		await process_frame
+		if current_scene != old_arena and current_scene != null and not session.is_traveling():
+			break
+	await _ticks(3)
 	arena = current_scene as Node2D
 	player = arena.get_node("Player")
 	hud = arena.get_node("GameHud")
 	player.feed_input(f)
 	var loaded := session.character
 	_check(loaded != character, "new character object after load")
-	_check(loaded.to_dict() == snapshot, "loaded state equals the saved snapshot")
+	_check(preload("res://tests/playtest/loop_playtest.gd").comparable(loaded.to_dict()) == preload("res://tests/playtest/loop_playtest.gd").comparable(snapshot), "loaded state equals the saved snapshot (except visit counters)")
 	_check(loaded.get_stats() == stats, "stats rebuilt identically")
 	_check(loaded.inventory.count(&"echo_blade") == 1, "discarded blade is back")
 	_check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "technique active after load")

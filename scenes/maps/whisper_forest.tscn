@@ -10,6 +10,11 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/grunt.tscn" id="8_grunt"]
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="9_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="10_transition"]
+[ext_resource type="PackedScene" path="res://scenes/world/resource_node.tscn" id="12_node"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/oak_tree.tres" id="def_oak_tree"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="def_forest_rock"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/iron_vein.tres" id="def_iron_vein"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/ancient_deposit.tres" id="def_ancient_deposit"]
 
 [sub_resource type="RectangleShape2D" id="Rect_door_west"]
 size = Vector2(12, 48)
@@ -96,6 +101,69 @@ label = "Hollow Home"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToHomeBase"]
 shape = SubResource("Rect_door_west")
+
+[node name="Resources" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="TreeA" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-200, -130)
+definition = ExtResource("def_oak_tree")
+node_id = &"treea"
+prompt = "Gather"
+
+[node name="TreeB" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-170, 130)
+definition = ExtResource("def_oak_tree")
+node_id = &"treeb"
+prompt = "Gather"
+
+[node name="TreeC" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-30, 60)
+definition = ExtResource("def_oak_tree")
+node_id = &"treec"
+prompt = "Gather"
+
+[node name="TreeD" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(30, -150)
+definition = ExtResource("def_oak_tree")
+node_id = &"treed"
+prompt = "Gather"
+
+[node name="RockA" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-110, -30)
+definition = ExtResource("def_forest_rock")
+node_id = &"rocka"
+prompt = "Gather"
+
+[node name="RockB" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-90, 150)
+definition = ExtResource("def_forest_rock")
+node_id = &"rockb"
+prompt = "Gather"
+
+[node name="RockC" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(180, -150)
+definition = ExtResource("def_forest_rock")
+node_id = &"rockc"
+prompt = "Gather"
+
+[node name="VeinA" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(120, -120)
+definition = ExtResource("def_iron_vein")
+node_id = &"veina"
+prompt = "Gather"
+
+[node name="VeinB" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(0, 150)
+definition = ExtResource("def_iron_vein")
+node_id = &"veinb"
+prompt = "Gather"
+
+[node name="Deposit" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(290, -150)
+definition = ExtResource("def_ancient_deposit")
+node_id = &"deposit"
+prompt = "Gather"
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true

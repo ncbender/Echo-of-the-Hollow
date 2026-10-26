@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/resource_node_definition.gd" id="1_node"]
+
+[resource]
+script = ExtResource("1_node")
+id = &"forest_rock"
+display_name = "Forest Rock"
+yield_item_id = &"stone"
+yield_quantity = 3
+respawn_seconds = 90.0
+look = 1

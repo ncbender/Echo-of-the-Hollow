@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_node"]
+
+[sub_resource type="CircleShape2D" id="Circle_area"]
+radius = 22.0
+
+[sub_resource type="CircleShape2D" id="Circle_body"]
+radius = 6.0
+
+[node name="ResourceNode" type="Area2D"]
+script = ExtResource("1_node")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Circle_area")
+
+[node name="Body" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+shape = SubResource("Circle_body")
