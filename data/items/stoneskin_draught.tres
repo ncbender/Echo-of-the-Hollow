@@ -6,7 +6,7 @@
 script = ExtResource("1_item")
 id = &"stoneskin_draught"
 display_name = "Stoneskin Draught"
-description = "A bitter draught said to harden the skin. (Potions cannot be used yet.)"
+description = "A bitter draught said to harden the skin. Not brewed in this version."
 category = 5
 rarity = 1
 max_stack = 10

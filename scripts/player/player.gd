@@ -7,6 +7,8 @@ signal weapon_equipped(weapon: WeaponFamily)
 signal respawned
 ## A skill movement ended: completed = covered its distance, false = interrupted.
 signal skill_motion_finished(completed: bool)
+## A drink (Hearth Flask, potion) ended: completed = its effect happened, false = interrupted.
+signal use_finished(completed: bool)
 
 const DASH_BUFFER_ACTION := &"dash"
 
@@ -35,6 +37,16 @@ var skill_move_multiplier: float = 1.0
 var hitstop_left: float = 0.0
 ## Multiplier for incoming damage (armor etc.), set by the progression bridge.
 var incoming_damage_multiplier: float = 1.0
+## Normal walking speed factor from stats (Movement Speed %, armour burden) -
+## never applied to the dash, skill motions or knockback.
+var move_speed_multiplier: float = 1.0
+## Quick use (keys 1 / 2): receives 0 = flask, 1 = potion; returns true when a
+## drink started (set by the progression bridge; the player knows no items).
+var consumable_handler: Callable
+## Remaining drink time (begin_use); attacks, skills and blocking are locked meanwhile.
+var use_left: float = 0.0
+var use_move_multiplier: float = 1.0
+var _use_done: Callable
 
 var _external_frame := InputFrame.new()
 var _locomotion_velocity: Vector2 = Vector2.ZERO
@@ -155,14 +167,16 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		combat.cancel(&"dash")
 		skill_lock_left = 0.0   # a dash ends the cast lock (the skill already happened)
 		defense.cancel()        # and any block/parry (no iFrame overlap, no stacking)
+		cancel_use()            # and a drink (nothing is consumed)
 		_start_dash(frame.move)
 
 	if defense.step(delta, frame.defend_pressed, frame.defend_held, can_start_defense()):
 		combat.cancel(&"defend")   # same cancel rule as a dash (see can_start_defense)
 
+	_step_use(frame, delta)
 	_step_abilities(frame, delta)
 	combat.step(delta, frame, aim_direction, dash.is_dashing() or reaction.blocks_actions() \
-			or skill_lock_left > 0.0 or is_in_skill_motion() or defense.blocks_actions())
+			or skill_lock_left > 0.0 or is_in_skill_motion() or defense.blocks_actions() or is_using())
 
 	if dash.is_dashing():
 		velocity = dash.get_velocity()
@@ -185,6 +199,9 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		if skill_lock_left > 0.0:
 			multiplier = minf(multiplier, skill_move_multiplier)
 		multiplier = minf(multiplier, defense.move_multiplier())
+		if is_using():
+			multiplier = minf(multiplier, use_move_multiplier)
+		multiplier *= move_speed_multiplier
 		_locomotion_velocity = movement.compute_velocity(_locomotion_velocity, move_input, multiplier, delta)
 		velocity = _locomotion_velocity + combat.take_lunge_velocity(delta)
 	velocity += knockback.step(delta)
@@ -222,11 +239,54 @@ func _step_abilities(frame: InputFrame, delta: float) -> void:
 
 
 ## A skill may start when an attack could be dash-cancelled right now (same
-## cancel rules), outside dashes, skill motions, cast locks and hit lockouts.
+## cancel rules), outside dashes, skill motions, cast locks, drinks and hit lockouts.
 func can_start_skill() -> bool:
 	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
 			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel() \
-			and not defense.blocks_actions()
+			and not defense.blocks_actions() and not is_using()
+
+
+# --- quick use: Hearth Flask and potions (Consumables 1.0) ------------------------
+
+## Keys 1 / 2 ask the handler (progression bridge) whether a drink starts; the
+## running drink completes after its time (then `_use_done` applies the effect).
+func _step_use(frame: InputFrame, delta: float) -> void:
+	if (frame.flask_pressed or frame.potion_pressed) and consumable_handler.is_valid() and can_start_skill():
+		consumable_handler.call(0 if frame.flask_pressed else 1)
+	if use_left <= 0.0:
+		return
+	use_left -= delta
+	if use_left <= 0.0:
+		use_left = 0.0
+		var done := _use_done
+		_use_done = Callable()
+		if done.is_valid():
+			done.call()
+		use_finished.emit(true)
+
+
+## Starts a drink: cancels the running attack and block, then for `duration`
+## no attacks, skills or blocking and walking at `move_multiplier`. `on_done`
+## runs when the drink completes - never when it is interrupted.
+func begin_use(duration: float, move_multiplier: float, on_done: Callable) -> void:
+	combat.cancel(&"use")
+	defense.cancel()
+	use_left = maxf(0.001, duration)
+	use_move_multiplier = move_multiplier
+	_use_done = on_done
+
+
+## Interrupts a running drink (dash, stagger, death, scene change): no effect, nothing consumed.
+func cancel_use() -> void:
+	if use_left <= 0.0:
+		return
+	use_left = 0.0
+	_use_done = Callable()
+	use_finished.emit(false)
+
+
+func is_using() -> bool:
+	return use_left > 0.0
 
 
 ## Starts a skill action: cancels the running attack/charge (like a dash cancel)
@@ -280,6 +340,7 @@ func _on_hit_received(hit: HitData) -> void:
 	if type >= HitReaction.Type.INTERRUPT:
 		skill_lock_left = 0.0
 		stop_skill_motion()
+		cancel_use()
 		if defense.is_defending():
 			defense.cancel()
 	knockback.start(hit.knockback * reaction.knockback_multiplier(type))
@@ -287,6 +348,7 @@ func _on_hit_received(hit: HitData) -> void:
 
 func _on_died() -> void:
 	combat.cancel(&"death")
+	cancel_use()
 	defense.cancel()
 	stop_skill_motion()
 	skill_lock_left = 0.0
@@ -309,7 +371,7 @@ func _step_down(delta: float) -> void:
 ## movements, cast locks and hit lockouts.
 func can_start_defense() -> bool:
 	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
-			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel()
+			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel() and not is_using()
 
 
 ## Hurtbox.hit_filter: block/parry resolve the hit before damage, numbers and reactions.

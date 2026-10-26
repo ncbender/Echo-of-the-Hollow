@@ -35,6 +35,8 @@ var waystone_panel: WaystonePanel
 var journal_panel: JournalPanel
 var world_map_panel: WorldMapPanel
 var professions_panel: ProfessionsPanel
+## Mara's Hearth Flask upgrades (NPC service "hearth_flask").
+var flask_panel: FlaskPanel
 ## Shared confirmation dialog (overwrite, discard, delete ...).
 var confirm_dialog: UiConfirmDialog
 ## Contextual tutorial hint (top centre).
@@ -54,6 +56,10 @@ var _prompt_key: Label
 var _prompt: Label
 var _windows: Array[UiWindow] = []
 var _bottom: VBoxContainer
+var _left_column: VBoxContainer
+## Active timed effects (potion buff) and the quick use slots above the player frame.
+var effect_bar: EffectBar
+var quick_use: QuickUseBar
 var _hint_spacer: Control
 
 
@@ -103,14 +109,26 @@ func _ready() -> void:
 	objectives.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_root.add_child(objectives)
 
-	# bottom left: player frame
+	# bottom left: active effects, quick use (1 / 2) and the player frame
+	_left_column = VBoxContainer.new()
+	_left_column.name = "LeftColumn"
+	_left_column.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_left_column.offset_left = margin
+	_left_column.offset_bottom = -margin
+	_left_column.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_left_column.alignment = BoxContainer.ALIGNMENT_END
+	_left_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_left_column.add_theme_constant_override(&"separation", UiTheme.GAP)
+	_root.add_child(_left_column)
+	effect_bar = EffectBar.new()
+	effect_bar.name = "EffectBar"
+	_left_column.add_child(effect_bar)
+	quick_use = QuickUseBar.new()
+	quick_use.name = "QuickUse"
+	_left_column.add_child(quick_use)
 	player_frame = PlayerFrame.new()
 	player_frame.name = "PlayerFrame"
-	player_frame.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	player_frame.offset_left = margin
-	player_frame.offset_bottom = -margin
-	player_frame.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_root.add_child(player_frame)
+	_left_column.add_child(player_frame)
 
 	# bottom centre: charge, prompt, skills, messages
 	var bottom := VBoxContainer.new()
@@ -183,6 +201,8 @@ func _ready() -> void:
 	journal_panel = _add_window(JournalPanel.new()) as JournalPanel
 	world_map_panel = _add_window(WorldMapPanel.new()) as WorldMapPanel
 	professions_panel = _add_window(ProfessionsPanel.new()) as ProfessionsPanel
+	flask_panel = _add_window(FlaskPanel.new()) as FlaskPanel
+	flask_panel.hud = self
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
@@ -203,6 +223,8 @@ func setup(progression_bridge: PlayerProgressionBridge) -> void:
 	skill_bar.bridge = bridge
 	objectives.bridge = bridge
 	player_frame.bridge = bridge
+	quick_use.bridge = bridge
+	effect_bar.bridge = bridge
 	target_frame.bridge = bridge
 	charge_meter.bridge = bridge
 	loot_feed.bridge = bridge
@@ -360,10 +382,20 @@ func _open_smithy_workbench(plot: BuildPlot) -> void:
 
 ## Keys of the windows added after the first input map (journal, map, professions). Registered at
 ## runtime so the project's input map file stays untouched; shown in Controls.
-const EXTRA_ACTIONS := {&"ui_journal": KEY_J, &"ui_map": KEY_M, &"ui_professions": KEY_P}
+## Keys 1 / 2 are the Hearth Flask and the potion slot (Consumables 1.0); the
+## weapon slot actions lose those keys at runtime (they stay as actions).
+const EXTRA_ACTIONS := {&"ui_journal": KEY_J, &"ui_map": KEY_M, &"ui_professions": KEY_P,
+	&"use_flask": KEY_1, &"use_potion": KEY_2}
+const RELEASED_KEYS := {&"weapon_slot_1": KEY_1, &"weapon_slot_2": KEY_2}
 
 
 static func ensure_input_actions() -> void:
+	for action: StringName in RELEASED_KEYS:
+		if not InputMap.has_action(action):
+			continue
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey and (event as InputEventKey).physical_keycode == RELEASED_KEYS[action]:
+				InputMap.action_erase_event(action, event)
 	for action: StringName in EXTRA_ACTIONS:
 		if InputMap.has_action(action):
 			continue
@@ -520,13 +552,13 @@ func _open_options_from_pause() -> void:
 func _layout_bottom() -> void:
 	var canvas := _root.size.x
 	var margin := float(UiTheme.SCREEN_MARGIN)
-	var frame_right := margin + player_frame.size.x + UiTheme.GAP * 2
+	var frame_right := margin + _left_column.size.x + UiTheme.GAP * 2
 	var skills_half := skill_bar.get_combined_minimum_size().x * 0.5
 	var shift := maxf(0.0, frame_right + skills_half - canvas * 0.5)
 	var lift := 0.0
 	if canvas * 0.5 + shift + skills_half > canvas - margin:
 		shift = 0.0
-		lift = player_frame.size.y + UiTheme.GAP
+		lift = _left_column.size.y + UiTheme.GAP
 	var half := minf(UiTheme.FEED_WIDTH, canvas - margin * 2.0 - shift * 2.0) * 0.5
 	_bottom.offset_left = -half + shift
 	_bottom.offset_right = half + shift
@@ -553,3 +585,17 @@ func _layout_hint(canvas: float, margin: float) -> void:
 	var spacer := maxf(0.0, objectives.position.y + objectives.size.y + UiTheme.GAP - margin - above) if below else 0.0
 	_hint_spacer.custom_minimum_size.y = spacer
 	_hint_spacer.visible = spacer > 0.0
+
+
+## An NPC's service window (data: NpcDefinition.service). False if the service
+## is unknown - the NPC then says an idle line instead.
+func open_npc_service(service: StringName, site: Node2D) -> bool:
+	if bridge == null:
+		return false
+	var windows := {&"hearth_flask": flask_panel}
+	var window: Variant = windows.get(service)
+	if window == null:
+		return false
+	close_windows()
+	(window as FlaskPanel).open(bridge.character, site)
+	return true

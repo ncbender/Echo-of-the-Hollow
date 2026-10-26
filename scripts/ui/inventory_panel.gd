@@ -109,7 +109,7 @@ func _ready() -> void:
 	_grid.columns = BAG_COLUMNS
 	bag_panel.get_node("Box").add_child(_grid)
 	middle.add_child(bag_panel)
-	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip  ·  Drag onto a slot to choose it (Ring 2, Off Hand)  ·  Ctrl+click: favourite  ·  Alt+click: lock", &"CaptionLabel")
+	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip, potion to slot [2]  ·  Drag onto a slot to choose it (Ring 2, Off Hand)  ·  Ctrl+click: favourite  ·  Alt+click: lock", &"CaptionLabel")
 	_bag_hint = hint
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP), 0)
@@ -416,6 +416,9 @@ func _on_right_click(cell: ItemCell) -> void:
 	_selected_id = item.instance_id
 	if slot >= 0:
 		_report(character.equipment.unequip(slot), "Unequipped %s." % definition.display_name)
+		return
+	if definition.potion_effect != null:   # special potions go on the potion slot (key 2)
+		_report(ConsumableService.assign_potion(character, definition.id), "%s is on the potion slot [2]." % definition.display_name)
 		return
 	if not definition.is_equippable():
 		_report("%s cannot be equipped." % definition.display_name, "")

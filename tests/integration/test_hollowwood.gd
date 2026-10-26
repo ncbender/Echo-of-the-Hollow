@@ -96,10 +96,10 @@ func test_no_potions_or_unsupported_outputs() -> void:
 		var item := db.get_item(recipe.output_item_id)
 		if not recipe.craftable:
 			continue
-		check(item.category != ItemDefinition.Category.CONSUMABLE, "%s: no craftable consumable" % recipe.id)
+		check(item.category != ItemDefinition.Category.CONSUMABLE or item.potion_effect != null, "%s: a craftable consumable must work (potion effect)" % recipe.id)
 		if item.category == ItemDefinition.Category.WEAPON:
 			check(db.weapons.has(item.weapon_family_id), "%s: weapon of a supported family" % recipe.id)
-		if not item.is_equippable():
+		if not item.is_equippable() and item.potion_effect == null:
 			var feeds := db.profession_recipes.values().any(func(r: ProfessionRecipeDefinition) -> bool:
 				return r.craftable and r.inputs.any(func(c: ItemCost) -> bool: return c.item_id == item.id))
 			var restores := db.ruins.values().any(func(r: RuinDefinition) -> bool:

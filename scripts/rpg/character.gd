@@ -23,6 +23,8 @@ var builds: ClassBuilds
 var prologue := PrologueState.new()
 ## The nine professions: levels, XP, learned recipes (class-independent).
 var professions: CharacterProfessions
+## Hearth Flask and special potions (Consumables 1.0, save v9).
+var consumables := CharacterConsumables.new()
 ## Class unlock quests.
 var quests := QuestLog.new()
 ## Raw saved items that could not be restored (e.g. definition removed from the
@@ -50,6 +52,7 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	builds = ClassBuilds.new(db, classes)
 	professions = CharacterProfessions.new(db)
 	ProfessionService.learn_automatic(self)   # level-1 recipes of every profession
+	consumables.charges = db.rules.flask_base_charges
 	# Method callables (not lambdas): they do not keep this RefCounted alive,
 	# so Character <-> sub-system signal links never form a reference cycle.
 	classes.leveled_up.connect(_on_class_leveled_up)
@@ -148,6 +151,7 @@ func to_dict() -> Dictionary:
 		"inventory": inventory.to_array(),
 		"stash": {"items": stash.to_array()},
 		"professions": professions.to_dict(),
+		"consumables": consumables.to_dict(),
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
 		"class_builds": builds.to_dict(),
@@ -186,7 +190,9 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 			warnings.append_array(TalentService.sanitize_build(character, class_id))
 	character.world.from_dict(_dict(data, "world"), warnings)
 	character.professions.from_dict(_dict(data, "professions"), warnings)
+	character.consumables.from_dict(_dict(data, "consumables"))
 	ProfessionService.learn_automatic(character)   # recipes the saved levels allow
+	ConsumableService.sanitize(character)   # clamps charges / levels, re-applies a running potion buff
 	character.refresh_inventory_capacity()
 	character.invalidate_stats()
 	return character

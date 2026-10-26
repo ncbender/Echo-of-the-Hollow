@@ -68,6 +68,7 @@ func bind(target_player: Player, target_character: Character) -> void:
 	effects.player = player
 	player.weapon_slot_handler = quick_equip_weapon
 	player.ability_handler = class_runtime.try_cast
+	player.consumable_handler = try_use
 	class_runtime.setup(character, player, effects, apply_status)
 	refresh_unlocks()
 	apply_stats()
@@ -90,6 +91,8 @@ func unbind() -> void:
 		player.combat.modifiers.erase(stat_modifier)
 		player.weapon_slot_handler = Callable()
 		player.ability_handler = Callable()
+		player.consumable_handler = Callable()
+		player.cancel_use()
 		_uninstall_modifiers()
 
 
@@ -112,6 +115,11 @@ func apply_stats() -> void:
 	player.health.set_max_health(stats.get(Stats.MAX_HEALTH, 100.0))
 	var armor := maxf(0.0, stats.get(Stats.ARMOR, 0.0))
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
+	player.incoming_damage_multiplier *= 1.0 - clampf(stats.get(Stats.DAMAGE_REDUCTION, 0.0), 0.0, 75.0) / 100.0
+	player.move_speed_multiplier = maxf(0.1, 1.0 + stats.get(Stats.MOVE_SPEED, 0.0) / 100.0)   # walking only, never the dash
+	var statuses := StatusComponent.of(player)
+	if statuses != null:
+		statuses.general_resistance = clampf(stats.get(Stats.STATUS_RESISTANCE, 0.0), 0.0, 100.0) / 100.0
 	var rules := character.database.rules
 	player.combat.attack_speed = clampf(1.0 + stats.get(Stats.ATTACK_SPEED, 0.0) / 100.0,
 			rules.attack_speed_min, rules.attack_speed_max)
@@ -177,6 +185,7 @@ func _physics_process(delta: float) -> void:
 	if _pending_weapon != null:
 		_apply_pending_weapon()
 	class_runtime.step(delta)
+	ConsumableService.step(character, delta)   # potion buff and cooldown run in game time
 	var pool := class_runtime.pool
 	if pool != null and character.classes.in_trial():
 		PrologueService.record(character, TrialObjective.Kind.RESOURCE_AT_LEAST, pool.definition.id, pool.value)
@@ -301,6 +310,7 @@ func _on_skill_cast(skill_id: StringName, _slot: int) -> void:
 
 ## Falling in a trial ends it without a trace; it can be restarted right away.
 func _on_player_died() -> void:
+	ConsumableService.end_buff(character)   # death ends the potion buff
 	if character.classes.in_trial():
 		PrologueService.end_trial(character, false)
 
@@ -320,3 +330,32 @@ func _on_build_changed(class_id: StringName) -> void:
 
 func _on_cast_failed(_skill_id: StringName, reason: String) -> void:
 	message.emit(reason)
+
+
+# --- quick use: Hearth Flask (1) and the slotted potion (2) ------------------------
+
+## Player.consumable_handler: starts the drink when the rules allow it (refusals
+## are shown as a message). The effect lands only when the drink completes.
+func try_use(kind: int) -> bool:
+	var rules := character.database.rules
+	var error := ConsumableService.flask_error(character) if kind == 0 else ConsumableService.potion_error(character)
+	if error != "":
+		message.emit(error)
+		return false
+	if kind == 0:
+		player.begin_use(rules.flask_drink_time, rules.drink_move_multiplier, _on_flask_done)
+	else:
+		player.begin_use(rules.potion_drink_time, rules.drink_move_multiplier, _on_potion_done)
+	return true
+
+
+func _on_flask_done() -> void:
+	var share := ConsumableService.complete_flask(character)
+	if share > 0.0 and not player.health.is_dead():
+		player.health.heal(player.health.max_health * share)
+
+
+func _on_potion_done() -> void:
+	var error := ConsumableService.complete_potion(character)
+	if error != "":
+		message.emit(error)

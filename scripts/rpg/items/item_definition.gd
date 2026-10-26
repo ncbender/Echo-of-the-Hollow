@@ -47,6 +47,10 @@ const RARITY_COLORS := {
 ## (overrides the weapon's profile).
 @export var defense_profile: DefenseProfile
 
+@export_group("Consumable")
+## Special potion: its timed buff (ConsumableService). Null for everything else.
+@export var potion_effect: PotionEffectDefinition
+
 @export_group("Crafting")
 ## Crafting capabilities (null = not craftable). See docs/CRAFTING_DESIGN.md.
 @export var crafting: CraftingProfile

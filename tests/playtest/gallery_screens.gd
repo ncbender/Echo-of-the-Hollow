@@ -7,7 +7,7 @@ const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory"
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
 	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
-	"hud_artisan_stages", "restoration_revitalize",
+	"hud_artisan_stages", "restoration_revitalize", "hud_consumables", "flask_upgrades",
 	"pause", "save", "load", "options", "confirm"]
 
 
@@ -218,6 +218,22 @@ static func open(gallery: Object, screen: String) -> String:
 			character.world.set_restoration(&"alchemists_cottage", RestorationService.REVITALIZED)
 			map.player.global_position = Vector2(-560, 0)
 			await gallery.frames(12)
+		"hud_consumables":   # one charge used, an Ember Draught running (15 s in), potion on cooldown
+			character.consumables.charges = 1
+			character.inventory.add_item(&"ember_draught", 3)
+			ConsumableService.assign_potion(character, &"ember_draught")
+			character.consumables.cooldown_left = 0.0
+			ConsumableService.complete_potion(character)
+			ConsumableService.step(character, 15.0)
+			map.player.global_position = Vector2(60, 60)
+			await gallery.frames(8)
+		"flask_upgrades":
+			if character.inventory.count(&"gold_coin") < 300:
+				character.inventory.add_item(&"gold_coin", 300)
+			var mara := map.get_node("Mara") as StoryNpc
+			await _stand_at(gallery, mara)
+			hud.open_npc_service(&"hearth_flask", mara)
+			await gallery.frames(3)
 		"restoration_revitalize":
 			character.world.set_restoration(&"tanners_lodge", RestorationService.RESTORED)
 			var lodge := map.get_node("Ruins/TannersLodge") as RuinSite

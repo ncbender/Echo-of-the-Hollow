@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/rpg/consumables/potion_effect_definition.gd" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("3_mod")
+stat = &"resource_efficiency"
+flat = 10
+percent = 0
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2_effect")
+id = &"resonance_elixir"
+summary = "-10% class resource costs"
+duration = 60.0
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_1")])
+color = Color(0.6, 0.45, 0.95, 1)
+
+[resource]
+script = ExtResource("1_item")
+id = &"resonance_elixir"
+display_name = "Resonance Elixir"
+description = "A humming elixir that eases the strain of your class's arts."
+category = 5
+rarity = 1
+max_stack = 10
+slot_kind = 0
+potion_effect = SubResource("Effect")

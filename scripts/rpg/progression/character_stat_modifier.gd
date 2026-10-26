@@ -18,6 +18,7 @@ func modify_hit(hit: HitData) -> void:
 	if hit.source == HitData.Source.SKILL:
 		damage_percent = stats.get(Stats.SKILL_DAMAGE, 0.0) + (damage_percent if hit.damage_type == &"physical" else 0.0)
 	hit.damage *= 1.0 + damage_percent / 100.0
+	hit.damage *= 1.0 + stats.get(Stats.DAMAGE_DEALT, 0.0) / 100.0   # all outgoing damage (potions)
 	hit.poise_damage *= 1.0 + stats.get(Stats.POISE_DAMAGE, 0.0) / 100.0
 	if &"heavy" in hit.tags and &"finisher" in hit.tags:
 		var finisher: float = 1.0 + stats.get(Stats.FINISHER_POWER, 0.0) / 100.0

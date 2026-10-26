@@ -12,7 +12,7 @@ const CONTROLS := [
 	[&"move_up", "Move up"], [&"move_down", "Move down"], [&"move_left", "Move left"], [&"move_right", "Move right"],
 	[&"attack_light", "Light attack"], [&"attack_heavy", "Heavy attack (hold to charge)"], [&"dash", "Dash (movement direction; standing still: towards the cursor)"],
 	[&"defensive", "Block / parry"], [&"ability_1", "Skill 1"], [&"ability_2", "Skill 2"], [&"ability_3", "Skill 3"],
-	[&"ability_4", "Skill 4"], [&"weapon_slot_1", "Weapon 1"], [&"weapon_slot_2", "Weapon 2"], [&"interact", "Interact / talk / continue"],
+	[&"ability_4", "Skill 4"], [&"use_flask", "Hearth Flask"], [&"use_potion", "Special potion (potion slot)"], [&"interact", "Interact / talk / continue"],
 	[&"ui_inventory", "Inventory"], [&"ui_character", "Character, talents and skills"], [&"ui_journal", "Journal"],
 	[&"ui_map", "Map"], [&"ui_professions", "Professions"], [&"ui_options", "Options"], [&"ui_cancel", "Pause menu / close"], [&"toggle_fullscreen", "Fullscreen"],
 ]

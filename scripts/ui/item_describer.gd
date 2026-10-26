@@ -101,6 +101,12 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 			names.append(class_def.display_name if class_def != null else String(class_id))
 		var allowed := character.classes.active_class_id in definition.required_class_ids
 		result.append(_l("Requires: %s" % ", ".join(names), "line" if allowed else "bad"))
+	# special potion: its buff (one at a time, shared cooldown)
+	if definition.potion_effect != null:
+		var effect := definition.potion_effect
+		var minutes := "%d min" % roundi(effect.duration / 60.0) if effect.duration >= 60.0 else "%d s" % roundi(effect.duration)
+		_section(result, "Potion", [_l("%s for %s" % [effect.summary, minutes], "line", effect.color.lightened(0.3)),
+			_l("Drink with [2] once it is on the potion slot (right-click). One potion effect at a time; a new one replaces it. %d s shared cooldown." % roundi(character.database.rules.potion_cooldown), "dim")])
 	# protection and origin (single items; stacks carry neither; not on recipe previews)
 	if not definition.is_stackable() and item.instance_id != "preview":
 		var marks: PackedStringArray = []

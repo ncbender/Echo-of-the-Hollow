@@ -94,7 +94,7 @@ func test_refused_crafts_change_nothing() -> void:
 		check((cases[label] as Dictionary).error != "", "%s refused: %s" % [label, (cases[label] as Dictionary).error])
 	check(str(cases["missing materials"].error).contains("Iron Ore 0/3"), "names what is missing")
 	check(str(cases["wrong workstation"].error).contains("Tanner's Lodge"), "names the right workstation")
-	check(str(cases["not craftable yet (potion)"].error).contains("Potions cannot be used yet"), "data-only recipe explained")
+	check(str(cases["not craftable yet (potion)"].error).contains("Not brewed in this version"), "data-only recipe explained")
 	# too low level: a recipe above the profession level
 	character.inventory.add_item(&"cured_leather", 4)
 	character.professions.learn(&"lw_leather_bracers")   # learned, but needs level 3

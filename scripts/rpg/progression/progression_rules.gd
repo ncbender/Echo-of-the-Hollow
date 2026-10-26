@@ -60,6 +60,22 @@ extends Resource
 ## Items every new character starts with (ids from data/items).
 @export var starting_items: Array[ItemCost] = []
 
+@export_group("Hearth Flask & Potions")
+## Hearth Flask (a character feature, not an item). Charges at upgrade level 0
+## and the charges each capacity upgrade adds; costs are gold (provisional).
+@export var flask_base_charges: int = 2
+@export var flask_capacity_costs: PackedInt32Array = PackedInt32Array([150, 450, 1100, 2400])
+## Share of max health healed per charge: index = potency upgrade level (0 = base).
+@export var flask_potency_heal: PackedFloat32Array = PackedFloat32Array([0.30, 0.40, 0.50, 0.60, 0.70])
+@export var flask_potency_costs: PackedInt32Array = PackedInt32Array([200, 550, 1300, 2800])
+## Drinking the flask: seconds until the heal lands, movement share meanwhile.
+@export var flask_drink_time: float = 1.1
+@export var drink_move_multiplier: float = 0.45
+## Special potions: drink time and the shared cooldown from a successful drink.
+## The movement share while drinking is the flask's (no own value designed).
+@export var potion_drink_time: float = 0.7
+@export var potion_cooldown: float = 30.0
+
 @export_group("Salvaging")
 ## Share of an item base's raw materials returned by salvaging, per rarity
 ## (index = ItemDefinition.Rarity: Normal, Magic, Rare, Epic, Legendary) as

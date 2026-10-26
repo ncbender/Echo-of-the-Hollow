@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/rpg/consumables/potion_effect_definition.gd" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("3_mod")
+stat = &"move_speed"
+flat = 7
+percent = 0
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2_effect")
+id = &"quickstep_tincture"
+summary = "+7% movement speed"
+duration = 240.0
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_1")])
+color = Color(0.45, 0.8, 0.95, 1)
+
+[resource]
+script = ExtResource("1_item")
+id = &"quickstep_tincture"
+display_name = "Quickstep Tincture"
+description = "A light tincture that quickens the step. The dash is unchanged."
+category = 5
+rarity = 1
+max_stack = 10
+slot_kind = 0
+potion_effect = SubResource("Effect")

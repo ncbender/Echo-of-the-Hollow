@@ -20,6 +20,9 @@ var ability_slot: int = -1
 ## Shift (defensive): pressed this tick (edge) and currently held (level).
 var defend_pressed: bool = false
 var defend_held: bool = false
+## Quick use (keys 1 / 2): Hearth Flask and the slotted special potion (edges).
+var flask_pressed: bool = false
+var potion_pressed: bool = false
 
 
 ## Clears one-shot flags after the frame was consumed; level state (move, aim, held) stays.
@@ -31,3 +34,5 @@ func clear_edges() -> void:
 	weapon_slot = -1
 	ability_slot = -1
 	defend_pressed = false
+	flask_pressed = false
+	potion_pressed = false

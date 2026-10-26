@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ProfessionRecipeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/professions/profession_recipe_definition.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Cost_1"]
+script = ExtResource("2_cost")
+item_id = &"duskleaf"
+quantity = 4
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"al_whisperbloom_concentrate"
+display_name = "Whisperbloom Concentrate"
+profession_id = &"alchemy"
+required_level = 4
+xp = 30
+is_processing = false
+output_item_id = &"whisperbloom_concentrate"
+output_quantity = 1
+inputs = Array[ExtResource("2_cost")]([SubResource("Cost_1")])
+craftable = false
+unavailable_reason = "No foe can afflict you with a status yet - there is nothing for Whisperbloom to resist."

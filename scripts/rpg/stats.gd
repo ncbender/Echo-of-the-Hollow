@@ -43,10 +43,20 @@ const COOLDOWN_REDUCTION := &"cooldown_reduction"
 const RESOURCE_EFFICIENCY := &"resource_efficiency"
 ## Flat bonus on the class resource maximum.
 const MAX_RESOURCE := &"max_resource"
+## Consumables 1.0 (special potions) and Armor Mastery 1.0:
+## Percent bonus on ALL outgoing hit damage (weapon, skill and effect hits).
+const DAMAGE_DEALT := &"damage_dealt"
+## Percent less damage taken (after armor, capped at 75); never touches block / parry windows.
+const DAMAGE_REDUCTION := &"damage_reduction"
+## Percent faster normal movement (walking only: never dash distance, iFrames or charges).
+const MOVE_SPEED := &"move_speed"
+## Percent resistance against statuses applied to the character (0..100).
+const STATUS_RESISTANCE := &"status_resistance"
 
 const ALL: Array[StringName] = [MAX_HEALTH, PHYSICAL_DAMAGE, ARMOR, CRIT_CHANCE, ATTACK_SPEED, POISE_DAMAGE,
 	CRIT_DAMAGE, FINISHER_POWER, KNOCKBACK_POWER, RESOURCE_GAIN, LIFE_ON_HIT, SHOCK_DAMAGE,
-	BLEED_CHANCE, BLEED_DAMAGE, CHILL_CHANCE, SKILL_DAMAGE, COOLDOWN_REDUCTION, RESOURCE_EFFICIENCY, MAX_RESOURCE]
+	BLEED_CHANCE, BLEED_DAMAGE, CHILL_CHANCE, SKILL_DAMAGE, COOLDOWN_REDUCTION, RESOURCE_EFFICIENCY, MAX_RESOURCE,
+	DAMAGE_DEALT, DAMAGE_REDUCTION, MOVE_SPEED, STATUS_RESISTANCE]
 const ARMOR_CONSTANT := 100.0
 const CRIT_MULTIPLIER := 1.5
 const NAMES := {
@@ -57,6 +67,8 @@ const NAMES := {
 	BLEED_CHANCE: "Bleed Chance %", BLEED_DAMAGE: "Bleed Damage %", CHILL_CHANCE: "Chill Chance %",
 	SKILL_DAMAGE: "Skill Damage %", COOLDOWN_REDUCTION: "Cooldown Reduction %",
 	RESOURCE_EFFICIENCY: "Resource Efficiency %", MAX_RESOURCE: "Max Class Resource",
+	DAMAGE_DEALT: "Damage Dealt %", DAMAGE_REDUCTION: "Damage Taken Reduction %", MOVE_SPEED: "Movement Speed %",
+	STATUS_RESISTANCE: "Status Resistance %",
 }
 
 

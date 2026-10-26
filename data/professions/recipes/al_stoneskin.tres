@@ -25,4 +25,4 @@ output_item_id = &"stoneskin_draught"
 output_quantity = 1
 inputs = Array[ExtResource("2_cost")]([SubResource("Cost_1"), SubResource("Cost_2")])
 craftable = false
-unavailable_reason = "Potions cannot be used yet - this recipe opens once consumables are in the game."
+unavailable_reason = "Not brewed in this version."

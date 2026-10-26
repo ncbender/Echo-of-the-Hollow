@@ -17,6 +17,9 @@ signal status_removed(status_id: StringName)
 var resistances: Dictionary = {}
 ## Largest total slow this entity accepts (EnemyConfig.max_slow, bosses lower).
 var max_slow_cap: float = 0.9
+## Resistance against every status (0..1), combined with the per-status one
+## (Status Resistance stat of the player character).
+var general_resistance: float = 0.0
 
 var _active: Dictionary = {}   # status id -> Entry
 
@@ -54,7 +57,7 @@ func apply(definition: StatusEffectDefinition, power: float = 1.0, source: Node 
 		on_damage: Callable = Callable(), stacks: int = 1) -> bool:
 	if definition == null or _is_dead():
 		return false
-	var resistance := clampf(float(resistances.get(definition.id, 0.0)), 0.0, 1.0)
+	var resistance := 1.0 - (1.0 - clampf(float(resistances.get(definition.id, 0.0)), 0.0, 1.0)) * (1.0 - clampf(general_resistance, 0.0, 1.0))
 	if resistance >= 1.0:
 		return false
 	var factor := 1.0 - resistance

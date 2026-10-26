@@ -10,3 +10,6 @@ extends Resource
 @export var dialogues: Array[DialogueDefinition] = []
 ## Said as a short speech bubble when no dialogue is available.
 @export var idle_lines: PackedStringArray = []
+## Service window the NPC opens when no dialogue is pending (&"" = none), e.g.
+## &"hearth_flask": Mara's Hearth Flask upgrades (GameHud.open_npc_service).
+@export var service: StringName

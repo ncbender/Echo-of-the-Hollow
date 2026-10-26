@@ -180,7 +180,9 @@ func test_migration_v3_to_v4() -> void:
 	check_eq(upgraded.prologue.stage, "completed", "old warrior unlock counts as the prologue choice")
 	check_eq(upgraded.prologue.chosen_class, "warrior", "chosen class kept")
 	check_eq(upgraded.class_builds, {}, "empty builds")
-	check_eq(upgraded.inventory, old.inventory, "items untouched")
+	for entry: Dictionary in upgraded.inventory:
+		entry.erase("origin")   # v8 marks the origin unknown_legacy (test_salvage)
+	check_eq(upgraded.inventory, old.inventory, "items otherwise untouched")
 	var warnings: PackedStringArray = []
 	var restored := Character.from_dict(upgraded, db, warnings)
 	check(restored.classes.is_unlocked(&"warrior"), "nothing unlocked is locked again")

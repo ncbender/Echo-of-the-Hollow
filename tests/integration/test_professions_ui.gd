@@ -176,7 +176,7 @@ func test_locked_recipes_show_why_and_patterns_teach() -> void:
 	panel.select_profession(&"alchemy")
 	await _frames()
 	var potion := panel.find_child("Recipe_al_stoneskin", true, false) as Button
-	check(potion != null and potion.tooltip_text.contains("Potions cannot be used yet"), "data-only potion explained")
+	check(potion != null and potion.tooltip_text.contains("Not brewed in this version"), "data-only potion explained")
 	check((panel.find_child("Craft", true, false) as Button).disabled, "potion not craftable")
 	# gathering page: resources with level and XP
 	panel.show_page("Gathering")

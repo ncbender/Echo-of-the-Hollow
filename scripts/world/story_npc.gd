@@ -2,11 +2,14 @@ class_name StoryNpc
 extends Interactable
 ## A named NPC standing in a map while `condition` holds (Mara at the cart, Mara
 ## in Haven, Edrin at the north gate). Interact (G): the NPC's current
-## dialogue, otherwise a short idle line. A gold "!" marks a dialogue that moves
+## dialogue, otherwise the NPC's service window (Mara: Hearth Flask upgrades)
+## or a short idle line. A gold "!" marks a dialogue that moves
 ## the story on. Which NPC stands where is data (conditions), never code.
 
 @export var npc_id: StringName
 @export var condition: StoryCondition
+## True where this NPC offers its service window (Mara in Haven, not on the road).
+@export var offers_service: bool = false
 
 var character: Character
 var _bark: String = ""
@@ -50,12 +53,18 @@ func _on_flag_changed(_flag: StringName, _value: Variant) -> void:
 	refresh_story()
 
 
+## A dialogue not heard yet comes first; an already heard (repeatable) one
+## gives way to the NPC's service window, which offers "Talk" for it.
 func interact(hud: GameHud) -> void:
-	var dialogue := DialogueService.pick(character, definition())
+	var npc := definition()
+	var dialogue := DialogueService.pick(character, npc)
+	var heard := dialogue != null and character.world.has_flag(dialogue.done_flag())
+	if offers_service and npc != null and npc.service != &"" and (dialogue == null or heard) \
+			and hud.open_npc_service(npc.service, self):
+		return
 	if dialogue != null:
 		hud.open_dialogue(dialogue)
 		return
-	var npc := definition()
 	if npc != null and not npc.idle_lines.is_empty():
 		say(npc.idle_lines[randi() % npc.idle_lines.size()])
 

@@ -19,6 +19,7 @@ static func _steps() -> Dictionary:
 		5: _v5_to_v6,
 		6: _v6_to_v7,
 		7: _v7_to_v8,
+		8: _v8_to_v9,
 	}
 
 
@@ -204,4 +205,13 @@ static func _v7_to_v8(data: Dictionary) -> Dictionary:
 		for entry: Variant in list:
 			if entry is Dictionary and not (entry as Dictionary).has("origin"):
 				entry["origin"] = "unknown_legacy"
+	return data
+
+
+## v9 (Hearth Flask & Consumables 1.0): the flask without upgrades and with
+## full base charges (-1 = filled from the rules on load), no potion slot, no
+## buff, no cooldown. Nothing else changes.
+static func _v8_to_v9(data: Dictionary) -> Dictionary:
+	if not data.get("consumables") is Dictionary:
+		data["consumables"] = {"capacity": 0, "potency": 0, "charges": -1, "potion_slot": "", "buff": "", "buff_left": 0.0, "cooldown": 0.0}
 	return data

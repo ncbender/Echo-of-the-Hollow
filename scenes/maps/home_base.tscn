@@ -295,6 +295,7 @@ position = Vector2(-40, 26)
 script = ExtResource("13_npc")
 npc_id = &"mara"
 condition = SubResource("C_in_haven")
+offers_service = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Mara"]
 shape = SubResource("Circle_npc")

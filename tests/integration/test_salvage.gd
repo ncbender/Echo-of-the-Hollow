@@ -97,7 +97,7 @@ func test_origin_and_marks() -> void:
 	var mantle := loaded.character.inventory.find(found.instance_id)
 	check(again != null and again.favorite and again.origin == ItemInstance.ORIGIN_CRAFTED, "favourite and origin after loading")
 	check(mantle != null and mantle.locked and mantle.favorite and mantle.origin == ItemInstance.ORIGIN_FOUND, "lock after loading")
-	check_eq(int(SaveSystem.VERSION), 8, "save version 8")
+	check(int(SaveSystem.VERSION) >= 8, "save version 8 or later")
 
 
 func test_v7_items_become_unknown_legacy_and_keep_their_data() -> void:

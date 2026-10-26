@@ -58,10 +58,16 @@ func test_dash_ignores_key_repeat() -> void:
 	check(not input.poll(character).dash_pressed, "OS key repeat is ignored")
 
 
-func test_weapon_slot_keys() -> void:
+## Consumables 1.0: key 1 drinks the Hearth Flask, key 2 the slotted potion;
+## the weapon slot actions no longer listen to those keys.
+func test_quick_use_keys() -> void:
 	var nodes := _setup()
 	var character: Node2D = nodes[0]
 	var input: PlayerInput = nodes[1]
+	input._unhandled_input(_key(KEY_1, true))
+	var first := input.poll(character)
+	check(first.flask_pressed and not first.potion_pressed and first.weapon_slot == -1, "key 1 -> flask, no weapon switch")
+	check(not input.poll(character).flask_pressed, "flask edge consumed")
 	input._unhandled_input(_key(KEY_2, true))
-	check_eq(input.poll(character).weapon_slot, 1, "key 2 -> slot index 1")
-	check_eq(input.poll(character).weapon_slot, -1, "slot request consumed")
+	var second := input.poll(character)
+	check(second.potion_pressed and second.weapon_slot == -1, "key 2 -> potion, no weapon switch")

@@ -12,6 +12,10 @@ const ABILITY_ACTIONS: Array[StringName] = [&"ability_1", &"ability_2", &"abilit
 var _pending := InputFrame.new()
 
 
+func _ready() -> void:
+	GameHud.ensure_input_actions()   # use_flask / use_potion and the other runtime actions
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
@@ -23,6 +27,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_pending.heavy_released = true
 	elif event.is_action_pressed(&"dash"):
 		_pending.dash_pressed = true
+	elif event.is_action_pressed(&"use_flask"):
+		_pending.flask_pressed = true
+	elif event.is_action_pressed(&"use_potion"):
+		_pending.potion_pressed = true
 	elif event.is_action_pressed(&"weapon_slot_1"):
 		_pending.weapon_slot = 0
 	elif event.is_action_pressed(&"defensive"):
@@ -49,6 +57,8 @@ func poll(character: Node2D) -> InputFrame:
 	frame.weapon_slot = _pending.weapon_slot
 	frame.ability_slot = _pending.ability_slot
 	frame.defend_pressed = _pending.defend_pressed
+	frame.flask_pressed = _pending.flask_pressed
+	frame.potion_pressed = _pending.potion_pressed
 	frame.defend_held = Input.is_action_pressed(&"defensive")
 	_pending.clear_edges()
 	return frame

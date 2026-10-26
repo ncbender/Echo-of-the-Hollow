@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/rpg/consumables/potion_effect_definition.gd" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_mod"]
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("3_mod")
+stat = &"damage_dealt"
+flat = 8
+percent = 0
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2_effect")
+id = &"ember_draught"
+summary = "+8% damage dealt"
+duration = 45.0
+modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_1")])
+color = Color(0.95, 0.5, 0.2, 1)
+
+[resource]
+script = ExtResource("1_item")
+id = &"ember_draught"
+display_name = "Ember Draught"
+description = "A warm, smoky draught that sharpens every blow."
+category = 5
+rarity = 1
+max_stack = 10
+slot_kind = 0
+potion_effect = SubResource("Effect")
