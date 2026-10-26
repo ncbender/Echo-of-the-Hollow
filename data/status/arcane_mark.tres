@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffectDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/status_effect_definition.gd" id="1_srpou"]
+
+[resource]
+script = ExtResource("1_srpou")
+id = &"arcane_mark"
+display_name = "Arcane Mark"
+description = "Marked by arcane energy (up to 3 stacks). Some spells detonate the marks for extra damage."
+duration = 6.0
+max_stacks = 3
+stack_rule = 1
+damage_type = &"arcane"
+color = Color(0.72, 0.5, 1, 1)

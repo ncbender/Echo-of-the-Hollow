@@ -1,0 +1,297 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_j1h34"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_dojwb"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_308gy"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_i0wan"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_l4u7y"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_6u2aw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_dh0u3"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_ipjd4"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_da7bw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="10_ksnbn"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/zone_action.gd" id="11_3jhcj"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="12_jyg58"]
+
+[sub_resource type="Resource" id="Resource_4ag4q"]
+script = ExtResource("4_i0wan")
+stat = &"skill_damage"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_bqi83"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_inscribed"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Inscribed"
+description = "+3% skill damage per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_4ag4q")])
+
+[sub_resource type="Resource" id="Resource_tg054"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_lore"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Glyph Lore"
+description = "Unlocks the Double Mark modification for Arcane Bolt."
+column = 1
+unlocks_mods = Array[StringName]([&"bolt_double_mark"])
+
+[sub_resource type="Resource" id="Resource_jcgsk"]
+script = ExtResource("5_l4u7y")
+sources = 3
+target_status = &"arcane_mark"
+
+[sub_resource type="Resource" id="Resource_2pwve"]
+script = ExtResource("6_6u2aw")
+condition = SubResource("Resource_jcgsk")
+damage_percent = 6.0
+effect_id = &"arc_resonant"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_bxdu0"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_resonant"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Resonant Marks"
+description = "+6% damage per rank against targets with an Arcane Mark."
+tier = 2
+max_rank = 3
+effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_2pwve")])
+
+[sub_resource type="Resource" id="Resource_ec0rl"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_rift"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Arcane Rift"
+description = "Unlocks the active skill Arcane Rift."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"arcane_rift"
+
+[sub_resource type="Resource" id="Resource_4psj4"]
+script = ExtResource("5_l4u7y")
+sources = 2
+required_tags = Array[StringName]([&"consumed_arcane_mark"])
+
+[sub_resource type="Resource" id="Resource_cs1kt"]
+script = ExtResource("6_6u2aw")
+condition = SubResource("Resource_4psj4")
+damage_percent = 5.0
+effect_id = &"arc_detonation"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_frl70"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_detonation"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Detonation"
+description = "+5% damage per rank on hits that detonate Arcane Marks."
+tier = 3
+max_rank = 5
+effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_cs1kt")])
+
+[sub_resource type="Resource" id="Resource_5hrux"]
+script = ExtResource("7_dh0u3")
+status_id = &"chill"
+
+[sub_resource type="Resource" id="Resource_6krfd"]
+script = ExtResource("3_308gy")
+id = &"arc_binding"
+display_name = "Arc Binding"
+skill_ids = Array[StringName]([&"rune_sigil"])
+add_statuses = Array[ExtResource("7_dh0u3")]([SubResource("Resource_5hrux")])
+
+[sub_resource type="Resource" id="Resource_bjb47"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_binding"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Sigil of Binding"
+description = "Rune Sigil also chills (1 stack per pulse)."
+kind = 2
+tier = 3
+column = 1
+skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_6krfd")])
+
+[sub_resource type="Resource" id="Resource_xl2v1"]
+script = ExtResource("4_i0wan")
+stat = &"resource_efficiency"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_qf5s3"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_flow"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Mana Flow"
+description = "+3% resource efficiency per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_xl2v1")])
+
+[sub_resource type="Resource" id="Resource_lj6db"]
+script = ExtResource("5_l4u7y")
+sources = 2
+required_tags = Array[StringName]([&"consumed_arcane_mark"])
+
+[sub_resource type="Resource" id="Resource_pi17g"]
+script = ExtResource("9_da7bw")
+condition = SubResource("Resource_lj6db")
+resource_gain = 2.0
+effect_id = &"arc_echo"
+hit_sources = 2
+
+[sub_resource type="Resource" id="Resource_qyh3p"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_echo"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Echoing Marks"
+description = "Detonating Arcane Marks restores 2 mana per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_pi17g")])
+
+[sub_resource type="Resource" id="Resource_cverd"]
+script = ExtResource("4_i0wan")
+stat = &"crit_chance"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_7kude"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_runes"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Runic Precision"
+description = "+3% critical hit chance per rank."
+tier = 5
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_cverd")])
+
+[sub_resource type="Resource" id="Resource_3h6du"]
+script = ExtResource("3_308gy")
+id = &"arc_grand_rift"
+display_name = "Arc Grand Rift"
+skill_ids = Array[StringName]([&"arcane_rift"])
+radius_multiplier = 1.3
+
+[sub_resource type="Resource" id="Resource_nmmww"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_grandrift"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Grand Rift"
+description = "Arcane Rift covers 30% more area."
+kind = 2
+tier = 5
+column = 1
+prerequisites = Array[StringName]([&"arc_rm_rift"])
+skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_3h6du")])
+
+[sub_resource type="Resource" id="Resource_4id1k"]
+script = ExtResource("4_i0wan")
+stat = &"max_resource"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_qxxh6"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_reservoir"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Arcane Reservoir"
+description = "+6 maximum mana per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_4id1k")])
+
+[sub_resource type="Resource" id="Resource_2tywv"]
+script = ExtResource("5_l4u7y")
+sources = 3
+target_status = &"arcane_mark"
+target_status_stacks = 3
+
+[sub_resource type="Resource" id="Resource_d6to4"]
+script = ExtResource("6_6u2aw")
+condition = SubResource("Resource_2tywv")
+damage_percent = 6.0
+effect_id = &"arc_ruin"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_tunlv"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_ruin"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Mark of Ruin"
+description = "+6% damage per rank against targets with 3 Arcane Marks."
+tier = 6
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_d6to4")])
+
+[sub_resource type="Resource" id="Resource_bok24"]
+script = ExtResource("10_ksnbn")
+damage = 18.0
+poise_damage = 12.0
+knockback = 10.0
+damage_type = &"arcane"
+consume_status = &"arcane_mark"
+consume_damage_per_stack = 8.0
+
+[sub_resource type="Resource" id="Resource_bjfn7"]
+script = ExtResource("7_dh0u3")
+status_id = &"arcane_mark"
+
+[sub_resource type="Resource" id="Resource_iunhr"]
+script = ExtResource("10_ksnbn")
+damage = 5.0
+poise_damage = 2.0
+knockback = 0.0
+damage_type = &"arcane"
+statuses = Array[ExtResource("7_dh0u3")]([SubResource("Resource_bjfn7")])
+
+[sub_resource type="Resource" id="Resource_pmj7m"]
+script = ExtResource("11_3jhcj")
+distance = 80.0
+delay = 1.2
+duration = 2.5
+interval = 0.5
+hit = SubResource("Resource_iunhr")
+end_hit = SubResource("Resource_bok24")
+color = Color(0.72, 0.5, 1, 1)
+style = 1
+
+[sub_resource type="Resource" id="Resource_lv2p0"]
+script = ExtResource("3_308gy")
+id = &"arc_glyph_cascade"
+display_name = "Arc Glyph Cascade"
+skill_ids = Array[StringName]([&"rune_sigil"])
+radius_multiplier = 1.2
+extra_actions = Array[ExtResource("8_ipjd4")]([SubResource("Resource_pmj7m")])
+
+[sub_resource type="Resource" id="Resource_3mad1"]
+script = ExtResource("1_j1h34")
+id = &"arc_rm_cascade"
+class_id = &"arcanist"
+tree_id = &"arc_runemaster"
+display_name = "Glyph Cascade"
+description = "Capstone - Rune Sigil covers 20% more area and inscribes a second sigil that arms after 1.2 s."
+kind = 2
+tier = 7
+skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_lv2p0")])
+
+[resource]
+script = ExtResource("12_jyg58")
+id = &"arc_runemaster"
+class_id = &"arcanist"
+display_name = "Runemaster"
+description = "Arcane marks, sigils and detonations. Capstone: Glyph Cascade."
+color = Color(0.72, 0.5, 1, 1)
+nodes = Array[ExtResource("1_j1h34")]([SubResource("Resource_bqi83"), SubResource("Resource_tg054"), SubResource("Resource_bxdu0"), SubResource("Resource_ec0rl"), SubResource("Resource_frl70"), SubResource("Resource_bjb47"), SubResource("Resource_qf5s3"), SubResource("Resource_qyh3p"), SubResource("Resource_7kude"), SubResource("Resource_nmmww"), SubResource("Resource_qxxh6"), SubResource("Resource_tunlv"), SubResource("Resource_3mad1")])

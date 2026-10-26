@@ -1,0 +1,251 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_1wb6j"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_04l70"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_acwfr"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_o8u7l"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_qxj6g"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_l7wql"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_6ixsb"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_wrdke"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_3s5el"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_aqh41"]
+
+[sub_resource type="Resource" id="Resource_wmvm6"]
+script = ExtResource("4_o8u7l")
+stat = &"resource_gain"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_p4d1a"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_studious"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Studious"
+description = "+4% mana gain per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_wmvm6")])
+
+[sub_resource type="Resource" id="Resource_lrnup"]
+script = ExtResource("4_o8u7l")
+stat = &"resource_efficiency"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_clwfp"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_clarity"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Clarity"
+description = "+4% resource efficiency per rank."
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_lrnup")])
+
+[sub_resource type="Resource" id="Resource_kv414"]
+script = ExtResource("5_qxj6g")
+sources = 2
+min_resource_ratio = 0.6
+
+[sub_resource type="Resource" id="Resource_si2d0"]
+script = ExtResource("6_l7wql")
+condition = SubResource("Resource_kv414")
+damage_percent = 5.0
+effect_id = &"arc_focused_mind"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_gpi6q"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_focus"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Focused Mind"
+description = "+5% skill damage per rank while your mana is at least 60%."
+tier = 2
+max_rank = 3
+effects = Array[ExtResource("2_04l70")]([SubResource("Resource_si2d0")])
+
+[sub_resource type="Resource" id="Resource_bqlgb"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_lance"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Astral Lance"
+description = "Unlocks the active skill Astral Lance."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"astral_lance"
+
+[sub_resource type="Resource" id="Resource_hos8s"]
+script = ExtResource("4_o8u7l")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_ryop7"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_shards"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Star Shards"
+description = "+2% critical hit chance per rank."
+tier = 3
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_hos8s")])
+
+[sub_resource type="Resource" id="Resource_b8k02"]
+script = ExtResource("3_acwfr")
+id = &"arc_lance_of_stars"
+display_name = "Arc Lance Of Stars"
+skill_ids = Array[StringName]([&"astral_lance"])
+damage_multiplier = 0.75
+extra_projectiles = 2
+
+[sub_resource type="Resource" id="Resource_17w5a"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_stars"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Lance of Stars"
+description = "Astral Lance fires 3 lances (25% less damage each)."
+kind = 2
+tier = 3
+column = 1
+prerequisites = Array[StringName]([&"arc_as_lance"])
+skill_mods = Array[ExtResource("3_acwfr")]([SubResource("Resource_b8k02")])
+
+[sub_resource type="Resource" id="Resource_5m7sa"]
+script = ExtResource("4_o8u7l")
+stat = &"cooldown_reduction"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_65cf2"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_insight"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Astral Insight"
+description = "+3% cooldown reduction per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_5m7sa")])
+
+[sub_resource type="Resource" id="Resource_b33mx"]
+script = ExtResource("5_qxj6g")
+sources = 2
+requires_crit = true
+
+[sub_resource type="Resource" id="Resource_f458s"]
+script = ExtResource("9_3s5el")
+condition = SubResource("Resource_b33mx")
+resource_gain = 3.0
+effect_id = &"arc_overflow"
+hit_sources = 2
+
+[sub_resource type="Resource" id="Resource_jknsr"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_overflow"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Overflow"
+description = "Critical skill hits restore 3 mana per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_04l70")]([SubResource("Resource_f458s")])
+
+[sub_resource type="Resource" id="Resource_lnxix"]
+script = ExtResource("5_qxj6g")
+sources = 2
+recent_cast = &"rune_sigil"
+recent_seconds = 3.0
+
+[sub_resource type="Resource" id="Resource_57ndk"]
+script = ExtResource("6_l7wql")
+condition = SubResource("Resource_lnxix")
+damage_percent = 6.0
+effect_id = &"arc_empowered_study"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_ajpbm"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_empowered"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Empowered Study"
+description = "Spells deal 6% more damage per rank within 3 s after casting Rune Sigil."
+tier = 5
+max_rank = 3
+effects = Array[ExtResource("2_04l70")]([SubResource("Resource_57ndk")])
+
+[sub_resource type="Resource" id="Resource_3i22m"]
+script = ExtResource("3_acwfr")
+id = &"arc_pulse_barrage"
+display_name = "Arc Pulse Barrage"
+skill_ids = Array[StringName]([&"mana_pulse"])
+cooldown_multiplier = 0.7
+
+[sub_resource type="Resource" id="Resource_euuah"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_barrage"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Pulse Barrage"
+description = "Mana Pulse recharges 30% faster."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_acwfr")]([SubResource("Resource_3i22m")])
+
+[sub_resource type="Resource" id="Resource_nigte"]
+script = ExtResource("4_o8u7l")
+stat = &"max_resource"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_pk21d"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_reserves"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Deep Reserves"
+description = "+6 maximum mana per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_nigte")])
+
+[sub_resource type="Resource" id="Resource_4cpil"]
+script = ExtResource("4_o8u7l")
+stat = &"crit_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_lahfj"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_precision"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Stellar Precision"
+description = "+10% critical damage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_o8u7l")]([SubResource("Resource_4cpil")])
+
+[sub_resource type="Resource" id="Resource_4p71u"]
+script = ExtResource("1_1wb6j")
+id = &"arc_as_ascension"
+class_id = &"arcanist"
+tree_id = &"arc_astral"
+display_name = "Astral Ascension"
+description = "Capstone - unlocks Astral Ascension: 10 s of 40% cheaper, 25% stronger and 20% faster-recharging skills."
+kind = 1
+tier = 7
+unlocks_skill = &"astral_ascension"
+
+[resource]
+script = ExtResource("10_aqh41")
+id = &"arc_astral"
+class_id = &"arcanist"
+display_name = "Astral Scholar"
+description = "Mana mastery, piercing starlight and burst. Capstone: Astral Ascension."
+color = Color(0.95, 0.9, 0.55, 1)
+nodes = Array[ExtResource("1_1wb6j")]([SubResource("Resource_p4d1a"), SubResource("Resource_clwfp"), SubResource("Resource_gpi6q"), SubResource("Resource_bqlgb"), SubResource("Resource_ryop7"), SubResource("Resource_17w5a"), SubResource("Resource_65cf2"), SubResource("Resource_jknsr"), SubResource("Resource_ajpbm"), SubResource("Resource_euuah"), SubResource("Resource_pk21d"), SubResource("Resource_lahfj"), SubResource("Resource_4p71u")])

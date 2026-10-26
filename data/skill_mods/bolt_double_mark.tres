@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_3vi1r"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_4a6nt"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_crbaw"]
+
+[sub_resource type="Resource" id="Resource_5k3pn"]
+script = ExtResource("1_3vi1r")
+status_id = &"arcane_mark"
+
+[resource]
+script = ExtResource("3_crbaw")
+id = &"bolt_double_mark"
+display_name = "Double Mark"
+description = "Arcane Bolt applies an additional Arcane Mark."
+slot = 1
+skill_ids = Array[StringName]([&"arcane_bolt"])
+incompatible_with = Array[StringName]([&"bolt_split"])
+unlock_source = &"talent.arc_rm_lore"
+add_statuses = Array[ExtResource("1_3vi1r")]([SubResource("Resource_5k3pn")])

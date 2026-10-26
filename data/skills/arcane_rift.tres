@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_co2p8"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_jqlih"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_0m6la"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/zone_action.gd" id="4_b4vj1"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_ycdbq"]
+
+[sub_resource type="Resource" id="Resource_mlmrt"]
+script = ExtResource("3_0m6la")
+status_id = &"arcane_mark"
+
+[sub_resource type="Resource" id="Resource_kva72"]
+script = ExtResource("2_jqlih")
+damage = 7.0
+poise_damage = 4.0
+knockback = 0.0
+damage_type = &"arcane"
+statuses = Array[ExtResource("3_0m6la")]([SubResource("Resource_mlmrt")])
+
+[sub_resource type="Resource" id="Resource_t7n0i"]
+script = ExtResource("4_b4vj1")
+distance = 70.0
+radius = 36.0
+duration = 2.5
+interval = 0.4
+hit = SubResource("Resource_kva72")
+color = Color(0.72, 0.5, 1, 1)
+
+[resource]
+script = ExtResource("5_ycdbq")
+id = &"arcane_rift"
+class_id = &"arcanist"
+display_name = "Arcane Rift"
+description = "Tear open a rift ahead of you that pulses arcane damage and marks everything inside."
+color = Color(0.72, 0.5, 1, 1)
+tags = Array[StringName]([&"spell", &"rift", &"arcane"])
+resource_cost = 30.0
+cooldown = 12.0
+unlock_level = 0
+cast_lock = 0.3
+actions = Array[ExtResource("1_co2p8")]([SubResource("Resource_t7n0i")])

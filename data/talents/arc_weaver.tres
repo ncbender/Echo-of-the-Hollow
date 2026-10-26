@@ -1,0 +1,296 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_xvgte"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_wjwrw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_notog"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_iptmi"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_6yoq2"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_m33n4"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_qjekl"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_umqit"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_qtjtp"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_anrk0"]
+
+[sub_resource type="Resource" id="Resource_tv4vh"]
+script = ExtResource("4_iptmi")
+stat = &"chill_chance"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_kslbv"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_focus"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Cold Focus"
+description = "+4% chill chance per rank (weapon hits)."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_tv4vh")])
+
+[sub_resource type="Resource" id="Resource_b3odg"]
+script = ExtResource("5_6yoq2")
+sources = 3
+target_status = &"chill"
+
+[sub_resource type="Resource" id="Resource_ye208"]
+script = ExtResource("6_m33n4")
+condition = SubResource("Resource_b3odg")
+damage_percent = 5.0
+effect_id = &"arc_frostbite"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_dc5v0"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_frostbite"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Frostbite"
+description = "+5% damage per rank against chilled targets."
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_ye208")])
+
+[sub_resource type="Resource" id="Resource_x7aee"]
+script = ExtResource("4_iptmi")
+stat = &"skill_damage"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_rulcp"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_attune"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Elemental Attunement"
+description = "+4% skill damage per rank."
+tier = 2
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_x7aee")])
+
+[sub_resource type="Resource" id="Resource_2jakh"]
+script = ExtResource("7_qjekl")
+status_id = &"chill"
+
+[sub_resource type="Resource" id="Resource_rwa43"]
+script = ExtResource("3_notog")
+id = &"arc_shatterbolt"
+display_name = "Arc Shatterbolt"
+skill_ids = Array[StringName]([&"arcane_bolt"])
+add_statuses = Array[ExtResource("7_qjekl")]([SubResource("Resource_2jakh")])
+
+[sub_resource type="Resource" id="Resource_7ci44"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_shatterbolt"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Shatterbolt"
+description = "Arcane Bolt also chills (1 stack)."
+kind = 2
+tier = 2
+column = 1
+skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_rwa43")])
+
+[sub_resource type="Resource" id="Resource_pbb1m"]
+script = ExtResource("4_iptmi")
+stat = &"armor"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_g2psn"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_ward"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Glacial Ward"
+description = "+6 armor per rank."
+tier = 3
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_pbb1m")])
+
+[sub_resource type="Resource" id="Resource_n1k15"]
+script = ExtResource("7_qjekl")
+status_id = &"chill"
+stacks = 2
+
+[sub_resource type="Resource" id="Resource_ujsme"]
+script = ExtResource("3_notog")
+id = &"arc_frozen_pulse"
+display_name = "Arc Frozen Pulse"
+skill_ids = Array[StringName]([&"mana_pulse"])
+add_statuses = Array[ExtResource("7_qjekl")]([SubResource("Resource_n1k15")])
+
+[sub_resource type="Resource" id="Resource_f115x"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_pulse"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Frozen Pulse"
+description = "Mana Pulse chills (2 stacks)."
+kind = 2
+tier = 3
+column = 1
+skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_ujsme")])
+
+[sub_resource type="Resource" id="Resource_66jge"]
+script = ExtResource("5_6yoq2")
+sources = 2
+target_status = &"chill"
+
+[sub_resource type="Resource" id="Resource_3wisn"]
+script = ExtResource("9_qtjtp")
+condition = SubResource("Resource_66jge")
+resource_gain = 1.0
+effect_id = &"arc_hypothermia"
+hit_sources = 2
+
+[sub_resource type="Resource" id="Resource_3cwge"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_hypothermia"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Hypothermia"
+description = "Skill hits on chilled targets restore 1 mana per rank."
+tier = 4
+max_rank = 5
+effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_3wisn")])
+
+[sub_resource type="Resource" id="Resource_ac2qq"]
+script = ExtResource("4_iptmi")
+stat = &"cooldown_reduction"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_ahmxs"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_permafrost"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Permafrost"
+description = "+3% cooldown reduction per rank."
+tier = 4
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_ac2qq")])
+
+[sub_resource type="Resource" id="Resource_ov0v0"]
+script = ExtResource("5_6yoq2")
+sources = 3
+target_status = &"chill"
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_yjpte"]
+script = ExtResource("9_qtjtp")
+condition = SubResource("Resource_ov0v0")
+cooldown_reduction = 0.5
+effect_id = &"arc_cold_snap"
+hit_sources = 3
+
+[sub_resource type="Resource" id="Resource_6kqym"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_snap"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Cold Snap"
+description = "Killing a chilled enemy reduces all cooldowns by 0.5 s per rank."
+tier = 5
+max_rank = 3
+effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_yjpte")])
+
+[sub_resource type="Resource" id="Resource_w7l78"]
+script = ExtResource("3_notog")
+id = &"arc_ice_lance"
+display_name = "Arc Ice Lance"
+skill_ids = Array[StringName]([&"frostbind"])
+damage_multiplier = 1.2
+extra_pierce = 2
+
+[sub_resource type="Resource" id="Resource_y386y"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_icelance"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Ice Lance"
+description = "Frostbind pierces 2 more targets and deals 20% more damage."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_w7l78")])
+
+[sub_resource type="Resource" id="Resource_emui0"]
+script = ExtResource("4_iptmi")
+stat = &"max_resource"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_a25ks"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_mind"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Winter Mind"
+description = "+6 maximum mana per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_emui0")])
+
+[sub_resource type="Resource" id="Resource_dnfgi"]
+script = ExtResource("4_iptmi")
+stat = &"crit_damage"
+flat = 8.0
+
+[sub_resource type="Resource" id="Resource_7shsn"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_brittle"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Brittle"
+description = "+8% critical damage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_dnfgi")])
+
+[sub_resource type="Resource" id="Resource_c2yjj"]
+script = ExtResource("5_6yoq2")
+sources = 3
+target_status = &"chill"
+target_status_stacks = 3
+
+[sub_resource type="Resource" id="Resource_t5hhg"]
+script = ExtResource("6_m33n4")
+condition = SubResource("Resource_c2yjj")
+damage_percent = 40.0
+mark_tag = &"winters_grasp"
+effect_id = &"arc_winter_bonus"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_uyy4g"]
+script = ExtResource("5_6yoq2")
+sources = 2
+target_status = &"chill"
+target_status_stacks = 3
+
+[sub_resource type="Resource" id="Resource_lw2xs"]
+script = ExtResource("9_qtjtp")
+condition = SubResource("Resource_uyy4g")
+consume_status = &"chill"
+consume_min_stacks = 3
+consume_damage_per_stack = 10.0
+consume_damage_type = &"frost"
+effect_id = &"arc_winter_shatter"
+hit_sources = 2
+
+[sub_resource type="Resource" id="Resource_gde1r"]
+script = ExtResource("1_xvgte")
+id = &"arc_ew_winter"
+class_id = &"arcanist"
+tree_id = &"arc_weaver"
+display_name = "Winter's Grasp"
+description = "Capstone - hits on targets with 3 Chill stacks deal 40% more damage; your skill hits shatter such targets: the chill is consumed for 10 frost damage per stack."
+kind = 2
+tier = 7
+effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_t5hhg"), SubResource("Resource_lw2xs")])
+
+[resource]
+script = ExtResource("10_anrk0")
+id = &"arc_weaver"
+class_id = &"arcanist"
+display_name = "Elemental Weaver"
+description = "Frost and control: chill, shatter, slow. Capstone: Winter's Grasp."
+color = Color(0.6, 0.9, 1, 1)
+nodes = Array[ExtResource("1_xvgte")]([SubResource("Resource_kslbv"), SubResource("Resource_dc5v0"), SubResource("Resource_rulcp"), SubResource("Resource_7ci44"), SubResource("Resource_g2psn"), SubResource("Resource_f115x"), SubResource("Resource_3cwge"), SubResource("Resource_ahmxs"), SubResource("Resource_6kqym"), SubResource("Resource_y386y"), SubResource("Resource_a25ks"), SubResource("Resource_7shsn"), SubResource("Resource_gde1r")])

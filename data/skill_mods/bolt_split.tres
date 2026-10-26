@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_07uwc"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_rh7sb"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_pxjty"]
+
+[resource]
+script = ExtResource("3_pxjty")
+id = &"bolt_split"
+display_name = "Split Bolt"
+description = "Arcane Bolt splits into 3 bolts that deal 30% less damage each."
+skill_ids = Array[StringName]([&"arcane_bolt"])
+incompatible_with = Array[StringName]([&"bolt_double_mark"])
+unlock_level = 4
+damage_multiplier = 0.7
+extra_projectiles = 2

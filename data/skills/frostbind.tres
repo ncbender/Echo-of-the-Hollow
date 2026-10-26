@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_f1cru"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_beepb"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_7nuj5"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/projectile_action.gd" id="4_n1xja"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_7g8r2"]
+
+[sub_resource type="Resource" id="Resource_rsf6b"]
+script = ExtResource("3_7nuj5")
+status_id = &"chill"
+stacks = 2
+
+[sub_resource type="Resource" id="Resource_pvnkt"]
+script = ExtResource("2_beepb")
+damage = 12.0
+poise_damage = 6.0
+knockback = 3.0
+damage_type = &"frost"
+statuses = Array[ExtResource("3_7nuj5")]([SubResource("Resource_rsf6b")])
+bonus_status = &"chill"
+bonus_multiplier = 1.4
+
+[sub_resource type="Resource" id="Resource_6w0i5"]
+script = ExtResource("4_n1xja")
+speed = 240.0
+max_distance = 190.0
+radius = 5.0
+pierce = 1
+hit = SubResource("Resource_pvnkt")
+color = Color(0.6, 0.9, 1, 1)
+
+[resource]
+script = ExtResource("5_7g8r2")
+id = &"frostbind"
+class_id = &"arcanist"
+display_name = "Frostbind"
+description = "A shard of binding frost: chills (2 stacks) and deals 40% more damage to targets that are already chilled."
+color = Color(0.6, 0.9, 1, 1)
+tags = Array[StringName]([&"spell", &"projectile", &"frost"])
+resource_cost = 20.0
+cooldown = 7.0
+unlock_level = 5
+cast_lock = 0.22
+cast_move_multiplier = 0.7
+actions = Array[ExtResource("1_f1cru")]([SubResource("Resource_6w0i5")])

@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="ClassDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_qejp0"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_cn0a7"]
+[ext_resource type="Script" path="res://scripts/rpg/classes/class_resource_definition.gd" id="3_0hcfp"]
+[ext_resource type="Script" path="res://scripts/rpg/classes/class_definition.gd" id="4_6aaaj"]
+
+[sub_resource type="Resource" id="Resource_1xdjx"]
+script = ExtResource("1_qejp0")
+stat = &"skill_damage"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_mbrni"]
+script = ExtResource("3_0hcfp")
+id = &"mana"
+display_name = "Mana"
+start_value = 100.0
+regen_per_second = 8.0
+gain_per_hit_dealt = 3.0
+color = Color(0.45, 0.6, 1, 1)
+gain_per_kill = 10.0
+
+[sub_resource type="Resource" id="Resource_tocgc"]
+script = ExtResource("1_qejp0")
+stat = &"max_health"
+flat = 3.0
+
+[resource]
+script = ExtResource("4_6aaaj")
+id = &"arcanist"
+display_name = "Arcanist"
+description = "Spellcaster. Mana regenerates over time; spells leave Arcane Marks that other spells detonate. Trees: Elemental Weaver, Runemaster, Astral Scholar."
+max_level = 60
+xp_base = 100
+xp_growth = 1.07
+base_stats = Array[ExtResource("1_qejp0")]([SubResource("Resource_1xdjx")])
+stats_per_level = Array[ExtResource("1_qejp0")]([SubResource("Resource_tocgc")])
+allowed_weapon_families = Array[StringName]([&"one_handed_sword"])
+can_dual_wield = false
+can_use_shields = false
+unlock_condition = &"prologue.choice"
+resource = SubResource("Resource_mbrni")
+talent_tree_ids = Array[StringName]([&"arc_weaver", &"arc_runemaster", &"arc_astral"])

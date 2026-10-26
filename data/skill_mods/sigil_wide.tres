@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_gdmwy"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_w44sf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_3di0d"]
+
+[resource]
+script = ExtResource("3_3di0d")
+id = &"sigil_wide"
+display_name = "Wide Sigil"
+description = "Rune Sigil covers 30% more area."
+skill_ids = Array[StringName]([&"rune_sigil"])
+unlock_level = 11
+radius_multiplier = 1.3

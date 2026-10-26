@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_t8d4u"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_qr6dk"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_fmvk4"]
+
+[resource]
+script = ExtResource("3_fmvk4")
+id = &"pulse_wide"
+display_name = "Wide Pulse"
+description = "Mana Pulse covers 35% more area for 15% less damage."
+skill_ids = Array[StringName]([&"mana_pulse"])
+unlock_level = 7
+damage_multiplier = 0.85
+radius_multiplier = 1.35

@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_iim2x"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_qqohr"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_dhmdv"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/projectile_action.gd" id="4_pe58l"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_ts0w0"]
+
+[sub_resource type="Resource" id="Resource_wb4cs"]
+script = ExtResource("3_dhmdv")
+status_id = &"arcane_mark"
+
+[sub_resource type="Resource" id="Resource_1q57n"]
+script = ExtResource("2_qqohr")
+damage = 14.0
+poise_damage = 4.0
+knockback = 4.0
+damage_type = &"arcane"
+statuses = Array[ExtResource("3_dhmdv")]([SubResource("Resource_wb4cs")])
+
+[sub_resource type="Resource" id="Resource_noo4b"]
+script = ExtResource("4_pe58l")
+speed = 300.0
+max_distance = 200.0
+hit = SubResource("Resource_1q57n")
+color = Color(0.72, 0.5, 1, 1)
+
+[resource]
+script = ExtResource("5_ts0w0")
+id = &"arcane_bolt"
+class_id = &"arcanist"
+display_name = "Arcane Bolt"
+description = "A quick bolt of arcane force that leaves an Arcane Mark."
+color = Color(0.72, 0.5, 1, 1)
+tags = Array[StringName]([&"spell", &"projectile", &"arcane"])
+resource_cost = 8.0
+cooldown = 0.45
+cast_lock = 0.18
+cast_move_multiplier = 0.75
+actions = Array[ExtResource("1_iim2x")]([SubResource("Resource_noo4b")])

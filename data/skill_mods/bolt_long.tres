@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_0dn0p"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_kjxy4"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_f1fm3"]
+
+[resource]
+script = ExtResource("3_f1fm3")
+id = &"bolt_long"
+display_name = "Far Bolt"
+description = "Arcane Bolt flies 60% further."
+skill_ids = Array[StringName]([&"arcane_bolt"])
+unlock_level = 9
+range_multiplier = 1.6

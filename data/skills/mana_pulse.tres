@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_yb0en"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_2jcl0"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_e8lrr"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_1olkg"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_emnwi"]
+
+[sub_resource type="Resource" id="Resource_g6qd6"]
+script = ExtResource("2_2jcl0")
+damage = 12.0
+poise_damage = 10.0
+knockback = 18.0
+damage_type = &"arcane"
+consume_status = &"arcane_mark"
+consume_damage_per_stack = 12.0
+
+[sub_resource type="Resource" id="Resource_rkjya"]
+script = ExtResource("4_1olkg")
+radius = 46.0
+arc_degrees = 360.0
+hit = SubResource("Resource_g6qd6")
+fx_color = Color(0.72, 0.5, 1, 1)
+
+[resource]
+script = ExtResource("5_emnwi")
+id = &"mana_pulse"
+class_id = &"arcanist"
+display_name = "Mana Pulse"
+description = "A burst of mana around you that pushes enemies away and detonates their Arcane Marks."
+color = Color(0.72, 0.5, 1, 1)
+tags = Array[StringName]([&"spell", &"nova", &"arcane"])
+resource_cost = 18.0
+cooldown = 5.0
+unlock_level = 3
+cast_move_multiplier = 0.5
+actions = Array[ExtResource("1_yb0en")]([SubResource("Resource_rkjya")])

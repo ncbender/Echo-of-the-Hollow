@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_wir5l"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_obm6y"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_qaokr"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_ltygv"]
+
+[sub_resource type="Resource" id="Resource_x4dia"]
+script = ExtResource("3_qaokr")
+stat = &"resource_efficiency"
+flat = 40.0
+
+[sub_resource type="Resource" id="Resource_2sh78"]
+script = ExtResource("3_qaokr")
+stat = &"skill_damage"
+flat = 25.0
+
+[sub_resource type="Resource" id="Resource_v46kh"]
+script = ExtResource("3_qaokr")
+stat = &"cooldown_reduction"
+flat = 20.0
+
+[sub_resource type="Resource" id="Resource_4wqvo"]
+script = ExtResource("2_obm6y")
+key = &"astral_ascension"
+duration = 10.0
+stat_modifiers = Array[ExtResource("3_qaokr")]([SubResource("Resource_x4dia"), SubResource("Resource_2sh78"), SubResource("Resource_v46kh")])
+fx_color = Color(0.95, 0.9, 0.55, 1)
+
+[resource]
+script = ExtResource("4_ltygv")
+id = &"astral_ascension"
+class_id = &"arcanist"
+display_name = "Astral Ascension"
+description = "Astral Scholar capstone: for 10 s your skills cost 40% less, deal 25% more damage and recharge 20% faster."
+color = Color(0.95, 0.9, 0.55, 1)
+tags = Array[StringName]([&"buff", &"astral"])
+resource_cost = 20.0
+cooldown = 35.0
+unlock_level = 0
+cast_lock = 0.3
+cast_move_multiplier = 0.5
+actions = Array[ExtResource("1_wir5l")]([SubResource("Resource_4wqvo")])
