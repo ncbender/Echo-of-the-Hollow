@@ -78,6 +78,11 @@ extends Resource
 @export var potion_drink_time: float = 0.7
 @export var potion_cooldown: float = 30.0
 
+@export_group("Economy")
+## Sell value factor per rarity (index = ItemDefinition.Rarity: Normal, Magic, Rare,
+## Epic, Legendary). Provisional. Unique and Set use special_sell_value instead.
+@export var rarity_sell_factors: PackedFloat32Array = PackedFloat32Array([1.0, 1.6, 2.5, 4.0, 7.0])
+
 @export_group("Salvaging")
 ## Share of an item base's raw materials returned by salvaging, per rarity
 ## (index = ItemDefinition.Rarity: Normal, Magic, Rare, Epic, Legendary) as

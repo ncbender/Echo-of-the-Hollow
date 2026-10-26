@@ -30,6 +30,13 @@ const RARITY_COLORS := {
 ## Recipe item: using it teaches this profession recipe (ProfessionService.learn_from_item).
 @export var teaches_recipe_id: StringName
 
+@export_group("Economy")
+## Base Item Value (Loot Economy 1.0): sell value = base value x rarity factor
+## (rules.rarity_sell_factors). 0 = no value designed yet - the item cannot be sold.
+@export var base_value: int = 0
+## Unique and Set items keep their own value (never derived from rarity); 0 = never sold.
+@export var special_sell_value: int = 0
+
 @export_group("Equipment")
 @export var slot_kind: SlotKind = SlotKind.NONE
 @export var armor_type: ArmorType = ArmorType.NONE

@@ -49,8 +49,10 @@ static func _mark(character: Character, instance_id: String, field: StringName, 
 
 
 ## Why the bag item `instance_id` must not be destroyed (salvaged), or "" when
-## nothing protects it. Order: the strongest reason first.
-static func destroy_block(character: Character, instance_id: String) -> String:
+## nothing protects it. Order: the strongest reason first. `allow_special`: Unique
+## and Set items are not refused for being Unique / Set (selling at their own value);
+## every other protection still applies.
+static func destroy_block(character: Character, instance_id: String, allow_special: bool = false) -> String:
 	var item := character.inventory.find(instance_id)
 	if item == null:
 		return "That item is no longer in your bag."
@@ -59,7 +61,7 @@ static func destroy_block(character: Character, instance_id: String) -> String:
 		return "Unknown item."
 	if definition.category == ItemDefinition.Category.QUEST:
 		return "Quest items cannot be salvaged."
-	if definition.rarity in [ItemDefinition.Rarity.UNIQUE, ItemDefinition.Rarity.SET]:
+	if not allow_special and definition.rarity in [ItemDefinition.Rarity.UNIQUE, ItemDefinition.Rarity.SET]:
 		return "Unique and set items cannot be salvaged."
 	if character.equipment.is_referenced(instance_id):
 		return "Equipped items cannot be salvaged."
