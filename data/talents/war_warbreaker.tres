@@ -1,0 +1,292 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_025lu"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_nap88"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_b7a3d"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_rxcmf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="5_blmaw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="6_vljc5"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="7_tyyme"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="8_4snnn"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="9_3bap1"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_8478l"]
+
+[sub_resource type="Resource" id="Resource_ja5w5"]
+script = ExtResource("4_rxcmf")
+stat = &"poise_damage"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_d1u8u"]
+script = ExtResource("1_025lu")
+id = &"war_wb_hands"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Heavy Hands"
+description = "+3% poise damage per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_ja5w5")])
+
+[sub_resource type="Resource" id="Resource_48dgs"]
+script = ExtResource("4_rxcmf")
+stat = &"armor"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_51fyu"]
+script = ExtResource("1_025lu")
+id = &"war_wb_skin"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Thick Skin"
+description = "+5 armor per rank."
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_48dgs")])
+
+[sub_resource type="Resource" id="Resource_1fa8v"]
+script = ExtResource("4_rxcmf")
+stat = &"finisher_power"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_r17up"]
+script = ExtResource("1_025lu")
+id = &"war_wb_finish"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Crushing Finish"
+description = "+5% heavy finisher power per rank."
+tier = 2
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_1fa8v")])
+
+[sub_resource type="Resource" id="Resource_6id28"]
+script = ExtResource("5_blmaw")
+status_id = &"chill"
+
+[sub_resource type="Resource" id="Resource_k2pbt"]
+script = ExtResource("3_b7a3d")
+id = &"war_earthshaker"
+display_name = "War Earthshaker"
+skill_ids = Array[StringName]([&"warbreaker"])
+add_statuses = Array[ExtResource("5_blmaw")]([SubResource("Resource_6id28")])
+
+[sub_resource type="Resource" id="Resource_1dccn"]
+script = ExtResource("1_025lu")
+id = &"war_wb_earthshaker"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Earthshaker"
+description = "Warbreaker also chills its targets (1 stack)."
+kind = 2
+tier = 2
+column = 1
+skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_k2pbt")])
+
+[sub_resource type="Resource" id="Resource_dmomn"]
+script = ExtResource("7_tyyme")
+sources = 3
+requires_poise_break = true
+
+[sub_resource type="Resource" id="Resource_xnfs8"]
+script = ExtResource("8_4snnn")
+condition = SubResource("Resource_dmomn")
+resource_gain = 4.0
+effect_id = &"war_breaker"
+hit_sources = 3
+
+[sub_resource type="Resource" id="Resource_x6ue1"]
+script = ExtResource("1_025lu")
+id = &"war_wb_breaker"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Breaker"
+description = "Breaking an enemy's poise restores 4 rage per rank."
+tier = 3
+max_rank = 5
+effects = Array[ExtResource("2_nap88")]([SubResource("Resource_xnfs8")])
+
+[sub_resource type="Resource" id="Resource_8i355"]
+script = ExtResource("3_b7a3d")
+id = &"war_concussive_rush"
+display_name = "War Concussive Rush"
+skill_ids = Array[StringName]([&"blade_rush"])
+poise_multiplier = 1.5
+
+[sub_resource type="Resource" id="Resource_tkgik"]
+script = ExtResource("1_025lu")
+id = &"war_wb_rush"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Concussive Rush"
+description = "Blade Rush deals 50% more poise damage and unlocks the Piercing Lunge modification for Furious Strike."
+kind = 2
+tier = 3
+column = 1
+skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_8i355")])
+unlocks_mods = Array[StringName]([&"furious_lunge"])
+
+[sub_resource type="Resource" id="Resource_vvmnl"]
+script = ExtResource("4_rxcmf")
+stat = &"max_health"
+flat = 12.0
+
+[sub_resource type="Resource" id="Resource_xg7ga"]
+script = ExtResource("1_025lu")
+id = &"war_wb_will"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Iron Will"
+description = "+12 maximum health per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_vvmnl")])
+
+[sub_resource type="Resource" id="Resource_1qaj3"]
+script = ExtResource("7_tyyme")
+required_tags = Array[StringName]([&"heavy"])
+full_charge_only = true
+
+[sub_resource type="Resource" id="Resource_pa5pc"]
+script = ExtResource("9_3bap1")
+condition = SubResource("Resource_1qaj3")
+damage_percent = 8.0
+effect_id = &"war_overpower"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_xogjl"]
+script = ExtResource("1_025lu")
+id = &"war_wb_overpower"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Overpower"
+description = "Fully charged heavy attacks deal 8% more damage per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_nap88")]([SubResource("Resource_pa5pc")])
+
+[sub_resource type="Resource" id="Resource_0q14n"]
+script = ExtResource("7_tyyme")
+required_tags = Array[StringName]([&"heavy", &"finisher"])
+
+[sub_resource type="Resource" id="Resource_k6wfj"]
+script = ExtResource("8_4snnn")
+condition = SubResource("Resource_0q14n")
+once_per_swing = true
+burst_radius = 30.0
+burst_damage_ratio = 0.15
+burst_poise = 6.0
+burst_knockback = 4.0
+effect_id = &"war_aftershock"
+
+[sub_resource type="Resource" id="Resource_lewbw"]
+script = ExtResource("1_025lu")
+id = &"war_wb_aftershock"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Aftershock"
+description = "Heavy finishers send out an aftershock: 15% of the hit's damage per rank to other enemies within 30 px."
+tier = 5
+max_rank = 3
+effects = Array[ExtResource("2_nap88")]([SubResource("Resource_k6wfj")])
+
+[sub_resource type="Resource" id="Resource_mekqr"]
+script = ExtResource("3_b7a3d")
+id = &"war_titan"
+display_name = "War Titan"
+skill_ids = Array[StringName]([&"warbreaker"])
+damage_multiplier = 1.2
+radius_multiplier = 1.3
+
+[sub_resource type="Resource" id="Resource_1200c"]
+script = ExtResource("1_025lu")
+id = &"war_wb_titan"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Titan's Grip"
+description = "Warbreaker reaches 30% further and deals 20% more damage."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_mekqr")])
+
+[sub_resource type="Resource" id="Resource_uvmbn"]
+script = ExtResource("4_rxcmf")
+stat = &"armor"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_m7h2c"]
+script = ExtResource("1_025lu")
+id = &"war_wb_bulwark"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Bulwark"
+description = "+6 armor per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_uvmbn")])
+
+[sub_resource type="Resource" id="Resource_p1fva"]
+script = ExtResource("4_rxcmf")
+stat = &"knockback_power"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_77pai"]
+script = ExtResource("1_025lu")
+id = &"war_wb_juggernaut"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Juggernaut"
+description = "+6% knockback per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_p1fva")])
+
+[sub_resource type="Resource" id="Resource_104h1"]
+script = ExtResource("7_tyyme")
+required_tags = Array[StringName]([&"heavy", &"finisher"])
+full_charge_only = true
+
+[sub_resource type="Resource" id="Resource_vmkjj"]
+script = ExtResource("9_3bap1")
+condition = SubResource("Resource_104h1")
+poise_percent = 30.0
+mark_tag = &"worldbreaker"
+effect_id = &"war_worldbreaker_poise"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_grpxq"]
+script = ExtResource("7_tyyme")
+required_tags = Array[StringName]([&"heavy", &"finisher"])
+full_charge_only = true
+
+[sub_resource type="Resource" id="Resource_765un"]
+script = ExtResource("8_4snnn")
+condition = SubResource("Resource_grpxq")
+once_per_swing = true
+burst_radius = 56.0
+burst_damage_ratio = 0.6
+burst_poise = 25.0
+burst_knockback = 10.0
+fx_color = Color(0.95, 0.8, 0.4, 1)
+effect_id = &"war_worldbreaker"
+
+[sub_resource type="Resource" id="Resource_sqtvi"]
+script = ExtResource("1_025lu")
+id = &"war_wb_worldbreaker"
+class_id = &"warrior"
+tree_id = &"war_warbreaker"
+display_name = "Worldbreaker"
+description = "Capstone - fully charged heavy finishers become world-breaking: +30% poise damage, and a quake hits all enemies within 56 px for 60% of the damage (heavy poise, knockback)."
+kind = 2
+tier = 7
+effects = Array[ExtResource("2_nap88")]([SubResource("Resource_vmkjj"), SubResource("Resource_765un")])
+
+[resource]
+script = ExtResource("10_8478l")
+id = &"war_warbreaker"
+class_id = &"warrior"
+display_name = "Warbreaker"
+description = "Heavy blows, poise breaking and control. Capstone: Worldbreaker."
+color = Color(0.9, 0.75, 0.4, 1)
+nodes = Array[ExtResource("1_025lu")]([SubResource("Resource_d1u8u"), SubResource("Resource_51fyu"), SubResource("Resource_r17up"), SubResource("Resource_1dccn"), SubResource("Resource_x6ue1"), SubResource("Resource_tkgik"), SubResource("Resource_xg7ga"), SubResource("Resource_xogjl"), SubResource("Resource_lewbw"), SubResource("Resource_1200c"), SubResource("Resource_m7h2c"), SubResource("Resource_77pai"), SubResource("Resource_sqtvi")])

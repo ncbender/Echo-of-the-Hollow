@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_ceaf5"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_itwhk"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_xsjsu"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_es65s"]
+
+[sub_resource type="Resource" id="Resource_tv6kb"]
+script = ExtResource("3_xsjsu")
+stat = &"physical_damage"
+flat = 20.0
+
+[sub_resource type="Resource" id="Resource_ywjsu"]
+script = ExtResource("3_xsjsu")
+stat = &"attack_speed"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_tbitu"]
+script = ExtResource("2_itwhk")
+key = &"battle_cry"
+duration = 8.0
+stat_modifiers = Array[ExtResource("3_xsjsu")]([SubResource("Resource_tv6kb"), SubResource("Resource_ywjsu")])
+resource_gain = 25.0
+fx_color = Color(1, 0.65, 0.3, 1)
+
+[resource]
+script = ExtResource("4_es65s")
+id = &"battle_cry"
+class_id = &"warrior"
+display_name = "Battle Cry"
+description = "A roar that sharpens your blows and fills you with rage."
+color = Color(1, 0.65, 0.3, 1)
+tags = Array[StringName]([&"buff", &"shout"])
+cooldown = 18.0
+unlock_level = 3
+cast_lock = 0.35
+cast_move_multiplier = 0.5
+actions = Array[ExtResource("1_ceaf5")]([SubResource("Resource_tbitu")])

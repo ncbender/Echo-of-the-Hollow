@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_5mgu2"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_ih5ig"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_p7hcs"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_n81ss"]
+
+[sub_resource type="Resource" id="Resource_mmm0p"]
+script = ExtResource("3_p7hcs")
+stat = &"attack_speed"
+flat = 15.0
+
+[sub_resource type="Resource" id="Resource_4mne3"]
+script = ExtResource("3_p7hcs")
+stat = &"life_on_hit"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_3xkva"]
+script = ExtResource("3_p7hcs")
+stat = &"bleed_chance"
+flat = 30.0
+
+[sub_resource type="Resource" id="Resource_xktc8"]
+script = ExtResource("2_ih5ig")
+key = &"blood_frenzy"
+stat_modifiers = Array[ExtResource("3_p7hcs")]([SubResource("Resource_mmm0p"), SubResource("Resource_4mne3"), SubResource("Resource_3xkva")])
+fx_color = Color(0.8, 0.12, 0.2, 1)
+
+[resource]
+script = ExtResource("4_n81ss")
+id = &"blood_frenzy"
+class_id = &"warrior"
+display_name = "Blood Frenzy"
+description = "Enter a bloody frenzy: faster attacks, life on hit and bleeding blows."
+color = Color(0.8, 0.12, 0.2, 1)
+tags = Array[StringName]([&"buff", &"blood"])
+resource_cost = 20.0
+cooldown = 14.0
+unlock_level = 0
+cast_move_multiplier = 0.7
+actions = Array[ExtResource("1_5mgu2")]([SubResource("Resource_xktc8")])

@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_ybpid"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_pexv8"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_ktclq"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_fv3to"]
+
+[sub_resource type="Resource" id="Resource_ja850"]
+script = ExtResource("3_ktclq")
+stat = &"attack_speed"
+flat = 25.0
+
+[sub_resource type="Resource" id="Resource_p33xv"]
+script = ExtResource("3_ktclq")
+stat = &"physical_damage"
+flat = 20.0
+
+[sub_resource type="Resource" id="Resource_gupef"]
+script = ExtResource("3_ktclq")
+stat = &"life_on_hit"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_qm6wx"]
+script = ExtResource("2_pexv8")
+key = &"unbound_fury"
+duration = 10.0
+stat_modifiers = Array[ExtResource("3_ktclq")]([SubResource("Resource_ja850"), SubResource("Resource_p33xv"), SubResource("Resource_gupef")])
+pause_decay = true
+fx_color = Color(1, 0.3, 0.1, 1)
+
+[resource]
+script = ExtResource("4_fv3to")
+id = &"unbound_fury"
+class_id = &"warrior"
+display_name = "Unbound Fury"
+description = "Berserker capstone: 10 s of unbound fury - faster, harder hits, life on hit, and rage does not decay."
+color = Color(1, 0.3, 0.1, 1)
+tags = Array[StringName]([&"buff", &"berserk"])
+resource_cost = 50.0
+cooldown = 30.0
+unlock_level = 0
+cast_lock = 0.3
+cast_move_multiplier = 0.5
+actions = Array[ExtResource("1_ybpid")]([SubResource("Resource_qm6wx")])

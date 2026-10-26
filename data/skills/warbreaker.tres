@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_8n3iw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_vc2aa"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_cvhgf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_b83uj"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_6300o"]
+
+[sub_resource type="Resource" id="Resource_08tc0"]
+script = ExtResource("2_vc2aa")
+damage = 26.0
+poise_damage = 60.0
+knockback = 20.0
+hitstop = 0.07
+
+[sub_resource type="Resource" id="Resource_vglk0"]
+script = ExtResource("4_b83uj")
+radius = 46.0
+arc_degrees = 160.0
+forward_offset = 6.0
+hit = SubResource("Resource_08tc0")
+fx_color = Color(0.9, 0.75, 0.4, 1)
+
+[resource]
+script = ExtResource("5_6300o")
+id = &"warbreaker"
+class_id = &"warrior"
+display_name = "Warbreaker"
+description = "A crushing overhead slam that shatters poise."
+color = Color(0.9, 0.75, 0.4, 1)
+tags = Array[StringName]([&"melee", &"slam"])
+resource_cost = 35.0
+cooldown = 9.0
+unlock_level = 8
+cast_lock = 0.4
+cast_move_multiplier = 0.3
+actions = Array[ExtResource("1_8n3iw")]([SubResource("Resource_vglk0")])

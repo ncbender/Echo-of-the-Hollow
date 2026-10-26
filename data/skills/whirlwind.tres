@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_hqoel"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_5kwsc"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_axr7d"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/zone_action.gd" id="4_xj45v"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_bdxhn"]
+
+[sub_resource type="Resource" id="Resource_6itp2"]
+script = ExtResource("2_5kwsc")
+damage = 9.0
+poise_damage = 6.0
+knockback = 4.0
+
+[sub_resource type="Resource" id="Resource_2tglc"]
+script = ExtResource("4_xj45v")
+placement = 0
+radius = 34.0
+duration = 1.2
+interval = 0.3
+max_hits_per_target = 4
+hit = SubResource("Resource_6itp2")
+color = Color(0.86, 0.3, 0.22, 1)
+
+[resource]
+script = ExtResource("5_bdxhn")
+id = &"whirlwind"
+class_id = &"warrior"
+display_name = "Whirlwind"
+description = "Spin with your weapon, striking everything around you several times."
+color = Color(0.86, 0.3, 0.22, 1)
+tags = Array[StringName]([&"melee", &"spin"])
+resource_cost = 30.0
+cooldown = 8.0
+unlock_level = 0
+cast_lock = 1.2
+cast_move_multiplier = 0.8
+actions = Array[ExtResource("1_hqoel")]([SubResource("Resource_2tglc")])

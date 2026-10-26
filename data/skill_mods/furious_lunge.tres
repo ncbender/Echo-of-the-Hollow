@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_jwx8t"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_klehd"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="3_t6jga"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/move_action.gd" id="4_l87yn"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="5_c3n84"]
+
+[sub_resource type="Resource" id="Resource_0vodl"]
+script = ExtResource("3_t6jga")
+damage = 32.0
+poise_damage = 22.0
+knockback = 12.0
+
+[sub_resource type="Resource" id="Resource_5xj8v"]
+script = ExtResource("4_l87yn")
+distance = 45.0
+duration = 0.12
+hit = SubResource("Resource_0vodl")
+trail_color = Color(0.86, 0.3, 0.22, 1)
+
+[resource]
+script = ExtResource("5_c3n84")
+id = &"furious_lunge"
+display_name = "Piercing Lunge"
+description = "Transformation: Furious Strike becomes a lunging thrust that carries you forward and hits everything in your path."
+skill_ids = Array[StringName]([&"furious_strike"])
+incompatible_with = Array[StringName]([&"furious_rage_refund"])
+transformative = true
+unlock_source = &"talent.war_wb_rush"
+replace_actions = Array[ExtResource("2_klehd")]([SubResource("Resource_5xj8v")])

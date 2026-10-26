@@ -94,6 +94,7 @@ func on_hit_landed(hit: HitData) -> void:
 func dispatch_hit(hit: HitData) -> void:
 	if hit == null or hit.depth > MAX_TRIGGER_DEPTH or _seen.has(hit):
 		return   # too deep, or this very hit was already dispatched (re-entry)
+	hit.snapshot_target()
 	_queue.append(hit)
 	_seen[hit] = true
 	if _dispatching:

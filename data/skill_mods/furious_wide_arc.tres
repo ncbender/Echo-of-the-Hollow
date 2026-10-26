@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_3q10p"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_c7myf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_va8t1"]
+
+[resource]
+script = ExtResource("3_va8t1")
+id = &"furious_wide_arc"
+display_name = "Wide Arc"
+description = "Furious Strike sweeps a larger area (+25% radius) for 15% less damage."
+skill_ids = Array[StringName]([&"furious_strike"])
+unlock_level = 4
+damage_multiplier = 0.85
+radius_multiplier = 1.25

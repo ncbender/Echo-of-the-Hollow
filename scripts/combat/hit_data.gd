@@ -34,6 +34,29 @@ var skill_id: StringName
 ## Outcome, filled in by the target's HealthComponent.
 var broke_poise: bool = false
 var killed: bool = false
+## Target statuses (id -> stacks) BEFORE this hit's effects ran; filled by the
+## ItemEffectRunner so conditions never see stacks the same hit just added.
+var target_statuses: Dictionary = {}
+var _snapshot_taken: bool = false
+
+
+## Stacks of `status_id` on the target before this hit's effects (live value when
+## no snapshot was taken).
+func target_stacks(status_id: StringName) -> int:
+	if _snapshot_taken:
+		return target_statuses.get(status_id, 0)
+	var status := StatusComponent.of(target)
+	return status.stacks(status_id) if status != null else 0
+
+
+func snapshot_target() -> void:
+	if _snapshot_taken:
+		return
+	_snapshot_taken = true
+	var status := StatusComponent.of(target)
+	if status != null:
+		for status_id in status.active_ids():
+			target_statuses[status_id] = status.stacks(status_id)
 
 
 func is_direct() -> bool:

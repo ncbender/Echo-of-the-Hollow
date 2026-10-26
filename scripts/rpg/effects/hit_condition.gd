@@ -45,8 +45,7 @@ func matches(hit: HitData, runner: ItemEffectRunner) -> bool:
 	if requires_crit and not &"crit" in hit.tags:
 		return false
 	if target_status != &"":
-		var status := StatusComponent.of(hit.target)
-		if status == null or status.stacks(target_status) < target_status_stacks:
+		if hit.target_stacks(target_status) < target_status_stacks:
 			return false
 	var state := runner.shared_state(&"class") if runner != null else {}
 	if min_resource_ratio > 0.0 and float(state.get("resource_ratio", 0.0)) + 0.0001 < min_resource_ratio:

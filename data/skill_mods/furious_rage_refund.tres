@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_bb2ot"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_cpfbq"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_2jt8a"]
+
+[resource]
+script = ExtResource("3_2jt8a")
+id = &"furious_rage_refund"
+display_name = "Rage Refund"
+description = "Every target hit by Furious Strike refunds 6 rage."
+slot = 1
+skill_ids = Array[StringName]([&"furious_strike"])
+incompatible_with = Array[StringName]([&"furious_lunge"])
+unlock_level = 10
+resource_on_hit = 6.0

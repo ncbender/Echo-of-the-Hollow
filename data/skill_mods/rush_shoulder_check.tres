@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_vvdjw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_xnefa"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_ve5l2"]
+
+[resource]
+script = ExtResource("3_ve5l2")
+id = &"rush_shoulder_check"
+display_name = "Shoulder Check"
+description = "Blade Rush deals 60% more poise damage."
+slot = 1
+skill_ids = Array[StringName]([&"blade_rush"])
+unlock_level = 12
+poise_multiplier = 1.6

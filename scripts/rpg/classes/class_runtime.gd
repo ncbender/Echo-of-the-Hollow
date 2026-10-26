@@ -215,14 +215,14 @@ func on_hit_dispatched(hit: HitData) -> void:
 		return
 	var definition := pool.definition
 	if hit.is_direct():
-		if definition.pressure_max_stacks > 0:
-			pressure = mini(definition.pressure_max_stacks, pressure + 1)
-			_pressure_left = definition.pressure_window
 		var amount := definition.gain_per_hit_dealt
 		for tag: StringName in definition.gain_per_tag:
 			if tag in hit.tags:
 				amount += definition.gain_per_tag[tag]
-		gain(amount)
+		gain(amount)   # pressure of the previous hits speeds this gain up
+		if definition.pressure_max_stacks > 0:
+			pressure = mini(definition.pressure_max_stacks, pressure + 1)
+			_pressure_left = definition.pressure_window
 	if hit.broke_poise:
 		gain(definition.gain_per_poise_break)
 	if hit.killed:

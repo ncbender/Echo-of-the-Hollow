@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_sixb7"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_dnaea"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_vsbd7"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_pk2i4"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_5jiaj"]
+
+[sub_resource type="Resource" id="Resource_oqokm"]
+script = ExtResource("2_dnaea")
+damage = 30.0
+poise_damage = 25.0
+knockback = 14.0
+hitstop = 0.05
+
+[sub_resource type="Resource" id="Resource_golaq"]
+script = ExtResource("4_pk2i4")
+radius = 40.0
+forward_offset = 4.0
+hit = SubResource("Resource_oqokm")
+fx_color = Color(0.86, 0.3, 0.22, 1)
+
+[resource]
+script = ExtResource("5_5jiaj")
+id = &"furious_strike"
+class_id = &"warrior"
+display_name = "Furious Strike"
+description = "A heavy forward cleave fuelled by rage."
+color = Color(0.86, 0.3, 0.22, 1)
+tags = Array[StringName]([&"melee", &"strike"])
+resource_cost = 25.0
+cast_lock = 0.3
+actions = Array[ExtResource("1_sixb7")]([SubResource("Resource_golaq")])

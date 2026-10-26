@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_kyh13"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_pn8nv"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_ubu0f"]
+
+[sub_resource type="Resource" id="Resource_xy4s0"]
+script = ExtResource("1_kyh13")
+status_id = &"chill"
+stacks = 2
+
+[resource]
+script = ExtResource("3_ubu0f")
+id = &"warbreaker_frost"
+display_name = "Numbing Blow"
+description = "Warbreaker chills its targets (2 stacks)."
+slot = 1
+skill_ids = Array[StringName]([&"warbreaker"])
+unlock_level = 14
+add_statuses = Array[ExtResource("1_kyh13")]([SubResource("Resource_xy4s0")])

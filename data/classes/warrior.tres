@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="ClassDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/classes/class_definition.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_kv6er"]
 [ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
 [ext_resource type="Script" path="res://scripts/rpg/classes/class_resource_definition.gd" id="3_res"]
 
@@ -19,6 +20,23 @@ script = ExtResource("2_mod")
 stat = &"poise_damage"
 flat = 5.0
 
+[sub_resource type="Resource" id="Resource_kv6er"]
+script = ExtResource("3_res")
+id = &"rage"
+display_name = "Rage"
+regen_per_second = -10.0
+regen_delay = 3.0
+gain_per_hit_dealt = 8.0
+gain_per_hit_taken = 5.0
+color = Color(0.86, 0.25, 0.2, 1)
+gain_per_tag = Dictionary[StringName, float]({
+&"finisher": 6.0,
+&"heavy": 4.0
+})
+gain_per_poise_break = 10.0
+gain_per_kill = 8.0
+pressure_max_stacks = 5
+
 [sub_resource type="Resource" id="Mod_hp_level"]
 script = ExtResource("2_mod")
 stat = &"max_health"
@@ -29,30 +47,16 @@ script = ExtResource("2_mod")
 stat = &"armor"
 flat = 1.0
 
-[sub_resource type="Resource" id="Resource_rage"]
-script = ExtResource("3_res")
-id = &"rage"
-display_name = "Rage"
-max_value = 100.0
-start_value = 0.0
-regen_per_second = -10.0
-regen_delay = 3.0
-gain_per_hit_dealt = 8.0
-gain_per_hit_taken = 5.0
-color = Color(0.86, 0.25, 0.2, 1)
-
 [resource]
 script = ExtResource("1_class")
 id = &"warrior"
 display_name = "Warrior"
-description = "Frontline fighter. More health and armor, extra poise damage, can use shields. Builds Rage in combat (prepared for skills)."
-max_level = 30
-xp_base = 120
-xp_growth = 1.2
+description = "Frontline fighter. Builds Rage by hitting and getting hit; Combat Pressure (consecutive hits) speeds up rage gain. Spends rage on powerful strikes. Trees: Berserker, Warbreaker, Bloodblade."
+max_level = 60
+xp_base = 100
+xp_growth = 1.07
 base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_hp"), SubResource("Mod_armor"), SubResource("Mod_poise")])
 stats_per_level = Array[ExtResource("2_mod")]([SubResource("Mod_hp_level"), SubResource("Mod_armor_level")])
-can_dual_wield = true
-can_use_shields = true
-starts_unlocked = false
 unlock_condition = &"prologue.choice"
-resource = SubResource("Resource_rage")
+resource = SubResource("Resource_kv6er")
+talent_tree_ids = Array[StringName]([&"war_berserker", &"war_warbreaker", &"war_bloodblade"])

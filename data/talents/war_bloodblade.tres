@@ -1,0 +1,296 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_r55dl"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_b78jv"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_mx2ow"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_sr28g"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="5_4g150"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="6_4ttll"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="7_fger7"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_65j8k"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="9_4gjgu"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_pdf5o"]
+
+[sub_resource type="Resource" id="Resource_ly0y8"]
+script = ExtResource("4_sr28g")
+stat = &"bleed_chance"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_ubr5k"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_serrated"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Serrated Edge"
+description = "+4% bleed chance per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_ly0y8")])
+
+[sub_resource type="Resource" id="Resource_cmfh0"]
+script = ExtResource("4_sr28g")
+stat = &"bleed_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_8mxyp"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_veins"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Open Veins"
+description = "+10% bleed damage per rank."
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_cmfh0")])
+
+[sub_resource type="Resource" id="Resource_0o246"]
+script = ExtResource("6_4ttll")
+required_tags = Array[StringName]([&"finisher"])
+
+[sub_resource type="Resource" id="Resource_ls5r2"]
+script = ExtResource("5_4g150")
+status_id = &"bleeding"
+
+[sub_resource type="Resource" id="Resource_8ocer"]
+script = ExtResource("7_fger7")
+condition = SubResource("Resource_0o246")
+statuses = Array[ExtResource("5_4g150")]([SubResource("Resource_ls5r2")])
+stacks_per_rank = true
+effect_id = &"war_hemorrhage"
+
+[sub_resource type="Resource" id="Resource_eb6yj"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_hemorrhage"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Hemorrhage"
+description = "Finishers apply 1 Bleeding stack per rank."
+tier = 2
+max_rank = 3
+effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_8ocer")])
+
+[sub_resource type="Resource" id="Resource_xnowi"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_frenzy"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Blood Frenzy"
+description = "Unlocks the active skill Blood Frenzy."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"blood_frenzy"
+
+[sub_resource type="Resource" id="Resource_bf7x8"]
+script = ExtResource("6_4ttll")
+sources = 8
+required_tags = Array[StringName]([&"bleeding"])
+
+[sub_resource type="Resource" id="Resource_ov6pj"]
+script = ExtResource("7_fger7")
+condition = SubResource("Resource_bf7x8")
+heal_flat = 0.3
+effect_id = &"war_sanguine"
+hit_sources = 8
+
+[sub_resource type="Resource" id="Resource_8rbnk"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_sanguine"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Sanguine"
+description = "Each Bleeding tick you cause heals you for 0.3 health per rank."
+tier = 3
+max_rank = 5
+effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_ov6pj")])
+
+[sub_resource type="Resource" id="Resource_pj6mf"]
+script = ExtResource("5_4g150")
+status_id = &"bleeding"
+stacks = 2
+
+[sub_resource type="Resource" id="Resource_ruqws"]
+script = ExtResource("3_mx2ow")
+id = &"war_lacerate"
+display_name = "War Lacerate"
+skill_ids = Array[StringName]([&"furious_strike"])
+add_statuses = Array[ExtResource("5_4g150")]([SubResource("Resource_pj6mf")])
+
+[sub_resource type="Resource" id="Resource_fmdgu"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_lacerate"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Lacerating Strike"
+description = "Furious Strike applies 2 Bleeding stacks."
+kind = 2
+tier = 3
+column = 1
+skill_mods = Array[ExtResource("3_mx2ow")]([SubResource("Resource_ruqws")])
+
+[sub_resource type="Resource" id="Resource_jpcgs"]
+script = ExtResource("6_4ttll")
+sources = 3
+target_status = &"bleeding"
+
+[sub_resource type="Resource" id="Resource_105jm"]
+script = ExtResource("9_4gjgu")
+condition = SubResource("Resource_jpcgs")
+damage_percent = 3.0
+effect_id = &"war_bloodletter"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_1uxrb"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_bloodletter"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Bloodletter"
+description = "+3% damage per rank against bleeding targets."
+tier = 4
+max_rank = 5
+effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_105jm")])
+
+[sub_resource type="Resource" id="Resource_6wgck"]
+script = ExtResource("6_4ttll")
+sources = 11
+target_status = &"bleeding"
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_03w8h"]
+script = ExtResource("7_fger7")
+condition = SubResource("Resource_6wgck")
+resource_gain = 5.0
+effect_id = &"war_herd"
+hit_sources = 11
+
+[sub_resource type="Resource" id="Resource_l0j4o"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_herd"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Thin the Herd"
+description = "Killing a bleeding enemy restores 5 rage per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_03w8h")])
+
+[sub_resource type="Resource" id="Resource_jdkwd"]
+script = ExtResource("4_sr28g")
+stat = &"bleed_damage"
+flat = 15.0
+
+[sub_resource type="Resource" id="Resource_mc5in"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_deep"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Deep Cuts"
+description = "+15% bleed damage per rank."
+tier = 5
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_jdkwd")])
+
+[sub_resource type="Resource" id="Resource_4xqxk"]
+script = ExtResource("5_4g150")
+status_id = &"bleeding"
+stacks = 2
+
+[sub_resource type="Resource" id="Resource_r3lvv"]
+script = ExtResource("3_mx2ow")
+id = &"war_rending"
+display_name = "War Rending"
+skill_ids = Array[StringName]([&"blade_rush"])
+add_statuses = Array[ExtResource("5_4g150")]([SubResource("Resource_4xqxk")])
+
+[sub_resource type="Resource" id="Resource_bhqum"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_rending"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Rending Rush"
+description = "Blade Rush applies 2 Bleeding stacks."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_mx2ow")]([SubResource("Resource_r3lvv")])
+
+[sub_resource type="Resource" id="Resource_dppgo"]
+script = ExtResource("4_sr28g")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_subto"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_exsanguinate"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Exsanguinate"
+description = "+2% critical hit chance per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_dppgo")])
+
+[sub_resource type="Resource" id="Resource_ikuj0"]
+script = ExtResource("4_sr28g")
+stat = &"max_resource"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_bcaop"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_price"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Blood Price"
+description = "+10 maximum rage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_ikuj0")])
+
+[sub_resource type="Resource" id="Resource_0u0qj"]
+script = ExtResource("6_4ttll")
+sources = 8
+required_tags = Array[StringName]([&"bleeding"])
+
+[sub_resource type="Resource" id="Resource_a0hrv"]
+script = ExtResource("7_fger7")
+condition = SubResource("Resource_0u0qj")
+heal_ratio = 0.3
+effect_id = &"war_blood_oath_heal"
+hit_sources = 8
+
+[sub_resource type="Resource" id="Resource_w82bu"]
+script = ExtResource("6_4ttll")
+required_tags = Array[StringName]([&"finisher"])
+target_status = &"bleeding"
+target_status_stacks = 3
+
+[sub_resource type="Resource" id="Resource_uqswc"]
+script = ExtResource("7_fger7")
+condition = SubResource("Resource_w82bu")
+consume_status = &"bleeding"
+consume_min_stacks = 3
+consume_damage_per_stack = 8.0
+consume_damage_type = &"bleed"
+effect_id = &"war_blood_oath_rupture"
+
+[sub_resource type="Resource" id="Resource_prs50"]
+script = ExtResource("1_r55dl")
+id = &"war_bb_oath"
+class_id = &"warrior"
+tree_id = &"war_bloodblade"
+display_name = "Blood Oath"
+description = "Capstone - your Bleeding heals you for 30% of its damage, and finishers against targets with 3+ Bleeding stacks rupture them: all stacks are consumed for 8 damage each."
+kind = 2
+tier = 7
+effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_a0hrv"), SubResource("Resource_uqswc")])
+
+[resource]
+script = ExtResource("10_pdf5o")
+id = &"war_bloodblade"
+class_id = &"warrior"
+display_name = "Bloodblade"
+description = "Bleeding wounds, sustain and blood magic. Capstone: Blood Oath."
+color = Color(0.8, 0.12, 0.2, 1)
+nodes = Array[ExtResource("1_r55dl")]([SubResource("Resource_ubr5k"), SubResource("Resource_8mxyp"), SubResource("Resource_eb6yj"), SubResource("Resource_xnowi"), SubResource("Resource_8rbnk"), SubResource("Resource_fmdgu"), SubResource("Resource_1uxrb"), SubResource("Resource_l0j4o"), SubResource("Resource_mc5in"), SubResource("Resource_bhqum"), SubResource("Resource_subto"), SubResource("Resource_bcaop"), SubResource("Resource_prs50")])

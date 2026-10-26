@@ -1,0 +1,265 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_y28yy"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_t2rui"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_phapr"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_cp37l"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_0boye"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_b6yem"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_luovr"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_ch2yx"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_wv0rw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="10_31r7k"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="11_jv38o"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="12_jj553"]
+
+[sub_resource type="Resource" id="Resource_idvoi"]
+script = ExtResource("4_cp37l")
+stat = &"attack_speed"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_pvpmn"]
+script = ExtResource("1_y28yy")
+id = &"war_b_seething"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Seething Blood"
+description = "+2% attack speed per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_idvoi")])
+
+[sub_resource type="Resource" id="Resource_hoapj"]
+script = ExtResource("4_cp37l")
+stat = &"resource_gain"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_luyod"]
+script = ExtResource("1_y28yy")
+id = &"war_b_temper"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Hot Temper"
+description = "+6% rage gain per rank."
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_hoapj")])
+
+[sub_resource type="Resource" id="Resource_brvoy"]
+script = ExtResource("5_0boye")
+sources = 3
+min_resource_ratio = 0.5
+
+[sub_resource type="Resource" id="Resource_6g02o"]
+script = ExtResource("6_b6yem")
+condition = SubResource("Resource_brvoy")
+damage_percent = 4.0
+effect_id = &"war_relentless"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_07us5"]
+script = ExtResource("1_y28yy")
+id = &"war_b_relentless"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Relentless"
+description = "+4% damage per rank while your rage is at least 50%."
+tier = 2
+max_rank = 3
+effects = Array[ExtResource("2_t2rui")]([SubResource("Resource_6g02o")])
+
+[sub_resource type="Resource" id="Resource_vh0v4"]
+script = ExtResource("1_y28yy")
+id = &"war_b_whirlwind"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Whirlwind"
+description = "Unlocks the active skill Whirlwind."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"whirlwind"
+
+[sub_resource type="Resource" id="Resource_i5gvl"]
+script = ExtResource("4_cp37l")
+stat = &"life_on_hit"
+flat = 0.5
+
+[sub_resource type="Resource" id="Resource_m117o"]
+script = ExtResource("1_y28yy")
+id = &"war_b_bloodlust"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Bloodlust"
+description = "+0.5 life on hit per rank."
+tier = 3
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_i5gvl")])
+
+[sub_resource type="Resource" id="Resource_3enl0"]
+script = ExtResource("3_phapr")
+id = &"war_cyclone"
+display_name = "War Cyclone"
+skill_ids = Array[StringName]([&"whirlwind"])
+radius_multiplier = 1.25
+
+[sub_resource type="Resource" id="Resource_porxm"]
+script = ExtResource("1_y28yy")
+id = &"war_b_cyclone"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Cyclone"
+description = "Whirlwind covers 25% more area."
+kind = 2
+tier = 3
+column = 1
+prerequisites = Array[StringName]([&"war_b_whirlwind"])
+skill_mods = Array[ExtResource("3_phapr")]([SubResource("Resource_3enl0")])
+
+[sub_resource type="Resource" id="Resource_cfnbw"]
+script = ExtResource("4_cp37l")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_s4gsx"]
+script = ExtResource("1_y28yy")
+id = &"war_b_pace"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Frenzied Pace"
+description = "+2% critical hit chance per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_cfnbw")])
+
+[sub_resource type="Resource" id="Resource_5rvdf"]
+script = ExtResource("5_0boye")
+sources = 3
+min_pressure = 3
+
+[sub_resource type="Resource" id="Resource_kf4o3"]
+script = ExtResource("6_b6yem")
+condition = SubResource("Resource_5rvdf")
+damage_percent = 3.0
+effect_id = &"war_momentum"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_asl8e"]
+script = ExtResource("1_y28yy")
+id = &"war_b_momentum"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Momentum"
+description = "+3% damage per rank while Combat Pressure has at least 3 stacks."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_t2rui")]([SubResource("Resource_kf4o3")])
+
+[sub_resource type="Resource" id="Resource_h3o6g"]
+script = ExtResource("5_0boye")
+sources = 11
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_kuprr"]
+script = ExtResource("9_wv0rw")
+condition = SubResource("Resource_h3o6g")
+resource_gain = 6.0
+effect_id = &"war_unstoppable"
+hit_sources = 11
+
+[sub_resource type="Resource" id="Resource_nt4vj"]
+script = ExtResource("1_y28yy")
+id = &"war_b_unstoppable"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Unstoppable"
+description = "Kills restore 6 rage per rank."
+tier = 5
+max_rank = 3
+effects = Array[ExtResource("2_t2rui")]([SubResource("Resource_kuprr")])
+
+[sub_resource type="Resource" id="Resource_4xp30"]
+script = ExtResource("10_31r7k")
+damage = 26.0
+poise_damage = 22.0
+knockback = 12.0
+hitstop = 0.05
+
+[sub_resource type="Resource" id="Resource_e4kk8"]
+script = ExtResource("11_jv38o")
+radius = 42.0
+arc_degrees = 360.0
+hit = SubResource("Resource_4xp30")
+fx_color = Color(0.86, 0.3, 0.22, 1)
+
+[sub_resource type="Resource" id="Resource_jo270"]
+script = ExtResource("3_phapr")
+id = &"war_furious_cleave"
+display_name = "War Furious Cleave"
+skill_ids = Array[StringName]([&"furious_strike"])
+replace_actions = Array[ExtResource("8_ch2yx")]([SubResource("Resource_e4kk8")])
+
+[sub_resource type="Resource" id="Resource_55505"]
+script = ExtResource("1_y28yy")
+id = &"war_b_cleave"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Furious Cleave"
+description = "Transformation: Furious Strike hits all around you."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_phapr")]([SubResource("Resource_jo270")])
+
+[sub_resource type="Resource" id="Resource_fjwhq"]
+script = ExtResource("4_cp37l")
+stat = &"skill_damage"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_th4w8"]
+script = ExtResource("1_y28yy")
+id = &"war_b_bloodrush"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Bloodrush"
+description = "+3% skill damage per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_fjwhq")])
+
+[sub_resource type="Resource" id="Resource_thouq"]
+script = ExtResource("4_cp37l")
+stat = &"crit_damage"
+flat = 8.0
+
+[sub_resource type="Resource" id="Resource_6bylp"]
+script = ExtResource("1_y28yy")
+id = &"war_b_savage"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Savage"
+description = "+8% critical damage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_cp37l")]([SubResource("Resource_thouq")])
+
+[sub_resource type="Resource" id="Resource_6dq2u"]
+script = ExtResource("1_y28yy")
+id = &"war_b_unbound"
+class_id = &"warrior"
+tree_id = &"war_berserker"
+display_name = "Unbound Fury"
+description = "Capstone - unlocks Unbound Fury: 10 s of +25% attack speed, +20% damage, +2 life on hit; rage does not decay."
+kind = 1
+tier = 7
+unlocks_skill = &"unbound_fury"
+
+[resource]
+script = ExtResource("12_jj553")
+id = &"war_berserker"
+class_id = &"warrior"
+display_name = "Berserker"
+description = "Rage, speed and relentless offence. Capstone: Unbound Fury."
+color = Color(0.86, 0.3, 0.22, 1)
+nodes = Array[ExtResource("1_y28yy")]([SubResource("Resource_pvpmn"), SubResource("Resource_luyod"), SubResource("Resource_07us5"), SubResource("Resource_vh0v4"), SubResource("Resource_m117o"), SubResource("Resource_porxm"), SubResource("Resource_s4gsx"), SubResource("Resource_asl8e"), SubResource("Resource_nt4vj"), SubResource("Resource_55505"), SubResource("Resource_th4w8"), SubResource("Resource_6bylp"), SubResource("Resource_6dq2u")])

@@ -12,6 +12,7 @@ var inventory_panel: InventoryPanel
 var build_panel: BuildPanel
 var options_panel: OptionsPanel
 var crafting_panel: CraftingPanel
+var skill_bar: SkillBar
 ## Player display preferences (from GameSession); null when running without one.
 var settings: UserSettings
 
@@ -51,6 +52,8 @@ func _ready() -> void:
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(bottom)
+	skill_bar = SkillBar.new()
+	bottom.add_child(skill_bar)
 	_prompt = UiTheme.label("", UiTheme.COLOR_PROMPT)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.add_theme_font_size_override(&"font_size", UiTheme.FONT_HEADING)
@@ -76,6 +79,7 @@ func setup(progression_bridge: PlayerProgressionBridge) -> void:
 	bridge = progression_bridge
 	mastery_panel.bridge = bridge
 	class_info.bridge = bridge
+	skill_bar.bridge = bridge
 	bridge.message.connect(toasts.push.bind(UiTheme.COLOR_ACCENT))
 
 
