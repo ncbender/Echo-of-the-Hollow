@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/resource_node_definition.gd" id="1_node"]
+
+[resource]
+script = ExtResource("1_node")
+id = &"rich_iron_vein"
+display_name = "Rich Iron Vein"
+yield_item_id = &"iron_ore"
+yield_quantity = 3
+respawn_seconds = 180.0
+look = 2
+profession_id = &"mining"
+required_level = 3
+gather_xp = 16

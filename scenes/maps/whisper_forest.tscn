@@ -18,8 +18,12 @@
 [ext_resource type="Resource" path="res://data/world/resource_nodes/wild_flax.tres" id="def_wild_flax"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/duskleaf_patch.tres" id="def_duskleaf"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/stag_remains.tres" id="def_stag"]
+[ext_resource type="Script" path="res://scripts/world/story_pickup.gd" id="15_pickup"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_config.tres" id="13_warden_cfg"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="14_warden_attacks"]
+
+[sub_resource type="CircleShape2D" id="Circle_pack"]
+radius = 18.0
 
 [sub_resource type="RectangleShape2D" id="Rect_door_west"]
 size = Vector2(12, 48)
@@ -193,6 +197,22 @@ position = Vector2(-240, -50)
 definition = ExtResource("def_stag")
 node_id = &"stag"
 prompt = "Gather"
+
+[node name="StagRemainsB" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-270, 135)
+definition = ExtResource("def_stag")
+node_id = &"stag_b"
+prompt = "Gather"
+
+[node name="HuntersPack" type="Area2D" parent="."]
+position = Vector2(-285, -112)
+script = ExtResource("15_pickup")
+persistent_id = &"forest_hunters_pack"
+item_id = &"pattern_leather_bracers"
+label = "Hunter's Pack"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HuntersPack"]
+shape = SubResource("Circle_pack")
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true

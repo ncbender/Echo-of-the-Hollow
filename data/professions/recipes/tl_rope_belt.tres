@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ProfessionRecipeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/professions/profession_recipe_definition.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Cost_1"]
+script = ExtResource("2_cost")
+item_id = &"flax_fiber"
+quantity = 4
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"tl_rope_belt"
+display_name = "Rope Belt"
+profession_id = &"tailoring"
+required_level = 1
+xp = 20
+is_processing = false
+output_item_id = &"rope_belt"
+output_quantity = 1
+inputs = Array[ExtResource("2_cost")]([SubResource("Cost_1")])

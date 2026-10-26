@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/resource_node_definition.gd" id="1_node"]
+
+[resource]
+script = ExtResource("1_node")
+id = &"elk_remains"
+display_name = "Elk Remains"
+yield_item_id = &"raw_hide"
+yield_quantity = 3
+respawn_seconds = 240.0
+look = 4
+profession_id = &"skinning"
+required_level = 3
+gather_xp = 16

@@ -322,9 +322,9 @@ func locked_reason(recipe: ProfessionRecipeDefinition) -> String:
 func locked_tag(recipe: ProfessionRecipeDefinition) -> String:
 	if not recipe.craftable:
 		return "Not yet available"
-	if not character.professions.knows(recipe.id):
+	if not character.professions.knows(recipe.id) and recipe.unlock_source != ProfessionRecipeDefinition.UnlockSource.AUTOMATIC:
 		return "Not learned"
-	return "Level %d" % recipe.required_level
+	return "Level %d" % recipe.required_level   # automatic recipes come with the level
 
 
 func _unlock_text(recipe: ProfessionRecipeDefinition) -> String:

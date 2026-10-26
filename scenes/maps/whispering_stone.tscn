@@ -21,6 +21,11 @@
 [ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="19_husk"]
 [ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="20_wolf"]
 [ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="21_cost"]
+[ext_resource type="PackedScene" path="res://scenes/world/resource_node.tscn" id="30_node"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/old_oak.tres" id="31_old_oak"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/rich_iron_vein.tres" id="32_rich_vein"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/duskleaf_cluster.tres" id="33_duskleaf"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/elk_remains.tres" id="34_elk"]
 
 [sub_resource type="RectangleShape2D" id="Rect_exit"]
 size = Vector2(56, 12)
@@ -344,6 +349,33 @@ label = "Haven"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToHaven"]
 shape = SubResource("Rect_exit")
+
+[node name="Resources" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="OldOak" parent="Resources" instance=ExtResource("30_node")]
+position = Vector2(-210,250)
+definition = ExtResource("31_old_oak")
+node_id = &"old_oak"
+prompt = "Gather"
+
+[node name="RichIronVein" parent="Resources" instance=ExtResource("30_node")]
+position = Vector2(210,250)
+definition = ExtResource("32_rich_vein")
+node_id = &"rich_vein"
+prompt = "Gather"
+
+[node name="DuskleafCluster" parent="Resources" instance=ExtResource("30_node")]
+position = Vector2(-210,100)
+definition = ExtResource("33_duskleaf")
+node_id = &"duskleaf_cluster"
+prompt = "Gather"
+
+[node name="ElkRemains" parent="Resources" instance=ExtResource("30_node")]
+position = Vector2(215,40)
+definition = ExtResource("34_elk")
+node_id = &"elk"
+prompt = "Gather"
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true

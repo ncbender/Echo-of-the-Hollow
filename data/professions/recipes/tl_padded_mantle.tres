@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ProfessionRecipeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/professions/profession_recipe_definition.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Cost_1"]
+script = ExtResource("2_cost")
+item_id = &"linen_cloth"
+quantity = 3
+
+[sub_resource type="Resource" id="Cost_2"]
+script = ExtResource("2_cost")
+item_id = &"cured_leather"
+quantity = 1
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"tl_padded_mantle"
+display_name = "Padded Mantle"
+profession_id = &"tailoring"
+required_level = 2
+xp = 28
+is_processing = false
+output_item_id = &"padded_mantle"
+output_quantity = 1
+inputs = Array[ExtResource("2_cost")]([SubResource("Cost_1"),SubResource("Cost_2")])

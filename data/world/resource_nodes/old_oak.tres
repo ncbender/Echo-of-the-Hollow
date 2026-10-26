@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/resource_node_definition.gd" id="1_node"]
+
+[resource]
+script = ExtResource("1_node")
+id = &"old_oak"
+display_name = "Old Oak"
+yield_item_id = &"timber"
+yield_quantity = 5
+respawn_seconds = 150.0
+look = 0
+profession_id = &"woodcutting"
+required_level = 3
+gather_xp = 14
