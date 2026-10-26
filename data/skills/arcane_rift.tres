@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_jqlih"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_0m6la"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/zone_action.gd" id="4_b4vj1"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="5_jqlih"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_ycdbq"]
 
 [sub_resource type="Resource" id="Resource_mlmrt"]
@@ -27,6 +28,15 @@ interval = 0.4
 hit = SubResource("Resource_kva72")
 color = Color(0.72, 0.5, 1, 1)
 
+[sub_resource type="Resource" id="Resource_jqlih"]
+script = ExtResource("5_jqlih")
+cast_style = 5
+cast_color = Color(0.72, 0.5, 1, 1)
+cast_radius = 12.0
+impact_style = 7
+impact_color = Color(0.72, 0.5, 1, 1)
+impact_radius = 7.0
+
 [resource]
 script = ExtResource("5_ycdbq")
 id = &"arcane_rift"
@@ -40,3 +50,4 @@ cooldown = 12.0
 unlock_level = 0
 cast_lock = 0.3
 actions = Array[ExtResource("1_co2p8")]([SubResource("Resource_t7n0i")])
+fx = SubResource("Resource_jqlih")

@@ -13,6 +13,24 @@ const COLOR_UNBLOCKABLE := Color(0.95, 0.35, 1.0)
 @onready var fx: HitReactionFx = $"../HitReactionFx"
 
 
+func _ready() -> void:
+	# Poise break: impact + word, clearly stronger than a normal hit flash.
+	($"../HealthComponent" as HealthComponent).poise_broken.connect(_on_poise_broken)   # parent not ready yet
+	enemy.parried.connect(_on_parried)
+
+
+func _on_poise_broken() -> void:
+	var world := CombatFx.world_of(enemy)
+	CombatFx.spawn(world, enemy.global_position + Vector2(0, -4), CombatFx.Style.STAR, COLOR_STAGGER, 20.0, 0.4)
+	CombatFx.spawn(world, enemy.global_position, CombatFx.Style.RING, COLOR_STAGGER, 24.0, 0.35)
+	var label := CombatFx.spawn(world, enemy.global_position, CombatFx.Style.TEXT, COLOR_STAGGER, 0.0, 0.6)
+	label.text = "BREAK"
+
+
+func _on_parried() -> void:
+	CombatFx.spawn(CombatFx.world_of(enemy), enemy.global_position + Vector2(0, -4), CombatFx.Style.FLASH, Color(1, 1, 0.85), 9.0, 0.2)
+
+
 func _process(_delta: float) -> void:
 	queue_redraw()
 

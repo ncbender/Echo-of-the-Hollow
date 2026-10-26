@@ -14,3 +14,4 @@ damage_per_second = 3.0
 tick_interval = 0.5
 damage_type = &"bleed"
 color = Color(0.88, 0.25, 0.31, 1)
+marker = 3

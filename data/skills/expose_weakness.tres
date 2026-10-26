@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_4p45c"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_ynm7n"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_eruxk"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="5_4p45c"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_g7tpg"]
 
 [sub_resource type="Resource" id="Resource_0mc3b"]
@@ -26,6 +27,14 @@ forward_offset = 4.0
 hit = SubResource("Resource_j1q0r")
 fx_color = Color(1, 0.85, 0.35, 1)
 
+[sub_resource type="Resource" id="Resource_4p45c"]
+script = ExtResource("5_4p45c")
+cast_color = Color(1, 0.8, 0.4, 1)
+cast_radius = 0.0
+impact_style = 7
+impact_color = Color(1, 0.8, 0.4, 1)
+impact_radius = 10.0
+
 [resource]
 script = ExtResource("5_g7tpg")
 id = &"expose_weakness"
@@ -39,3 +48,4 @@ unlock_level = 3
 cast_lock = 0.2
 cast_move_multiplier = 0.7
 actions = Array[ExtResource("1_x23oi")]([SubResource("Resource_y0epe")])
+fx = SubResource("Resource_4p45c")

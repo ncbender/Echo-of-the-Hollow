@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_vsbd7"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_pk2i4"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_5jiaj"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="5_dnaea"]
 
 [sub_resource type="Resource" id="Resource_oqokm"]
 script = ExtResource("2_dnaea")
@@ -20,6 +21,15 @@ forward_offset = 4.0
 hit = SubResource("Resource_oqokm")
 fx_color = Color(0.86, 0.3, 0.22, 1)
 
+[sub_resource type="Resource" id="Resource_dnaea"]
+script = ExtResource("5_dnaea")
+cast_style = 0
+cast_color = Color(1, 0.55, 0.25, 1)
+cast_radius = 16.0
+impact_style = 2
+impact_color = Color(1, 0.55, 0.25, 1)
+impact_radius = 14.0
+
 [resource]
 script = ExtResource("5_5jiaj")
 id = &"furious_strike"
@@ -31,3 +41,4 @@ tags = Array[StringName]([&"melee", &"strike"])
 resource_cost = 25.0
 cast_lock = 0.3
 actions = Array[ExtResource("1_sixb7")]([SubResource("Resource_golaq")])
+fx = SubResource("Resource_dnaea")

@@ -28,6 +28,10 @@ extends Resource
 ## False for skills without modification slots.
 @export var allows_mods: bool = true
 
+@export_group("Feedback")
+## Cast, impact and aura effects (visual only).
+@export var fx: SkillFxSpec
+
 
 func validate() -> PackedStringArray:
 	var errors: PackedStringArray = []

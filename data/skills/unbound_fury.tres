@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_pexv8"]
 [ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_ktclq"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_fv3to"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="4_pexv8"]
 
 [sub_resource type="Resource" id="Resource_ja850"]
 script = ExtResource("3_ktclq")
@@ -28,6 +29,15 @@ stat_modifiers = Array[ExtResource("3_ktclq")]([SubResource("Resource_ja850"), S
 pause_decay = true
 fx_color = Color(1, 0.3, 0.1, 1)
 
+[sub_resource type="Resource" id="Resource_pexv8"]
+script = ExtResource("4_pexv8")
+cast_style = 4
+cast_color = Color(0.95, 0.3, 0.2, 1)
+cast_radius = 22.0
+impact_radius = 0.0
+aura = true
+aura_color = Color(1, 0.4, 0.15, 1)
+
 [resource]
 script = ExtResource("4_fv3to")
 id = &"unbound_fury"
@@ -42,3 +52,4 @@ unlock_level = 0
 cast_lock = 0.3
 cast_move_multiplier = 0.5
 actions = Array[ExtResource("1_ybpid")]([SubResource("Resource_qm6wx")])
+fx = SubResource("Resource_pexv8")

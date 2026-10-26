@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="2_itwhk"]
 [ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_xsjsu"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="4_es65s"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="4_itwhk"]
 
 [sub_resource type="Resource" id="Resource_tv6kb"]
 script = ExtResource("3_xsjsu")
@@ -23,6 +24,15 @@ stat_modifiers = Array[ExtResource("3_xsjsu")]([SubResource("Resource_tv6kb"), S
 resource_gain = 25.0
 fx_color = Color(1, 0.65, 0.3, 1)
 
+[sub_resource type="Resource" id="Resource_itwhk"]
+script = ExtResource("4_itwhk")
+cast_style = 0
+cast_color = Color(1, 0.55, 0.25, 1)
+cast_radius = 40.0
+impact_radius = 0.0
+aura = true
+aura_color = Color(1, 0.55, 0.25, 1)
+
 [resource]
 script = ExtResource("4_es65s")
 id = &"battle_cry"
@@ -36,3 +46,4 @@ unlock_level = 3
 cast_lock = 0.35
 cast_move_multiplier = 0.5
 actions = Array[ExtResource("1_ceaf5")]([SubResource("Resource_tbitu")])
+fx = SubResource("Resource_itwhk")

@@ -35,7 +35,8 @@ func _on_hit_received(hit: HitData) -> void:
 	# keeps the old look for sword light hits).
 	var push := hit.knockback.normalized() * minf(max_offset, 2.0 + hit.knockback.length() / 5.0)
 	_offset_velocity += push * 30.0
-	_spawn_number(hit)
+	if hit.damage > 0.0:   # parries and poise-only answers show no "0"
+		_spawn_number(hit)
 
 
 func _spawn_number(hit: HitData) -> void:

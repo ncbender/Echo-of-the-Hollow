@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_2jcl0"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_e8lrr"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_1olkg"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="5_2jcl0"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_emnwi"]
 
 [sub_resource type="Resource" id="Resource_g6qd6"]
@@ -22,6 +23,15 @@ arc_degrees = 360.0
 hit = SubResource("Resource_g6qd6")
 fx_color = Color(0.72, 0.5, 1, 1)
 
+[sub_resource type="Resource" id="Resource_2jcl0"]
+script = ExtResource("5_2jcl0")
+cast_style = 5
+cast_color = Color(0.45, 0.6, 1, 1)
+cast_radius = 12.0
+impact_style = 1
+impact_color = Color(0.45, 0.6, 1, 1)
+impact_radius = 10.0
+
 [resource]
 script = ExtResource("5_emnwi")
 id = &"mana_pulse"
@@ -35,3 +45,4 @@ cooldown = 5.0
 unlock_level = 3
 cast_move_multiplier = 0.5
 actions = Array[ExtResource("1_yb0en")]([SubResource("Resource_rkjya")])
+fx = SubResource("Resource_2jcl0")

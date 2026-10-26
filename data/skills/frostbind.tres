@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_7nuj5"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/actions/projectile_action.gd" id="4_n1xja"]
 [ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_7g8r2"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_fx_spec.gd" id="5_beepb"]
 
 [sub_resource type="Resource" id="Resource_rsf6b"]
 script = ExtResource("3_7nuj5")
@@ -29,6 +30,15 @@ radius = 5.0
 pierce = 1
 hit = SubResource("Resource_pvnkt")
 color = Color(0.6, 0.9, 1, 1)
+shape = 1
+
+[sub_resource type="Resource" id="Resource_beepb"]
+script = ExtResource("5_beepb")
+cast_style = 5
+cast_color = Color(0.6, 0.92, 1, 1)
+cast_radius = 8.0
+impact_style = 1
+impact_color = Color(0.6, 0.92, 1, 1)
 
 [resource]
 script = ExtResource("5_7g8r2")
@@ -44,3 +54,4 @@ unlock_level = 5
 cast_lock = 0.22
 cast_move_multiplier = 0.7
 actions = Array[ExtResource("1_f1cru")]([SubResource("Resource_6w0i5")])
+fx = SubResource("Resource_beepb")

@@ -14,3 +14,4 @@ slow_per_stack = 0.15
 max_slow = 0.45
 damage_type = &"frost"
 color = Color(0.66, 0.9, 0.94, 1)
+marker = 4

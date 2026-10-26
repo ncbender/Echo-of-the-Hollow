@@ -178,6 +178,8 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	if _active.is_empty():
 		return
+	var time := Time.get_ticks_msec() * 0.001
+	# Summary pips above the health bar (one per status, stack ticks).
 	var x := -float(_active.size() - 1) * 3.5
 	for entry: Entry in _active.values():
 		var center := Vector2(x, -27)
@@ -186,6 +188,38 @@ func _draw() -> void:
 		for i in mini(entry.stacks - 1, 4):
 			draw_rect(Rect2(center + Vector2(-2.5 + i * 1.4, -4.6), Vector2(0.9, 1.2)), entry.definition.color)
 		x += 7.0
+	# Markers on the body: each style has its own SHAPE, not only a colour.
+	for entry: Entry in _active.values():
+		var color := entry.definition.color
+		var fade := clampf(entry.remaining / 0.4, 0.3, 1.0)   # blinks out in the last moments
+		match entry.definition.marker:
+			1:   # Rune: one orbiting glyph per stack (arcane marks)
+				for i in entry.stacks:
+					var a := time * 2.2 + TAU * i / maxf(entry.stacks, 1)
+					var at := Vector2(cos(a) * 11.0, -4.0 + sin(a) * 5.0)
+					var tri := PackedVector2Array([at + Vector2(0, -2.6), at + Vector2(2.3, 1.5), at + Vector2(-2.3, 1.5), at + Vector2(0, -2.6)])
+					draw_polyline(tri, Color(color, fade), 1.2)
+			2:   # Reticle: four brackets around the body (weak point, death mark)
+				var pulse := 1.0 + 0.12 * sin(time * 9.0)
+				var size := 10.0 * pulse
+				for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+					var c := Vector2(corner.x * size, -4.0 + corner.y * size)
+					draw_line(c, c - Vector2(corner.x * 4.0, 0), Color(color, fade), 1.5)
+					draw_line(c, c - Vector2(0, corner.y * 4.0), Color(color, fade), 1.5)
+				draw_circle(Vector2(0, -4), 1.3, Color(color, fade))
+			3:   # Drops: bleeding
+				for i in mini(entry.stacks, 3):
+					var phase := fmod(time * 1.6 + i * 0.37, 1.0)
+					var at := Vector2(-5.0 + i * 5.0, -6.0 + phase * 10.0)
+					draw_circle(at, 1.1, Color(color, (1.0 - phase) * fade))
+			4:   # Frost: cold tint over the body + crystals + slow ring
+				draw_circle(Vector2(0, -4), 8.5, Color(color, 0.12 * entry.stacks * fade))
+				for i in 3:
+					var a := -PI * 0.5 + (i - 1) * 0.9
+					draw_line(Vector2(0, -4) + Vector2.from_angle(a) * 6.0, Vector2(0, -4) + Vector2.from_angle(a) * 10.0, Color(color.lightened(0.3), fade), 1.0)
+			5:   # Cloud: smoke puffs
+				for i in 3:
+					draw_circle(Vector2(-6.0 + i * 6.0, -14.0 + sin(time * 3.0 + i) * 1.5), 2.6, Color(color, 0.35 * fade))
 	if move_multiplier() < 0.999:
 		draw_set_transform(Vector2(0, 6), 0.0, Vector2(1.0, 0.45))
 		draw_arc(Vector2.ZERO, 10.0, 0.0, TAU, 20, Color(0.65, 0.9, 1.0, 0.7), 1.5)

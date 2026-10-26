@@ -66,6 +66,9 @@ func _ready() -> void:
 	defense.name = "DefenseComponent"
 	add_child(defense)
 	combat.modifiers.append(defense.counter_modifier)
+	defense.parried.connect(_on_parried)
+	defense.blocked.connect(_on_blocked)
+	defense.guard_broken.connect(_on_guard_broken)
 	knockback.deceleration = knockback_decay
 	combat.input_buffer_time = input_buffer_time
 	combat.buffer.window = input_buffer_time
@@ -304,3 +307,30 @@ func can_start_defense() -> bool:
 ## Hurtbox.hit_filter: block/parry resolve the hit before damage, numbers and reactions.
 func _filter_incoming_hit(hit: HitData) -> void:
 	defense.resolve(hit, global_position, aim_direction)
+
+
+# --- Defense feedback (visual only; audio: CombatAudio) ---------------------------
+
+func _defense_fx_point() -> Vector2:
+	return global_position + aim_direction * 8.0 + Vector2(0, -3)
+
+
+func _on_parried(_hit: HitData) -> void:
+	var world := CombatFx.world_of(self)
+	CombatFx.spawn(world, _defense_fx_point(), CombatFx.Style.STAR, Color(1.0, 0.97, 0.8), 18.0, 0.35)
+	CombatFx.spawn(world, _defense_fx_point(), CombatFx.Style.FLASH, Color(1.0, 1.0, 0.9), 10.0, 0.18)
+	var label := CombatFx.spawn(world, global_position, CombatFx.Style.TEXT, Color(1.0, 0.95, 0.6), 0.0, 0.6)
+	label.text = "PARRY"
+
+
+func _on_blocked(_hit: HitData) -> void:
+	var profile := defense.profile()
+	CombatFx.spawn(CombatFx.world_of(self), _defense_fx_point(), CombatFx.Style.SPARKS,
+			profile.color if profile != null else Color.WHITE, 10.0, 0.22)
+
+
+func _on_guard_broken(_hit: HitData) -> void:
+	var world := CombatFx.world_of(self)
+	CombatFx.spawn(world, _defense_fx_point(), CombatFx.Style.SPARKS, Color(1.0, 0.45, 0.3), 14.0, 0.3)
+	var label := CombatFx.spawn(world, global_position, CombatFx.Style.TEXT, Color(1.0, 0.5, 0.35), 0.0, 0.7)
+	label.text = "GUARD BREAK"

@@ -30,6 +30,14 @@ func execute(cast: SkillCast) -> void:
 		health.heal(health.max_health * heal_percent / 100.0)
 	if empower_tag != &"":
 		runtime.empower_next(empower_tag, empower_multiplier)
+	var spec := cast.skill.fx
+	if spec != null and spec.aura and duration > 0.5:
+		var key_name := StringName("buff:%s" % key)
+		var aura := CombatFx.spawn(CombatFx.world_of(cast.player()), cast.player().global_position, CombatFx.Style.AURA, spec.aura_color, 11.0, 0.0)
+		aura.follow = cast.player()
+		var player := cast.player()
+		aura.alive_check = func() -> bool:
+			return runtime.buff_left(key_name) > 0.0 and is_instance_valid(player) and not player.health.is_dead()
 	var fx: Node2D = AreaStrikeAction.FX_SCRIPT.new()
 	fx.set(&"radius", 18.0)
 	fx.set(&"color", fx_color)

@@ -12,6 +12,8 @@ extends SkillAction
 @export var pierce: int = 0
 @export var hit: SkillHitSpec
 @export var color: Color = Color(0.8, 0.6, 1.0)
+## Look of the projectile: 0 orb (arcane), 1 shard (frost, lance), 2 knife.
+@export_enum("Orb", "Shard", "Knife") var shape: int = 0
 
 
 func execute(cast: SkillCast) -> void:
@@ -27,6 +29,7 @@ func execute(cast: SkillCast) -> void:
 		projectile.pierce = pierce + cast.params.extra_pierce
 		projectile.team = cast.player().hurtbox.team
 		projectile.color = color
+		projectile.shape = shape
 		projectile.payload = cast
 		projectile.on_hit = func(hurtbox: Hurtbox) -> bool:
 			return cast.deliver(hurtbox, hit, projectile.global_position - projectile.velocity.normalized() * 8.0, "projectile:%d" % index) != null

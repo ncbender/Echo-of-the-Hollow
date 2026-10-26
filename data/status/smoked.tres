@@ -11,3 +11,4 @@ duration = 1.0
 slow_per_stack = 0.3
 max_slow = 0.3
 color = Color(0.55, 0.55, 0.62, 1)
+marker = 5

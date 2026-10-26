@@ -114,6 +114,11 @@ func execute(cast: SkillCast) -> void:
 			if hurtbox != target and cast.hit_count("path", hurtbox) == 0:
 				cast.deliver(hurtbox, path_hit, player.global_position, "path")
 		cast.spawn(zone, player.global_position)
+	# afterimages along the path (visual only)
+	var world := CombatFx.world_of(player)
+	for i in 3:
+		var ghost := CombatFx.spawn(world, player.global_position + motion * (i / 3.0), CombatFx.Style.AFTERIMAGE, trail_color, 7.0, 0.22 + 0.06 * i)
+		ghost.z_index = 4
 	cast.move(motion, speed)
 
 

@@ -91,6 +91,7 @@ func deliver(hurtbox: Hurtbox, spec: SkillHitSpec, from: Vector2, key: String = 
 	if not hurtbox.receive_hit(hit):
 		return null
 	hits_landed += 1
+	_impact_fx(hurtbox, hit)
 	if key != "":
 		var counts: Dictionary = _hit_counts.get(key, {})
 		counts[hurtbox.get_instance_id()] = counts.get(hurtbox.get_instance_id(), 0) + 1
@@ -147,3 +148,19 @@ func arrive(completed: bool) -> void:
 	var rest: Array[SkillAction] = pending.duplicate()
 	pending.clear()
 	run_actions(rest)
+
+
+## Visual feedback of an accepted skill hit: the skill's impact effect and, when
+## the hit consumed a status (mark detonation, execution), a burst in that
+## status's colour. Purely cosmetic.
+func _impact_fx(hurtbox: Hurtbox, hit: HitData) -> void:
+	var world := CombatFx.world_of(player())
+	var fx := skill.fx
+	if fx != null and fx.impact_style >= 0:
+		CombatFx.spawn(world, hurtbox.global_position, fx.impact_style, fx.impact_color, fx.impact_radius, 0.3, direction)
+	for tag in hit.tags:
+		if String(tag).begins_with("consumed_"):
+			var status: StatusEffectDefinition = runtime.character.database.statuses.get(StringName(String(tag).trim_prefix("consumed_")))
+			var tint := status.color if status != null else Color.WHITE
+			CombatFx.spawn(world, hurtbox.global_position, CombatFx.Style.STAR, tint, 22.0, 0.4)
+			CombatFx.spawn(world, hurtbox.global_position, CombatFx.Style.RING, tint, 26.0, 0.35)

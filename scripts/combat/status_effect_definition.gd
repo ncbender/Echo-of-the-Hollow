@@ -33,6 +33,10 @@ enum StackRule {
 
 @export_group("Presentation")
 @export var color: Color = Color.WHITE
+## Marker drawn on the affected entity (StatusComponent): Pip = small dot only,
+## Rune = orbiting glyphs per stack (marks), Reticle = target brackets (weak
+## points), Drops = bleeding, Frost = cold tint + crystals, Cloud = smoke puffs.
+@export_enum("Pip", "Rune", "Reticle", "Drops", "Frost", "Cloud") var marker: int = 0
 
 
 func validate() -> PackedStringArray:

@@ -63,6 +63,8 @@ func _draw() -> void:
 	draw_circle(Vector2(0, -2), BODY_RADIUS, body_color)
 	draw_circle(Vector2(0, -2) + player.aim_direction * 3.0, 2.0, Color("1d1b26"))
 
+	if player.defense != null and player.defense.is_defending():
+		_draw_guard()
 	if combat.state == CombatComponent.State.ATTACKING:
 		_draw_swing(combat)
 	else:
@@ -154,3 +156,19 @@ func _draw_wedge(from: float, to: float, radius: float, color: Color) -> void:
 	for i in segments + 1:
 		points.append(Vector2.from_angle(lerpf(from, to, float(i) / segments)) * radius)
 	draw_colored_polygon(points, color)
+
+
+## Guard stance: an arc over the defended front sector. Parry window = bright,
+## thick and white; block = the profile's colour.
+func _draw_guard() -> void:
+	var defense := player.defense
+	var profile := defense.profile()
+	if profile == null:
+		return
+	var parry := defense.state == DefenseComponent.State.PARRY
+	var arc := deg_to_rad(profile.parry_arc_degrees if parry else profile.block_arc_degrees) * 0.5
+	var angle := player.aim_direction.angle()
+	var color := Color(1.0, 1.0, 0.9, 0.95) if parry else Color(profile.color, 0.75)
+	draw_arc(Vector2(0, -2), 12.0, angle - arc, angle + arc, 16, color, 3.0 if parry else 2.0)
+	if parry:
+		draw_arc(Vector2(0, -2), 15.0, angle - arc * 0.6, angle + arc * 0.6, 10, Color(color, 0.5), 1.0)

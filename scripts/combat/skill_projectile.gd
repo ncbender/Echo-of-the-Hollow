@@ -14,6 +14,8 @@ var team: StringName = &"player"
 var on_hit: Callable
 var payload: RefCounted
 var color: Color = Color.WHITE
+## 0 orb, 1 shard, 2 knife (visual only).
+var shape: int = 0
 
 var traveled: float = 0.0
 var _hit_ids: Dictionary = {}
@@ -89,7 +91,21 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	var forward := velocity.normalized() if velocity != Vector2.ZERO else Vector2.RIGHT
 	for i in _trail.size():
 		draw_circle(to_local(_trail[i]), radius * (0.8 - i * 0.15), Color(color, 0.35 - i * 0.08))
-	draw_circle(Vector2.ZERO, radius + 1.0, Color(color, 0.4))
-	draw_circle(Vector2.ZERO, radius * 0.7, color.lightened(0.4))
+	match shape:
+		1:
+			var side := forward.orthogonal() * radius * 0.7
+			draw_colored_polygon(PackedVector2Array([forward * radius * 2.4, side, -forward * radius * 1.2, -side]), Color(color, 0.85))
+			draw_line(-forward * radius, forward * radius * 2.2, color.lightened(0.6), 1.0)
+		2:
+			draw_line(-forward * radius * 1.5, forward * radius * 1.8, color.lightened(0.3), 2.0)
+			draw_line(forward * radius * 0.6, forward * radius * 1.8, Color.WHITE, 1.0)
+		_:
+			draw_circle(Vector2.ZERO, radius + 1.5, Color(color, 0.3))
+			draw_circle(Vector2.ZERO, radius * 0.7, color.lightened(0.4))
+			var spin := traveled * 0.08
+			for i in 4:
+				var axis := Vector2.from_angle(spin + PI * 0.5 * i) * (radius + 2.5)
+				draw_line(axis * 0.4, axis, Color(color.lightened(0.5), 0.8), 1.0)

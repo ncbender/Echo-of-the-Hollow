@@ -88,6 +88,8 @@ func _consume(hit: HitData, runner: ItemEffectRunner, power: float) -> void:
 	rupture.damage_type = consume_damage_type
 	rupture.tags.append(StringName("rupture_%s" % consume_status))
 	if hurtbox.receive_hit(rupture):
+		if runner.player != null:
+			CombatFx.spawn(CombatFx.world_of(runner.player), hurtbox.global_position, CombatFx.Style.STAR, fx_color, 20.0, 0.4)
 		runner.dispatch_hit(rupture)
 
 
@@ -108,6 +110,8 @@ func _burst(hit: HitData, runner: ItemEffectRunner, power: float) -> void:
 	fx.set(&"radius", burst_radius)
 	fx.set(&"color", fx_color)
 	runner.spawn_fx(fx, hit.position)
+	if runner.player != null:
+		CombatFx.spawn(CombatFx.world_of(runner.player), hit.position, CombatFx.Style.SPARKS, fx_color, burst_radius * 0.6, 0.35)
 
 
 func _triggered(hit: HitData, hurtbox: Hurtbox) -> HitData:
