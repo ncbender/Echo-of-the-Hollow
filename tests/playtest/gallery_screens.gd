@@ -3,7 +3,7 @@ extends RefCounted
 ## The screens of the UI gallery (tests/playtest/ui_gallery.gd) and how to open
 ## each one with real data. Returns the screen label, or "" when skipped.
 
-const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "character", "classes", "classes_locked", "talents", "talents_full", "skills", "presets", "forge_imprint",
+const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "pause", "save", "load", "options", "confirm"]
 
@@ -47,6 +47,12 @@ static func open(gallery: Object, screen: String) -> String:
 			var crafted := character.inventory.items().filter(func(i: ItemInstance) -> bool: return i.definition_id == &"stormcaller_fang")
 			if not crafted.is_empty():
 				hud.inventory_panel.select_item((crafted[0] as ItemInstance).instance_id)
+		"inventory_tooltip":
+			hud.toggle_inventory()
+			await gallery.frames(3)
+			var blade := character.inventory.items().filter(func(i: ItemInstance) -> bool: return i.definition_id == &"forged_blade")
+			var cell := hud.inventory_panel.find_child("Item_%s" % (blade[0] as ItemInstance).instance_id, true, false) as ItemCell
+			hud.inventory_panel._on_cell_hovered(cell)
 		"character":
 			hud.toggle_character()
 		"classes", "talents", "skills", "presets":

@@ -95,37 +95,144 @@ func test_description_order_and_comparison() -> void:
 	check(delta.size() >= 2 and delta[1].text.ends_with("(better)") or delta[1].text.ends_with("(worse)"), "deltas say better/worse in words")
 
 
-func test_equip_buttons_and_drag_drop_never_duplicate() -> void:
+## Real input through the viewport (not direct method calls): mouse motion and
+## button events at the centre of a control.
+func _mouse_at(control: Control) -> Vector2:
+	return control.get_global_rect().get_center()
+
+
+func _move(control: Control) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = _mouse_at(control)
+	motion.global_position = motion.position
+	get_viewport().push_input(motion, true)   # canvas coordinates
+	await get_tree().process_frame
+
+
+func _right_click(control: Control) -> void:
+	await _move(control)
+	for pressed: bool in [true, false]:
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_RIGHT
+		click.pressed = pressed
+		click.position = _mouse_at(control)
+		click.global_position = click.position
+		get_viewport().push_input(click, true)
+	await get_tree().process_frame
+
+
+func _bag_cell(item: ItemInstance) -> ItemCell:
+	return panel.find_child("Item_%s" % item.instance_id, true, false) as ItemCell
+
+
+func test_right_click_equips_and_unequips_with_predictable_slots() -> void:
 	var before := character.inventory.items().size()
-	var ring := _instance(&"silver_ring")
-	panel.select_item(ring.instance_id)
-	var equip := panel.find_child("EquipRing2", true, false) as Button
-	check(equip != null, "ring offers Ring 2")
-	equip.pressed.emit()
-	check(character.equipment.get_item(EquipSlot.Slot.RING_2) == ring, "ring in Ring 2")
-	# drag the ring onto Ring 1, then back into the bag
-	var ring1 := panel.find_child("Slot_RING_1", true, false).find_child("Cell", true, false) as ItemCell
-	check(ring1._can_drop_data(Vector2.ZERO, {"instance_id": ring.instance_id, "from_slot": EquipSlot.Slot.RING_2}), "drop allowed")
-	ring1._drop_data(Vector2.ZERO, {"instance_id": ring.instance_id, "from_slot": EquipSlot.Slot.RING_2})
-	check(character.equipment.get_item(EquipSlot.Slot.RING_1) == ring and character.equipment.get_item(EquipSlot.Slot.RING_2) == null, "moved, not copied")
-	var bag_cell := panel.find_children("Item_*", "ItemCell", true, false)[0] as ItemCell
-	bag_cell._drop_data(Vector2.ZERO, {"instance_id": ring.instance_id, "from_slot": EquipSlot.Slot.RING_1})
-	check(not character.equipment.is_equipped(ring.instance_id), "unequipped by dropping on the bag")
-	check_eq(character.inventory.items().size(), before, "same number of items")
-	check(character.equipment.integrity_errors().is_empty() and character.inventory.integrity_errors().is_empty(), "no duplicates or broken references")
+	var silver := _instance(&"silver_ring")
+	var copper := _instance(&"copper_ring")
+	await _right_click(_bag_cell(silver))
+	check(character.equipment.get_item(EquipSlot.Slot.RING_1) == silver, "first ring -> Ring 1 (first empty)")
+	await _right_click(_bag_cell(copper))
+	check(character.equipment.get_item(EquipSlot.Slot.RING_2) == copper, "second ring -> Ring 2 (next empty)")
+	character.inventory.capacity += 5   # the debug kit fills the bag
+	var third: ItemInstance = character.inventory.add_item(&"silver_ring", 1)[0]
+	panel.rebuild()
+	await _right_click(_bag_cell(third))
+	check(character.equipment.get_item(EquipSlot.Slot.RING_1) == third and character.equipment.get_item(EquipSlot.Slot.RING_2) == copper,
+		"both full -> Ring 1 is replaced, Ring 2 kept")
+	check(character.inventory.has(silver.instance_id) and not character.equipment.is_equipped(silver.instance_id), "replaced ring back in the bag")
+	# right click on the paper doll unequips
+	var doll := panel.find_child("Slot_RING_2", true, false).find_child("Cell", true, false) as ItemCell
+	await _right_click(doll)
+	check(character.equipment.get_item(EquipSlot.Slot.RING_2) == null and character.inventory.has(copper.instance_id), "paper doll right click unequips")
+	# right click on an equipped item in the bag unequips it too
+	await _right_click(_bag_cell(third))
+	check(not character.equipment.is_equipped(third.instance_id), "bag right click on equipped item unequips")
+	# one-handers (hands emptied first): main hand, then the off hand (dual wield), then main hand replaced
+	for hand: int in [EquipSlot.Slot.MAIN_HAND, EquipSlot.Slot.OFF_HAND]:
+		character.equipment.unequip(hand)
+	var swords: Array[ItemInstance] = []
+	for item_id: StringName in [&"iron_sword", &"militia_sword", &"echo_blade"]:
+		swords.append(_instance(item_id))
+	for sword in swords:
+		panel.rebuild()
+		await _right_click(_bag_cell(sword))
+	check(character.equipment.get_item(EquipSlot.Slot.MAIN_HAND) == swords[2] and character.equipment.get_item(EquipSlot.Slot.OFF_HAND) == swords[1],
+		"main hand, then off hand, then main hand replaced")
+	# non-equippable: nothing happens, item kept
+	var ore := _instance(&"iron_ore")
+	await _right_click(_bag_cell(ore))
+	check(character.inventory.has(ore.instance_id), "materials are never removed by right click")
+	check_eq(character.inventory.items().size(), before + 1, "no item lost or copied (one ring added by the test)")
+	check(character.equipment.integrity_errors().is_empty() and character.inventory.integrity_errors().is_empty(), "consistent references")
 
 
-func test_discard_needs_confirmation() -> void:
+func test_no_action_buttons_and_no_destruction() -> void:
 	var potion := _instance(&"minor_potion")
 	panel.select_item(potion.instance_id)
-	(panel.find_child("Discard", true, false) as Button).pressed.emit()
-	var dialog := map.hud.confirm_dialog
-	check(dialog.visible, "confirmation shown")
-	dialog.cancel()
-	check(character.inventory.has(potion.instance_id), "cancel keeps the item")
-	(panel.find_child("Discard", true, false) as Button).pressed.emit()
-	dialog.confirm()
-	check(not character.inventory.has(potion.instance_id), "confirmed discard removes it")
+	for button_name: String in ["Equip", "Unequip", "Discard", "EquipOffhand", "EquipRing1", "EquipRing2", "Actions"]:
+		check(panel.find_child(button_name, true, false) == null, "%s removed" % button_name)
+	await _right_click(_bag_cell(potion))
+	check(character.inventory.has(potion.instance_id), "right click never destroys")
+
+
+func test_hover_shows_tooltip_with_comparison_inside_the_screen() -> void:
+	var equipped := _instance(&"iron_sword")
+	character.equipment.equip(equipped.instance_id, EquipSlot.Slot.MAIN_HAND)
+	panel.rebuild()
+	await get_tree().process_frame
+	var other := _instance(&"stormcaller_fang")
+	await _move(_bag_cell(other))
+	await get_tree().process_frame
+	var tooltip := panel.tooltip
+	check(tooltip.visible and tooltip.item == other, "hover shows the tooltip at once")
+	check(tooltip.item != null and tooltip.compared_items().has(equipped), "compared with the equipped main hand")
+	check_eq(tooltip.get_child_count(), 2, "item card + equipped card")
+	var view := panel.get_viewport_rect()
+	check(view.grow(1.0).encloses(tooltip.get_global_rect()), "tooltip inside the screen: %s" % tooltip.get_global_rect())
+	# the right-most bag cell: the tooltip flips to the left of it
+	var cells := panel.find_children("Item_*", "ItemCell", true, false)
+	var right_most := cells[0] as ItemCell
+	for cell: ItemCell in cells:
+		if cell.get_global_rect().end.x > right_most.get_global_rect().end.x:
+			right_most = cell
+	await _move(right_most)
+	await get_tree().process_frame
+	check(view.grow(1.0).encloses(tooltip.get_global_rect()), "edge cell: tooltip still inside the screen")
+	await _move(panel.find_child("Gold", true, false) as Control)
+	check(not tooltip.visible, "tooltip hides when the mouse leaves the item")
+
+
+func test_gold_is_a_counter_not_a_bag_item() -> void:
+	character.inventory.add_item(&"gold_coin", 1234)
+	var used := character.inventory.used_slots()
+	panel.rebuild()
+	check_eq((panel.find_child("Gold", true, false) as Label).text, "Gold  %s" % InventoryPanel.gold_text(character.inventory.count(&"gold_coin")), "wallet counter")
+	check_eq(InventoryPanel.gold_text(1234), "1,234", "thousands separator")
+	check(not panel.visible_items().any(func(i: ItemInstance) -> bool: return i.definition_id == &"gold_coin"), "gold not in the bag grid")
+	character.inventory.add_item(&"gold_coin", 10)
+	check_eq(character.inventory.used_slots(), used, "gold takes no bag slot")
+	check(character.inventory.count(&"gold_coin") >= 1244, "gold still stored in the inventory (save format unchanged)")
+
+
+func test_equipment_survives_save_and_load_after_right_click() -> void:
+	var ring := _instance(&"silver_ring")
+	await _right_click(_bag_cell(ring))
+	var sword := _instance(&"iron_sword")
+	await _right_click(_bag_cell(sword))
+	character.inventory.add_item(&"gold_coin", 77)
+	var path := "user://test_saves/inventory_ui/slot_1.save.json"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	SaveSystem.save_to(character, path)
+	var restored := SaveSystem.load_from(path, session.database).character
+	check(restored != null, "loaded")
+	if restored != null:
+		check_eq(restored.equipment.get_item(EquipSlot.Slot.RING_1).instance_id, ring.instance_id, "Ring 1 instance id kept")
+		var sword_slot := character.equipment.active_loadout().slot_of(sword.instance_id)
+		check(sword_slot >= 0, "sword equipped by right click")
+		check_eq(restored.equipment.get_item(sword_slot).instance_id, sword.instance_id, "weapon instance id kept in its slot")
+		check_eq(restored.inventory.count(&"gold_coin"), character.inventory.count(&"gold_coin"), "gold kept")
+		check(restored.inventory.integrity_errors().is_empty() and restored.equipment.integrity_errors().is_empty(), "consistent after load")
+	DirAccess.remove_absolute(path)
 
 
 func test_overview_and_details_pages() -> void:

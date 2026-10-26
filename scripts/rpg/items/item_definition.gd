@@ -21,6 +21,9 @@ const RARITY_COLORS := {
 @export var category: Category = Category.MATERIAL
 @export var rarity: Rarity = Rarity.NORMAL
 @export var max_stack: int = 1
+## Currency (gold): kept in the inventory like any stack (save format unchanged),
+## but shown as a wallet counter and it takes no bag slot.
+@export var is_currency: bool = false
 
 @export_group("Equipment")
 @export var slot_kind: SlotKind = SlotKind.NONE

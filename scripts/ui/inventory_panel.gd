@@ -2,8 +2,12 @@ class_name InventoryPanel
 extends UiWindow
 ## Inventory & character window (I): paper doll with all 15 equipment slots of
 ## the ACTIVE class, character overview and detailed stats, the bag with
-## category tabs and sorting, and the selected item's description (same order
-## as every tooltip), comparison and actions.
+## category tabs and sorting, gold as a wallet counter, and the selected item's
+## description (same order as every tooltip) with its comparison.
+## Interaction (no action buttons): hover shows the ItemTooltip at once (item +
+## equipped comparison), right click equips (CharacterEquipment.quick_slot) or
+## unequips, drag & drop picks a specific slot (Ring 2, Off Hand). There is no
+## way to destroy items here.
 ## Only calls public Character / CharacterEquipment methods; holds no item state
 ## except the selected instance id. Drag & drop between bag and paper doll goes
 ## through the same equip/unequip calls (an item is never copied).
@@ -40,9 +44,11 @@ var _bag_tabs: UiTabs
 var _sort: OptionButton
 var _grid: GridContainer
 var _details: VBoxContainer
-var _actions: HFlowContainer
 var _status: Label
+var _gold: Label
 var _selected_id: String = ""
+## Immediate hover tooltip (top level, above the window content).
+var tooltip: ItemTooltip
 
 
 func _ready() -> void:
@@ -83,6 +89,12 @@ func _ready() -> void:
 		sort_mode = SORTS[index]
 		rebuild())
 	header.add_child(_sort)
+	_gold = UiTheme.styled("", &"SubheadingLabel")
+	_gold.name = "Gold"
+	_gold.add_theme_color_override(&"font_color", UiTheme.WARNING)
+	_gold.tooltip_text = "Gold - your currency. It takes no bag slot."
+	_gold.mouse_filter = Control.MOUSE_FILTER_PASS
+	header.add_child(_gold)
 	middle.add_child(header)
 	_bag_tabs = UiTabs.new()
 	for id in CATEGORIES:
@@ -97,7 +109,7 @@ func _ready() -> void:
 	_grid.columns = BAG_COLUMNS
 	bag_panel.get_node("Box").add_child(_grid)
 	middle.add_child(bag_panel)
-	var hint := UiTheme.styled("Drag items onto the equipment slots, or select one and use the actions.", &"CaptionLabel")
+	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip  ·  Drag onto a slot to choose it (Ring 2, Off Hand)", &"CaptionLabel")
 	_bag_hint = hint
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP), 0)
@@ -110,12 +122,12 @@ func _ready() -> void:
 	_details = details_card.get_node("Box") as VBoxContainer
 	_details.add_theme_constant_override(&"separation", 4)
 	right.add_child(details_card)
-	_actions = HFlowContainer.new()
-	_actions.name = "Actions"
-	_actions.add_theme_constant_override(&"h_separation", UiTheme.GAP)
-	right.add_child(_actions)
 	_status = UiTheme.wrapped("", UiTheme.WARNING, DETAILS_WIDTH)
+	_status.name = "Status"
 	right.add_child(_status)
+	tooltip = ItemTooltip.new()
+	add_child(tooltip)
+	visibility_changed.connect(func() -> void: if not visible: tooltip.hide_tooltip())
 
 
 ## All three columns side by side; the flow container stacks them when narrower.
@@ -147,6 +159,8 @@ func rebuild() -> void:
 	_bag_tabs.select(category)
 	_sort.select(SORTS.find(sort_mode))
 	_bag_title.text = "Bag  %d / %d" % [character.inventory.used_slots(), character.inventory.capacity]
+	_gold.text = "Gold  %s" % gold_text(gold())
+	tooltip.hide_tooltip()   # cells are rebuilt; the next hover shows it again
 	_fit_bag_columns()
 	_clear(_left)
 	match left_page:
@@ -218,6 +232,7 @@ func _slot_entry(slot: int, caption_left: bool) -> HBoxContainer:
 	cell.button_pressed = item != null and item.instance_id == _selected_id
 	cell.pressed.connect(_select.bind(item.instance_id if item != null else ""))
 	cell.drop_handler = _drop_on_slot
+	_wire(cell)
 	var info := VBoxContainer.new()
 	info.add_theme_constant_override(&"separation", 0)
 	info.custom_minimum_size = Vector2(96, 0)
@@ -306,6 +321,7 @@ func _rebuild_grid() -> void:
 		cell.button_pressed = item.instance_id == _selected_id
 		cell.pressed.connect(_select.bind(item.instance_id))
 		cell.drop_handler = _drop_on_bag
+		_wire(cell)
 		_grid.add_child(cell)
 	if category == "All":
 		for index in maxi(0, character.inventory.capacity - character.inventory.used_slots()):
@@ -323,7 +339,9 @@ func visible_items() -> Array[ItemInstance]:
 	var result: Array[ItemInstance] = []
 	for item in character.inventory.items():
 		var definition := character.database.get_item(item.definition_id)
-		if definition != null and (category == "All" or ItemDescriber.category_tab(definition) == category):
+		if definition == null or definition.is_currency:
+			continue   # gold is shown as the wallet counter, not as a bag item
+		if category == "All" or ItemDescriber.category_tab(definition) == category:
 			result.append(item)
 	var db := character.database
 	match sort_mode:
@@ -358,50 +376,75 @@ func _select(instance_id: String) -> void:
 
 func _show_details() -> void:
 	_clear(_details)
-	_clear(_actions)
 	var item := character.inventory.find(_selected_id)
 	if item == null:
 		_details.add_child(UiTheme.heading("No item selected"))
-		_details.add_child(UiTheme.wrapped("Select an item in the bag or on the paper doll to see its details and compare it with your gear.",
+		_details.add_child(UiTheme.wrapped("Hover an item for its details and a comparison with your gear. Click it to keep it here.",
 			UiTheme.TEXT_SECONDARY, DETAILS_WIDTH - 30))
 		return
 	ItemDescriber.build(_details, character, item, DETAILS_WIDTH - 30)
-	_add_actions(item, character.database.get_item(item.definition_id))
-
-
-func _add_actions(item: ItemInstance, definition: ItemDefinition) -> void:
-	var equipment := character.equipment
+	var definition := character.database.get_item(item.definition_id)
 	if definition.is_equippable():
-		var current_slot := equipment.active_loadout().slot_of(item.instance_id)
-		if current_slot >= 0:
-			_add_action("Unequip", &"PrimaryButton", func() -> void: _report(equipment.unequip(current_slot), "Unequipped."))
-		else:
-			_add_action("Equip", &"PrimaryButton", func() -> void: _equip(item, -1))
-		if definition.slot_kind == ItemDefinition.SlotKind.ONE_HAND_WEAPON and current_slot != EquipSlot.Slot.OFF_HAND:
-			_add_action("Equip Off-hand", &"", func() -> void: _equip(item, EquipSlot.Slot.OFF_HAND))
-		if definition.slot_kind == ItemDefinition.SlotKind.RING:
-			for ring: int in [EquipSlot.Slot.RING_1, EquipSlot.Slot.RING_2]:
-				if ring != current_slot:
-					_add_action("Equip %s" % EquipSlot.display_name(ring), &"", func() -> void: _equip(item, ring))
-	_add_action("Discard", &"DangerButton", func() -> void: _ask_discard(item, definition))
+		var equipped := character.equipment.active_loadout().slot_of(item.instance_id) >= 0
+		var hint := UiTheme.styled("Right-click to unequip." if equipped else "Right-click to equip.", &"CaptionLabel")
+		hint.add_theme_color_override(&"font_color", UiTheme.RESONANCE)
+		_details.add_child(hint)
 
 
-func _ask_discard(item: ItemInstance, definition: ItemDefinition) -> void:
-	var dialog := _confirm_dialog()
-	var action := func() -> void:
-		_report("" if character.discard_item(item.instance_id) else "Cannot discard this item.", "Discarded %s." % definition.display_name)
-	if dialog == null:
-		action.call()
+## Cell callbacks: immediate tooltip on hover/focus, quick equip on right click.
+func _wire(cell: ItemCell) -> void:
+	cell.hovered.connect(_on_cell_hovered)
+	cell.right_click_handler = _on_right_click
+
+
+func _on_cell_hovered(cell: ItemCell) -> void:
+	if cell == null or not is_instance_valid(cell) or not cell.is_inside_tree():
+		tooltip.hide_tooltip()
 		return
-	var amount := " (x%d)" % item.quantity if item.quantity > 1 else ""
-	dialog.ask("Discard item?", "%s%s will be destroyed for good. This cannot be undone." % [definition.display_name, amount], "Discard", action, true)
+	tooltip.show_for(character, cell.item(), cell)
 
 
-func _confirm_dialog() -> UiConfirmDialog:
-	var hud := get_parent()
-	while hud != null and not hud is GameHud:
-		hud = hud.get_parent()
-	return (hud as GameHud).confirm_dialog if hud != null else null
+## Right click: an equipped item (paper doll, or marked in the bag) is
+## unequipped - it stays in the bag, so no free slot is needed (items live only
+## in the inventory). Other equippable items go to CharacterEquipment.quick_slot.
+func _on_right_click(cell: ItemCell) -> void:
+	var item := cell.item()
+	if item == null:
+		return
+	var definition := character.database.get_item(item.definition_id)
+	var slot := cell.equip_slot if cell.equip_slot >= 0 else character.equipment.active_loadout().slot_of(item.instance_id)
+	_selected_id = item.instance_id
+	if slot >= 0:
+		_report(character.equipment.unequip(slot), "Unequipped %s." % definition.display_name)
+		return
+	if not definition.is_equippable():
+		_report("%s cannot be equipped." % definition.display_name, "")
+		return
+	var target := character.equipment.quick_slot(item)
+	if target < 0:
+		_report(character.equipment.can_equip(item.instance_id, EquipSlot.allowed_slots(definition)[0]), "")
+		return
+	_equip(item, target)
+
+
+func gold() -> int:
+	var total := 0
+	for item in character.inventory.items():
+		var definition := character.database.get_item(item.definition_id)
+		if definition != null and definition.is_currency:
+			total += item.quantity
+	return total
+
+
+## 12345 -> "12,345".
+static func gold_text(amount: int) -> String:
+	var digits := str(absi(amount))
+	var groups: PackedStringArray = []
+	while digits.length() > 3:
+		groups.insert(0, digits.right(3))
+		digits = digits.left(digits.length() - 3)
+	groups.insert(0, digits)
+	return ("-" if amount < 0 else "") + ",".join(groups)
 
 
 func _equip(item: ItemInstance, slot: int) -> void:
@@ -411,7 +454,7 @@ func _equip(item: ItemInstance, slot: int) -> void:
 		var other := character.inventory.find(instance_id)
 		if other != null:
 			displaced.append(character.database.get_item(other.definition_id).display_name)
-	var text := "Equipped."
+	var text := "Equipped %s (%s)." % [character.database.get_item(item.definition_id).display_name, EquipSlot.display_name(character.equipment.active_loadout().slot_of(item.instance_id))]
 	if not displaced.is_empty():
 		text += " Moved back to the bag: %s." % ", ".join(displaced)
 	_report(error, text)
@@ -437,12 +480,6 @@ func _report(error: String, success_text: String) -> void:
 	_status.text = error if error != "" else success_text
 	_status.add_theme_color_override(&"font_color", UiTheme.DANGER if error != "" else UiTheme.SUCCESS)
 	rebuild()
-
-
-func _add_action(text: String, variation: StringName, callback: Callable) -> void:
-	var button := UiTheme.button(text, variation, callback)
-	button.name = text.replace(" ", "").replace("-", "")
-	_actions.add_child(button)
 
 
 func _format(value: float) -> String:

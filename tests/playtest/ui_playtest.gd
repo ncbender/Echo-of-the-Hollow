@@ -137,7 +137,7 @@ func _open_inventory(tag: String) -> void:
 	# hover the first bag slot and the right-most equipped slot -> custom item tooltips
 	var slots: Array[Control] = []
 	for button: Button in map.hud.inventory_panel.find_children("*", "ItemCell", true, false):
-		if not button.disabled and button.tooltip_text != "":
+		if not button.disabled and (button as ItemCell).instance_id != "":
 			if slots.is_empty() or button.get_global_rect().end.x > slots[slots.size() - 1].get_global_rect().end.x + 1.0:
 				slots.append(button)
 	for index in [0, slots.size() - 1]:
@@ -154,20 +154,59 @@ func _open_inventory(tag: String) -> void:
 			motion.global_position = at
 			motion.relative = Vector2(1, 0)
 			Input.parse_input_event(motion)
-			await create_timer(1.0).timeout   # tooltip delay 0.5 s (frame rate is uncapped)
+			await create_timer(0.3).timeout   # the item tooltip shows without delay
 			if root.gui_get_hovered_control() == slot:
 				break
 		var hovered := root.gui_get_hovered_control()
-		_log("%s hover target %s -> hovered %s (window px %s, mouse canvas %s, slot %s, os mouse %s)" % [tag, (slot as Button).tooltip_text, (hovered as Button).tooltip_text if hovered is Button else str(hovered), at, root.get_mouse_position(), slot.get_global_rect(), DisplayServer.mouse_get_position()])
-		var tooltip := _visible_tooltip(root)
+		_log("%s hover target %s -> hovered %s (window px %s, mouse canvas %s, slot %s, os mouse %s)" % [tag, slot.name, hovered.name if hovered != null else "-", at, root.get_mouse_position(), slot.get_global_rect(), DisplayServer.mouse_get_position()])
+		var tooltip: Control = map.hud.inventory_panel.tooltip if map.hud.inventory_panel.tooltip.visible else null
 		_check(tooltip != null, tag + " item tooltip shown")
 		if tooltip != null:
 			_log("%s tooltip at %s size %s, canvas %s" % [tag, tooltip.position, tooltip.size, root.get_visible_rect().size])
 			_check(Rect2(Vector2.ZERO, root.get_visible_rect().size).grow(1.0).encloses(Rect2(tooltip.position, tooltip.size)), tag + " tooltip inside the screen")
 		await _shot(tag, "03_tooltip_%d" % index)
 		Input.warp_mouse(Vector2(4, 4))
+	await _right_click_roundtrip(tag)
 	map.hud.close_windows()
 	await _frames(2)
+
+
+## Real right clicks (OS cursor + mouse button events): equip an item from the
+## bag, then unequip it again with a right click on the same bag cell.
+func _right_click_roundtrip(tag: String) -> void:
+	var panel := map.hud.inventory_panel
+	var character := session.character
+	var target: ItemInstance = null
+	for cell: ItemCell in panel.find_children("Item_*", "ItemCell", true, false):
+		var item := cell.item()
+		if item != null and character.database.get_item(item.definition_id).is_equippable() and not character.equipment.is_equipped(item.instance_id) \
+				and character.equipment.quick_slot(item) >= 0 and cell.is_visible_in_tree():
+			target = item
+			break
+	if target == null:
+		_check(false, tag + " an equippable bag item for the right click")
+		return
+	for expected: bool in [true, false]:
+		var cell := panel.find_child("Item_%s" % target.instance_id, true, false) as ItemCell
+		var scroll := cell.get_parent()
+		while scroll != null and not scroll is ScrollContainer:
+			scroll = scroll.get_parent()
+		if scroll != null:
+			(scroll as ScrollContainer).ensure_control_visible(cell)
+			await _frames(3)
+		var at := root.get_final_transform() * cell.get_global_rect().get_center()
+		Input.warp_mouse(at)
+		await _frames(2)
+		for pressed: bool in [true, false]:
+			var click := InputEventMouseButton.new()
+			click.button_index = MOUSE_BUTTON_RIGHT
+			click.pressed = pressed
+			click.position = at
+			click.global_position = at
+			Input.parse_input_event(click)
+			await _frames(2)
+		_check(character.equipment.is_equipped(target.instance_id) == expected, "%s real right click %s" % [tag, "equips" if expected else "unequips"])
+	Input.warp_mouse(Vector2(4, 4))
 
 
 func _visible_tooltip(node: Node) -> Window:

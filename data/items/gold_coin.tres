@@ -10,4 +10,5 @@ description = "Common coin of the Hollow. Pays for talent resets at the class st
 category = 4
 rarity = 0
 max_stack = 9999
+is_currency = true
 slot_kind = 0

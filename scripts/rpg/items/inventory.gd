@@ -1,6 +1,8 @@
 class_name Inventory
 extends RefCounted
-## Simple slot inventory: every ItemInstance (single item or stack) uses one slot.
+## Simple slot inventory: every ItemInstance (single item or stack) uses one slot -
+## except currency stacks (ItemDefinition.is_currency, gold), which are kept here
+## but take no bag slot.
 ## Guarantees: no negative or zero quantities, no stack above max_stack, no two
 ## instances with the same id, no unknown definitions. All multi-step operations
 ## are validated first and then applied, so they either fully succeed or change
@@ -9,6 +11,9 @@ extends RefCounted
 signal changed
 ## Emitted after an instance left the inventory (equipment drops its references).
 signal item_removed(instance_id: String)
+
+## Upper bound for one currency addition (no slot limit applies).
+const CURRENCY_ROOM := 1 << 30
 
 var capacity: int = 40
 var _db: GameDatabase
@@ -26,11 +31,21 @@ func items() -> Array[ItemInstance]:
 
 
 func used_slots() -> int:
-	return _items.size()
+	var used := 0
+	for item in _items:
+		if _takes_slot(item.definition_id):
+			used += 1
+	return used
 
 
 func free_slots() -> int:
-	return maxi(0, capacity - _items.size())
+	return maxi(0, capacity - used_slots())
+
+
+## False for currency: its stacks live in the inventory without a bag slot.
+func _takes_slot(item_id: StringName) -> bool:
+	var definition := _db.get_item(item_id)
+	return definition == null or not definition.is_currency
 
 
 func is_full() -> bool:
@@ -58,6 +73,8 @@ func room_for(item_id: StringName) -> int:
 	var definition := _db.get_item(item_id)
 	if definition == null:
 		return 0
+	if definition.is_currency:
+		return CURRENCY_ROOM   # new currency stacks need no slot
 	var room := free_slots() * definition.max_stack
 	if definition.is_stackable():
 		for item in _items:
@@ -107,7 +124,7 @@ func add_instance(item: ItemInstance) -> String:
 		return "duplicate or missing instance id"
 	if item.quantity <= 0 or item.quantity > definition.max_stack:
 		return "invalid quantity %d" % item.quantity
-	if is_full():
+	if is_full() and _takes_slot(item.definition_id):
 		return "inventory full"
 	_insert(item)
 	changed.emit()
@@ -180,7 +197,7 @@ func transfer_to(target: Inventory, instance_id: String) -> String:
 		return "item not found"
 	if target == self:
 		return "same inventory"
-	if target.is_full():
+	if target.is_full() and _takes_slot(item.definition_id):
 		return "target inventory full"
 	if target.has(instance_id):
 		return "target already holds this instance"
@@ -196,8 +213,8 @@ func transfer_to(target: Inventory, instance_id: String) -> String:
 func integrity_errors() -> PackedStringArray:
 	var errors: PackedStringArray = []
 	var seen := {}
-	if _items.size() > capacity:
-		errors.append("over capacity: %d / %d" % [_items.size(), capacity])
+	if used_slots() > capacity:
+		errors.append("over capacity: %d / %d" % [used_slots(), capacity])
 	for item in _items:
 		if seen.has(item.instance_id):
 			errors.append("duplicate instance id %s" % item.instance_id)

@@ -85,6 +85,30 @@ func auto_slot(item: ItemInstance, class_id: StringName = &"") -> int:
 	return allowed[0]
 
 
+## Slot for a quick equip (right click), predictable for the player:
+## the first EMPTY allowed slot that accepts the item (Ring 1 before Ring 2,
+## Main Hand before Off Hand - a one-hander goes to the off hand only if the
+## main hand is taken, the off hand is free and the class may dual wield);
+## if none is empty, the first allowed slot is replaced (Ring 1 / Main Hand).
+## -1 if the item cannot be equipped by the class at all.
+func quick_slot(item: ItemInstance, class_id: StringName = &"") -> int:
+	var definition := _db.get_item(item.definition_id) if item != null else null
+	if definition == null:
+		return -1
+	class_id = _class_or_active(class_id)
+	var loadout := loadout_for(class_id)
+	var fitting: Array[int] = []
+	for slot: int in EquipSlot.allowed_slots(definition):
+		if can_equip(item.instance_id, slot, class_id) == "":
+			fitting.append(slot)
+	if fitting.is_empty():
+		return -1
+	for slot in fitting:
+		if loadout.get_id(slot) == "" and not (slot == EquipSlot.Slot.OFF_HAND and _holds_two_hander(loadout)):
+			return slot
+	return fitting[0]
+
+
 ## "" if `instance_id` may go into `slot` for `class_id`, otherwise the reason.
 func can_equip(instance_id: String, slot: int, class_id: StringName = &"") -> String:
 	class_id = _class_or_active(class_id)
