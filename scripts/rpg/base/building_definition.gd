@@ -19,3 +19,5 @@ extends Resource
 @export var inventory_capacity_bonus: int = 0
 ## Recipes offered by this building (smithy crafting test).
 @export var recipes: Array[RecipeDefinition] = []
+## Interacting with the built building opens the Resonance Forge (crafting UI).
+@export var crafting_station: bool = false

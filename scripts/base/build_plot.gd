@@ -44,7 +44,11 @@ func refresh() -> void:
 
 
 func interact(hud: GameHud) -> void:
-	hud.open_build_panel(self)
+	var building := built_building()
+	if building != null and building.crafting_station:
+		hud.open_crafting_panel(self)
+	else:
+		hud.open_build_panel(self)
 
 
 func _draw() -> void:

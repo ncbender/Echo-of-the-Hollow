@@ -49,3 +49,4 @@ color = Color(0.42, 0.4, 0.42, 1)
 unique = true
 scene = ExtResource("3_scene")
 recipes = Array[ExtResource("4_recipe")]([SubResource("Recipe_sword")])
+crafting_station = true

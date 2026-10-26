@@ -13,6 +13,14 @@ const DEBUG_MASTERY_XP := 100
 const DEBUG_CLASS_XP := 100
 ## F7 debug kit: one of every equippable test item plus building materials.
 const DEBUG_MATERIALS := {&"iron_ore": 10, &"timber": 10, &"stone": 10}
+## F4 crafting kit: craftable bases + crafting materials (Resonance Forge vertical slice).
+const DEBUG_CRAFTING_ITEMS := {
+	&"forged_blade": 1, &"forged_greatsword": 1, &"stormcaller_fang": 1,
+	&"blood_steel_ingot": 6, &"storm_ore": 6, &"frost_glass": 6, &"imprint_shard": 10,
+	&"transmute_core": 6, &"focus_catalyst": 3, &"storm_wolf_essence": 1, &"stone_golem_essence": 1,
+	&"essence_siphon": 1, &"socket_chisel": 3, &"garnet": 1, &"impact_rune": 1, &"forge_crystal": 10,
+	&"awakening_stone": 1, &"hollow_essence": 5,
+}
 
 var session: SessionState
 var bridge: PlayerProgressionBridge
@@ -159,6 +167,8 @@ func _handle_debug_input(event: InputEvent) -> bool:
 		hud.notify("+%d class XP (debug)" % DEBUG_CLASS_XP)
 	elif event.is_action_pressed(&"debug_spawn_items") and bridge != null:
 		hud.notify("Debug item kit: %d items added" % give_debug_items(bridge.character))
+	elif event.is_action_pressed(&"debug_crafting_kit") and bridge != null:
+		hud.notify("Debug crafting kit: %d stacks added" % give_crafting_kit(bridge.character))
 	elif event.is_action_pressed(&"debug_reset_arena"):
 		get_tree().reload_current_scene()
 	else:
@@ -199,3 +209,13 @@ func _random_spawn_point() -> Vector2:
 		if spawn_area.has_point(point):
 			return point
 	return spawn_area.get_center()
+
+
+## Debug crafting kit (F4). Returns the number of added stacks; items that do
+## not fit into the inventory are skipped (never partially added).
+static func give_crafting_kit(character: Character) -> int:
+	var added := 0
+	for item_id: StringName in DEBUG_CRAFTING_ITEMS:
+		if character.database.get_item(item_id) != null:
+			added += character.inventory.add_item(item_id, DEBUG_CRAFTING_ITEMS[item_id]).size()
+	return added

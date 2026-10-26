@@ -14,6 +14,7 @@ func before_each() -> void:
 	_previous_factor = get_tree().root.content_scale_factor
 	var character := CharacterFactory.create_new(session.database)
 	GameMap.give_debug_items(character)
+	GameMap.give_crafting_kit(character)
 	session.set_character(character)
 
 
@@ -76,6 +77,13 @@ func test_windows_fit_at_every_ui_scale() -> void:
 		await _settle()
 		_check_window(map.hud.options_panel, tag + " options")
 		map.hud.close_windows()
+		map.hud.crafting_panel.open(session.character, null)
+		map.hud.crafting_panel.select_item(_first_craftable())
+		map.hud.crafting_panel.select_operation(CraftingOps.IMPRINT)
+		map.hud.crafting_panel.choose_material(&"storm_ore")
+		await _settle()
+		_check_window(map.hud.crafting_panel, tag + " resonance forge")
+		map.hud.close_windows()
 	session.settings.reset_to_defaults()
 
 
@@ -94,3 +102,10 @@ func test_inventory_scrolls_instead_of_overflowing_at_200_percent() -> void:
 	var scroll := inventory.find_children("*", "ScrollContainer", true, false)[0] as ScrollContainer
 	check(scroll.get_v_scroll_bar().max_value > scroll.size.y, "body scrolls vertically")
 	session.settings.reset_to_defaults()
+
+
+func _first_craftable() -> String:
+	for item in session.character.inventory.items():
+		if item.definition_id == &"forged_greatsword":
+			return item.instance_id
+	return ""

@@ -144,6 +144,12 @@ func _build_check() -> void:
 	_click_button(map.hud.build_panel, "Craft")
 	_check(character.inventory.count(&"iron_sword") == 2, "smithy recipe crafted a second Iron Sword")
 	await _shot("l05_smithy_built")
+	await _press(&"interact")   # closes the build panel
+	await _press(&"interact")   # a built smithy opens the Resonance Forge
+	_check(map.hud.crafting_panel.visible, "smithy opens the Resonance Forge")
+	_click_button(map.hud.crafting_panel, "Smithy recipes")
+	await _ticks(3)
+	_check(map.hud.build_panel.visible, "forge links back to the smithy recipes")
 
 
 # --- helpers ---------------------------------------------------------------

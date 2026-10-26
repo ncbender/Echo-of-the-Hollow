@@ -11,6 +11,7 @@ var class_panel: ClassPanel
 var inventory_panel: InventoryPanel
 var build_panel: BuildPanel
 var options_panel: OptionsPanel
+var crafting_panel: CraftingPanel
 ## Player display preferences (from GameSession); null when running without one.
 var settings: UserSettings
 
@@ -62,6 +63,8 @@ func _ready() -> void:
 	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
 	build_panel = _add_window(BuildPanel.new()) as BuildPanel
 	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
+	crafting_panel = _add_window(CraftingPanel.new()) as CraftingPanel
+	crafting_panel.recipes_requested.connect(open_build_panel)
 	var session := SessionState.find(get_tree())
 	if session != null:
 		settings = session.settings
@@ -114,6 +117,14 @@ func toggle_inventory() -> void:
 	else:
 		close_windows()
 		inventory_panel.open(bridge.character)
+
+
+## Resonance Forge at a crafting station (smithy).
+func open_crafting_panel(plot: BuildPlot) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	crafting_panel.open(bridge.character, plot)
 
 
 func toggle_options() -> void:
