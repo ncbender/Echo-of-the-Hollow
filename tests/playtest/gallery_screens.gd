@@ -3,7 +3,7 @@ extends RefCounted
 ## The screens of the UI gallery (tests/playtest/ui_gallery.gd) and how to open
 ## each one with real data. Returns the screen label, or "" when skipped.
 
-const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "skills", "presets", "forge_imprint",
+const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "pause", "save", "load", "options", "confirm"]
 
@@ -62,7 +62,23 @@ static func open(gallery: Object, screen: String) -> String:
 			await _stand_at(gallery, map.get_node("ClassStation"))
 			_spend_all_points(character)
 			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, "Talents")
-			hud.class_panel.show_talent(&"war_b_unbound")
+			await gallery.frames(4)
+			_hover_talent(hud.class_panel, 0, 7)   # capstone of the first tree
+		"talents_locked":
+			await _stand_at(gallery, map.get_node("ClassStation"))
+			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, "Talents")
+			await gallery.frames(4)
+			_hover_talent(hud.class_panel, 2, 6, 1)   # right-most tree, right column: tooltip at the right edge
+		"talents_arcanist", "talents_shadowrunner":
+			# a separate character of that class (the gallery character stays as it is)
+			var other := CharacterFactory.create_new(character.database)
+			var class_id := StringName(screen.get_slice("_", 1))
+			other.classes.unlock(class_id)
+			other.switch_class(class_id, true)
+			other.classes.add_xp(class_id, 40000)
+			_spend_all_points(other)
+			await _stand_at(gallery, map.get_node("ClassStation"))
+			hud.class_panel.open(other, map.get_node("ClassStation") as ClassStation, "Talents")
 		"classes_locked":
 			await _stand_at(gallery, map.get_node("ClassStation"))
 			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, "Classes")
@@ -190,3 +206,13 @@ static func _spend_all_points(character: Character) -> void:
 			if TalentService.learn(character, class_id, node.id) == "":
 				learned = true
 				break
+
+
+## Shows the talent tooltip of the node in tree `tree_index`, `tier` (and
+## `column`, if that tier has two) - as a hover would.
+static func _hover_talent(panel: ClassStationPanel, tree_index: int, tier: int, column: int = 0) -> void:
+	var view: TalentTreeView = panel._trees[tree_index]
+	for node in view.tree.nodes:
+		if node.tier == tier and (node.column == column or view.tree.nodes.filter(func(n: TalentNodeDefinition) -> bool: return n.tier == tier).size() == 1):
+			panel._on_talent_hovered(node.id, view)
+			return

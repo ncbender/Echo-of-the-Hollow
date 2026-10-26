@@ -13,22 +13,26 @@ const RESONANCE := SkillModDefinition.Slot.RESONANCE
 const CONTENT_WIDTH := 900
 const CLASS_CARD := Vector2(320, 104)
 const CLASS_DETAILS_WIDTH := 480
-const TALENT_DETAILS_HEIGHT := 92
 
 var character: Character
 var station: ClassStation
 var page: String = "Classes"
 ## Class shown in the details area of the Classes page (default: the active one).
 var selected_class: StringName
-## Talent node shown in the details bar of the Talents page.
-var _talent_focus: StringName
-var _talent_title: Label
-var _talent_text: Label
-var _talent_reason: Label
+## Talents page: sizes, tier scale and the immediate node tooltip.
+var talent_layout: TalentLayout
+var talent_tooltip: TalentTooltip
+var _tier_scale: TalentTierScale
 var _tree_scroll: ScrollContainer
+## True while the window gives its automatic first focus (no tooltip for that).
+var _auto_focusing: bool = false
+## Room the trees were last laid out for (layout_trees skips when unchanged).
+var _tree_room: Vector2
+## Node whose tooltip was open before a rebuild (shown again afterwards).
+var _keep_tooltip: StringName
 
-var _tabs: UiTabs
-var _summary: HBoxContainer
+var _tabs: BookTabs
+var _summary: HFlowContainer
 var _content: VBoxContainer
 var _status: Label
 var _trees: Array[TalentTreeView] = []
@@ -37,28 +41,46 @@ var _trees: Array[TalentTreeView] = []
 func _ready() -> void:
 	set_title(tr("UI_CLASS_STATION"))
 	set_close_text(tr("UI_CLOSE_CLASS"))
-	_tabs = UiTabs.new()
+	# page registers on the left outer edge (book tabs) instead of a tab row
+	_tabs = BookTabs.new()
+	_tabs.name = "BookTabs"
 	for name in PAGES:
 		_tabs.add_tab(name, tr("UI_PAGE_%s" % name.to_upper()))   # stable localization keys
 	_tabs.tab_selected.connect(show_page)
-	body.add_child(_tabs)
-	_summary = HBoxContainer.new()
-	_summary.add_theme_constant_override(&"separation", UiTheme.GAP * 2)
+	set_side_tabs(_tabs)
+	_summary = HFlowContainer.new()   # one line; wraps at high UI scales
+	_summary.name = "Header"
+	_summary.add_theme_constant_override(&"h_separation", UiTheme.GAP + 4)
+	_summary.resized.connect(_relayout_trees)
 	body.add_child(_summary)
-	_status = UiTheme.wrapped("", UiTheme.WARNING, CONTENT_WIDTH)
-	body.add_child(_status)
+	# result messages in the bottom row next to Close: top level, so a message
+	# never shifts the page (the talent trees would jump under the mouse)
+	_status = UiTheme.label("", UiTheme.WARNING)
+	_status.name = "Status"
+	_status.top_level = true
+	_status.clip_text = true
+	_status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_status.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(_status)
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override(&"separation", UiTheme.GAP)
 	body.add_child(_content)
-	get_viewport().size_changed.connect(func() -> void: _fit_tree_scroll.call_deferred())
+	talent_tooltip = TalentTooltip.new()
+	talent_tooltip.name = "TalentTooltip"
+	add_child(talent_tooltip)   # top level: not laid out by the window
+	visibility_changed.connect(func() -> void:
+		if not visible:
+			_keep_tooltip = &""
+			talent_tooltip.hide_tooltip())
+	get_viewport().size_changed.connect(func() -> void: layout_trees.call_deferred())
 
 
 func open(target_character: Character, target_station: ClassStation, start_page: String = "") -> void:
 	character = target_character
 	station = target_station
 	set_title(tr("UI_CLASS_STATION") if station != null else tr("UI_CHARACTER_WINDOW"))
-	_status.text = "" if station != null else tr("UI_AWAY_FROM_STATION")
-	_status.visible = _status.text != ""
+	_status.text = ""   # the station rules are the header status' tooltip now
+	_status.visible = false
 	show()
 	show_page(start_page if start_page != "" else page)
 
@@ -73,6 +95,7 @@ func _process(_delta: float) -> void:
 
 
 func show_page(name: String) -> void:
+	_keep_tooltip = &""   # a tooltip only returns after learning, never after switching pages
 	page = name
 	_tabs.select(name)
 	rebuild()
@@ -82,13 +105,16 @@ func show_page(name: String) -> void:
 func rebuild() -> void:
 	if character == null:
 		return
+	if _keep_tooltip == &"" and talent_tooltip.visible:
+		_keep_tooltip = talent_tooltip.node_id   # before the old nodes leave (their exit hides it)
 	_refresh_summary()
 	for child in _content.get_children():
 		_content.remove_child(child)   # detach now: rebuilt rows reuse their names
 		child.queue_free()
 	_trees.clear()
 	_tree_scroll = null
-	_talent_title = null
+	_tier_scale = null
+	talent_tooltip.hide_tooltip()   # its node is rebuilt
 	match page:
 		"Talents":
 			_build_talents()
@@ -103,7 +129,8 @@ func rebuild() -> void:
 	queue_fit()
 
 
-## Header: active class, level bar, resource, free talent points (chips).
+## One slim header line: class · level (with a thin XP bar) · resource · free
+## talent points · station status (rules in its tooltip) ... respec (Talents).
 func _refresh_summary() -> void:
 	for child in _summary.get_children():
 		_summary.remove_child(child)
@@ -111,38 +138,77 @@ func _refresh_summary() -> void:
 	var classes := character.classes
 	var class_id := classes.active_class_id
 	var definition := classes.get_active_definition()
-	var name_box := VBoxContainer.new()
-	name_box.add_theme_constant_override(&"separation", 2)
-	name_box.add_child(UiTheme.heading(definition.display_name))
-	var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.BRONZE)
-	bar.custom_minimum_size.x = 220
+	var title := UiTheme.heading(definition.display_name)
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_summary.add_child(title)
+	var level := VBoxContainer.new()
+	level.add_theme_constant_override(&"separation", 1)
+	level.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	level.tooltip_text = "%d / %d XP to the next level" % [classes.get_xp(class_id), classes.xp_to_next(class_id)]
+	level.mouse_filter = Control.MOUSE_FILTER_PASS
+	var level_text := UiTheme.styled("Lv. %d" % classes.get_level(class_id), &"SubheadingLabel")
+	level_text.mouse_filter = Control.MOUSE_FILTER_PASS
+	level.add_child(level_text)
+	var bar := UiTheme.bar(3, UiTheme.BRONZE)
+	bar.name = "XpBar"
+	bar.custom_minimum_size.x = 72
 	bar.max_value = maxi(1, classes.xp_to_next(class_id))
 	bar.value = classes.get_xp(class_id)
-	name_box.add_child(bar)
-	_summary.add_child(name_box)
-	_summary.add_child(_chip("Level %d" % classes.get_level(class_id), "%d / %d XP" % [classes.get_xp(class_id), classes.xp_to_next(class_id)]))
+	bar.mouse_filter = Control.MOUSE_FILTER_PASS
+	level.add_child(bar)
+	_summary.add_child(_header_dot())
+	_summary.add_child(level)
 	if definition.resource != null:
-		_summary.add_child(_chip(definition.resource.display_name, "class resource"))
+		_summary.add_child(_header_dot())
+		_summary.add_child(_header_text(definition.resource.display_name, definition.resource.color.lerp(UiTheme.TEXT_PRIMARY, 0.4), resource_text(definition.resource)))
 	if not definition.talent_tree_ids.is_empty():
-		_summary.add_child(_chip("%d free" % TalentService.points_available(character, class_id), "of %d talent points" % TalentService.points_total(character, class_id)))
+		var free := TalentService.points_available(character, class_id)
+		_summary.add_child(_header_dot())
+		var points := _header_text("%d Talent Point%s" % [free, "" if free == 1 else "s"], UiTheme.RESONANCE if free > 0 else UiTheme.TEXT_SECONDARY,
+			"%d of %d talent points free (one per class level from level %d)." % [free, TalentService.points_total(character, class_id), character.database.rules.talent_rules().first_point_level])
+		points.name = "TalentPoints"
+		_summary.add_child(points)
 	if classes.in_trial():
-		_summary.add_child(_chip("Class trial", "temporary"))
-	_summary.add_child(_chip("At a class station" if at_station() else "Away from a station", "changes allowed" if at_station() else "learning talents only"))
+		_summary.add_child(_header_dot())
+		_summary.add_child(_header_text("Class Trial", UiTheme.WARNING, "A temporary trial: talents and skills reset when it ends."))
+	_summary.add_child(_header_dot())
+	var station_text := _header_text("At Class Station" if at_station() else "Away from Station", UiTheme.SUCCESS if at_station() else UiTheme.TEXT_SECONDARY,
+		"Everything can be changed here." if at_station() else tr("UI_AWAY_FROM_STATION"))
+	station_text.name = "StationStatus"
+	_summary.add_child(station_text)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_summary.add_child(spacer)
+	if page == "Talents" and not definition.talent_tree_ids.is_empty():
+		var cost := TalentService.respec_cost(character, class_id)
+		var respec_error := TalentService.can_respec(character, class_id, at_station())
+		var respec := _station_button("Reset talents (%s)" % ("free" if cost == 0 else "%d gold" % cost), func() -> void:
+			_say(TalentService.respec(character, class_id, at_station()), "Talents reset."), respec_error == "", respec_error, &"DangerButton")
+		respec.name = "Respec"
+		_summary.add_child(respec)
 
 
-func _chip(value: String, caption: String) -> Control:
-	var panel := UiTheme.card(&"InsetPanel")
-	var box := panel.get_node("Box") as VBoxContainer
-	box.add_theme_constant_override(&"separation", 0)
-	box.add_child(UiTheme.styled(value, &"SubheadingLabel"))
-	box.add_child(UiTheme.styled(caption, &"CaptionLabel"))
-	return panel
+func _header_text(text: String, color: Color, tooltip: String = "") -> Label:
+	var label := UiTheme.styled(text, &"SubheadingLabel")
+	label.add_theme_color_override(&"font_color", color)
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	label.tooltip_text = tooltip
+	label.mouse_filter = Control.MOUSE_FILTER_PASS if tooltip != "" else Control.MOUSE_FILTER_IGNORE
+	return label
+
+
+func _header_dot() -> Label:
+	var dot := UiTheme.styled("·", &"SubheadingLabel")
+	dot.add_theme_color_override(&"font_color", UiTheme.BRONZE_DIM)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return dot
 
 
 func _say(error: String, success: String) -> void:
 	_status.text = error if error != "" else success
 	_status.add_theme_color_override(&"font_color", UiTheme.DANGER if error != "" else UiTheme.SUCCESS)
 	_status.visible = _status.text != ""
+	_status.tooltip_text = _status.text   # full text if it is cut
 	rebuild()
 
 
@@ -379,46 +445,17 @@ func requirements(definition: ClassDefinition) -> PackedStringArray:
 
 # --- Talents ----------------------------------------------------------------------
 
+## Talents (Talent UI Polish 1.2): the three complete trees fill the window -
+## a shared tier scale, one column per tree, tiers aligned across columns.
+## TalentLayout picks normal (named nodes) or compact (icons) from the room
+## left; only when even compact does not fit (200 %) the tree area scrolls.
+## Node details: TalentTooltip on hover / keyboard focus (no details bar).
 func _build_talents() -> void:
 	var class_id := character.classes.active_class_id
 	var trees := TalentService.trees_of(character.database, class_id)
 	if trees.is_empty():
 		_content.add_child(UiTheme.wrapped("This class has no talent trees.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 		return
-	var rules := character.database.rules.talent_rules()
-	var top := HFlowContainer.new()   # legend wraps on narrow canvases
-	top.add_theme_constant_override(&"h_separation", UiTheme.GAP * 3)
-	for entry: Array in [["Learned", UiTheme.BRONZE], ["Available", UiTheme.RESONANCE], ["Locked", UiTheme.TEXT_MUTED]]:
-		var legend := HBoxContainer.new()
-		var swatch := Panel.new()
-		var style := StyleBoxFlat.new()
-		style.bg_color = UiTheme.PANEL_INSET if entry[0] != "Learned" else UiTheme.BRONZE_DIM
-		style.border_color = entry[1]
-		style.set_border_width_all(2)
-		swatch.add_theme_stylebox_override(&"panel", style)
-		swatch.custom_minimum_size = Vector2(16, 16)
-		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		legend.add_child(swatch)
-		legend.add_child(UiTheme.styled(entry[0], &"SmallLabel"))
-		top.add_child(legend)
-	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.PASSIVE, "Passive"))
-	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.ACTIVE, "Skill"))
-	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.TRANSFORMATIVE, "Transformation"))
-	var rules_text := UiTheme.styled("1 point per level from %d  ·  a tier opens with points in the lower tiers  ·  capstone: %d" % [rules.first_point_level, rules.tier_requirement(7)], &"CaptionLabel")
-	rules_text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	top.add_child(rules_text)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(spacer)
-	var cost := TalentService.respec_cost(character, class_id)
-	var respec_error := TalentService.can_respec(character, class_id, at_station())
-	var respec := _station_button("Reset talents (%s)" % ("free" if cost == 0 else "%d gold" % cost), func() -> void:
-		_say(TalentService.respec(character, class_id, at_station()), "Talents reset."), respec_error == "", respec_error, &"DangerButton")
-	respec.name = "Respec"
-	top.add_child(respec)
-	_content.add_child(top)
-	_content.add_child(_talent_details())
-	# the three trees always side by side; too little room -> this row scrolls
 	_tree_scroll = ScrollContainer.new()
 	_tree_scroll.name = "TreeScroll"
 	_tree_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
@@ -426,81 +463,126 @@ func _build_talents() -> void:
 	_content.add_child(_tree_scroll)
 	var row := HBoxContainer.new()
 	row.name = "Trees"
-	row.add_theme_constant_override(&"separation", UiTheme.GAP * 4)
+	row.add_theme_constant_override(&"separation", int(TalentLayout.TREE_GAP))
 	_tree_scroll.add_child(row)
+	_tier_scale = TalentTierScale.new()
+	_tier_scale.name = "TierScale"
+	_tier_scale.setup(character.database.rules.talent_rules())
+	row.add_child(_tier_scale)
 	for tree in trees:
 		var view := TalentTreeView.new()
 		view.name = "Tree_%s" % tree.id
 		row.add_child(view)
 		view.setup(character, class_id, tree)
 		view.learn_requested.connect(_learn)
-		view.node_hovered.connect(show_talent)
+		view.node_hovered.connect(_on_talent_hovered.bind(view))
 		_trees.append(view)
-	if _talent_focus != &"" and character.database.talent_nodes.has(_talent_focus):
-		show_talent(_talent_focus)
-	_fit_tree_scroll.call_deferred()
+	var legend := _talent_legend()
+	_content.add_child(legend)
+	# header and legend wrap by width: once the window has its size, size the trees again
+	legend.resized.connect(_relayout_trees)
+	_tree_room = Vector2.ZERO
+	layout_trees()
+	layout_trees.call_deferred()
+	_reshow_talent_tooltip.call_deferred()
 
 
-## Fixed-height bar above the trees: the hovered/clicked node in full.
-func _talent_details() -> Control:
-	var panel := UiTheme.card(&"InsetPanel")
-	panel.name = "TalentDetails"
-	panel.custom_minimum_size = Vector2(0, TALENT_DETAILS_HEIGHT)
-	panel.clip_contents = true
-	var box := panel.get_node("Box") as VBoxContainer
-	box.add_theme_constant_override(&"separation", 2)
-	_talent_title = UiTheme.styled("Hover a talent for details. Click to learn a rank.", &"SubheadingLabel")
-	box.add_child(_talent_title)
-	_talent_text = UiTheme.styled("", &"SmallLabel")
-	_talent_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_talent_text.max_lines_visible = 2
-	_talent_text.custom_minimum_size = Vector2(600, 0)
-	box.add_child(_talent_text)
-	_talent_reason = UiTheme.styled("", &"CaptionLabel")
-	box.add_child(_talent_reason)
-	return panel
+## One caption line under the trees: states (frame + marker), kinds, rules.
+func _talent_legend() -> Control:
+	var legend := HFlowContainer.new()
+	legend.name = "Legend"
+	legend.add_theme_constant_override(&"h_separation", UiTheme.GAP * 3)
+	for entry: Array in [["Learned", UiTheme.BRONZE], ["Maxed", UiTheme.BRONZE], ["Available", UiTheme.RESONANCE], ["Locked", UiTheme.TEXT_MUTED]]:
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override(&"separation", 4)
+		var swatch := Control.new()
+		swatch.custom_minimum_size = Vector2(16, 16)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var state: String = entry[0]
+		var color: Color = entry[1]
+		swatch.draw.connect(func() -> void:
+			var rect := Rect2(Vector2.ZERO, swatch.size)
+			swatch.draw_rect(rect, Color(UiTheme.BRONZE_DARK, 0.9) if state == "Maxed" else (Color(UiTheme.BRONZE_DARK, 0.55) if state == "Learned" else UiTheme.PANEL_INSET))
+			swatch.draw_rect(rect.grow(-1.0), color, false, 1.5)
+			if state == "Locked":
+				TalentTreeView.draw_lock(swatch, rect.get_center() + Vector2(0, 1), color)
+			elif state == "Available":
+				swatch.draw_line(rect.get_center() - Vector2(4, 0), rect.get_center() + Vector2(4, 0), color, 2.0)
+				swatch.draw_line(rect.get_center() - Vector2(0, 4), rect.get_center() + Vector2(0, 4), color, 2.0)
+			elif state == "Maxed":
+				swatch.draw_rect(rect.grow(-4.0), color, false, 1.0))
+		item.add_child(swatch)
+		item.add_child(UiTheme.styled(state, &"CaptionLabel"))
+		legend.add_child(item)
+	legend.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.PASSIVE, "Passive"))
+	legend.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.ACTIVE, "Skill"))
+	legend.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.TRANSFORMATIVE, "Transformation"))
+	var rules := character.database.rules.talent_rules()
+	var rules_text := UiTheme.styled("1 point per level from %d  ·  a tier opens with points in its lower tiers  ·  hover a talent for details, click to learn" % rules.first_point_level, &"CaptionLabel")
+	rules_text.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
+	legend.add_child(rules_text)
+	return legend
 
 
-## Shows a node in the details bar (hover, keyboard focus, click).
-func show_talent(node_id: StringName) -> void:
-	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
-	if node == null or _talent_title == null or not is_instance_valid(_talent_title):
+## Sizes the trees from the room the window has left (TalentLayout) - the tree
+## row fills it without scrolling whenever the normal or compact layout fits.
+func layout_trees() -> void:
+	if _tree_scroll == null or not is_instance_valid(_tree_scroll) or not is_inside_tree() or _trees.is_empty():
 		return
-	_talent_focus = node_id
-	var class_id := character.classes.active_class_id
-	var rank := character.builds.get_build(class_id).rank(node_id)
-	var error := TalentService.can_learn(character, class_id, node_id)
-	var state := TalentTreeView.state_of(rank, node.max_rank, error)
-	_talent_title.text = "%s  ·  %s, tier %d  ·  Rank %d / %d  ·  %s" % [node.display_name, node.kind_name(), node.tier, rank, node.max_rank, state]
-	_talent_text.text = node.describe(maxi(rank, 1))
-	if rank >= node.max_rank:
-		_talent_reason.text = "Fully learned."
-		_talent_reason.add_theme_color_override(&"font_color", UiTheme.BRONZE)
-	elif error == "":
-		_talent_reason.text = "Click to learn a rank."
-		_talent_reason.add_theme_color_override(&"font_color", UiTheme.RESONANCE)
-	else:
-		_talent_reason.text = "Locked: %s" % error
-		_talent_reason.add_theme_color_override(&"font_color", UiTheme.WARNING)
-
-
-## The tree row takes the room the window has left and scrolls inside it, so
-## the header and details bar stay in view.
-func _fit_tree_scroll() -> void:
-	if _tree_scroll == null or not is_instance_valid(_tree_scroll) or not is_inside_tree():
-		return
-	var row := _tree_scroll.get_child(0) as Control
-	var content := row.get_combined_minimum_size()
-	var limit := max_window_size() - _chrome_size() - Vector2(4, 4)
+	var limit := max_window_size() - _chrome_size()
 	var others := body.get_combined_minimum_size().y - _tree_scroll.get_combined_minimum_size().y
-	var bar := _tree_scroll.get_h_scroll_bar().get_combined_minimum_size().y + 4.0
-	var wide := content.x <= limit.x
-	_tree_scroll.custom_minimum_size = Vector2(minf(content.x, limit.x), clampf(limit.y - others, 160.0, content.y + (0.0 if wide else bar)))
+	var room := Vector2(limit.x - 8.0, limit.y - others - 6.0)
+	if room == _tree_room and talent_layout != null:
+		return   # nothing changed (called again after every resize)
+	_tree_room = room
+	talent_layout = TalentLayout.pick(room, _trees.size())
+	_tier_scale.apply(talent_layout)
+	for view in _trees:
+		view.apply(talent_layout)
+	var content := talent_layout.content_size(_trees.size())
+	var scroll_x := content.x > room.x
+	var scroll_y := content.y > room.y
+	var bar := 14.0
+	_tree_scroll.custom_minimum_size = Vector2(minf(content.x + (bar if scroll_y else 0.0), room.x), minf(content.y + (bar if scroll_x else 0.0), maxf(room.y, 160.0)))
 	queue_fit()
+	# nodes may have moved: keep / bring back the tooltip of the node under the mouse
+	if talent_tooltip.visible:
+		talent_tooltip._place.call_deferred()
+	else:
+		_reshow_talent_tooltip.call_deferred()
+
+
+func _focus_first() -> void:
+	_auto_focusing = true
+	super()
+	_auto_focusing = false
+
+
+func _on_talent_hovered(node_id: StringName, view: TalentTreeView) -> void:
+	if _auto_focusing or not is_instance_valid(view) or not view.is_inside_tree() or view.is_queued_for_deletion():
+		return   # automatic first focus, or a node of a page that was just rebuilt
+	if node_id == &"":
+		talent_tooltip.hide_tooltip()
+		return
+	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
+	talent_tooltip.show_for(character, character.classes.active_class_id, node, view.button_for(node_id))
+
+
+## After a rebuild (learning a rank) the node whose tooltip was open shows it
+## again - the mouse has not moved; leaving the node hides it as usual.
+func _reshow_talent_tooltip() -> void:
+	if page != "Talents" or not visible or _keep_tooltip == &"":
+		return
+	for view in _trees:
+		if is_instance_valid(view) and view.button_for(_keep_tooltip) != null:
+			var node_id := _keep_tooltip
+			_keep_tooltip = &""
+			_on_talent_hovered(node_id, view)
+			return
 
 
 func _learn(node_id: StringName) -> void:
-	_talent_focus = node_id   # the details bar keeps showing the clicked node
+	_keep_tooltip = node_id   # the mouse is on this node: its tooltip comes back after the rebuild
 	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
 	_say(TalentService.learn(character, character.classes.active_class_id, node_id), "Learned %s." % (node.display_name if node else String(node_id)))
 
@@ -751,3 +833,24 @@ func preferred_body_size() -> Vector2:
 		width += flow.get_theme_constant(&"h_separation") * maxi(0, flow.get_child_count() - 1)
 		wanted.x = maxf(wanted.x, width)
 	return wanted
+
+
+func _relayout_trees() -> void:
+	if page == "Talents":
+		layout_trees.call_deferred()
+
+
+func fit() -> void:
+	super()
+	_place_status.call_deferred()   # the close button is laid out after the fit
+
+
+## Bottom row, left of the Close button (outside the layout).
+func _place_status() -> void:
+	if _status == null or not is_inside_tree():
+		return
+	var close := close_button()
+	var padding := get_theme_stylebox(&"panel").get_margin(SIDE_LEFT)
+	_status.size = Vector2(maxf(0.0, close.global_position.x - global_position.x - padding * 2.0), close.size.y)
+	_status.global_position = Vector2(global_position.x + padding, close.global_position.y)
+	_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

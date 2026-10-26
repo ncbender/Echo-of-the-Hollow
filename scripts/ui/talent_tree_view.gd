@@ -1,33 +1,29 @@
 class_name TalentTreeView
 extends Control
-## One talent tree as a vertical node graph: tier 1 at the top to tier 7 at the
-## bottom, the point gate of each tier in the gutter, nodes as square icons
-## (glyph by kind, rank badge, state colour) with their name below. Lines show
-## the way down the tree (same column / single-node tiers) and, stronger, the
-## explicit prerequisites. Hover: tooltip with effect, rank, requirements and
-## lock reason. Click: learn one rank - through TalentService only (the panel).
+## One talent tree as a vertical node graph (Talent UI Polish 1.2): tree name
+## and invested points on top, tier 1 to tier 7 downwards in rows of equal
+## height (the same rows in every tree, so tiers line up across the columns;
+## the tier labels are the shared TalentTierScale). Sizes come from a
+## TalentLayout: "normal" nodes with their short name below, or "compact" icon
+## nodes when the room is small. Nodes: kind glyph, state frame and marker,
+## rank badge. Lines: the way down the tree (thin) and explicit prerequisites
+## (thick). Everything else is in the TalentTooltip (hover / keyboard focus).
+## A click learns one rank - through TalentService only (the panel).
+## Works from the tree data alone (node tier/column/prerequisites), for every class.
 
 signal learn_requested(node_id: StringName)
-## Hovered or focused node (the panel shows it in its details bar).
+## Mouse or keyboard focus entered a node (`node_id`) or left it (&"").
 signal node_hovered(node_id: StringName)
-
-const NODE := 46.0
-const COLUMN_WIDTH := 132.0
-const COLUMN_GAP := 12.0
-const GUTTER := 44.0
-const HEADER := 56.0
-const ROW := 74.0
-const COLUMNS := 2
 
 var character: Character
 var class_id: StringName
 var tree: TalentTreeDefinition
+var layout: TalentLayout
 
 var _buttons: Dictionary = {}   # node id -> TalentButton
 var _names: Dictionary = {}     # node id -> Label
 var _header: Label
 var _points: Label
-var _gates: Array[Label] = []
 
 
 func setup(target_character: Character, target_class: StringName, target_tree: TalentTreeDefinition) -> void:
@@ -35,57 +31,62 @@ func setup(target_character: Character, target_class: StringName, target_tree: T
 	class_id = target_class
 	tree = target_tree
 	mouse_filter = Control.MOUSE_FILTER_PASS
-	custom_minimum_size = Vector2(GUTTER + COLUMNS * COLUMN_WIDTH + (COLUMNS - 1) * COLUMN_GAP, HEADER + 7 * ROW)
-	_header = UiTheme.heading(tree.display_name)
+	_header = UiTheme.styled(tree.display_name, &"HeaderLabel")
+	_header.name = "TreeName"
 	_header.add_theme_color_override(&"font_color", tree.color.lightened(0.2))
 	add_child(_header)
 	_points = UiTheme.styled("", &"CaptionLabel")
-	_points.position = Vector2(0, 30)
+	_points.name = "Invested"
 	add_child(_points)
-	var rules := character.database.rules.talent_rules()
-	for tier in range(1, 8):
-		var gate := UiTheme.styled("T%d\n%d" % [tier, rules.tier_requirement(tier)], &"CaptionLabel")
-		gate.tooltip_text = "Tier %d: needs %d points in the lower tiers of %s." % [tier, rules.tier_requirement(tier), tree.display_name]
-		gate.mouse_filter = Control.MOUSE_FILTER_PASS
-		gate.position = Vector2(0, _row_y(tier) + 2)
-		add_child(gate)
-		_gates.append(gate)
 	for node in tree.nodes:
 		var button := TalentButton.new()
 		button.name = String(node.id)
 		button.node = node
-		button.custom_minimum_size = Vector2.ONE * NODE
-		button.size = Vector2.ONE * NODE
-		button.position = node_center(node) - Vector2.ONE * NODE * 0.5
 		button.pressed.connect(func() -> void: learn_requested.emit(node.id))
 		button.mouse_entered.connect(func() -> void: node_hovered.emit(node.id))
+		button.mouse_exited.connect(func() -> void: node_hovered.emit(&""))
 		button.focus_entered.connect(func() -> void: node_hovered.emit(node.id))
+		button.focus_exited.connect(func() -> void: node_hovered.emit(&""))
 		add_child(button)
 		_buttons[node.id] = button
 		var label := UiTheme.styled(node.display_name, &"CaptionLabel")
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.clip_text = true
-		label.size = Vector2(COLUMN_WIDTH, 18)
-		label.position = node_center(node) + Vector2(-COLUMN_WIDTH * 0.5, NODE * 0.5 + 1)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(label)
 		_names[node.id] = label
+	apply(TalentLayout.new())
 	refresh()
 
 
-func _row_y(tier: int) -> float:
-	return HEADER + (tier - 1) * ROW
+## Places header, nodes and names for `target` (sizes from the free room).
+func apply(target: TalentLayout) -> void:
+	layout = target
+	custom_minimum_size = Vector2(layout.tree_width, layout.height())
+	size = custom_minimum_size
+	_header.position = Vector2(0, 0)
+	_header.size = Vector2(layout.tree_width, 26)
+	_points.position = Vector2(0, 24)
+	_points.size = Vector2(layout.tree_width, 16)
+	for node in tree.nodes:
+		var button: TalentButton = _buttons[node.id]
+		button.custom_minimum_size = Vector2.ONE * layout.node_size
+		button.size = button.custom_minimum_size
+		button.position = node_center(node) - Vector2.ONE * layout.node_size * 0.5
+		var label: Label = _names[node.id]
+		label.visible = not layout.compact
+		label.size = Vector2(layout.name_width(), TalentLayout.NAME_HEIGHT)
+		label.position = node_center(node) + Vector2(-layout.name_width() * 0.5, layout.node_size * 0.5 + 2)
+	queue_redraw()
 
 
 ## Centre of a node: its column, or the middle when it is alone in its tier.
 func node_center(node: TalentNodeDefinition) -> Vector2:
-	var left := GUTTER + COLUMN_WIDTH * 0.5
-	var right := left + COLUMN_WIDTH + COLUMN_GAP
-	var x := left if clampi(node.column, 0, COLUMNS - 1) == 0 else right
+	var x := layout.tree_width * (0.27 if clampi(node.column, 0, 1) == 0 else 0.73)
 	if _tier_size(node.tier) == 1:
-		x = (left + right) * 0.5
-	return Vector2(x, _row_y(node.tier) + NODE * 0.5)
+		x = layout.tree_width * 0.5
+	return Vector2(x, layout.node_center_y(node.tier))
 
 
 func _tier_size(tier: int) -> int:
@@ -98,18 +99,12 @@ func button_for(node_id: StringName) -> Button:
 
 func refresh() -> void:
 	var build := character.builds.get_build(class_id)
-	var invested := TalentService.points_in_tree(build.talents, tree)
-	_points.text = "%d points invested" % invested
-	var rules := character.database.rules.talent_rules()
-	for tier in range(1, 8):
-		_gates[tier - 1].add_theme_color_override(&"font_color", UiTheme.BRONZE if invested >= rules.tier_requirement(tier) else UiTheme.TEXT_MUTED)
+	_points.text = "%d points invested" % TalentService.points_in_tree(build.talents, tree)
 	for node in tree.nodes:
 		var button: TalentButton = _buttons[node.id]
 		var rank := build.rank(node.id)
-		var error := TalentService.can_learn(character, class_id, node.id)
 		button.rank = rank
-		button.state = state_of(rank, node.max_rank, error)
-		button.tooltip_text = tooltip_for(node, rank, error)
+		button.state = state_of(rank, node.max_rank, TalentService.can_learn(character, class_id, node.id))
 		button.queue_redraw()
 		(_names[node.id] as Label).add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED if button.state == "Locked" else UiTheme.TEXT_PRIMARY)
 	queue_redraw()
@@ -124,26 +119,10 @@ static func state_of(rank: int, max_rank: int, error: String) -> String:
 	return "Available" if error == "" else "Locked"
 
 
-## Name, kind, tier, state, effect, rank, requirements and why it is locked.
-func tooltip_for(node: TalentNodeDefinition, rank: int, error: String) -> String:
-	var rules := character.database.rules.talent_rules()
-	var state := state_of(rank, node.max_rank, error)
-	var lines: PackedStringArray = ["%s (%s, tier %d)  -  %s" % [node.display_name, node.kind_name(), node.tier, state], node.describe(rank)]
-	lines.append("Rank %d / %d" % [rank, node.max_rank])
-	if node.tier > 1:
-		lines.append("Requires %d points in lower tiers of %s." % [rules.tier_requirement(node.tier), tree.display_name])
-	for prerequisite in node.prerequisites:
-		var other: TalentNodeDefinition = character.database.talent_nodes.get(prerequisite)
-		lines.append("Requires: %s" % (other.display_name if other else String(prerequisite)))
-	if node.required_class_level > 0:
-		lines.append("Requires class level %d." % node.required_class_level)
-	if node.unlocks_skill != &"":
-		var skill: SkillDefinition = character.database.skills.get(node.unlocks_skill)
-		if skill != null:
-			lines.append("Skill: %s - %s" % [skill.display_name, skill.description])
-	if rank < node.max_rank:
-		lines.append("Click to learn." if error == "" else "Cannot learn: %s" % error)
-	return "\n".join(lines)
+## The node's full information as plain text (same content as the tooltip).
+func info_text(node_id: StringName) -> String:
+	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
+	return "\n".join(TalentTooltip.lines(character, class_id, node).map(func(line: Dictionary) -> String: return line.text))
 
 
 ## Pairs of node ids connected by lines: [from, to, explicit prerequisite?].
@@ -159,7 +138,7 @@ func links() -> Array:
 		for lower in tree.nodes:
 			if lower.tier != node.tier + 1:
 				continue
-			var same_column := clampi(node.column, 0, COLUMNS - 1) == clampi(lower.column, 0, COLUMNS - 1)
+			var same_column := clampi(node.column, 0, 1) == clampi(lower.column, 0, 1)
 			if not (same_column or _tier_size(node.tier) == 1 or _tier_size(lower.tier) == 1):
 				continue
 			if result.any(func(link: Array) -> bool: return link[0] == node.id and link[1] == lower.id):
@@ -169,19 +148,19 @@ func links() -> Array:
 
 
 func _draw() -> void:
-	if tree == null:
+	if tree == null or layout == null:
 		return
-	for tier in range(2, 8):
-		var y := _row_y(tier) - (ROW - NODE - 18.0) * 0.5
-		draw_line(Vector2(GUTTER, y), Vector2(size.x, y), Color(UiTheme.BRONZE_DARK, 0.35), 1.0)
+	# faint tier bands (same rows as the tier scale)
+	for tier in range(1, 8):
+		if tier % 2 == 0:
+			draw_rect(Rect2(0, layout.row_top(tier), size.x, layout.row_height), Color(UiTheme.BRONZE_DARK, 0.12))
 	var build := character.builds.get_build(class_id)
+	var below := layout.node_size * 0.5 + (0.0 if layout.compact else TalentLayout.NAME_HEIGHT + 2.0)
 	for link: Array in links():
 		var from_node: TalentNodeDefinition = (_buttons[link[0]] as TalentButton).node
 		var to_node: TalentNodeDefinition = (_buttons[link[1]] as TalentButton).node
-		var start := node_center(from_node) + Vector2(0, NODE * 0.5 + 18.0)
-		var end := node_center(to_node) - Vector2(0, NODE * 0.5)
-		if absf(start.x - end.x) < 1.0 and to_node.tier - from_node.tier == 1:
-			start.y = node_center(from_node).y + NODE * 0.5 + 18.0
+		var start := node_center(from_node) + Vector2(0, below)
+		var end := node_center(to_node) - Vector2(0, layout.node_size * 0.5)
 		var walked := build.rank(link[0]) > 0
 		var explicit: bool = link[2]
 		var color := UiTheme.BRONZE if walked else Color(UiTheme.TEXT_MUTED, 0.45)
@@ -205,6 +184,12 @@ static func draw_glyph(canvas: CanvasItem, kind: TalentNodeDefinition.Kind, cent
 			canvas.draw_colored_polygon(PackedVector2Array([center + Vector2(0, -r), center + Vector2(r, 0), center + Vector2(0, r), center + Vector2(-r, 0)]), color)
 
 
+## Small padlock (Locked marker; also in the legend).
+static func draw_lock(canvas: CanvasItem, at: Vector2, color: Color) -> void:
+	canvas.draw_arc(at + Vector2(0, -2), 3.0, PI, TAU, 8, color, 1.5)
+	canvas.draw_rect(Rect2(at + Vector2(-4, -1), Vector2(8, 6)), color)
+
+
 ## Legend entry: glyph of a node kind plus its word.
 static func kind_legend(kind: TalentNodeDefinition.Kind, text: String) -> HBoxContainer:
 	var row := HBoxContainer.new()
@@ -214,11 +199,13 @@ static func kind_legend(kind: TalentNodeDefinition.Kind, text: String) -> HBoxCo
 	glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	glyph.draw.connect(func() -> void: draw_glyph(glyph, kind, glyph.size * 0.5, 6.0, UiTheme.TEXT_PRIMARY))
 	row.add_child(glyph)
-	row.add_child(UiTheme.styled(text, &"SmallLabel"))
+	row.add_child(UiTheme.styled(text, &"CaptionLabel"))
 	return row
 
 
-## Square talent node: glyph by kind, state colours, rank badge.
+## Square talent node: glyph by kind, state frame, state marker (not only by
+## colour: Maxed double frame + diamond, Available "+", Locked padlock),
+## rank badge. No Godot tooltip - the panel shows the TalentTooltip at once.
 class TalentButton:
 	extends Button
 
@@ -230,9 +217,10 @@ class TalentButton:
 		flat = true
 		focus_mode = Control.FOCUS_ALL
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-	func _make_custom_tooltip(for_text: String) -> Object:
-		return UiTheme.tooltip(for_text)
+		mouse_entered.connect(queue_redraw)
+		mouse_exited.connect(queue_redraw)
+		focus_entered.connect(queue_redraw)
+		focus_exited.connect(queue_redraw)
 
 	func _draw() -> void:
 		if node == null:
@@ -244,7 +232,7 @@ class TalentButton:
 		match state:
 			"Maxed":
 				border = UiTheme.BRONZE
-				fill = Color(UiTheme.BRONZE_DARK, 0.9)
+				fill = Color(UiTheme.BRONZE_DARK, 0.95)
 				glyph = UiTheme.PARCHMENT
 			"Learned":
 				border = UiTheme.BRONZE
@@ -254,20 +242,30 @@ class TalentButton:
 				border = UiTheme.RESONANCE
 				glyph = UiTheme.TEXT_PRIMARY
 		if is_hovered() or has_focus():
-			fill = fill.lightened(0.1)
+			fill = fill.lightened(0.12)
 		draw_rect(rect, fill)
 		draw_rect(rect.grow(-1.0), border, false, 2.0 if state != "Locked" else 1.0)
-		if node.is_capstone():
-			draw_rect(rect.grow(-5.0), Color(border, 0.6), false, 1.0)
-		var center := rect.get_center()
-		TalentTreeView.draw_glyph(self, node.kind, center, size.x * 0.22, glyph)
+		if state == "Maxed" or node.is_capstone():
+			draw_rect(rect.grow(-5.0), Color(border, 0.7), false, 1.0)
+		TalentTreeView.draw_glyph(self, node.kind, rect.get_center() + Vector2(0, -2), size.x * 0.2, glyph)
+		# state marker in the top right corner
+		var corner := Vector2(size.x - 7, 7)
+		match state:
+			"Maxed":
+				draw_colored_polygon(PackedVector2Array([corner + Vector2(0, -4), corner + Vector2(4, 0), corner + Vector2(0, 4), corner + Vector2(-4, 0)]), UiTheme.BRONZE)
+			"Available":
+				draw_line(corner + Vector2(-4, 0), corner + Vector2(4, 0), UiTheme.RESONANCE, 2.0)
+				draw_line(corner + Vector2(0, -4), corner + Vector2(0, 4), UiTheme.RESONANCE, 2.0)
+			"Locked":
+				TalentTreeView.draw_lock(self, corner + Vector2(0, 1), Color(UiTheme.TEXT_MUTED, 0.9))
+		# rank badge, bottom right, always inside the node
 		var font := get_theme_font(&"font")
-		var badge := "%d/%d" % [rank, node.max_rank]
 		var font_size := UiTheme.FONT_CAPTION
+		var badge := "%d/%d" % [rank, node.max_rank]
 		var text_size := font.get_string_size(badge, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-		var badge_rect := Rect2(Vector2(size.x - text_size.x - 4.0, size.y - font_size + 2.0), Vector2(text_size.x + 4.0, font_size - 2.0))
-		draw_rect(badge_rect, Color(UiTheme.BG, 0.85))
-		draw_string(font, badge_rect.position + Vector2(2.0, font_size - 6.0), badge, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size,
+		var badge_rect := Rect2(Vector2(size.x - text_size.x - 6.0, size.y - font_size - 1.0), Vector2(text_size.x + 5.0, font_size))
+		draw_rect(badge_rect, Color(UiTheme.BG, 0.88))
+		draw_string(font, badge_rect.position + Vector2(2.5, font_size - 3.0), badge, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size,
 				UiTheme.BRONZE if rank > 0 else UiTheme.TEXT_SECONDARY)
 		if has_focus():
 			draw_rect(rect.grow(2.0), UiTheme.COLOR_FOCUS, false, 2.0)

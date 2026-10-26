@@ -15,7 +15,8 @@ extends SceneTree
 ## Screenshots and log: tests/output/classes/.
 
 const OUTPUT := "res://tests/output/classes"
-const PASSES: Array = [[Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5]]
+const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(2560, 1440), 1.0],
+	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5]]
 
 var session: SessionState
 var map: GameMap
@@ -100,61 +101,83 @@ func _ui_pass(resolution: Vector2i, scale: float) -> void:
 	session.settings.reset_to_defaults()
 
 
+## Real mouse on the talent page: hover nodes in all three trees (left, right
+## edge, top row, bottom row / capstone) - the tooltip shows the node and stays
+## on screen; a real click learns a rank; real clicks on the book tabs switch
+## pages (also while the tree area is scrolled) and back.
 func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
-	var view := panel.tree_view(&"war_berserker")
-	var button := view.button_for(&"war_b_pace") if tag != "1080p_100" else view.button_for(&"war_b_temper")
-	# the window and the tree area scroll separately: bring the node into view in both
+	var targets: Array = [[0, &"war_b_temper"], [2, &"war_bb_veins"], [1, &"war_wb_hands"], [1, &"war_wb_worldbreaker"], [2, &"war_bb_price"]]
+	for target: Array in targets:
+		var view: TalentTreeView = panel._trees[target[0]]
+		var button := view.button_for(target[1])
+		if button == null:
+			button = view.button_for(view.tree.nodes[view.tree.nodes.size() - 1].id)
+		var at := await _bring_into_view(panel, button)
+		await _hover(at)
+		var tooltip := panel.talent_tooltip
+		_check(tooltip.visible and tooltip.node_id == StringName(button.name), "%s tooltip for %s on hover" % [tag, button.name])
+		_check(panel.get_viewport_rect().grow(1.0).encloses(tooltip.get_global_rect()), "%s tooltip of %s on screen" % [tag, button.name])
+		_check(not tooltip.get_global_rect().intersects(button.get_global_rect().grow(-2.0)), "%s tooltip of %s does not cover the node" % [tag, button.name])
+		await _shot(tag, "talent_tooltip_%s" % button.name)
+	var character := session.character
+	var temper := panel.tree_view(&"war_berserker").button_for(&"war_b_temper")
+	var temper_at := await _bring_into_view(panel, temper)
+	await _hover(temper_at)
+	var rank := character.builds.get_build().rank(&"war_b_temper")
+	await _click(temper_at, MOUSE_BUTTON_LEFT)
+	_check(character.builds.get_build().rank(&"war_b_temper") == mini(rank + 1, 3), "%s real mouse click learned a talent rank" % tag)
+	var new_temper := panel.tree_view(&"war_berserker").button_for(&"war_b_temper")
+	if new_temper.get_global_rect().has_point(panel.get_global_mouse_position()):
+		_check(panel.talent_tooltip.visible, "%s tooltip back after learning (mouse unmoved)" % tag)
+	else:   # the OS cursor (warp) did not end where the synthetic events were - nothing to judge
+		_log("%s tooltip-after-learning check skipped: Godot mouse %s not on the node" % [tag, panel.get_global_mouse_position()])
+	# book tabs: Skills and back, with the tree area scrolled down if it can scroll
+	var scroll := panel.find_child("TreeScroll", true, false) as ScrollContainer
+	if scroll != null:
+		scroll.scroll_vertical = 10000
+		await _frames(2)
+	for id: String in ["Skills", "Talents"]:
+		var tab := panel.find_child("BookTabs", true, false).find_child("Tab%s" % id, false, false) as Button
+		await _click(root.get_final_transform() * tab.get_global_rect().get_center(), MOUSE_BUTTON_LEFT)
+		await _frames(3)
+		_check(panel.page == id, "%s real click on the %s register" % [tag, id])
+	_check(character.builds.get_build().rank(&"war_b_temper") == mini(rank + 1, 3), "%s switching pages changed no talent" % tag)
+	Input.warp_mouse(Vector2(4, 4))
+	await _frames(2)
+
+
+func _bring_into_view(panel: ClassStationPanel, button: Control) -> Vector2:
 	var parent := button.get_parent()
 	while parent != null and parent != panel.get_parent():
 		if parent is ScrollContainer:
 			(parent as ScrollContainer).ensure_control_visible(button)
 			await _frames(2)
 		parent = parent.get_parent()
-	await _frames(4)
-	var at := root.get_final_transform() * button.get_global_rect().get_center()
-	for attempt in 4:
-		Input.warp_mouse(at)
-		await _frames(2)
+	await _frames(2)
+	return root.get_final_transform() * button.get_global_rect().get_center()
+
+
+func _hover(at: Vector2) -> void:
+	for spot: Vector2 in [at + Vector2(0, 40), at]:   # come from outside, as a player would
+		Input.warp_mouse(spot)
 		var motion := InputEventMouseMotion.new()
-		motion.position = at
-		motion.global_position = at
+		motion.position = spot
+		motion.global_position = spot
 		motion.relative = Vector2(1, 0)
 		Input.parse_input_event(motion)
-		await create_timer(1.0).timeout
-		if _tooltip(root) != null:
-			break
-	_check(_tooltip(root) != null, "%s talent tooltip visible on hover" % tag)
-	var tooltip := _tooltip(root)
-	if tooltip != null:
-		_check(root.get_visible_rect().grow(1.0).encloses(Rect2(tooltip.position, tooltip.size) * root.get_final_transform().affine_inverse()) \
-			or Rect2(Vector2.ZERO, root.size).encloses(Rect2(tooltip.position - root.position, tooltip.size)), "%s tooltip on screen" % tag)
-	await _shot(tag, "talent_tooltip")
-	if tag == "1080p_100":
-		var character := session.character
-		var rank := character.builds.get_build().rank(&"war_b_temper")
-		# Close the open tooltip first (it may lie over the button and take the click):
-		# move away, then back - the click follows before a new tooltip appears.
-		for spot: Vector2 in [Vector2(4, 4), at]:
-			Input.warp_mouse(spot)
-			var away := InputEventMouseMotion.new()
-			away.position = spot
-			away.global_position = spot
-			away.relative = Vector2(1, 0)
-			Input.parse_input_event(away)
-			await _frames(3)
-		for pressed: bool in [true, false]:
-			var click := InputEventMouseButton.new()
-			click.button_index = MOUSE_BUTTON_LEFT
-			click.pressed = pressed
-			click.position = at
-			click.global_position = at
-			Input.parse_input_event(click)
-			await _frames(2)
-		_check(character.builds.get_build().rank(&"war_b_temper") == rank + 1, "real mouse click learned a talent rank")
-	Input.warp_mouse(Vector2(4, 4))
-	for scroll: ScrollContainer in panel.find_children("*", "ScrollContainer", true, false):
-		scroll.scroll_vertical = 0
-	await _frames(2)
+		await _frames(3)
+
+
+func _click(at: Vector2, button_index: MouseButton) -> void:
+	await _hover(at)   # a real click always follows a mouse movement onto the target
+	for pressed: bool in [true, false]:
+		var click := InputEventMouseButton.new()
+		click.button_index = button_index
+		click.pressed = pressed
+		click.position = at
+		click.global_position = at
+		Input.parse_input_event(click)
+		await _frames(2)
 
 
 # --- Prologue ----------------------------------------------------------------------
