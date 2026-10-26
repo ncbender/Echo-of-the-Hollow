@@ -37,6 +37,8 @@ extends Resource
 @export_group("Talents")
 ## Talent tiers, points, slots and respec costs (data/progression/talent_rules.tres).
 @export var talents: TalentRules
+## Armor Mastery 1.0 values (burden, tiers, weights, milestones, provisional XP).
+@export var armor_mastery: ArmorMasteryRules
 
 @export_group("Prologue")
 ## Classes tried in the prologue; exactly one of them is chosen permanently.
@@ -92,3 +94,9 @@ func talent_rules() -> TalentRules:
 	if talents == null:
 		talents = TalentRules.new()
 	return talents
+
+
+func armor_rules() -> ArmorMasteryRules:
+	if armor_mastery == null:
+		armor_mastery = ArmorMasteryRules.new()
+	return armor_mastery

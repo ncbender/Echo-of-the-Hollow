@@ -37,6 +37,10 @@ signal weapon_changed(weapon: WeaponFamily)
 ## shortens startup/active/recovery and chain_delay and spreads the lunge over the
 ## shorter time. Heavy charge thresholds, combo windows and dashes never scale.
 var attack_speed: float = 1.0
+## Factor on the recovery phase only (Armor Mastery: burden lengthens it, Attack
+## Recovery Speed shortens it). Set by the owner; 1 = data timings. Startup,
+## active, chain delay, combo windows, charge and dash never use it.
+var recovery_multiplier: float = 1.0
 
 var state: State = State.IDLE
 var phase: Phase = Phase.NONE
@@ -314,7 +318,7 @@ func phase_duration() -> float:
 		Phase.ACTIVE:
 			return current_attack.active / _speed
 		Phase.RECOVERY:
-			return current_attack.recovery / _speed
+			return current_attack.recovery / _speed * recovery_multiplier
 	return 0.0
 
 

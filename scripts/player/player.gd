@@ -37,6 +37,9 @@ var skill_move_multiplier: float = 1.0
 var hitstop_left: float = 0.0
 ## Multiplier for incoming damage (armor etc.), set by the progression bridge.
 var incoming_damage_multiplier: float = 1.0
+## Extra factors by damage type (Armor Mastery: physical / magic resistance).
+var physical_damage_multiplier: float = 1.0
+var magic_damage_multiplier: float = 1.0
 ## Normal walking speed factor from stats (Movement Speed %, armour burden) -
 ## never applied to the dash, skill motions or knockback.
 var move_speed_multiplier: float = 1.0
@@ -332,7 +335,7 @@ func _start_dash(move: Vector2) -> void:
 ## Hits deal damage and knockback; the attack's reaction type decides whether the
 ## current action is interrupted (HitReactionComponent, docs/COMBAT_DESIGN.md).
 func _on_hit_received(hit: HitData) -> void:
-	hit.damage *= incoming_damage_multiplier
+	hit.damage *= incoming_damage_multiplier * (physical_damage_multiplier if hit.damage_type == &"physical" else magic_damage_multiplier)
 	health.apply_hit(hit)
 	if health.is_dead():
 		return

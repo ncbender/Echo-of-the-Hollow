@@ -7,6 +7,7 @@ extends RefCounted
 ##  * one reward per (swing, target): duplicate events are ignored
 ##  * training targets give reduced XP with a per-target cap and no kill reward
 ##  * a kill is rewarded once per target instance
+##  * Armor Mastery: a kill gives its mastery XP to the worn armour too (never hits taken)
 
 signal rewarded(kind: StringName, amount: int)
 
@@ -73,6 +74,7 @@ func _on_hit_landed(hit: HitData) -> void:
 		if mastery_xp > 0:
 			character.mastery.add_xp(hit.attack.weapon_family_id, mastery_xp)
 			rewarded.emit(&"kill_mastery", mastery_xp)
+			ArmorMasteryService.add_xp(character, mastery_xp)   # the worn armour learns from the kill too
 		if class_xp > 0:
 			character.add_class_xp(class_xp)
 			rewarded.emit(&"kill_class", class_xp)
@@ -88,7 +90,9 @@ func reward_kill(hit: HitData) -> void:
 	if _killed.has(target_id) or not _is_dead(target) or not target.has_method(&"get_kill_reward"):
 		return
 	_killed[target_id] = true
-	var class_xp: int = target.call(&"get_kill_reward").get("class_xp", 0)
+	var reward: Dictionary = target.call(&"get_kill_reward")
+	var class_xp: int = reward.get("class_xp", 0)
+	ArmorMasteryService.add_xp(character, float(reward.get("mastery_xp", 0)))   # armour learns from every kill
 	if class_xp > 0:
 		character.add_class_xp(class_xp)
 		rewarded.emit(&"kill_class", class_xp)

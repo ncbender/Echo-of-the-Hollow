@@ -18,4 +18,5 @@ category = 1
 rarity = 0
 max_stack = 1
 slot_kind = 8
+armor_type = 1
 base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_1")])

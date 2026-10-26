@@ -39,6 +39,9 @@ var cooldown_left: float = 0.0
 ## Remaining counter window after a successful parry.
 var counter_left: float = 0.0
 var last_outcome: Outcome = Outcome.NONE
+## Extra share (0..0.9) by which blocked damage is reduced (Block Efficiency stat,
+## Armor Mastery). Never touches parry / block windows, arcs or timings.
+var block_efficiency: float = 0.0
 var _press_buffer := InputBuffer.new(0.12)
 var counter_modifier := CounterModifier.new()
 
@@ -133,7 +136,7 @@ func resolve(hit: HitData, defender_position: Vector2, facing: Vector2) -> Outco
 		last_outcome = Outcome.GUARD_BROKEN
 		guard_broken.emit(hit)
 		return Outcome.GUARD_BROKEN
-	hit.damage *= 1.0 - active.block_reduction
+	hit.damage *= (1.0 - active.block_reduction) * (1.0 - clampf(block_efficiency, 0.0, 0.9))
 	hit.knockback *= active.block_knockback_multiplier
 	hit.reaction = mini(hit.reaction, HitReaction.Type.FLINCH) as HitReaction.Type
 	hit.tags.append(&"blocked")

@@ -4,6 +4,9 @@ extends Resource
 
 enum Category { WEAPON, ARMOR, JEWELRY, TRINKET, MATERIAL, CONSUMABLE, QUEST }
 enum Rarity { NORMAL, MAGIC, RARE, EPIC, LEGENDARY, UNIQUE, SET }
+## Armor Mastery 1.0: material class of an armour piece (NONE = not armour,
+## or not clearly one of the four - then it adds no burden and no mastery).
+enum ArmorType { NONE, CLOTH, LEATHER, MAIL, PLATE }
 enum SlotKind {
 	NONE, HEAD, SHOULDERS, BACK, CHEST, WRISTS, HANDS, BELT, LEGS, FEET,
 	ONE_HAND_WEAPON, TWO_HAND_WEAPON, OFF_HAND, SHIELD, RING, NECK, TRINKET,
@@ -29,6 +32,7 @@ const RARITY_COLORS := {
 
 @export_group("Equipment")
 @export var slot_kind: SlotKind = SlotKind.NONE
+@export var armor_type: ArmorType = ArmorType.NONE
 ## Combat weapon family used when equipped in the main hand.
 @export var weapon_family_id: StringName
 @export var base_stats: Array[StatModifier] = []

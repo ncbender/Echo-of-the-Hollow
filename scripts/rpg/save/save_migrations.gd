@@ -20,6 +20,7 @@ static func _steps() -> Dictionary:
 		6: _v6_to_v7,
 		7: _v7_to_v8,
 		8: _v8_to_v9,
+		9: _v9_to_v10,
 	}
 
 
@@ -214,4 +215,12 @@ static func _v7_to_v8(data: Dictionary) -> Dictionary:
 static func _v8_to_v9(data: Dictionary) -> Dictionary:
 	if not data.get("consumables") is Dictionary:
 		data["consumables"] = {"capacity": 0, "potency": 0, "charges": -1, "potion_slot": "", "buff": "", "buff_left": 0.0, "cooldown": 0.0}
+	return data
+
+
+## v10 (Armor Mastery 1.0): every armour track at level 1 without XP. Items,
+## equipment slots and loadouts are not touched (no slot assumptions).
+static func _v9_to_v10(data: Dictionary) -> Dictionary:
+	if not data.get("armor_mastery") is Dictionary:
+		data["armor_mastery"] = {}
 	return data

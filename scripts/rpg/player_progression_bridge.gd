@@ -33,10 +33,17 @@ var _pending_weapon: WeaponFamily
 
 var _connections: Array[Array] = []   # [Signal, Callable]
 var _installed_modifiers: Array[AttackModifier] = []
+var _base_poise: float = -1.0
+## Armor XP from defense: attack instances already rewarded, XP per enemy so far.
+var _defended: Dictionary = {}
+var _defense_xp: Dictionary = {}
 
 
 func bind(target_player: Player, target_character: Character) -> void:
 	unbind()
+	_base_poise = -1.0
+	_defended.clear()
+	_defense_xp.clear()
 	player = target_player
 	character = target_character
 	rewards = CombatRewardTracker.new(character, character.database.rules)
@@ -62,6 +69,8 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(class_runtime.skill_cast, _on_skill_cast)
 	_track(character.prologue.trial_finished, _on_trial_finished)
 	_track(player.health.died, _on_player_died)
+	_track(player.defense.blocked, _on_defended)
+	_track(player.defense.parried, _on_defended)
 	effects.resource_gainer = class_runtime.gain
 	effects.status_applier = apply_status
 	effects.cooldown_reducer = class_runtime.reduce_cooldown
@@ -116,7 +125,16 @@ func apply_stats() -> void:
 	var armor := maxf(0.0, stats.get(Stats.ARMOR, 0.0))
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
 	player.incoming_damage_multiplier *= 1.0 - clampf(stats.get(Stats.DAMAGE_REDUCTION, 0.0), 0.0, 75.0) / 100.0
-	player.move_speed_multiplier = maxf(0.1, 1.0 + stats.get(Stats.MOVE_SPEED, 0.0) / 100.0)   # walking only, never the dash
+	# walking only, never the dash: Movement Speed % and the armour burden (after Iron Discipline)
+	player.move_speed_multiplier = maxf(0.1, (1.0 + stats.get(Stats.MOVE_SPEED, 0.0) / 100.0) * (1.0 - ArmorMasteryService.move_penalty(character) / 100.0))
+	player.combat.recovery_multiplier = (1.0 + ArmorMasteryService.recovery_penalty(character) / 100.0) \
+		/ (1.0 + maxf(0.0, stats.get(Stats.ATTACK_RECOVERY_SPEED, 0.0)) / 100.0)
+	player.physical_damage_multiplier = 1.0 - clampf(stats.get(Stats.PHYSICAL_RESISTANCE, 0.0), 0.0, 75.0) / 100.0
+	player.magic_damage_multiplier = 1.0 - clampf(stats.get(Stats.MAGIC_RESISTANCE, 0.0), 0.0, 75.0) / 100.0
+	player.defense.block_efficiency = clampf(stats.get(Stats.BLOCK_EFFICIENCY, 0.0), 0.0, 90.0) / 100.0
+	if _base_poise < 0.0:
+		_base_poise = player.health.max_poise
+	player.health.max_poise = _base_poise * (1.0 + maxf(0.0, stats.get(Stats.POISE, 0.0)) / 100.0)
 	var statuses := StatusComponent.of(player)
 	if statuses != null:
 		statuses.general_resistance = clampf(stats.get(Stats.STATUS_RESISTANCE, 0.0), 0.0, 100.0) / 100.0
@@ -359,3 +377,24 @@ func _on_potion_done() -> void:
 	var error := ConsumableService.complete_potion(character)
 	if error != "":
 		message.emit(error)
+
+
+# --- Armor Mastery XP ---------------------------------------------------------------
+
+## A blocked or parried enemy attack is a valid combat event (never a hit taken):
+## once per attack instance, capped per enemy so one weak enemy cannot be farmed.
+func _on_defended(hit: HitData) -> void:
+	var attacker := hit.attacker
+	if attacker == null or not is_instance_valid(attacker) or attacker.is_in_group(&"training_target") or attacker.is_in_group(&"player"):
+		return
+	var key := "%d:%d" % [attacker.get_instance_id(), hit.attack_instance_id]
+	if _defended.has(key):
+		return
+	_defended[key] = true
+	var armor_rules := ArmorMasteryService.rules(character)
+	var given: float = _defense_xp.get(attacker.get_instance_id(), 0.0)
+	var amount := minf(armor_rules.xp_per_defense, armor_rules.defense_xp_cap_per_enemy - given)
+	if amount <= 0.0:
+		return
+	_defense_xp[attacker.get_instance_id()] = given + amount
+	ArmorMasteryService.add_xp(character, amount)

@@ -148,7 +148,8 @@ func try_cast(slot: int) -> bool:
 		return false
 	_casts += 1
 	cooldowns[skill.id] = time + params.cooldown
-	player.begin_skill(skill.cast_lock, skill.cast_move_multiplier)
+	# Skill Recovery Speed (Armor Mastery) shortens only the cast lock - never cooldowns or the skill itself
+	player.begin_skill(skill.cast_lock / (1.0 + maxf(0.0, character.get_stat(Stats.SKILL_RECOVERY_SPEED)) / 100.0), skill.cast_move_multiplier)
 	var cast := SkillCast.new()
 	cast.runtime = self
 	cast.skill = skill

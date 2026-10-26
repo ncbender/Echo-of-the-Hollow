@@ -330,7 +330,7 @@ func test_save_load_and_migration() -> void:
 	check_eq(old.consumables.charges, 2, "full base charges")
 	check(old.consumables.potion_slot == &"" and old.consumables.buff_item == &"", "no slot, no buff")
 	check_eq(old.inventory.to_array(), character.inventory.to_array(), "bag untouched")
-	check_eq(int(SaveSystem.VERSION), 9, "save version 9")
+	check(int(SaveSystem.VERSION) >= 9, "save version 9 or later")
 
 
 func test_effect_icon_runs_clockwise_and_is_display_only() -> void:

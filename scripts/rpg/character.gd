@@ -25,6 +25,8 @@ var prologue := PrologueState.new()
 var professions: CharacterProfessions
 ## Hearth Flask and special potions (Consumables 1.0, save v9).
 var consumables := CharacterConsumables.new()
+## Armor Mastery 1.0: Cloth / Leather / Mail / Plate tracks (save v10).
+var armor_mastery := CharacterArmorMastery.new()
 ## Class unlock quests.
 var quests := QuestLog.new()
 ## Raw saved items that could not be restored (e.g. definition removed from the
@@ -152,6 +154,7 @@ func to_dict() -> Dictionary:
 		"stash": {"items": stash.to_array()},
 		"professions": professions.to_dict(),
 		"consumables": consumables.to_dict(),
+		"armor_mastery": armor_mastery.to_dict(),
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
 		"class_builds": builds.to_dict(),
@@ -191,6 +194,7 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 	character.world.from_dict(_dict(data, "world"), warnings)
 	character.professions.from_dict(_dict(data, "professions"), warnings)
 	character.consumables.from_dict(_dict(data, "consumables"))
+	character.armor_mastery.from_dict(_dict(data, "armor_mastery"), db.rules.armor_rules(), warnings)
 	ProfessionService.learn_automatic(character)   # recipes the saved levels allow
 	ConsumableService.sanitize(character)   # clamps charges / levels, re-applies a running potion buff
 	character.refresh_inventory_capacity()
@@ -239,6 +243,7 @@ func _stat_sources() -> Array:
 	for bonus in active_set_bonuses():
 		sources.append(bonus.stat_modifiers)
 	sources.append(TalentService.stat_modifiers(self, classes.active_class_id))
+	sources.append(ArmorMasteryService.stat_modifiers(self))   # milestones x coverage of the worn armour
 	for modifiers: Array in _runtime_modifiers.values():
 		sources.append(modifiers)
 	return sources

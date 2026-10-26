@@ -7,7 +7,7 @@ extends UiWindow
 ## and quests need a class station). Pure presentation over TalentService,
 ## SkillBook, PresetService, QuestService and Character.switch_class.
 
-const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests"]
+const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests", "Armor"]
 const FORM := SkillModDefinition.Slot.FORM
 const RESONANCE := SkillModDefinition.Slot.RESONANCE
 const CONTENT_WIDTH := 900
@@ -129,6 +129,8 @@ func rebuild() -> void:
 			_build_presets()
 		"Quests":
 			_build_quests()
+		"Armor":
+			_build_armor()
 		_:
 			_build_classes()
 	queue_fit()
@@ -781,6 +783,100 @@ func _ask_delete(class_id: StringName, index: int, preset_name: String) -> void:
 
 
 # --- Quests -----------------------------------------------------------------------
+
+## Armor Mastery: total burden and tier with its penalties, what each armour
+## slot holds, and the four tracks (level, XP, coverage, milestones with their
+## effective, coverage-scaled bonus). Read-only over ArmorMasteryService.
+func _build_armor() -> void:
+	var armor_rules := ArmorMasteryService.rules(character)
+	var points := ArmorMasteryService.burden(character)
+	var tier := ArmorMasteryService.tier(points, armor_rules)
+	var head := UiTheme.card(&"CardPanel")
+	head.name = "Burden"
+	var box := head.get_node("Box") as VBoxContainer
+	var title := HBoxContainer.new()
+	var heading := UiTheme.styled("Armor Burden", &"SubheadingLabel")
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(heading)
+	var tier_label := UiTheme.styled("%d  ·  %s" % [points, ArmorMasteryService.TIER_NAMES[tier]], &"SubheadingLabel")
+	tier_label.name = "Tier"
+	tier_label.add_theme_color_override(&"font_color", UiTheme.SUCCESS if tier == 0 else (UiTheme.WARNING if tier < 3 else UiTheme.DANGER))
+	title.add_child(tier_label)
+	box.add_child(title)
+	var move := ArmorMasteryService.move_penalty(character)
+	var recovery := ArmorMasteryService.recovery_penalty(character)
+	box.add_child(UiTheme.wrapped("No penalty." if move <= 0.0 and recovery <= 0.0 else
+		"-%s%% movement  ·  +%s%% attack recovery time" % [_num(move), _num(recovery)], UiTheme.TEXT_SECONDARY, CONTENT_WIDTH - 40))
+	if ArmorMasteryService.iron_discipline(character) > 0.0:
+		box.add_child(UiTheme.wrapped("Iron Discipline lowers the movement penalty by %s points." % _num(ArmorMasteryService.iron_discipline(character)), UiTheme.TEXT_SECONDARY, CONTENT_WIDTH - 40))
+	box.add_child(UiTheme.styled("Light 0-14  ·  Balanced 15-25  ·  Burdened 26-37  ·  Heavy 38+. Dash and parry are never affected.", &"CaptionLabel"))
+	var slots := HFlowContainer.new()
+	slots.add_theme_constant_override(&"h_separation", UiTheme.GAP * 2)
+	var types := ArmorMasteryService.worn_types(character)
+	for index in ArmorMasteryRules.SLOTS.size():
+		var slot: int = ArmorMasteryRules.SLOTS[index]
+		var type_name: String = ArmorMasteryService.TYPE_NAMES.get(types[index], "-")
+		slots.add_child(UiTheme.styled("%s: %s (%d)" % [EquipSlot.NAMES[slot], type_name, armor_rules.burden_of(types[index], index)], &"SmallLabel"))
+	box.add_child(slots)
+	_content.add_child(head)
+	var grid := GridContainer.new()
+	grid.name = "Tracks"
+	grid.columns = 2
+	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP)
+	grid.add_theme_constant_override(&"v_separation", UiTheme.GAP)
+	var covered := ArmorMasteryService.coverage(character)
+	var bonuses := ArmorMasteryService.milestone_bonuses(character)
+	for type: int in ArmorMasteryRules.TYPES:
+		grid.add_child(_armor_track(type, float(covered[type]), bonuses, armor_rules))
+	_content.add_child(grid)
+
+
+func _armor_track(type: int, coverage: float, bonuses: Array[Dictionary], armor_rules: ArmorMasteryRules) -> Control:
+	var card := UiTheme.card(&"InsetPanel")
+	card.name = "Track_%s" % CharacterArmorMastery.KEYS[type]
+	card.custom_minimum_size = Vector2((CONTENT_WIDTH - UiTheme.GAP) * 0.5, 0)
+	var box := card.get_node("Box") as VBoxContainer
+	var level := character.armor_mastery.level(type)
+	var head := HBoxContainer.new()
+	var name_label := UiTheme.styled(ArmorMasteryService.TYPE_NAMES[type], &"SubheadingLabel")
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(name_label)
+	var level_label := UiTheme.styled("Level %d / %d" % [level, armor_rules.max_level], &"SmallLabel")
+	level_label.name = "Level"
+	head.add_child(level_label)
+	box.add_child(head)
+	var need := armor_rules.xp_to_next(level)
+	var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.BRONZE)
+	bar.max_value = maxf(1.0, need)
+	bar.value = character.armor_mastery.xp(type) if need > 0 else bar.max_value
+	box.add_child(bar)
+	box.add_child(UiTheme.styled(("XP %d / %d" % [floori(character.armor_mastery.xp(type)), need] if need > 0 else "Mastered") + "  ·  worn: %d%%" % roundi(coverage * 100.0), &"CaptionLabel"))
+	for milestone: Array in ArmorMasteryRules.MILESTONES:
+		if int(milestone[0]) != type:
+			continue
+		var reached := level >= int(milestone[1])
+		var text := "Lv %d  %s" % [int(milestone[1]), _milestone_text(milestone[2], float(milestone[3]))]
+		if reached:
+			var value := 0.0
+			for entry: Dictionary in bonuses:
+				if int(entry.type) == type and int(entry.level) == int(milestone[1]):
+					value = float(entry.value)
+			text += ("  ->  now %s points" if milestone[2] == ArmorMasteryRules.IRON_DISCIPLINE else "  ->  now +%s%%") % _num(value)
+		var line := UiTheme.styled(text, &"SmallLabel")
+		line.add_theme_color_override(&"font_color", UiTheme.SUCCESS if reached and coverage > 0.0 else (UiTheme.TEXT_SECONDARY if reached else UiTheme.TEXT_MUTED))
+		box.add_child(line)
+	return card
+
+
+func _milestone_text(stat: StringName, value: float) -> String:
+	if stat == ArmorMasteryRules.IRON_DISCIPLINE:
+		return "Iron Discipline: up to %s point less burden movement penalty" % _num(value)
+	return "+%s%% %s" % [_num(value), Stats.display_name(stat).trim_suffix(" %")]
+
+
+static func _num(value: float) -> String:
+	return str(snappedf(value, 0.1)).trim_suffix(".0")
+
 
 func _build_quests() -> void:
 	_content.add_child(UiTheme.wrapped("Classes you did not choose at the Whispering Stone are unlocked by their class quests. Take and turn them in at a class station.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))

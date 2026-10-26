@@ -3,7 +3,7 @@ extends RefCounted
 ## The screens of the UI gallery (tests/playtest/ui_gallery.gd) and how to open
 ## each one with real data. Returns the screen label, or "" when skipped.
 
-const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
+const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "character_armor", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
 	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
@@ -58,6 +58,15 @@ static func open(gallery: Object, screen: String) -> String:
 			hud.inventory_panel._on_cell_hovered(cell)
 		"character":
 			hud.toggle_character()
+		"character_armor":   # leather and cloth worn, some mastery
+			for item_id: StringName in [&"leather_cap", &"leather_gloves", &"worn_boots", &"linen_trousers"]:
+				var added := character.inventory.add_item(item_id, 1)   # the gallery bag may be full
+				if not added.is_empty():
+					character.equipment.equip(added[0].instance_id)
+			if character.armor_mastery.level(ItemDefinition.ArmorType.LEATHER) < 5:
+				ArmorMasteryService.add_xp(character, 3000.0)
+			hud.toggle_character()
+			hud.class_panel.show_page("Armor")
 		"classes", "talents", "skills", "presets":
 			await _stand_at(gallery, map.get_node("ClassStation"))
 			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, screen.capitalize())

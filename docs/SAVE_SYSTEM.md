@@ -32,9 +32,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 9) ✅
+## Format (Version 10) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 9, "saved_at": 1761460000, "order": 1761460000123,
+{ "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
   "meta": { "location": "Haven", "class": "Warrior", "level": 3, "play_time": 812,
             "kind": "manual|autosave|milestone", "reason": "..." } }
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 9.
+Aktuell: Version 10.
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
@@ -122,6 +122,7 @@ Aktuell: Version 9.
   Beim Laden verlieren Stapel Herkunft und Markierungen (nur Einzelitems tragen sie).
 - 8→9 (Hearth Flask & Consumables 1.0): `consumables` = keine Upgrades, volle Grundladungen (`charges` -1 → beim Laden aus den Regeln), kein
   Trankslot, kein Buff, kein Cooldown. Sonst ändert sich nichts. Laden begrenzt Stufen/Ladungen und setzt einen laufenden Buff wieder ein.
+- 9→10 (Armor Mastery 1.0): leeres `armor_mastery` → alle vier Tracks Stufe 1 ohne XP. Items, Slots und Loadouts unverändert.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

@@ -17,5 +17,6 @@ category = 1
 rarity = 6
 max_stack = 1
 slot_kind = 1
+armor_type = 3
 base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_armor")])
 set_id = &"hollow_warden"
