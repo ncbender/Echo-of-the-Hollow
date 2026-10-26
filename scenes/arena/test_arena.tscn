@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
 [ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
 [ext_resource type="Script" path="res://scripts/world/item_pickup.gd" id="9_pickup"]
+[ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="10_spawn"]
 
 [node name="TestArena" type="Node2D"]
 y_sort_enabled = true
@@ -76,19 +77,31 @@ position = Vector2(-40, -110)
 position = Vector2(-120, -40)
 script = ExtResource("9_pickup")
 item_id = &"militia_sword"
+persistent_id = &"arena_militia_sword"
 
 [node name="PickupOakShield" type="Area2D" parent="."]
 position = Vector2(-100, -40)
 script = ExtResource("9_pickup")
 item_id = &"oak_shield"
+persistent_id = &"arena_oak_shield"
 
 [node name="PickupCopperRing" type="Area2D" parent="."]
 position = Vector2(-80, -40)
 script = ExtResource("9_pickup")
 item_id = &"copper_ring"
+persistent_id = &"arena_copper_ring"
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="SpawnDefault" type="Marker2D" parent="."]
+position = Vector2(0, 40)
+script = ExtResource("10_spawn")
+
+[node name="SpawnClassStation" type="Marker2D" parent="."]
+position = Vector2(-40, -80)
+script = ExtResource("10_spawn")
+spawn_id = &"class_station"
 
 [node name="Player" parent="." instance=ExtResource("3_player")]
 position = Vector2(0, 40)

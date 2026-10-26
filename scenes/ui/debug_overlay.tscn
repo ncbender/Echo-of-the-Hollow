@@ -36,4 +36,4 @@ theme_override_constants/line_spacing = -2
 theme_override_font_sizes/font_size = 8
 text = "WASD move  |  Mouse aim  |  LMB light  |  hold/release RMB heavy  |  Space dash  |  1/2 weapon
 F1 hitboxes  |  F2 spawn enemy  |  F3 +mastery XP  |  F5 reset  |  F7 item kit  |  F8 +class XP
-G interact  |  I inventory"
+G interact  |  I inventory  |  F6 save  |  F9 load"

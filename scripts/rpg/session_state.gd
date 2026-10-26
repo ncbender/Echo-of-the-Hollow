@@ -2,14 +2,24 @@ class_name SessionState
 extends Node
 ## Autoload "GameSession" - the only autoload of the project.
 ## Reason: the Character (progress, items, location) must survive scene changes
-## (map transitions, arena reload). Everything else stays scene-local.
-## Systems never reach for this node implicitly: maps call bind_player(), and
-## all RPG classes receive their dependencies explicitly (testable without it).
+## (map transitions, arena reload, loading a save). Everything else stays
+## scene-local. Maps call bind_player(); all RPG classes receive their
+## dependencies explicitly and are testable without this node.
 
 signal character_changed(character: Character)
+## Immediate user-facing message (current map shows it in the HUD).
+signal message(text: String)
+
+const DEFAULT_SAVE_PATH := "user://saves/slot_1.save.json"
 
 var database: GameDatabase
 var character: Character
+## Real player saves go to DEFAULT_SAVE_PATH; tests/playtests point this elsewhere.
+var save_path: String = DEFAULT_SAVE_PATH
+var last_load: SaveSystem.LoadResult
+
+var _pending_spawn: StringName = &""
+var _messages: PackedStringArray = []
 
 
 func _ready() -> void:
@@ -36,6 +46,46 @@ func bind_player(player: Player) -> PlayerProgressionBridge:
 		player.add_child(bridge)
 	bridge.bind(player, get_character())
 	return bridge
+
+
+func save_game() -> Error:
+	return SaveSystem.save_to(get_character(), save_path)
+
+
+## Loads `save_path`. On success the character is replaced and its saved map is
+## (re)loaded at the saved spawn point. Returns the detailed result.
+func load_game() -> SaveSystem.LoadResult:
+	last_load = SaveSystem.load_from(save_path, database)
+	if not last_load.ok():
+		message.emit("LOAD FAILED: %s" % "; ".join(last_load.errors))
+		return last_load
+	set_character(last_load.character)
+	_messages.append("Loaded save (%s)%s" % [last_load.source, " with %d warnings" % last_load.warnings.size() if not last_load.warnings.is_empty() else ""])
+	travel(character.world.map_id, character.world.spawn_id)
+	return last_load
+
+
+## Changes to the scene of `map_id` (or reloads the current one) and spawns the
+## player at `spawn_id`. Map definitions come from the database (Phase 8).
+func travel(map_id: StringName, spawn_id: StringName) -> void:
+	_pending_spawn = spawn_id
+	var map_def: MapDefinition = database.maps.get(map_id)
+	if map_def != null and map_def.scene_path != "":
+		get_tree().change_scene_to_file.call_deferred(map_def.scene_path)
+	else:
+		get_tree().reload_current_scene.call_deferred()
+
+
+func consume_pending_spawn() -> StringName:
+	var spawn := _pending_spawn
+	_pending_spawn = &""
+	return spawn
+
+
+func consume_messages() -> PackedStringArray:
+	var messages := _messages
+	_messages = PackedStringArray()
+	return messages
 
 
 static func find(tree: SceneTree) -> SessionState:

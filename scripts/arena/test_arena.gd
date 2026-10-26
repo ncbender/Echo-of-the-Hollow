@@ -1,30 +1,23 @@
-extends Node2D
-## Test arena glue: connects game-feel systems, the RPG session and debug hotkeys.
+extends GameMap
+## Test arena: game-feel glue and debug hotkeys on top of GameMap.
 ## Contains no combat or progression rules.
 
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
+const PICKUP_SCRIPT: GDScript = preload("res://scripts/world/item_pickup.gd")
 const SPAWN_AREA := Rect2(-300, -180, 600, 360)
 const DEBUG_MASTERY_XP := 100
 const DEBUG_CLASS_XP := 100
-const PICKUP_SCRIPT: GDScript = preload("res://scripts/world/item_pickup.gd")
 ## F7 debug kit: one of every equippable test item plus building materials.
 const DEBUG_MATERIALS := {&"iron_ore": 10, &"timber": 10}
 
-var bridge: PlayerProgressionBridge
-
-@onready var player: Player = $Player
 @onready var hitstop: HitstopController = $HitstopController
 @onready var enemies: Node2D = $Enemies
-@onready var hud: GameHud = $GameHud
 
 
 func _ready() -> void:
+	super()
 	hitstop.camera = player.get_node("Camera2D")
 	hitstop.watch(player.combat)
-	var session := SessionState.find(get_tree())
-	if session != null:
-		bridge = session.bind_player(player)
-		hud.setup(bridge)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -40,15 +33,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.notify("+%d class XP (debug)" % DEBUG_CLASS_XP)
 	elif event.is_action_pressed(&"debug_spawn_items") and bridge != null:
 		hud.notify("Debug item kit: %d items added" % give_debug_items(bridge.character))
-	elif event.is_action_pressed(&"interact"):
-		if hud.is_window_open():
-			hud.close_windows()
-		else:
-			var target := Interactable.find_active(get_tree())
-			if target != null:
-				target.interact(hud)
 	elif event.is_action_pressed(&"debug_reset_arena"):
 		get_tree().reload_current_scene()
+	else:
+		super(event)
 
 
 ## Debug spawning (F2). Returns the spawned enemy.
@@ -60,15 +48,6 @@ func spawn_enemy(at: Vector2) -> Enemy:
 	hitstop.watch(enemy.combat)
 	enemy.defeated.connect(_spawn_drops)
 	return enemy
-
-
-func _spawn_point() -> Vector2:
-	# Random point at a fair distance from the player, inside the arena.
-	for attempt in 10:
-		var point := player.global_position + Vector2.from_angle(randf() * TAU) * randf_range(110.0, 170.0)
-		if SPAWN_AREA.has_point(point):
-			return point
-	return Vector2(0, -150)
 
 
 ## Gives every equippable item definition once plus materials. Returns the
@@ -99,3 +78,12 @@ func _spawn_drops(enemy: Enemy) -> void:
 	for drop in enemy.config.drops:
 		spawn_pickup(drop.item_id, drop.quantity, enemy.global_position + Vector2(offset - 6.0, 6.0))
 		offset += 12.0
+
+
+func _spawn_point() -> Vector2:
+	# Random point at a fair distance from the player, inside the arena.
+	for attempt in 10:
+		var point := player.global_position + Vector2.from_angle(randf() * TAU) * randf_range(110.0, 170.0)
+		if SPAWN_AREA.has_point(point):
+			return point
+	return Vector2(0, -150)

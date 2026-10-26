@@ -55,6 +55,29 @@ func test_full_inventory_leaves_item_on_ground() -> void:
 	check_eq(character.inventory.count(&"leather_cap"), 1, "exactly one")
 
 
+func test_placed_pickups_cannot_be_farmed_by_reloading() -> void:
+	var session := SessionState.find(get_tree())
+	var previous := session.character
+	session.set_character(CharacterFactory.create_new(GameDatabase.get_default()))
+	var arena: Node2D = load("res://scenes/arena/test_arena.tscn").instantiate()
+	add_child(arena)
+	await wait_physics(1)
+	var pickup := arena.get_node("PickupCopperRing") as ItemPickup
+	check(pickup.try_pick_up(arena.get_node("Player")), "picked up in the arena")
+	check_eq(session.character.inventory.count(&"copper_ring"), 1, "one ring")
+	arena.queue_free()
+	await wait_physics(1)
+	var reloaded: Node2D = load("res://scenes/arena/test_arena.tscn").instantiate()
+	add_child(reloaded)
+	await wait_physics(1)
+	var again := reloaded.get_node_or_null("PickupCopperRing")
+	check(again == null or again.is_queued_for_deletion(), "taken pickup removed on reload")
+	check(reloaded.get_node_or_null("PickupOakShield") != null, "untouched pickups remain")
+	check_eq(session.character.inventory.count(&"copper_ring"), 1, "still exactly one ring")
+	reloaded.queue_free()
+	session.set_character(previous)
+
+
 func test_enemy_drops_spawn_pickups_in_arena() -> void:
 	var arena: Node2D = load("res://scenes/arena/test_arena.tscn").instantiate()
 	add_child(arena)

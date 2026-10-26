@@ -8,6 +8,10 @@ signal picked_up(item_id: StringName, quantity: int)
 
 @export var item_id: StringName
 @export var quantity: int = 1
+## Non-empty for pickups placed in a map: once taken, a world flag remembers it
+## so reloading the map or a save can never hand out the same item again.
+## Empty for transient pickups (enemy drops).
+@export var persistent_id: StringName
 
 var _taken: bool = false
 
@@ -37,10 +41,16 @@ func try_pick_up(player: Node) -> bool:
 		bridge.message.emit("Inventory full - %s stays on the ground" % _name())
 		return false
 	_taken = true
+	if persistent_id != &"":
+		bridge.character.world.set_flag(flag_name())
 	bridge.message.emit("Picked up %s x%d" % [_name(), quantity])
 	picked_up.emit(item_id, quantity)
 	queue_free()
 	return true
+
+
+func flag_name() -> StringName:
+	return StringName("pickup_taken.%s" % persistent_id)
 
 
 func _on_body_entered(body: Node2D) -> void:

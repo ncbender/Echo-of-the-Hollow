@@ -14,6 +14,10 @@ var mastery: WeaponMastery
 var classes: CharacterClasses
 var inventory: Inventory
 var equipment: CharacterEquipment
+var world: WorldState
+## Raw saved items that could not be restored (e.g. definition removed from the
+## data). Kept and written back on save so no player property is ever deleted.
+var orphaned_items: Array = []
 
 var _stats: Dictionary = {}
 var _stats_dirty: bool = true
@@ -26,6 +30,7 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	classes = CharacterClasses.new(db)
 	inventory = Inventory.new(db, db.rules.inventory_capacity)
 	equipment = CharacterEquipment.new(db, inventory, classes)
+	world = WorldState.new()
 	# Method callables (not lambdas): they do not keep this RefCounted alive,
 	# so Character <-> sub-system signal links never form a reference cycle.
 	classes.leveled_up.connect(_on_class_leveled_up)
@@ -74,6 +79,50 @@ func get_stats() -> Dictionary:
 func invalidate_stats() -> void:
 	_stats_dirty = true
 	stats_changed.emit()
+
+
+## Serializable source data only. Derived values (stats, health, class
+## resource, active effects) are rebuilt after loading.
+func to_dict() -> Dictionary:
+	return {
+		"id": id,
+		"name": display_name,
+		"classes": classes.to_dict(),
+		"mastery": mastery.to_dict(),
+		"inventory": inventory.to_array(),
+		"orphaned_items": orphaned_items.duplicate(true),
+		"loadouts": equipment.to_dict(),
+		"world": world.to_dict(),
+	}
+
+
+## Rebuilds a character from saved data. Never fails hard: invalid parts are
+## repaired or skipped and reported in `warnings`.
+static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedStringArray) -> Character:
+	var character := Character.new(db, str(data.get("id", "")))
+	character.display_name = str(data.get("name", "Wanderer"))
+	character.classes.from_dict(_dict(data, "classes"), warnings)
+	if character.classes.active_class_id == &"":
+		warnings.append("no usable class in save; starting class restored")
+		character.classes.unlock(db.rules.starting_class_id)
+		character.classes.set_active(db.rules.starting_class_id)
+	character.mastery.from_dict(_dict(data, "mastery"), warnings)
+	var orphans := []
+	var items: Variant = data.get("inventory", [])
+	character.inventory.from_array(items if items is Array else [], warnings, orphans)
+	var previous: Variant = data.get("orphaned_items", [])
+	if previous is Array:
+		orphans.append_array(previous)
+	character.orphaned_items = orphans
+	character.equipment.from_dict(_dict(data, "loadouts"), warnings)
+	character.world.from_dict(_dict(data, "world"), warnings)
+	character.invalidate_stats()
+	return character
+
+
+static func _dict(data: Dictionary, key: String) -> Dictionary:
+	var value: Variant = data.get(key, {})
+	return value if value is Dictionary else {}
 
 
 ## Equipped piece count per set id (active loadout only).

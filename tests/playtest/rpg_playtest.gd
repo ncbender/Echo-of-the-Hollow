@@ -23,6 +23,8 @@ func _initialize() -> void:
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT))
 	session = SessionState.find(self)
+	# Separate test save: the player's real slot is never touched.
+	session.save_path = "user://test_saves/rpg_playtest.save.json"
 	session.set_character(CharacterFactory.create_new(session.database))
 	await _load_arena()
 	await _class_station_flow()
@@ -80,6 +82,7 @@ func _pickup_and_inventory_flow() -> void:
 	await _shot("r03_inventory")
 	await _equipment_flow()
 	await _legendary_flow()
+	await _save_load_flow()
 
 
 func _equipment_flow() -> void:
@@ -127,6 +130,38 @@ func _legendary_flow() -> void:
 	_check(shot_taken, "shockwave visual spawned")
 	_check((extra.get(&"hits_taken") as int) >= 1, "nearby dummy hit by the shockwave")
 	_check(bridge.effects.has_effect(&"echo_shockwave"), "legendary effect active")
+
+
+func _save_load_flow() -> void:
+	var character := session.character
+	var level_before := character.mastery.get_level(&"one_handed_sword")
+	for i in 3:
+		await _press(&"debug_add_mastery_xp")
+	_check(character.mastery.get_level(&"one_handed_sword") > level_before, "mastery raised via F3")
+	_check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "technique unlocked in combat")
+	await _press(&"debug_save")
+	_check(FileAccess.file_exists(session.save_path), "F6 wrote the test save")
+	var snapshot := character.to_dict()
+	var stats := character.get_stats()
+	# Change the live state after saving; loading must restore the snapshot.
+	character.discard_item(_instance_of(&"echo_blade"))
+	character.mastery.add_xp(&"two_handed_sword", 500)
+	await _press(&"debug_load")
+	await _ticks(10)
+	arena = current_scene as Node2D
+	player = arena.get_node("Player")
+	hud = arena.get_node("GameHud")
+	player.feed_input(f)
+	var loaded := session.character
+	_check(loaded != character, "new character object after load")
+	_check(loaded.to_dict() == snapshot, "loaded state equals the saved snapshot")
+	_check(loaded.get_stats() == stats, "stats rebuilt identically")
+	_check(loaded.inventory.count(&"echo_blade") == 1, "discarded blade is back")
+	_check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "technique active after load")
+	var bridge: PlayerProgressionBridge = player.get_node("ProgressionBridge")
+	_check(bridge.effects.has_effect(&"echo_shockwave"), "legendary effect reconstructed")
+	_check(player.combat.weapon.id == loaded.equipment.main_hand_family(), "weapon from loaded main hand")
+	await _shot("r06_after_load")
 
 
 func _instance_of(item_id: StringName) -> String:
