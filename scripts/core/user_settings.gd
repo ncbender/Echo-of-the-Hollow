@@ -34,6 +34,8 @@ var sfx_volume: float = DEFAULT_SFX_VOLUME
 var periodic_autosave: bool = true
 ## HUD hint "Saving... / Progress saved / Save failed".
 var show_save_indicator: bool = true
+## Accessibility: no UI fades/slides (UiTheme.motion_enabled).
+var reduce_motion: bool = false
 
 
 ## Loads `file_path`; missing or invalid entries fall back to the defaults.
@@ -54,6 +56,7 @@ static func load_from(file_path: String) -> UserSettings:
 		settings.sfx_volume = clampf(float(volume), 0.0, 1.0)
 	settings.periodic_autosave = bool(config.get_value(GAMEPLAY_SECTION, "periodic_autosave", true))
 	settings.show_save_indicator = bool(config.get_value(GAMEPLAY_SECTION, "show_save_indicator", true))
+	settings.reduce_motion = bool(config.get_value(SECTION, "reduce_motion", false))
 	return settings
 
 
@@ -81,6 +84,7 @@ func save() -> Error:
 	config.set_value(AUDIO_SECTION, "sfx_volume", sfx_volume)
 	config.set_value(GAMEPLAY_SECTION, "periodic_autosave", periodic_autosave)
 	config.set_value(GAMEPLAY_SECTION, "show_save_indicator", show_save_indicator)
+	config.set_value(SECTION, "reduce_motion", reduce_motion)
 	return config.save(path)
 
 
@@ -113,6 +117,12 @@ func set_show_save_indicator(enabled: bool) -> void:
 		changed.emit()
 
 
+func set_reduce_motion(enabled: bool) -> void:
+	if enabled != reduce_motion:
+		reduce_motion = enabled
+		changed.emit()
+
+
 func set_window_mode(mode: WindowMode) -> void:
 	if mode != window_mode:
 		window_mode = mode
@@ -136,6 +146,7 @@ func reset_to_defaults() -> void:
 func apply_to(window: Window) -> void:
 	window.content_scale_factor = ui_scale
 	CombatAudio.set_volume(sfx_volume)
+	UiTheme.motion_enabled = not reduce_motion
 	var fullscreen := window_mode == WindowMode.FULLSCREEN
 	if fullscreen and window.mode != Window.MODE_FULLSCREEN:
 		window.mode = Window.MODE_FULLSCREEN

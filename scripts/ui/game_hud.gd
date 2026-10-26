@@ -20,6 +20,8 @@ var save_indicator: SaveIndicator
 var dialogue_panel: DialoguePanel
 var restoration_panel: RestorationPanel
 var waystone_panel: WaystonePanel
+## Shared confirmation dialog (overwrite, discard, delete ...).
+var confirm_dialog: UiConfirmDialog
 ## Contextual tutorial hint (top centre).
 var hint_panel: PanelContainer
 var _hint_label: Label
@@ -89,6 +91,7 @@ func _ready() -> void:
 	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
 	restoration_panel.hud = self
 	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
+	confirm_dialog = _add_window(UiConfirmDialog.new()) as UiConfirmDialog
 	hint_panel = PanelContainer.new()
 	hint_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_panel.offset_top = UiTheme.SCREEN_MARGIN * 3

@@ -14,6 +14,7 @@ var _volume: HSlider
 var _volume_label: Label
 var _autosave: CheckButton
 var _indicator: CheckButton
+var _motion: CheckButton
 
 
 func _ready() -> void:
@@ -67,6 +68,13 @@ func _ready() -> void:
 	_indicator.text = "Show Save Indicator"
 	_indicator.toggled.connect(func(on: bool) -> void: settings.set_show_save_indicator(on))
 	body.add_child(_indicator)
+	body.add_child(UiTheme.label("Accessibility"))
+	_motion = CheckButton.new()
+	_motion.name = "ReduceMotion"
+	_motion.text = "Reduce Motion"
+	_motion.tooltip_text = "Windows and panels appear instantly instead of fading in."
+	_motion.toggled.connect(func(on: bool) -> void: settings.set_reduce_motion(on))
+	body.add_child(_motion)
 	var reset := Button.new()
 	reset.text = "Reset to defaults"
 	reset.pressed.connect(_on_reset)
@@ -97,6 +105,7 @@ func refresh() -> void:
 	_volume_label.text = "%d %%" % roundi(settings.sfx_volume * 100.0)
 	_autosave.set_pressed_no_signal(settings.periodic_autosave)
 	_indicator.set_pressed_no_signal(settings.show_save_indicator)
+	_motion.set_pressed_no_signal(settings.reduce_motion)
 	var window := get_window()
 	_info.text = "Window %d x %d px  -  UI canvas %d x %d  -  design 1920 x 1080\nSettings are stored per installation (%s), not in save games." % [
 		window.size.x, window.size.y, get_viewport_rect().size.x, get_viewport_rect().size.y,
