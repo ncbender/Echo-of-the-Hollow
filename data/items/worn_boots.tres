@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Mod_1"]
+script = ExtResource("2_mod")
+stat = &"armor"
+flat = 2
+percent = 0
+
+[resource]
+script = ExtResource("1_item")
+id = &"worn_boots"
+display_name = "Worn Boots"
+description = "Comfortable, if old."
+category = 1
+rarity = 0
+max_stack = 1
+slot_kind = 9
+base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_1")])

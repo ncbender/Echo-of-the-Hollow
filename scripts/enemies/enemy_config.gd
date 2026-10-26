@@ -23,6 +23,8 @@ extends Resource
 @export var despawn_delay: float = 0.8
 
 @export_group("Rewards")
+## Items dropped as pickups on death.
+@export var drops: Array[ItemCost] = []
 ## Weapon mastery XP for the killing blow's weapon family.
 @export var mastery_xp_reward: int = 20
 ## Class XP for the active class.

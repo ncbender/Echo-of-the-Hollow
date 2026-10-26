@@ -12,6 +12,7 @@ var display_name: String = "Wanderer"
 var database: GameDatabase
 var mastery: WeaponMastery
 var classes: CharacterClasses
+var inventory: Inventory
 
 var _stats: Dictionary = {}
 var _stats_dirty: bool = true
@@ -22,6 +23,7 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	id = character_id if character_id != "" else IdGenerator.new_id("chr")
 	mastery = WeaponMastery.new(db)
 	classes = CharacterClasses.new(db)
+	inventory = Inventory.new(db, db.rules.inventory_capacity)
 	# Method callables (not lambdas): they do not keep this RefCounted alive,
 	# so Character <-> sub-system signal links never form a reference cycle.
 	classes.leveled_up.connect(_on_class_leveled_up)
@@ -78,3 +80,8 @@ func _on_class_leveled_up(_class_id: StringName, _level: int) -> void:
 
 func _on_active_class_changed(_class_id: StringName) -> void:
 	invalidate_stats()
+
+
+## Destroys an item instance on purpose (player discards it).
+func discard_item(instance_id: String) -> bool:
+	return inventory.remove_instance(instance_id) != null

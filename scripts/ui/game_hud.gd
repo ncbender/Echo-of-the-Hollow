@@ -8,6 +8,7 @@ var toasts: ToastFeed
 var mastery_panel: MasteryPanel
 var class_info: ClassInfoPanel
 var class_panel: ClassPanel
+var inventory_panel: InventoryPanel
 
 var _root: Control
 var _prompt: Label
@@ -54,6 +55,7 @@ func _ready() -> void:
 	_root.add_child(_prompt)
 
 	class_panel = _add_window(ClassPanel.new()) as ClassPanel
+	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
 
 
 func setup(progression_bridge: PlayerProgressionBridge) -> void:
@@ -86,6 +88,16 @@ func open_class_panel(station: ClassStation) -> void:
 	class_panel.open(bridge.character, station)
 
 
+func toggle_inventory() -> void:
+	if bridge == null:
+		return
+	if inventory_panel.visible:
+		inventory_panel.hide()
+	else:
+		close_windows()
+		inventory_panel.open(bridge.character)
+
+
 func _add_window(window: Control) -> Control:
 	window.set_anchors_preset(Control.PRESET_CENTER)
 	window.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -102,6 +114,10 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"ui_inventory"):
+		toggle_inventory()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"ui_cancel") and is_window_open():
 		close_windows()
 		get_viewport().set_input_as_handled()

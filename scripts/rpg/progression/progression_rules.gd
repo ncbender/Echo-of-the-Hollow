@@ -23,6 +23,11 @@ extends Resource
 ## Class that a new character starts with (the prologue later replaces this choice).
 @export var starting_class_id: StringName = &"basic_adventurer"
 
+@export_group("Inventory")
+@export var inventory_capacity: int = 40
+## Items every new character starts with (ids from data/items).
+@export var starting_items: Array[ItemCost] = []
+
 @export_group("Class XP")
 ## Class XP for an accepted hit on a non-training target.
 @export var class_xp_per_hit: int = 1

@@ -26,6 +26,7 @@ func _run() -> void:
 	session.set_character(CharacterFactory.create_new(session.database))
 	await _load_arena()
 	await _class_station_flow()
+	await _pickup_and_inventory_flow()
 	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
 	var file := FileAccess.open(OUTPUT.path_join("rpg_playtest_log.txt"), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
@@ -63,6 +64,20 @@ func _class_station_flow() -> void:
 	await _shot("r02_warrior_active")
 	await _press(&"interact")
 	_check(not hud.class_panel.visible, "panel closed with G")
+
+
+func _pickup_and_inventory_flow() -> void:
+	var inventory := session.character.inventory
+	var before := inventory.used_slots()
+	for pickup_name in ["PickupMilitiaSword", "PickupOakShield", "PickupCopperRing"]:
+		var pickup := arena.get_node_or_null(pickup_name) as Node2D
+		if pickup != null:
+			await _walk_to(pickup.global_position)
+	_check(inventory.count(&"militia_sword") == 1 and inventory.count(&"oak_shield") == 1 and inventory.count(&"copper_ring") == 1, "three pickups collected")
+	_check(inventory.used_slots() == before + 3, "exactly three new slots used")
+	await _press(&"ui_inventory")
+	_check(hud.inventory_panel.visible, "inventory opened with I")
+	await _shot("r03_inventory")
 
 
 # --- helpers ---------------------------------------------------------------

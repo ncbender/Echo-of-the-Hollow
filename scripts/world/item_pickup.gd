@@ -1,0 +1,68 @@
+class_name ItemPickup
+extends Area2D
+## Item lying in the world. Touching it moves it into the toucher's character
+## inventory (via the Player's ProgressionBridge). If the inventory has no room
+## it stays on the ground - items are never destroyed by a failed pickup.
+
+signal picked_up(item_id: StringName, quantity: int)
+
+@export var item_id: StringName
+@export var quantity: int = 1
+
+var _taken: bool = false
+
+
+func _ready() -> void:
+	collision_layer = 0
+	collision_mask = 2   # player body
+	monitoring = true
+	monitorable = false
+	if get_child_count() == 0:
+		var shape := CollisionShape2D.new()
+		var circle := CircleShape2D.new()
+		circle.radius = 8.0
+		shape.shape = circle
+		add_child(shape)
+	body_entered.connect(_on_body_entered)
+
+
+## Tries to give the item to `player`. Returns true when it was picked up.
+func try_pick_up(player: Node) -> bool:
+	if _taken:
+		return false
+	var bridge := player.get_node_or_null("ProgressionBridge") as PlayerProgressionBridge
+	if bridge == null or not bridge.is_bound():
+		return false
+	if bridge.character.inventory.add_item(item_id, quantity).is_empty():
+		bridge.message.emit("Inventory full - %s stays on the ground" % _name())
+		return false
+	_taken = true
+	bridge.message.emit("Picked up %s x%d" % [_name(), quantity])
+	picked_up.emit(item_id, quantity)
+	queue_free()
+	return true
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if body is Player:
+		try_pick_up(body)
+
+
+func _name() -> String:
+	var definition := GameDatabase.get_default().get_item(item_id)
+	return definition.display_name if definition != null else String(item_id)
+
+
+func _process(_delta: float) -> void:
+	queue_redraw()
+
+
+func _draw() -> void:
+	var definition := GameDatabase.get_default().get_item(item_id)
+	var color := definition.rarity_color() if definition != null else Color.WHITE
+	var bob := sin(Time.get_ticks_msec() * 0.005) * 1.5
+	draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.45))
+	draw_circle(Vector2.ZERO, 5.0, Color(0, 0, 0, 0.3))
+	draw_set_transform(Vector2(0, bob))
+	draw_colored_polygon(PackedVector2Array([Vector2(0, -6), Vector2(4, -1), Vector2(0, 4), Vector2(-4, -1)]), color)
+	draw_polyline(PackedVector2Array([Vector2(0, -6), Vector2(4, -1), Vector2(0, 4), Vector2(-4, -1), Vector2(0, -6)]), Color(1, 1, 1, 0.7), 1.0)

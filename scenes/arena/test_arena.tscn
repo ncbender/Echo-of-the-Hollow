@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
 [ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
+[ext_resource type="Script" path="res://scripts/world/item_pickup.gd" id="9_pickup"]
 
 [node name="TestArena" type="Node2D"]
 y_sort_enabled = true
@@ -70,6 +71,21 @@ position = Vector2(-90, 10)
 
 [node name="ClassStation" parent="." instance=ExtResource("8_station")]
 position = Vector2(-40, -110)
+
+[node name="PickupMilitiaSword" type="Area2D" parent="."]
+position = Vector2(-120, -40)
+script = ExtResource("9_pickup")
+item_id = &"militia_sword"
+
+[node name="PickupOakShield" type="Area2D" parent="."]
+position = Vector2(-100, -40)
+script = ExtResource("9_pickup")
+item_id = &"oak_shield"
+
+[node name="PickupCopperRing" type="Area2D" parent="."]
+position = Vector2(-80, -40)
+script = ExtResource("9_pickup")
+item_id = &"copper_ring"
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true

@@ -1,6 +1,28 @@
 [gd_resource type="Resource" script_class="ProgressionRules" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/progression/progression_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Start_sword"]
+script = ExtResource("2_cost")
+item_id = &"iron_sword"
+
+[sub_resource type="Resource" id="Start_greatsword"]
+script = ExtResource("2_cost")
+item_id = &"steel_greatsword"
+
+[sub_resource type="Resource" id="Start_cap"]
+script = ExtResource("2_cost")
+item_id = &"leather_cap"
+
+[sub_resource type="Resource" id="Start_coat"]
+script = ExtResource("2_cost")
+item_id = &"wanderer_coat"
+
+[sub_resource type="Resource" id="Start_potions"]
+script = ExtResource("2_cost")
+item_id = &"minor_potion"
+quantity = 3
 
 [resource]
 script = ExtResource("1_rules")
@@ -9,4 +31,7 @@ finisher_bonus_xp = 6
 full_charge_bonus_xp = 4
 training_xp_multiplier = 0.5
 training_xp_cap_per_target = 60
+starting_class_id = &"basic_adventurer"
+inventory_capacity = 40
+starting_items = Array[ExtResource("2_cost")]([SubResource("Start_sword"), SubResource("Start_greatsword"), SubResource("Start_cap"), SubResource("Start_coat"), SubResource("Start_potions")])
 class_xp_per_hit = 1

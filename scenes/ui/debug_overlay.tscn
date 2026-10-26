@@ -24,7 +24,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 6.0
-offset_top = -38.0
+offset_top = -48.0
 offset_right = 634.0
 offset_bottom = -4.0
 grow_vertical = 0
@@ -35,4 +35,5 @@ theme_override_constants/outline_size = 3
 theme_override_constants/line_spacing = -2
 theme_override_font_sizes/font_size = 8
 text = "WASD move  |  Mouse aim  |  LMB light  |  hold/release RMB heavy  |  Space dash  |  1/2 weapon
-F1 hitboxes  |  F2 spawn enemy  |  F3 +100 mastery XP  |  F5 reset arena"
+F1 hitboxes  |  F2 spawn enemy  |  F3 +mastery XP  |  F5 reset  |  F7 item kit  |  F8 +class XP
+G interact  |  I inventory"
