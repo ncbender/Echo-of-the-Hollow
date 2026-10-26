@@ -6,6 +6,8 @@ extends Node
 ## Cursor closer to the character than this (px) gives no aim; the character keeps
 ## its last valid facing (attacks and dash).
 const AIM_DEADZONE := 4.0
+## Q, E, R, F: the four active skill slots.
+const ABILITY_ACTIONS: Array[StringName] = [&"ability_1", &"ability_2", &"ability_3", &"ability_4"]
 
 var _pending := InputFrame.new()
 
@@ -25,6 +27,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_pending.weapon_slot = 0
 	elif event.is_action_pressed(&"weapon_slot_2"):
 		_pending.weapon_slot = 1
+	else:
+		for index in ABILITY_ACTIONS.size():
+			if event.is_action_pressed(ABILITY_ACTIONS[index]):
+				_pending.ability_slot = index
 
 
 ## Returns this tick's intent for a character at `origin`, aiming at the mouse.
@@ -39,5 +45,6 @@ func poll(character: Node2D) -> InputFrame:
 	frame.heavy_released = _pending.heavy_released
 	frame.dash_pressed = _pending.dash_pressed
 	frame.weapon_slot = _pending.weapon_slot
+	frame.ability_slot = _pending.ability_slot
 	_pending.clear_edges()
 	return frame

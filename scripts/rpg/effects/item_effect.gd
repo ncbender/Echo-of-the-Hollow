@@ -11,6 +11,9 @@ extends Resource
 
 @export var effect_id: StringName
 @export_multiline var description: String
+## Hit sources (HitData.Source bits) that reach on_hit_landed. Default: weapon hits
+## only, so skills, status ticks and triggered hits never re-trigger weapon effects.
+@export_flags("Direct", "Skill", "Triggered", "Status") var hit_sources: int = 1
 
 
 func get_attack_modifiers() -> Array[AttackModifier]:
@@ -23,7 +26,8 @@ func get_attack_modifiers_for(_runner: ItemEffectRunner, _source_key: String) ->
 	return get_attack_modifiers()
 
 
-## `source_key` identifies the owning item/set
-## so runtime state of two sources never mixes.
+## Called once per dispatched hit whose source is in `hit_sources`.
+## `source_key` identifies the owning item/set/talent so runtime state of two
+## sources never mixes.
 func on_hit_landed(_hit: HitData, _runner: ItemEffectRunner, _source_key: String) -> void:
 	pass

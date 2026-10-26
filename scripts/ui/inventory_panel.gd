@@ -10,6 +10,9 @@ extends UiWindow
 const COLUMNS := 5
 const DETAILS_WIDTH := 330
 const EQUIPMENT_WIDTH := 360
+## Always listed; other stats only while non-zero.
+const CORE_STATS: Array[StringName] = [Stats.MAX_HEALTH, Stats.ARMOR, Stats.PHYSICAL_DAMAGE, Stats.CRIT_CHANCE,
+	Stats.ATTACK_SPEED, Stats.POISE_DAMAGE]
 
 var character: Character
 
@@ -146,6 +149,8 @@ func _rebuild_equipment() -> void:
 	var stats := character.get_stats()
 	var lines: PackedStringArray = []
 	for stat in Stats.ALL:
+		if stats[stat] == 0.0 and not stat in CORE_STATS:
+			continue   # specialised stats only when something grants them
 		lines.append("%s: %s" % [Stats.display_name(stat), _format(stats[stat])])
 	var bonuses := character.active_set_bonuses()
 	for bonus in bonuses:

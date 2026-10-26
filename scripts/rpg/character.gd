@@ -15,10 +15,15 @@ var classes: CharacterClasses
 var inventory: Inventory
 var equipment: CharacterEquipment
 var world: WorldState
+## Talents, skill slots, mods and presets per class (docs/TALENT_SYSTEM.md).
+var builds: ClassBuilds
 ## Raw saved items that could not be restored (e.g. definition removed from the
 ## data). Kept and written back on save so no player property is ever deleted.
 var orphaned_items: Array = []
 
+## Runtime stat sources (skill buffs, class states): key -> Array[StatModifier].
+## Never saved; the class runtime re-creates them.
+var _runtime_modifiers: Dictionary = {}
 var _stats: Dictionary = {}
 var _stats_dirty: bool = true
 
@@ -31,12 +36,14 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	inventory = Inventory.new(db, db.rules.inventory_capacity)
 	equipment = CharacterEquipment.new(db, inventory, classes)
 	world = WorldState.new()
+	builds = ClassBuilds.new(db, classes)
 	# Method callables (not lambdas): they do not keep this RefCounted alive,
 	# so Character <-> sub-system signal links never form a reference cycle.
 	classes.leveled_up.connect(_on_class_leveled_up)
 	classes.active_class_changed.connect(_on_active_class_changed)
 	classes.class_unlocked.connect(_on_class_unlocked)
 	equipment.changed.connect(invalidate_stats)
+	builds.changed.connect(_on_build_changed)
 
 
 ## Class XP for the active class.
@@ -81,6 +88,22 @@ func notify_item_changed(instance_id: String) -> void:
 	inventory.changed.emit()
 
 
+## Adds or replaces a temporary stat source (buffs). Stats are re-resolved from
+## scratch, so a buff can never be applied twice or linger after removal.
+func set_runtime_modifiers(key: StringName, modifiers: Array[StatModifier]) -> void:
+	_runtime_modifiers[key] = modifiers.duplicate()
+	invalidate_stats()
+
+
+func clear_runtime_modifiers(key: StringName) -> void:
+	if _runtime_modifiers.erase(key):
+		invalidate_stats()
+
+
+func has_runtime_modifiers(key: StringName) -> bool:
+	return _runtime_modifiers.has(key)
+
+
 func get_stat(stat: StringName) -> float:
 	return get_stats().get(stat, 0.0)
 
@@ -108,6 +131,7 @@ func to_dict() -> Dictionary:
 		"inventory": inventory.to_array(),
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
+		"class_builds": builds.to_dict(),
 		"world": world.to_dict(),
 	}
 
@@ -131,6 +155,10 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 		orphans.append_array(previous)
 	character.orphaned_items = orphans
 	character.equipment.from_dict(_dict(data, "loadouts"), warnings)
+	character.builds.from_dict(_dict(data, "class_builds"), warnings)
+	for class_id in character.classes.unlocked_class_ids():
+		if character.builds.has_build(class_id):
+			warnings.append_array(TalentService.sanitize_build(character, class_id))
 	character.world.from_dict(_dict(data, "world"), warnings)
 	character.refresh_inventory_capacity()
 	character.invalidate_stats()
@@ -177,11 +205,15 @@ func _stat_sources() -> Array:
 			sources.append(ItemStats.modifiers(item, definition, database))
 	for bonus in active_set_bonuses():
 		sources.append(bonus.stat_modifiers)
+	sources.append(TalentService.stat_modifiers(self, classes.active_class_id))
+	for modifiers: Array in _runtime_modifiers.values():
+		sources.append(modifiers)
 	return sources
 
 
-func _on_class_leveled_up(_class_id: StringName, _level: int) -> void:
-	invalidate_stats()
+func _on_class_leveled_up(class_id: StringName, _level: int) -> void:
+	SkillBook.auto_fill(self, class_id)
+	builds.notify(class_id)   # re-resolves stats
 
 
 func _on_active_class_changed(_class_id: StringName) -> void:
@@ -190,5 +222,10 @@ func _on_active_class_changed(_class_id: StringName) -> void:
 
 
 func _on_class_unlocked(class_id: StringName) -> void:
+	SkillBook.auto_fill(self, class_id)
 	if classes.active_class_id != &"" and class_id != classes.active_class_id:
 		equipment.init_loadout_from(class_id, classes.active_class_id)
+
+
+func _on_build_changed(_class_id: StringName) -> void:
+	invalidate_stats()

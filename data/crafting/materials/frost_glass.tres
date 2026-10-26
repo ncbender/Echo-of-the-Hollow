@@ -13,14 +13,19 @@ script = ExtResource("1_t2i12")
 stat = &"knockback_power"
 flat = 10.0
 
+[sub_resource type="Resource" id="Resource_chill"]
+script = ExtResource("1_t2i12")
+stat = &"chill_chance"
+flat = 20.0
+
 [resource]
 script = ExtResource("2_keice")
 id = &"frost_glass"
 display_name = "Frost Glass"
-description = "Cold control: poise and knockback-leaning resonance."
+description = "Cold control: poise and knockback-leaning resonance; weapon hits can chill enemies."
 item_id = &"frost_glass"
 allowed_slot_kinds = Array[int]([10, 11])
-imprint_modifiers = Array[ExtResource("1_t2i12")]([SubResource("Resource_j2p52"), SubResource("Resource_7hcb8")])
+imprint_modifiers = Array[ExtResource("1_t2i12")]([SubResource("Resource_j2p52"), SubResource("Resource_7hcb8"), SubResource("Resource_chill")])
 preferred_tags = Array[StringName]([&"control", &"poise", &"defense"])
 tag_weight_multipliers = Dictionary[StringName, float]({
 &"control": 3.0,

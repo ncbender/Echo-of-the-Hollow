@@ -13,14 +13,19 @@ script = ExtResource("1_8ddxm")
 stat = &"life_on_hit"
 flat = 1.0
 
+[sub_resource type="Resource" id="Resource_bleed"]
+script = ExtResource("1_8ddxm")
+stat = &"bleed_chance"
+flat = 15.0
+
 [resource]
 script = ExtResource("2_c1n0y")
 id = &"blood_steel"
 display_name = "Bloodsteel"
-description = "Physical, bleeding-leaning resonance."
+description = "Physical, bleeding-leaning resonance: weapon hits can make enemies bleed."
 item_id = &"blood_steel_ingot"
 allowed_slot_kinds = Array[int]([10, 11])
-imprint_modifiers = Array[ExtResource("1_8ddxm")]([SubResource("Resource_a3avm"), SubResource("Resource_wsmwg")])
+imprint_modifiers = Array[ExtResource("1_8ddxm")]([SubResource("Resource_a3avm"), SubResource("Resource_wsmwg"), SubResource("Resource_bleed")])
 preferred_tags = Array[StringName]([&"blood", &"physical", &"crit"])
 tag_weight_multipliers = Dictionary[StringName, float]({
 &"blood": 3.0,

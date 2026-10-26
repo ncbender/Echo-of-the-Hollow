@@ -6,7 +6,8 @@ extends Node
 ##  * XP from combat events (CombatRewardTracker)
 ##  * mastery techniques -> combo tree unlocks
 ##  * resolved character stats -> player (max health, armor, outgoing hit modifier)
-##  * runtime class resource (rage ...)
+##  * class runtime: resource (rage, mana, focus), skills on Q/E/R/F, buffs
+##  * talents: stat sources (Character) and combat effects (ItemEffectRunner)
 ## All connections to the long-lived Character are tracked and removed in
 ## unbind(), so reloading a scene never leaves duplicate registrations behind.
 
@@ -16,10 +17,15 @@ var player: Player
 var character: Character
 var rewards: CombatRewardTracker
 var stat_modifier := CharacterStatModifier.new()
-## Runtime pool of the active class's resource (null if the class has none).
-var resource_pool: ClassResourcePool
+## Combat-time state of the active class (resource, skills, cooldowns, buffs).
+var class_runtime := ClassRuntime.new()
+## Runtime pool of the active class.s resource (null if the class has none).
+var resource_pool: ClassResourcePool:
+	get: return class_runtime.pool
 ## Special item and set effects of the active loadout.
 var effects := ItemEffectRunner.new()
+## Rolls status chances of weapon hits (Bleed / Chill Chance stats); tests may seed it.
+var rng := RandomNumberGenerator.new()
 ## Weapon family waiting to be applied (combat must be idle to switch).
 var _pending_weapon: WeaponFamily
 
@@ -42,15 +48,23 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(character.classes.leveled_up, _on_class_leveled_up)
 	_track(character.classes.class_unlocked, _on_class_unlocked)
 	_track(player.combat.hit_landed, _on_player_hit_landed)
-	_track(player.hurtbox.hit_received, _on_player_hit_taken)
+	_track(player.hurtbox.hit_received, class_runtime.on_hit_taken)
+	_track(character.builds.changed, _on_build_changed)
 	_track(character.equipment.changed, sync_weapon)
 	_track(character.equipment.changed, rebuild_effects)
 	_track(player.combat.hit_landed, effects.on_hit_landed)
+	_track(effects.hit_dispatched, _on_hit_dispatched)
+	_track(effects.hit_dispatched, class_runtime.on_hit_dispatched)
+	_track(class_runtime.cast_failed, _on_cast_failed)
+	effects.resource_gainer = class_runtime.gain
+	effects.status_applier = apply_status
+	effects.cooldown_reducer = class_runtime.reduce_cooldown
 	effects.player = player
 	player.weapon_slot_handler = quick_equip_weapon
+	player.ability_handler = class_runtime.try_cast
+	class_runtime.setup(character, player, effects, apply_status)
 	refresh_unlocks()
 	apply_stats()
-	_rebuild_resource_pool()
 	sync_weapon()
 	rebuild_effects()
 
@@ -64,9 +78,12 @@ func unbind() -> void:
 	if rewards != null:
 		rewards.detach()
 		rewards = null
+	if character != null:
+		class_runtime.clear_buffs()
 	if player != null and is_instance_valid(player):
 		player.combat.modifiers.erase(stat_modifier)
 		player.weapon_slot_handler = Callable()
+		player.ability_handler = Callable()
 		_uninstall_modifiers()
 
 
@@ -89,13 +106,18 @@ func apply_stats() -> void:
 	player.health.set_max_health(stats.get(Stats.MAX_HEALTH, 100.0))
 	var armor := maxf(0.0, stats.get(Stats.ARMOR, 0.0))
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
+	var rules := character.database.rules
+	player.combat.attack_speed = clampf(1.0 + stats.get(Stats.ATTACK_SPEED, 0.0) / 100.0,
+			rules.attack_speed_min, rules.attack_speed_max)
+	if class_runtime.character != null:
+		class_runtime.refresh_stats()
 
 
 ## Re-collects item/set effects from the active loadout and swaps the combo
 ## modifiers on the player (never adds twice, never leaves stale ones).
 func rebuild_effects() -> void:
 	_uninstall_modifiers()
-	effects.rebuild(character)
+	effects.rebuild(character, TalentService.effect_entries(character, character.classes.active_class_id))
 	for modifier in effects.attack_modifiers:
 		player.combat.modifiers.append(modifier)
 		_installed_modifiers.append(modifier)
@@ -145,8 +167,7 @@ func _physics_process(delta: float) -> void:
 	effects.step(delta)
 	if _pending_weapon != null:
 		_apply_pending_weapon()
-	if resource_pool != null:
-		resource_pool.step(delta)
+	class_runtime.step(delta)
 
 
 func _apply_pending_weapon() -> void:
@@ -154,11 +175,6 @@ func _apply_pending_weapon() -> void:
 		return
 	if player.combat.weapon == _pending_weapon or player.set_weapon_family(_pending_weapon):
 		_pending_weapon = null
-
-
-func _rebuild_resource_pool() -> void:
-	var definition := character.classes.get_active_definition()
-	resource_pool = ClassResourcePool.new(definition.resource) if definition != null and definition.resource != null else null
 
 
 func _track(sig: Signal, callable: Callable) -> void:
@@ -169,11 +185,12 @@ func _track(sig: Signal, callable: Callable) -> void:
 
 func _on_player_hit_landed(hit: HitData) -> void:
 	var stats := character.get_stats()
-	if resource_pool != null:
-		resource_pool.gain(resource_pool.definition.gain_per_hit_dealt * _resource_gain_factor())
 	var life: float = stats.get(Stats.LIFE_ON_HIT, 0.0)
 	if life > 0.0:
 		player.health.heal(life)
+	_roll_status(hit, Stats.BLEED_CHANCE, character.database.rules.bleed_status_id,
+			1.0 + stats.get(Stats.BLEED_DAMAGE, 0.0) / 100.0)
+	_roll_status(hit, Stats.CHILL_CHANCE, character.database.rules.chill_status_id, 1.0)
 	_grant_item_xp(hit)
 
 
@@ -189,15 +206,6 @@ func _grant_item_xp(hit: HitData) -> void:
 		message.emit("%s is ready to evolve (Resonance Forge)" % definition.display_name)
 
 
-func _on_player_hit_taken(_hit: HitData) -> void:
-	if resource_pool != null:
-		resource_pool.gain(resource_pool.definition.gain_per_hit_taken * _resource_gain_factor())
-
-
-func _resource_gain_factor() -> float:
-	return 1.0 + character.get_stat(Stats.RESOURCE_GAIN) / 100.0
-
-
 func _on_mastery_leveled_up(family_id: StringName, level: int) -> void:
 	message.emit("%s mastery reached level %d" % [_family_name(family_id), level])
 
@@ -209,7 +217,7 @@ func _on_mastery_unlocked(family_id: StringName, unlock: MasteryUnlock) -> void:
 
 
 func _on_active_class_changed(class_id: StringName) -> void:
-	_rebuild_resource_pool()
+	class_runtime.rebuild()
 	message.emit("Class changed: %s" % _class_name(class_id))
 
 
@@ -233,3 +241,38 @@ func _class_name(class_id: StringName) -> String:
 
 func _exit_tree() -> void:
 	unbind()
+
+
+## Applies status `status_id` to `target`, credited to the player: damage ticks
+## are dispatched like any other hit of the character (source STATUS).
+func apply_status(target: Node, status_id: StringName, power: float = 1.0, stacks: int = 1) -> bool:
+	var definition: StatusEffectDefinition = character.database.statuses.get(status_id)
+	var component := StatusComponent.of(target)
+	if definition == null or component == null:
+		return false
+	return component.apply(definition, power, player, effects.dispatch_hit, stacks)
+
+
+func _roll_status(hit: HitData, chance_stat: StringName, status_id: StringName, power: float) -> void:
+	var chance: float = character.get_stat(chance_stat)
+	if chance > 0.0 and status_id != &"" and rng.randf() * 100.0 < chance:
+		apply_status(hit.target, status_id, power)
+
+
+## Every hit the character caused (weapon, skill, status tick, triggered).
+## Weapon kills are rewarded by CombatRewardTracker; kills by skills and
+## statuses are credited here, once per target.
+func _on_hit_dispatched(hit: HitData) -> void:
+	if not hit.is_direct() and hit.killed and rewards != null:
+		rewards.reward_kill(hit)
+
+
+## Talents, slots or mods changed: talent effects may differ (stats re-resolve
+## through Character.stats_changed on their own).
+func _on_build_changed(class_id: StringName) -> void:
+	if class_id == character.classes.active_class_id:
+		rebuild_effects()
+
+
+func _on_cast_failed(_skill_id: StringName, reason: String) -> void:
+	message.emit(reason)

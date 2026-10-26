@@ -23,6 +23,12 @@ var use_external_input: bool = false
 var aim_direction: Vector2 = Vector2.RIGHT
 ## Optional override for weapon slot keys (1/2). Receives the slot index.
 var weapon_slot_handler: Callable
+## Active skills (Q/E/R/F): receives the slot index, returns true when a skill
+## was cast (set by the progression bridge; the player knows no skills itself).
+var ability_handler: Callable
+## Remaining skill cast lock: no attacks or other skills meanwhile (see begin_skill).
+var skill_lock_left: float = 0.0
+var skill_move_multiplier: float = 1.0
 ## Remaining local hitstop; while > 0 this character is frozen (others keep running).
 var hitstop_left: float = 0.0
 ## Multiplier for incoming damage (armor etc.), set by the progression bridge.
@@ -31,6 +37,9 @@ var incoming_damage_multiplier: float = 1.0
 var _external_frame := InputFrame.new()
 var _locomotion_velocity: Vector2 = Vector2.ZERO
 var _dash_buffer: InputBuffer
+var _ability_buffer: InputBuffer
+var _motion_velocity: Vector2 = Vector2.ZERO
+var _motion_left: float = 0.0
 var knockback := KnockbackMotion.new()
 var _spawn_position: Vector2
 var _respawn_left: float = 0.0
@@ -46,6 +55,7 @@ var _respawn_left: float = 0.0
 
 func _ready() -> void:
 	_dash_buffer = InputBuffer.new(input_buffer_time)
+	_ability_buffer = InputBuffer.new(input_buffer_time)
 	knockback.deceleration = knockback_decay
 	combat.input_buffer_time = input_buffer_time
 	combat.buffer.window = input_buffer_time
@@ -115,24 +125,34 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 	reaction.step(delta)
 	dash.step(delta)
 	_dash_buffer.step(delta)
+	skill_lock_left = maxf(0.0, skill_lock_left - delta)
 	if frame.dash_pressed:
 		_dash_buffer.push(DASH_BUFFER_ACTION)
 	if _dash_buffer.has(DASH_BUFFER_ACTION) and dash.can_dash() and combat.can_dash_cancel() \
-			and not reaction.blocks_dash():
+			and not reaction.blocks_dash() and not is_in_skill_motion():
 		_dash_buffer.clear()
 		combat.cancel(&"dash")
+		skill_lock_left = 0.0   # a dash ends the cast lock (the skill already happened)
 		_start_dash()
 
-	combat.step(delta, frame, aim_direction, dash.is_dashing() or reaction.blocks_actions())
+	_step_abilities(frame, delta)
+	combat.step(delta, frame, aim_direction, dash.is_dashing() or reaction.blocks_actions() \
+			or skill_lock_left > 0.0 or is_in_skill_motion())
 
 	if dash.is_dashing():
 		velocity = dash.get_velocity()
 		# Leave the dash at running speed instead of ramping up from zero.
 		_locomotion_velocity = movement.full_speed_velocity(dash.direction)
+	elif is_in_skill_motion():
+		_motion_left -= delta
+		velocity = _motion_velocity
+		_locomotion_velocity = Vector2.ZERO
 	else:
 		var move_input := Vector2.ZERO if reaction.blocks_movement() else frame.move
-		_locomotion_velocity = movement.compute_velocity(
-				_locomotion_velocity, move_input, combat.get_move_multiplier(), delta)
+		var multiplier := combat.get_move_multiplier()
+		if skill_lock_left > 0.0:
+			multiplier = minf(multiplier, skill_move_multiplier)
+		_locomotion_velocity = movement.compute_velocity(_locomotion_velocity, move_input, multiplier, delta)
 		velocity = _locomotion_velocity + combat.take_lunge_velocity(delta)
 	velocity += knockback.step(delta)
 	velocity = BodyContact.strip_push(self, velocity, delta)
@@ -144,7 +164,54 @@ func _step_frozen(frame: InputFrame, delta: float) -> void:
 	combat.record_inputs(frame)
 	if frame.dash_pressed:
 		_dash_buffer.push(DASH_BUFFER_ACTION)
+	if frame.ability_slot >= 0:
+		_ability_buffer.push(StringName(str(frame.ability_slot)))
 	velocity = Vector2.ZERO
+
+
+## Skill inputs share the 120 ms buffer rule of attacks and dash. The handler
+## (class runtime) decides whether the skill can be cast; the player only asks
+## whether an action may start now.
+func _step_abilities(frame: InputFrame, delta: float) -> void:
+	_ability_buffer.step(delta)
+	if frame.ability_slot >= 0:
+		_ability_buffer.push(StringName(str(frame.ability_slot)))
+	var buffered := _ability_buffer.peek()
+	if buffered == &"" or not ability_handler.is_valid() or not can_start_skill():
+		return
+	if ability_handler.call(int(String(buffered))):
+		_ability_buffer.clear()
+
+
+## A skill may start when an attack could be dash-cancelled right now (same
+## cancel rules), outside dashes, skill motions, cast locks and hit lockouts.
+func can_start_skill() -> bool:
+	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
+			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel()
+
+
+## Starts a skill action: cancels the running attack/charge (like a dash cancel)
+## and locks attacks and skills for `lock` seconds at `move_multiplier` speed.
+func begin_skill(lock: float, move_multiplier: float) -> void:
+	combat.cancel(&"skill")
+	skill_lock_left = maxf(0.0, lock)
+	skill_move_multiplier = move_multiplier
+
+
+## Skill movement (Blade Rush, Shadowstep ...): fixed velocity for `duration`,
+## blocked by walls and bodies like walking. Separate from the dash: no dash
+## charges, no dash iFrames, no dash cancel while it runs.
+func start_skill_motion(motion_velocity: Vector2, duration: float) -> void:
+	_motion_velocity = motion_velocity
+	_motion_left = duration
+
+
+func stop_skill_motion() -> void:
+	_motion_left = 0.0
+
+
+func is_in_skill_motion() -> bool:
+	return _motion_left > 0.0
 
 
 ## Design rule (Combat Polish 0.2): the dash always goes where the character faces,
@@ -163,11 +230,16 @@ func _on_hit_received(hit: HitData) -> void:
 	if health.is_dead():
 		return
 	var type := reaction.apply(hit, combat, dash)
+	if type >= HitReaction.Type.INTERRUPT:
+		skill_lock_left = 0.0
+		stop_skill_motion()
 	knockback.start(hit.knockback * reaction.knockback_multiplier(type))
 
 
 func _on_died() -> void:
 	combat.cancel(&"death")
+	stop_skill_motion()
+	skill_lock_left = 0.0
 	_respawn_left = respawn_delay
 
 

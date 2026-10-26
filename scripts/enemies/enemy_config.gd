@@ -22,6 +22,13 @@ extends Resource
 ## Seconds the corpse stays before it is removed.
 @export var despawn_delay: float = 0.8
 
+@export_group("Statuses")
+## Status id -> resistance 0..1 (1 = immune), e.g. {&"bleeding": 0.5}. Shortens the
+## duration and weakens the power of statuses applied to this enemy.
+@export var status_resistances: Dictionary[StringName, float] = {}
+## Largest total locomotion slow (chill ...) this enemy accepts. Bosses use a low cap.
+@export_range(0.0, 0.9) var max_slow: float = 0.6
+
 @export_group("Rewards")
 ## Items dropped as pickups on death.
 @export var drops: Array[ItemCost] = []

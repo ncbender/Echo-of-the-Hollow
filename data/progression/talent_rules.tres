@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TalentRules" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+tier_points = PackedInt32Array(0, 5, 10, 15, 20, 25, 30)
+first_point_level = 10
+skill_slots = 4
+preset_slots = 5
+respec_currency_item = &"gold_coin"
+respec_base_cost = 10
+respec_cost_per_level = 2
+first_respec_free = true

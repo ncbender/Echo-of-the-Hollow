@@ -78,6 +78,22 @@ func _on_hit_landed(hit: HitData) -> void:
 			rewarded.emit(&"kill_class", class_xp)
 
 
+## Kill by a skill or a status tick (no weapon swing): class XP of the kill
+## reward, once per target; no weapon mastery (no weapon was used).
+func reward_kill(hit: HitData) -> void:
+	var target := hit.target
+	if target == null or not is_instance_valid(target) or target.is_in_group(&"training_target"):
+		return
+	var target_id := target.get_instance_id()
+	if _killed.has(target_id) or not _is_dead(target) or not target.has_method(&"get_kill_reward"):
+		return
+	_killed[target_id] = true
+	var class_xp: int = target.call(&"get_kill_reward").get("class_xp", 0)
+	if class_xp > 0:
+		character.add_class_xp(class_xp)
+		rewarded.emit(&"kill_class", class_xp)
+
+
 func _is_dead(target: Node) -> bool:
 	var health := target.get_node_or_null("HealthComponent") as HealthComponent
 	return health != null and health.is_dead()

@@ -19,3 +19,10 @@ func modify_hit(_hit: HitData) -> void:
 ## Must not modify the AttackDefinition itself.
 func modify_reach(_attack: AttackDefinition, reach: float) -> float:
 	return reach
+
+
+## Whether skill hits (HitData.Source.SKILL) pass through this modifier too.
+## Default false: weapon-specific effects (finisher runes, combo uniques) never
+## touch skills; character stats and talents opt in.
+func applies_to_skill_hits() -> bool:
+	return false

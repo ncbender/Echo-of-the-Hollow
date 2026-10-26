@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/status_effect_definition.gd" id="1_status"]
+
+[resource]
+script = ExtResource("1_status")
+id = &"bleeding"
+display_name = "Bleeding"
+description = "Takes physical damage over time. Stacks up to 5 times; every new stack renews the duration."
+duration = 4.0
+max_stacks = 5
+stack_rule = 1
+damage_per_second = 3.0
+tick_interval = 0.5
+damage_type = &"bleed"
+color = Color(0.88, 0.25, 0.31, 1)

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffectDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/status_effect_definition.gd" id="1_status"]
+
+[resource]
+script = ExtResource("1_status")
+id = &"chill"
+display_name = "Chill"
+description = "Moves 15% slower per stack (up to 3 stacks, 45%). Bosses accept less."
+duration = 2.5
+max_stacks = 3
+stack_rule = 1
+slow_per_stack = 0.15
+max_slow = 0.45
+damage_type = &"frost"
+color = Color(0.66, 0.9, 0.94, 1)

@@ -28,11 +28,15 @@ var _attacks_started: int = 0
 @onready var combat: CombatComponent = $CombatComponent
 @onready var health: HealthComponent = $HealthComponent
 @onready var hurtbox: Hurtbox = $Hurtbox
+var status: StatusComponent
 
 
 func _ready() -> void:
 	if config == null:
 		config = EnemyConfig.new()
+	status = StatusComponent.of(self, true)
+	status.resistances = config.status_resistances
+	status.max_slow_cap = config.max_slow
 	knockback.deceleration = config.knockback_decay
 	combat.set_weapon(attacks)
 	combat.attack_finished.connect(func(_attack: AttackDefinition) -> void: _cooldown = config.attack_cooldown)
@@ -120,7 +124,7 @@ func _move(to_target: Vector2, delta: float) -> void:
 	if knocked:
 		desired = knockback.step(delta)   # own steps/lunge pause, so the push distance is exact
 	elif state == State.CHASE and distance > config.stop_distance and distance < config.aggro_range:
-		desired = to_target.normalized() * config.move_speed
+		desired = to_target.normalized() * config.move_speed * status.move_multiplier()   # chill: own locomotion only
 	elif combat.state == CombatComponent.State.ATTACKING:
 		desired = combat.take_lunge_velocity(delta)
 	velocity = BodyContact.strip_push(self, desired, delta)

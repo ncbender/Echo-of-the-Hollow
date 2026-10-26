@@ -31,6 +31,12 @@ signal weapon_changed(weapon: WeaponFamily)
 @export var hitbox: AttackHitbox
 @export var input_buffer_time: float = 0.12
 @export var modifiers: Array[AttackModifier] = []
+## Attack speed multiplier (1 = data timings). Set by the owner (player: resolved
+## Attack Speed stat, clamped by ProgressionRules). Taken over when an attack
+## starts and scaled per attack by AttackDefinition.attack_speed_scaling; it
+## shortens startup/active/recovery and chain_delay and spreads the lunge over the
+## shorter time. Heavy charge thresholds, combo windows and dashes never scale.
+var attack_speed: float = 1.0
 
 var state: State = State.IDLE
 var phase: Phase = Phase.NONE
@@ -51,6 +57,8 @@ var buffer := InputBuffer.new()
 var _heavy_hold_pending: bool = false
 ## Lunge distance the running attack may still cover (see take_lunge_velocity).
 var _lunge_left: float = 0.0
+## Effective speed factor of the running attack (fixed at attack start).
+var _speed: float = 1.0
 
 
 func _ready() -> void:
@@ -162,7 +170,7 @@ func get_lunge_velocity() -> Vector2:
 		return Vector2.ZERO
 	if phase != Phase.STARTUP and phase != Phase.ACTIVE:
 		return Vector2.ZERO
-	var lunge_time := current_attack.startup + current_attack.active
+	var lunge_time := (current_attack.startup + current_attack.active) / _speed
 	return attack_direction * current_attack.lunge_distance / lunge_time
 
 
@@ -246,6 +254,7 @@ func _start_attack(attack: AttackDefinition, aim: Vector2, tier: int) -> void:
 	combo.commit(attack)
 	attack_instance += 1
 	current_attack = attack
+	_speed = effective_speed(attack)
 	_lunge_left = attack.lunge_distance
 	charge_tier = tier
 	state = State.ATTACKING
@@ -292,18 +301,40 @@ func _enter_next_phase() -> void:
 
 
 func _phase_duration() -> float:
+	return phase_duration()
+
+
+## Duration of the current phase of the running attack, attack speed applied.
+func phase_duration() -> float:
+	if current_attack == null:
+		return 0.0
 	match phase:
 		Phase.STARTUP:
-			return current_attack.startup
+			return current_attack.startup / _speed
 		Phase.ACTIVE:
-			return current_attack.active
+			return current_attack.active / _speed
 		Phase.RECOVERY:
-			return current_attack.recovery
+			return current_attack.recovery / _speed
 	return 0.0
 
 
+## 0..1 progress through the current phase (views animate with it).
+func phase_progress() -> float:
+	return clampf(phase_time / maxf(phase_duration(), 0.001), 0.0, 1.0)
+
+
+## Speed factor `attack` runs with: 1 + (attack_speed - 1) * attack_speed_scaling.
+func effective_speed(attack: AttackDefinition) -> float:
+	return maxf(0.1, 1.0 + (attack_speed - 1.0) * attack.attack_speed_scaling)
+
+
+## Seconds the running attack takes in total (attack speed applied).
+func current_total_duration() -> float:
+	return current_attack.total_duration() / _speed if current_attack != null else 0.0
+
+
 func _can_chain() -> bool:
-	return phase == Phase.RECOVERY and phase_time >= current_attack.chain_delay
+	return phase == Phase.RECOVERY and phase_time >= current_attack.chain_delay / _speed
 
 
 func _clear_attack() -> void:
@@ -311,6 +342,7 @@ func _clear_attack() -> void:
 		hitbox.deactivate()
 	current_attack = null
 	_lunge_left = 0.0
+	_speed = 1.0
 	state = State.IDLE
 	phase = Phase.NONE
 	phase_time = 0.0

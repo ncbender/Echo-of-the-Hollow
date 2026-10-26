@@ -12,6 +12,11 @@ script = ExtResource("2_cost")
 item_id = &"iron_ore"
 quantity = 2
 
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_cost")
+item_id = &"gold_coin"
+quantity = 3
+
 [resource]
 script = ExtResource("1_cfg")
 move_speed = 70.0
@@ -25,4 +30,4 @@ knockback_decay = 1000.0
 despawn_delay = 0.8
 mastery_xp_reward = 20
 class_xp_reward = 30
-drops = Array[ExtResource("2_cost")]([SubResource("Drop_essence"), SubResource("Drop_ore")])
+drops = Array[ExtResource("2_cost")]([SubResource("Drop_essence"), SubResource("Drop_ore"), SubResource("Drop_gold")])

@@ -7,7 +7,17 @@ extends RefCounted
 ##    dispatches each accepted player hit once to every active event effect
 ##  * per-source runtime state (cooldowns, dedupe) lives here, never in the
 ##    shared ItemEffect resources
-##  * re-entrancy guard: effects never trigger effects (no recursive chains)
+##  * every hit source goes through dispatch_hit(): weapon hits (hit_landed),
+##    skill hits, status ticks and opt-in triggered hits. Hits are queued, so an
+##    effect never runs inside another effect, and hits deeper than
+##    MAX_TRIGGER_DEPTH are never dispatched (no endless trigger chains)
+##  * hit_dispatched: the one event stream class mechanics, talents, trials and
+##    rewards listen to (direct vs. triggered via HitData.source)
+
+signal hit_dispatched(hit: HitData)
+
+## Hits deeper than this are never dispatched (0 = player action, 1 = caused by a hit).
+const MAX_TRIGGER_DEPTH := 1
 
 ## One active effect: {"effect": ItemEffect, "key": String}.
 var active: Array[Dictionary] = []
@@ -21,10 +31,20 @@ var stats: Dictionary = {}
 ## Short-lived combat marks: mark id -> {target instance id: expires at (runner time)}.
 var marks: Dictionary = {}
 
+## Class hooks for talent effects (set by the bridge; no-ops when unset).
+var resource_gainer: Callable
+var status_applier: Callable
+var cooldown_reducer: Callable
+var rng := RandomNumberGenerator.new()
+
 var _dispatching: bool = false
+var _queue: Array[HitData] = []
+var _seen: Dictionary = {}   # hits of the running dispatch cycle
 
 
-func rebuild(character: Character) -> void:
+## `extra`: further effect sources of the character (talents, class mechanics):
+## [{"effect": ItemEffect, "key": String, "power": float}].
+func rebuild(character: Character, extra: Array = []) -> void:
 	active.clear()
 	attack_modifiers.clear()
 	for item in character.equipment.equipped_items():
@@ -42,6 +62,8 @@ func rebuild(character: Character) -> void:
 		for bonus in set_def.active_bonuses(counts[set_id]):
 			for index in bonus.effects.size():
 				_add(bonus.effects[index], "set:%s:%d:%d" % [set_id, bonus.pieces_required, index])
+	for entry: Dictionary in extra:
+		_add(entry.effect, entry.key, entry.get("power", 1.0))
 	# Drop state of sources that are no longer active.
 	var keys := {}
 	for entry in active:
@@ -62,13 +84,30 @@ func step(delta: float) -> void:
 	time += delta
 
 
+## Weapon hits of the player (CombatComponent.hit_landed).
 func on_hit_landed(hit: HitData) -> void:
+	dispatch_hit(hit)
+
+
+## Single entry point for every accepted hit the character caused. Queued:
+## hits produced while effects run are handled after them (never nested).
+func dispatch_hit(hit: HitData) -> void:
+	if hit == null or hit.depth > MAX_TRIGGER_DEPTH or _seen.has(hit):
+		return   # too deep, or this very hit was already dispatched (re-entry)
+	_queue.append(hit)
+	_seen[hit] = true
 	if _dispatching:
-		return   # an effect caused this hit: never chain effects
+		return
 	_dispatching = true
-	for entry in active:
-		entry.effect.on_hit_landed(hit, self, entry.key)
+	while not _queue.is_empty():
+		var current: HitData = _queue.pop_front()
+		var bit := 1 << current.source
+		for entry in active.duplicate():
+			if entry.effect.hit_sources & bit:
+				entry.effect.on_hit_landed(current, self, entry.key)
+		hit_dispatched.emit(current)
 	_dispatching = false
+	_seen.clear()
 
 
 func source_state(key: String) -> Dictionary:
@@ -146,3 +185,20 @@ func _add(effect: ItemEffect, key: String, power: float = 1.0) -> void:
 	active.append({"effect": effect, "key": key})
 	source_state(key)["power"] = power
 	attack_modifiers.append_array(effect.get_attack_modifiers_for(self, key))
+
+
+## Class resource for talent effects (rage on kill ...).
+func gain_resource(amount: float) -> void:
+	if resource_gainer.is_valid() and amount > 0.0:
+		resource_gainer.call(amount)
+
+
+## Applies a status credited to the character (damage ticks come back here).
+func apply_status(target: Node, status_id: StringName, power: float = 1.0, stacks: int = 1) -> bool:
+	return status_applier.is_valid() and status_applier.call(target, status_id, power, stacks)
+
+
+## Lowers skill cooldowns (&"" = all skills).
+func reduce_cooldown(skill_id: StringName, seconds: float) -> void:
+	if cooldown_reducer.is_valid():
+		cooldown_reducer.call(skill_id, seconds)

@@ -63,7 +63,7 @@ func _draw() -> void:
 func _draw_telegraph(combat: CombatComponent) -> void:
 	var attack := combat.current_attack
 	var color := COLOR_TELEGRAPH if attack.input_type == AttackDefinition.InputType.LIGHT else COLOR_TELEGRAPH_HEAVY
-	var progress := clampf(combat.phase_time / maxf(attack.startup, 0.001), 0.0, 1.0)
+	var progress := combat.phase_progress()
 	var reach := combat.get_reach(attack, 0)
 	var half := deg_to_rad(attack.arc_degrees) * 0.5
 	var angle := combat.attack_direction.angle()

@@ -23,6 +23,10 @@ const DIRS := {
 	&"currencies": "res://data/crafting/currencies",
 	&"operations": "res://data/crafting/operations",
 	&"evolutions": "res://data/crafting/evolutions",
+	&"statuses": "res://data/status",
+	&"skills": "res://data/skills",
+	&"skill_mods": "res://data/skill_mods",
+	&"talent_trees": "res://data/talents",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -47,6 +51,12 @@ var socketables: Dictionary = {}      # socketable id -> SocketableDefinition
 var currencies: Dictionary = {}       # currency id -> CraftingCurrencyDefinition
 var operations: Dictionary = {}       # operation id -> CraftingOperationDefinition
 var evolutions: Dictionary = {}       # evolution id -> EvolutionDefinition
+var statuses: Dictionary = {}         # status id -> StatusEffectDefinition
+# Classes (docs/CLASS_DESIGN.md, TALENT_SYSTEM.md, SKILL_SYSTEM.md)
+var skills: Dictionary = {}           # skill id -> SkillDefinition
+var skill_mods: Dictionary = {}       # mod id -> SkillModDefinition
+var talent_trees: Dictionary = {}     # tree id -> TalentTreeDefinition
+var talent_nodes: Dictionary = {}     # node id -> TalentNodeDefinition (indexed from the trees)
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -109,6 +119,19 @@ func register(resource: Resource) -> bool:
 		table = operations; key = resource.id
 	elif resource is EvolutionDefinition:
 		table = evolutions; key = resource.id
+	elif resource is StatusEffectDefinition:
+		table = statuses; key = resource.id
+	elif resource is SkillDefinition:
+		table = skills; key = resource.id
+	elif resource is SkillModDefinition:
+		table = skill_mods; key = resource.id
+	elif resource is TalentTreeDefinition:
+		table = talent_trees; key = resource.id
+		for node: TalentNodeDefinition in resource.nodes:
+			if node != null and talent_nodes.has(node.id):
+				load_errors.append("duplicate talent node %s (%s)" % [node.id, resource.resource_path])
+			elif node != null:
+				talent_nodes[node.id] = node
 	else:
 		load_errors.append("unsupported resource %s" % resource.resource_path)
 		return false
@@ -185,7 +208,13 @@ func validate() -> PackedStringArray:
 		for building_id in plot.allowed_building_ids:
 			if not buildings.has(building_id):
 				errors.append("plot %s allows unknown building %s" % [plot.id, building_id])
+	for status: StatusEffectDefinition in statuses.values():
+		errors.append_array(status.validate())
+	for status_id in [rules.bleed_status_id, rules.chill_status_id]:
+		if status_id != &"" and not statuses.has(status_id):
+			errors.append("rules reference unknown status %s" % status_id)
 	errors.append_array(_validate_crafting())
+	errors.append_array(_validate_classes())
 	return errors
 
 
@@ -261,3 +290,26 @@ static func _load_dir(path: String) -> Array[Resource]:
 			if resource != null:
 				result.append(resource)
 	return result
+
+
+## Skills, mods, talent trees and class references (TalentService checks trees).
+func _validate_classes() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	for skill: SkillDefinition in skills.values():
+		errors.append_array(skill.validate())
+		if get_class_def(skill.class_id) == null:
+			errors.append("skill %s for unknown class %s" % [skill.id, skill.class_id])
+	for mod: SkillModDefinition in skill_mods.values():
+		if mod.skill_ids.is_empty():
+			errors.append("mod %s fits no skill" % mod.id)
+		for skill_id in mod.skill_ids:
+			if not skills.has(skill_id):
+				errors.append("mod %s references unknown skill %s" % [mod.id, skill_id])
+		for other in mod.incompatible_with:
+			if not skill_mods.has(other):
+				errors.append("mod %s: unknown incompatible mod %s" % [mod.id, other])
+		for status in mod.add_statuses:
+			if status != null and not statuses.has(status.status_id):
+				errors.append("mod %s applies unknown status %s" % [mod.id, status.status_id])
+	errors.append_array(TalentService.validate_data(self))
+	return errors

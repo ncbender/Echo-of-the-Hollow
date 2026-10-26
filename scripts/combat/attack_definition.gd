@@ -23,6 +23,9 @@ const CANCEL_RECOVERY := 4
 @export var chain_delay: float = 0.0
 ## Seconds after recovery ends during which the combo can still continue.
 @export var combo_window: float = 0.35
+## How strongly the owner's attack speed applies (1 = fully, 0 = never, e.g. for
+## attacks whose timing is a fixed telegraph). See CombatComponent.attack_speed.
+@export_range(0.0, 1.0) var attack_speed_scaling: float = 1.0
 
 @export_group("Damage")
 @export var damage: float = 10.0

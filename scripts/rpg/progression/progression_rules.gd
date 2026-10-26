@@ -25,6 +25,19 @@ extends Resource
 ## Combat weapon family used while no weapon is equipped (placeholder until unarmed combat exists).
 @export var fallback_weapon_family: StringName = &"one_handed_sword"
 
+@export_group("Combat Stats")
+## Bounds of the attack speed multiplier (1 + Attack Speed % / 100). Items, talents
+## and skill buffs all add to the one Attack Speed stat; the result is clamped here.
+@export var attack_speed_min: float = 0.75
+@export var attack_speed_max: float = 1.4
+## Status ids applied by the Bleed Chance / Chill Chance stats on weapon hits.
+@export var bleed_status_id: StringName = &"bleeding"
+@export var chill_status_id: StringName = &"chill"
+
+@export_group("Talents")
+## Talent tiers, points, slots and respec costs (data/progression/talent_rules.tres).
+@export var talents: TalentRules
+
 @export_group("Inventory")
 @export var inventory_capacity: int = 40
 ## Items every new character starts with (ids from data/items).
@@ -33,3 +46,9 @@ extends Resource
 @export_group("Class XP")
 ## Class XP for an accepted hit on a non-training target.
 @export var class_xp_per_hit: int = 1
+
+
+func talent_rules() -> TalentRules:
+	if talents == null:
+		talents = TalentRules.new()
+	return talents

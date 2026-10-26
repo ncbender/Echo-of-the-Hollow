@@ -51,6 +51,8 @@ func activation_error(class_id: StringName) -> String:
 		return "unknown class"
 	if not is_unlocked(class_id):
 		return "class is locked"
+	if not _db.get_class_def(class_id).playable:
+		return "class is not playable yet"
 	return ""
 
 

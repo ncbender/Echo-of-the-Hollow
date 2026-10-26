@@ -15,6 +15,8 @@ var dash_pressed: bool = false
 var heavy_held: bool = false
 ## Weapon loadout slot requested this tick, -1 = none.
 var weapon_slot: int = -1
+## Active skill slot (Q/E/R/F = 0..3) pressed this tick, -1 = none.
+var ability_slot: int = -1
 
 
 ## Clears one-shot flags after the frame was consumed; level state (move, aim, held) stays.
@@ -24,3 +26,4 @@ func clear_edges() -> void:
 	heavy_released = false
 	dash_pressed = false
 	weapon_slot = -1
+	ability_slot = -1

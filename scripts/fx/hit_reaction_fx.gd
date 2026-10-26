@@ -5,6 +5,11 @@ extends Node2D
 ## Purely cosmetic; never changes gameplay state.
 
 const DAMAGE_NUMBER: GDScript = preload("res://scripts/fx/damage_number.gd")
+## Non-physical damage reads by colour (status ticks, skills, essences).
+const DAMAGE_TYPE_COLORS := {
+	&"bleed": Color("e04050"), &"shock": Color("8fd0ff"), &"arcane": Color("c58cff"),
+	&"frost": Color("a8e6f0"), &"shadow": Color("b9a6e8"),
+}
 
 @export var hurtbox: Hurtbox
 @export var flash_time: float = 0.12
@@ -45,6 +50,8 @@ func _spawn_number(hit: HitData) -> void:
 func _number_color(hit: HitData) -> Color:
 	if number_color.a > 0.0:
 		return number_color
+	if DAMAGE_TYPE_COLORS.has(hit.damage_type):
+		return DAMAGE_TYPE_COLORS[hit.damage_type]
 	if hit.charge_tier >= 2:
 		return Color("ffd84a")
 	if hit.charge_tier == 1:

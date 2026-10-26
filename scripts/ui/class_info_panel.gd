@@ -46,8 +46,8 @@ func refresh() -> void:
 	_resource_label.visible = pool != null
 	_resource_bar.visible = pool != null
 	if pool != null:
-		_resource_label.text = "%s %d / %d" % [pool.definition.display_name, roundi(pool.value), roundi(pool.definition.max_value)]
-		_resource_bar.max_value = pool.definition.max_value
+		_resource_label.text = "%s %d / %d" % [pool.definition.display_name, roundi(pool.value), roundi(pool.max_value())]
+		_resource_bar.max_value = pool.max_value()
 		_resource_bar.value = pool.value
 		_resource_bar.add_theme_stylebox_override(&"fill", _fill(pool.definition.color))
 	var stats := bridge.character.get_stats()

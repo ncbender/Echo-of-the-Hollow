@@ -33,9 +33,16 @@ extends Resource
 
 @export_group("Prepared Interfaces")
 @export var resource: ClassResourceDefinition
-## Skill slot ids for Q/E/R/F (no skills implemented yet).
+## Skill slot ids for Q/E/R/F.
 @export var skill_slot_ids: Array[StringName] = [&"ability_1", &"ability_2", &"ability_3", &"ability_4"]
-@export var talent_tree_id: StringName
+## The three talent trees of the class (empty for classes without talents yet).
+@export var talent_tree_ids: Array[StringName] = []
+## False for prepared classes (Guardian, Soulbinder): defined and unlockable later,
+## but without skills/talents in this build - they cannot be activated yet.
+@export var playable: bool = true
+## Class mechanics expressed as combat effects (e.g. Shadowrunner: finishers expose
+## Weak Points). Always active while the class is; hosted by the ItemEffectRunner.
+@export var innate_effects: Array[ItemEffect] = []
 ## Items granted the first time the class is unlocked.
 @export var starting_item_ids: Array[StringName] = []
 

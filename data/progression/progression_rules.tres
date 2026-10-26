@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/rpg/progression/progression_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Resource" path="res://data/progression/talent_rules.tres" id="3_talents"]
 
 [sub_resource type="Resource" id="Start_sword"]
 script = ExtResource("2_cost")
@@ -35,3 +36,4 @@ starting_class_id = &"basic_adventurer"
 inventory_capacity = 40
 starting_items = Array[ExtResource("2_cost")]([SubResource("Start_sword"), SubResource("Start_greatsword"), SubResource("Start_cap"), SubResource("Start_coat"), SubResource("Start_potions")])
 class_xp_per_hit = 1
+talents = ExtResource("3_talents")

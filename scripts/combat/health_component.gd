@@ -64,16 +64,19 @@ func apply_hit(hit: HitData) -> void:
 	if is_dead():
 		return
 	health = maxf(0.0, health - hit.damage)
-	_since_poise_damage = 0.0
+	if hit.poise_damage > 0.0:
+		_since_poise_damage = 0.0   # damage over time does not stall poise regeneration
 	if not is_staggered():
 		poise -= hit.poise_damage
 		if poise <= 0.0:
 			poise = 0.0
 			stagger_left = stagger_duration
+			hit.broke_poise = true
 			poise_broken.emit()
 	damaged.emit(hit)
 	health_changed.emit(health, max_health)
 	if is_dead():
+		hit.killed = true
 		died.emit()
 
 

@@ -132,16 +132,16 @@ func _draw_swing(combat: CombatComponent) -> void:
 			else TIER_COLORS[mini(combat.charge_tier, TIER_COLORS.size() - 1)]
 	match combat.phase:
 		CombatComponent.Phase.STARTUP:
-			var windup := clampf(combat.phase_time / maxf(attack.startup, 0.001), 0.0, 1.0)
+			var windup := combat.phase_progress()
 			var back := from - 0.5 * side * windup
 			draw_line(Vector2.ZERO, Vector2.from_angle(back) * reach * 0.7, Color(color, 0.9), 2.0)
 		CombatComponent.Phase.ACTIVE:
-			var t := clampf(combat.phase_time / maxf(attack.active, 0.001), 0.0, 1.0)
+			var t := combat.phase_progress()
 			var current := lerpf(from, to, ease(t, 0.6))
 			_draw_wedge(from, current, reach, Color(color, 0.45))
 			draw_line(Vector2.ZERO, Vector2.from_angle(current) * reach, Color.WHITE, 2.0)
 		CombatComponent.Phase.RECOVERY:
-			var fade := 1.0 - clampf(combat.phase_time / maxf(attack.recovery, 0.001), 0.0, 1.0)
+			var fade := 1.0 - combat.phase_progress()
 			_draw_wedge(from, to, reach, Color(color, 0.25 * fade))
 			draw_line(Vector2.ZERO, Vector2.from_angle(to) * reach * 0.6, Color(color, 0.8), 2.0)
 
