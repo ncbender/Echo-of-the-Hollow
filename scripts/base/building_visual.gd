@@ -39,8 +39,7 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 		var at := Vector2(-width * 0.5, -size.y * 0.5 - 14)
-		draw_string_outline(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, 2, Color.BLACK)
-		draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(1.0, 0.92, 0.75))
+		WorldText.draw(self, at, label, 7, Color(1.0, 0.92, 0.75), 2, Color.BLACK)
 
 
 func _draw_fence(rect: Rect2) -> void:

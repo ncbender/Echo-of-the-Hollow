@@ -25,5 +25,4 @@ func _draw() -> void:
 	var size := 10
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var at := Vector2(-width * 0.5, 0)
-	draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 3, Color(0, 0, 0, alpha))
-	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(color, alpha))
+	WorldText.draw(self, at, text, size, Color(color, alpha), 3, Color(0, 0, 0, alpha))

@@ -1,7 +1,7 @@
 # Echoes of the Hollow – Projektregeln
 
 2D-Pixel-Art-Action-RPG, schräge Top-Down-Perspektive. **Godot 4.7.2, ausschließlich GDScript.**
-Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2.
+Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1.
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_arena.tscn`.
 
@@ -10,7 +10,7 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Startprüfung (Import + Parse + 300 Frames, Fehler UND Warnungen): `./tools/check_project.ps1`
 - Tests gezielt: `./tools/run_tests.ps1 -Suite dash,combo` (Suite = `tests/**/test_<name>.gd`)
 - Playtests (Fenster): `-s res://tests/playtest/visual_playtest.gd` (Combat), `rpg_playtest.gd` (RPG),
-  `loop_playtest.gd` (Gameplay-Loop)
+  `loop_playtest.gd` (Gameplay-Loop), `ui_playtest.gd` (Auflösungen/UI-Skalierung)
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
 ## Feste Regeln
@@ -29,6 +29,9 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Signale langlebiger RefCounted-Objekte: Methoden-Callables statt Lambdas mit `self` (sonst Leck).
 - Schemaänderung am Save → `SaveSystem.VERSION` + Migration + `save`-Tests (`docs/SAVE_SYSTEM.md`).
 - Tests nutzen nie `user://saves/`, nur `user://test_saves/`.
+- UI: Maße nur in Design-Px (1920×1080) über `UiTheme`-Konstanten; Fenster erben von `UiWindow`;
+  nie `Control.scale` für UI; Welttexte über `WorldText`. Display-Einstellungen nur in `UserSettings`
+  (`user://settings.cfg`, nie im Save). Standard: `docs/DISPLAY_AND_UI_STANDARD.md`.
 - Neue Maps erben von `GameMap`, brauchen `Player`, `GameHud`, `SpawnPoint` "default" und eine `MapDefinition`.
   Übergänge nur über `SessionState.travel()`. Weltzustand nur in `WorldState`.
 

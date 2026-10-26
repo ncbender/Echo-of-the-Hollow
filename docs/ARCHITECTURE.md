@@ -123,6 +123,15 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
   Schalter).
 - Details: `WORLD_SYSTEM.md`.
 
+## Display- & UI-Schicht (UI Foundation 0.1, Details `DISPLAY_AND_UI_STANDARD.md`)
+- Designfläche 1920×1080, `canvas_items`/`keep`; UI-Skalierung = `Window.content_scale_factor`
+  aus `UserSettings` (gehalten von `GameSession.settings`, Datei `user://settings.cfg`, nie im Save).
+- `CameraShake` teilt `base_zoom` (3,75) durch den UI-Faktor → Weltausschnitt konstant 512×288.
+- `UiTheme`: einzige Quelle für Schriftgrößen, Farben, Styles, Layout-Konstanten (Design-Px).
+- `UiWindow`: Basis aller RPG-Fenster (Einpassen in die sichtbare Fläche, Scrollen, Zentrieren);
+  `GameHud` registriert Fenster, `OptionsPanel` (O) editiert `UserSettings`.
+- `WorldText`: scharfe Texte in der gezoomten Welt. Keine `Control.scale`-Skalierung für UI.
+
 ## Kollisionslayer
 1 `world` (Wände, Dummies) · 2 `player` · 3 `enemy` · 4 `hurtbox` (nur Abfragen, kein Monitoring).
 Player-Körper kollidiert mit `world` + `enemy`; Gegner mit `world`, `player`, `enemy`. Interactables

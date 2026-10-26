@@ -14,14 +14,14 @@ var _fill_cache: Dictionary = {}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(172, 0)
+	custom_minimum_size = Vector2(UiTheme.HUD_COLUMN_WIDTH, 0)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override(&"separation", 1)
+	box.add_theme_constant_override(&"separation", 4)
 	add_child(box)
 	_title = UiTheme.label("", UiTheme.COLOR_ACCENT)
-	_bar = UiTheme.bar(3.0)
+	_bar = UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL)
 	_resource_label = UiTheme.label("", UiTheme.COLOR_DIM)
-	_resource_bar = UiTheme.bar(3.0)
+	_resource_bar = UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL)
 	_stats = UiTheme.label("", UiTheme.COLOR_DIM)
 	_stats.autowrap_mode = TextServer.AUTOWRAP_WORD
 	for child: Control in [_title, _bar, _resource_label, _resource_bar, _stats]:

@@ -10,10 +10,13 @@ var class_info: ClassInfoPanel
 var class_panel: ClassPanel
 var inventory_panel: InventoryPanel
 var build_panel: BuildPanel
+var options_panel: OptionsPanel
+## Player display preferences (from GameSession); null when running without one.
+var settings: UserSettings
 
 var _root: Control
 var _prompt: Label
-var _windows: Array[Control] = []
+var _windows: Array[UiWindow] = []
 
 
 func _ready() -> void:
@@ -24,12 +27,14 @@ func _ready() -> void:
 	_root.theme = UiTheme.get_theme()
 	add_child(_root)
 
+	# Anchored layout in design px (UiTheme): adapts to every window size and UI scale.
+	var margin := UiTheme.SCREEN_MARGIN
 	var right := VBoxContainer.new()
 	right.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	right.offset_left = -176
+	right.offset_left = -UiTheme.HUD_COLUMN_WIDTH - margin
+	right.offset_right = -margin
+	right.offset_top = margin
 	right.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	right.offset_right = -4
-	right.offset_top = 4
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(right)
 	class_info = ClassInfoPanel.new()
@@ -37,27 +42,31 @@ func _ready() -> void:
 	mastery_panel = MasteryPanel.new()
 	right.add_child(mastery_panel)
 
-	toasts = ToastFeed.new()
-	toasts.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	toasts.offset_left = -160
-	toasts.offset_right = 160
-	toasts.offset_top = -110
-	toasts.offset_bottom = -50
-	_root.add_child(toasts)
-
-	_prompt = UiTheme.label("", Color(1.0, 0.95, 0.7))
-	_prompt.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_prompt.offset_left = -120
-	_prompt.offset_right = 120
-	_prompt.offset_top = -128
+	var bottom := VBoxContainer.new()
+	bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	bottom.offset_left = -UiTheme.FEED_WIDTH * 0.5
+	bottom.offset_right = UiTheme.FEED_WIDTH * 0.5
+	bottom.offset_bottom = -UiTheme.SCREEN_MARGIN * 6
+	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(bottom)
+	_prompt = UiTheme.label("", UiTheme.COLOR_PROMPT)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	_prompt.add_theme_constant_override(&"outline_size", 3)
-	_root.add_child(_prompt)
+	_prompt.add_theme_font_size_override(&"font_size", UiTheme.FONT_HEADING)
+	_prompt.add_theme_constant_override(&"outline_size", 6)
+	bottom.add_child(_prompt)
+	toasts = ToastFeed.new()
+	bottom.add_child(toasts)
 
 	class_panel = _add_window(ClassPanel.new()) as ClassPanel
 	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
 	build_panel = _add_window(BuildPanel.new()) as BuildPanel
+	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
+	var session := SessionState.find(get_tree())
+	if session != null:
+		settings = session.settings
+	if settings != null:
+		settings.changed.connect(_refit_windows)
 
 
 func setup(progression_bridge: PlayerProgressionBridge) -> void:
@@ -107,14 +116,33 @@ func toggle_inventory() -> void:
 		inventory_panel.open(bridge.character)
 
 
-func _add_window(window: Control) -> Control:
-	window.set_anchors_preset(Control.PRESET_CENTER)
-	window.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	window.grow_vertical = Control.GROW_DIRECTION_BOTH
+func toggle_options() -> void:
+	if settings == null:
+		return
+	if options_panel.visible:
+		options_panel.hide()
+	else:
+		close_windows()
+		options_panel.open(settings)
+
+
+## UiWindows size and center themselves (see UiWindow).
+func _add_window(window: UiWindow) -> UiWindow:
 	window.hide()
 	_root.add_child(window)
 	_windows.append(window)
 	return window
+
+
+## The visible canvas changes with the UI scale / window mode: re-fit open windows.
+func _refit_windows() -> void:
+	for window: UiWindow in _windows:
+		window.queue_fit()
+
+
+func _exit_tree() -> void:
+	if settings != null and settings.changed.is_connected(_refit_windows):
+		settings.changed.disconnect(_refit_windows)
 
 
 func _process(_delta: float) -> void:
@@ -125,6 +153,10 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_inventory"):
 		toggle_inventory()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(&"ui_options"):
+		toggle_options()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(&"ui_cancel") and is_window_open():

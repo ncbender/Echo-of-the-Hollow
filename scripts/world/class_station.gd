@@ -25,5 +25,4 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var text := "Class Station"
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
-	draw_string_outline(font, Vector2(-width * 0.5, -24), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, 2, Color.BLACK)
-	draw_string(font, Vector2(-width * 0.5, -24), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.8, 0.9, 1.0))
+	WorldText.draw(self, Vector2(-width * 0.5, -24), text, 7, Color(0.8, 0.9, 1.0), 2, Color.BLACK)

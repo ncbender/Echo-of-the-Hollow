@@ -104,4 +104,4 @@ func _draw() -> void:
 				for spot: Vector2 in [Vector2(-4, -4), Vector2(3, -7), Vector2(5, 0)]:
 					draw_circle(spot, 2.0, Color(0.85, 0.55, 0.3))
 	if not available:
-		draw_string(ThemeDB.fallback_font, Vector2(-10, -20), "...", HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(1, 1, 1, 0.5))
+		WorldText.draw(self, Vector2(-10, -20), "...", 7, Color(1, 1, 1, 0.5))

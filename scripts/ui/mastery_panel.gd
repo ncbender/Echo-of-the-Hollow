@@ -13,9 +13,9 @@ var _techniques: Label
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(172, 0)
+	custom_minimum_size = Vector2(UiTheme.HUD_COLUMN_WIDTH, 0)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override(&"separation", 1)
+	box.add_theme_constant_override(&"separation", 4)
 	add_child(box)
 	_title = UiTheme.label("", UiTheme.COLOR_ACCENT)
 	_level = UiTheme.label()

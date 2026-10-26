@@ -57,9 +57,7 @@ func _draw() -> void:
 	if DebugView.show_hitboxes and enemy.knockback.is_active():
 		DebugView.draw_vector(self, enemy.knockback.remaining(), DebugView.COLOR_KNOCKBACK)
 	if enemy.state == Enemy.State.STAGGERED:
-		var font := ThemeDB.fallback_font
-		draw_string_outline(font, Vector2(-2, -24), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 2, Color.BLACK)
-		draw_string(font, Vector2(-2, -24), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, COLOR_STAGGER)
+		WorldText.draw(self, Vector2(-2, -24), "!", 10, COLOR_STAGGER, 2, Color.BLACK)
 
 
 func _draw_telegraph(combat: CombatComponent) -> void:

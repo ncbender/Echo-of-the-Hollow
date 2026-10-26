@@ -7,33 +7,37 @@ layer = 10
 script = ExtResource("1_overlay")
 
 [node name="Status" type="Label" parent="."]
-offset_left = 6.0
-offset_top = 4.0
-offset_right = 360.0
-offset_bottom = 110.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 760.0
+offset_bottom = 420.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.93, 0.92, 0.86, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 5
 theme_override_constants/line_spacing = -2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 16
 text = "debug"
 
 [node name="Help" type="Label" parent="."]
-anchors_preset = 2
+anchors_preset = 12
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 6.0
-offset_top = -48.0
-offset_right = 634.0
-offset_bottom = -4.0
+offset_left = 16.0
+offset_top = -84.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.75, 0.73, 0.68, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 5
 theme_override_constants/line_spacing = -2
-theme_override_font_sizes/font_size = 8
-text = "WASD move  |  Mouse aim  |  LMB light  |  hold/release RMB heavy  |  Space dash  |  1/2 weapon
+theme_override_font_sizes/font_size = 15
+text = "WASD move  |  Mouse aim  |  LMB light  |  hold/release RMB heavy  |  Space dash (towards mouse)  |  1/2 weapon
 F1 hitboxes+vectors  |  F2 spawn enemy  |  F3 +mastery XP  |  F5 reset  |  F7 item kit  |  F8 +class XP
-G interact  |  I inventory  |  F6 save  |  F9 load"
+G interact  |  I inventory  |  O options  |  F11 fullscreen  |  F6 save  |  F9 load"
+autowrap_mode = 3
+vertical_alignment = 2

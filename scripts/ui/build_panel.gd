@@ -1,30 +1,20 @@
 class_name BuildPanel
-extends PanelContainer
+extends UiWindow
 ## Build / building menu of a BuildPlot. Calls BaseBuilder only.
 
 var character: Character
 var plot: BuildPlot
 
-var _title: Label
 var _list: VBoxContainer
 var _status: Label
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(280, 0)
-	var box := VBoxContainer.new()
-	add_child(box)
-	_title = UiTheme.label("", UiTheme.COLOR_ACCENT)
-	box.add_child(_title)
+	set_close_text("Close [G / Esc]")
 	_list = VBoxContainer.new()
-	box.add_child(_list)
-	_status = UiTheme.label("", Color(1.0, 0.85, 0.5))
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD
-	box.add_child(_status)
-	var close := Button.new()
-	close.text = "Close [G / Esc]"
-	close.pressed.connect(hide)
-	box.add_child(close)
+	body.add_child(_list)
+	_status = UiTheme.wrapped("", UiTheme.COLOR_WARN)
+	body.add_child(_status)
 
 
 func open(target_character: Character, target_plot: BuildPlot) -> void:
@@ -46,7 +36,7 @@ func rebuild() -> void:
 	var plot_def := plot.definition()
 	var building := plot.built_building()
 	if building == null:
-		_title.text = "%s  -  choose a building" % (plot_def.display_name if plot_def else "Plot")
+		set_title("%s  -  choose a building" % (plot_def.display_name if plot_def else "Plot"))
 		var ids: Array = character.database.buildings.keys()
 		ids.sort()
 		for building_id: StringName in ids:
@@ -54,7 +44,7 @@ func rebuild() -> void:
 			if plot_def != null and plot_def.allows(candidate):
 				_add_build_row(plot_def, candidate)
 	else:
-		_title.text = building.display_name
+		set_title(building.display_name)
 		_list.add_child(_wrapped(building.description, UiTheme.COLOR_DIM))
 		if building.inventory_capacity_bonus > 0:
 			_list.add_child(UiTheme.label("Active: +%d inventory slots (now %d)" % [
@@ -82,7 +72,7 @@ func _add_build_row(plot_def: BuildingPlotDefinition, building: BuildingDefiniti
 	row.add_child(button)
 	_list.add_child(row)
 	if error != "":
-		_list.add_child(_wrapped("   " + error, Color(1.0, 0.55, 0.45)))
+		_list.add_child(_wrapped("   " + error, UiTheme.COLOR_ERROR))
 
 
 func _add_recipe_row(recipe: RecipeDefinition) -> void:
@@ -115,6 +105,6 @@ func _costs_text(costs: Array[ItemCost]) -> String:
 
 func _wrapped(text: String, color: Color) -> Label:
 	var label := UiTheme.label(text, color)
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	label.custom_minimum_size = Vector2(200, 0)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(UiTheme.TEXT_WIDTH - 120, 0)
 	return label

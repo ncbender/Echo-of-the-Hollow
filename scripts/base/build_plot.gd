@@ -67,5 +67,4 @@ func _draw() -> void:
 	var text := plot.display_name if plot != null else String(plot_id)
 	var font := ThemeDB.fallback_font
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
-	draw_string_outline(font, Vector2(-width * 0.5, 3), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, 2, Color.BLACK)
-	draw_string(font, Vector2(-width * 0.5, 3), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, color)
+	WorldText.draw(self, Vector2(-width * 0.5, 3), text, 7, color, 2, Color.BLACK)

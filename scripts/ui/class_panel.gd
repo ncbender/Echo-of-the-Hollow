@@ -1,5 +1,5 @@
 class_name ClassPanel
-extends PanelContainer
+extends UiWindow
 ## Class selection window opened at a ClassStation. Activation goes through
 ## Character.switch_class(), which refuses when the player left the station.
 
@@ -11,19 +11,12 @@ var _status: Label
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(260, 0)
-	var box := VBoxContainer.new()
-	add_child(box)
-	box.add_child(UiTheme.label("Class Station  -  choose your active class", UiTheme.COLOR_ACCENT))
+	set_title("Class Station  -  choose your active class")
+	set_close_text("Close [G / Esc]")
 	_list = VBoxContainer.new()
-	box.add_child(_list)
-	_status = UiTheme.label("", UiTheme.COLOR_DIM)
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD
-	box.add_child(_status)
-	var close := Button.new()
-	close.text = "Close [G / Esc]"
-	close.pressed.connect(hide)
-	box.add_child(close)
+	body.add_child(_list)
+	_status = UiTheme.wrapped("", UiTheme.COLOR_DIM)
+	body.add_child(_status)
 
 
 func open(target_character: Character, target_station: ClassStation) -> void:

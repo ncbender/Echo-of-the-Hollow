@@ -17,6 +17,8 @@ var character: Character
 ## Real player saves go to DEFAULT_SAVE_PATH; tests/playtests point this elsewhere.
 var save_path: String = DEFAULT_SAVE_PATH
 var last_load: SaveSystem.LoadResult
+## Player preferences (UI scale, window mode); not part of any save slot.
+var settings: UserSettings
 
 var _pending_spawn: StringName = &""
 var _traveling: bool = false
@@ -28,6 +30,7 @@ var _messages: PackedStringArray = []
 
 func _ready() -> void:
 	database = GameDatabase.get_default()
+	_init_settings()
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	add_child(layer)
@@ -36,6 +39,31 @@ func _ready() -> void:
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(_fade)
+
+
+## Loads the player's display/UI preferences (user://settings.cfg, independent of
+## save slots) and applies them. Scripted runs (tests, playtests: the main loop is
+## a script) get in-memory defaults and never touch the player's settings file.
+func _init_settings() -> void:
+	var scripted := Engine.get_main_loop().get_script() != null
+	settings = UserSettings.new() if scripted else UserSettings.load_from(UserSettings.DEFAULT_PATH)
+	settings.changed.connect(_on_settings_changed)
+	settings.apply_to(get_window())
+	if not scripted and settings.window_mode == UserSettings.WindowMode.WINDOWED \
+			and not Engine.is_embedded_in_editor():
+		UserSettings.fit_window_to_screen(get_window())
+
+
+func _on_settings_changed() -> void:
+	settings.apply_to(get_window())
+	if settings.path != "":
+		settings.save()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"toggle_fullscreen"):
+		settings.toggle_fullscreen()
+		get_viewport().set_input_as_handled()
 
 
 func get_character() -> Character:

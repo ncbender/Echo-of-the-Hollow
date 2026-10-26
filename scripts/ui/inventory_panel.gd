@@ -1,67 +1,75 @@
 class_name InventoryPanel
-extends PanelContainer
+extends UiWindow
 ## Inventory + equipment window: slot grid, equipment of the ACTIVE class,
 ## details/actions of the selected item and resolved stats.
 ## Only calls public Character methods; holds no item state itself except the
 ## id of the selected instance.
+## Layout: three columns in a flow container - side by side when the canvas is
+## wide enough, stacked (vertical scrolling) at high UI scales / small windows.
 
 const COLUMNS := 5
-const SLOT_SIZE := Vector2(44, 15)
+const DETAILS_WIDTH := 330
+const EQUIPMENT_WIDTH := 360
 
 var character: Character
 
+var _columns: HFlowContainer
 var _grid: GridContainer
 var _equipment_list: VBoxContainer
 var _header: Label
 var _details: Label
-var _actions: HBoxContainer
+var _actions: HFlowContainer
 var _status: Label
 var _stats: Label
 var _selected_id: String = ""
 
 
 func _ready() -> void:
-	var outer := VBoxContainer.new()
-	add_child(outer)
-	_header = UiTheme.label("", UiTheme.COLOR_ACCENT)
-	outer.add_child(_header)
-	var columns := HBoxContainer.new()
-	columns.add_theme_constant_override(&"separation", 6)
-	outer.add_child(columns)
+	set_title("Inventory & Equipment")
+	set_close_text("Close [I / Esc]")
+	_header = UiTheme.wrapped("", UiTheme.COLOR_DIM, 0)
+	_header.theme_type_variation = &"SmallLabel"
+	_header.custom_minimum_size = Vector2.ZERO
+	_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(_header)
+	_columns = HFlowContainer.new()
+	_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(_columns)
 
 	_grid = GridContainer.new()
 	_grid.columns = COLUMNS
-	_grid.add_theme_constant_override(&"h_separation", 1)
-	_grid.add_theme_constant_override(&"v_separation", 1)
-	columns.add_child(_grid)
+	_grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_columns.add_child(_grid)
 
 	var middle := VBoxContainer.new()
-	middle.custom_minimum_size = Vector2(120, 0)
-	columns.add_child(middle)
-	_details = UiTheme.label("Select an item.", UiTheme.COLOR_DIM)
-	_details.autowrap_mode = TextServer.AUTOWRAP_WORD
+	middle.custom_minimum_size = Vector2(DETAILS_WIDTH, 0)
+	_columns.add_child(middle)
+	_details = UiTheme.wrapped("Select an item.", UiTheme.COLOR_DIM, DETAILS_WIDTH)
 	middle.add_child(_details)
-	_actions = HBoxContainer.new()
+	_actions = HFlowContainer.new()
 	middle.add_child(_actions)
-	_status = UiTheme.label("", Color(1.0, 0.85, 0.5))
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_status = UiTheme.wrapped("", UiTheme.COLOR_WARN, DETAILS_WIDTH)
 	middle.add_child(_status)
 
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(130, 0)
-	right.add_theme_constant_override(&"separation", 0)
-	columns.add_child(right)
+	right.custom_minimum_size = Vector2(EQUIPMENT_WIDTH, 0)
+	right.add_theme_constant_override(&"separation", UiTheme.SLOT_GAP)
+	_columns.add_child(right)
+	right.add_child(UiTheme.heading("Equipment"))
 	_equipment_list = VBoxContainer.new()
-	_equipment_list.add_theme_constant_override(&"separation", 0)
+	_equipment_list.add_theme_constant_override(&"separation", UiTheme.SLOT_GAP)
 	right.add_child(_equipment_list)
-	_stats = UiTheme.label("", UiTheme.COLOR_DIM)
-	_stats.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_stats = UiTheme.wrapped("", UiTheme.COLOR_DIM, EQUIPMENT_WIDTH)
 	right.add_child(_stats)
 
-	var close := Button.new()
-	close.text = "Close [I / Esc]"
-	close.pressed.connect(hide)
-	outer.add_child(close)
+
+## All three columns side by side; the flow container stacks them when narrower.
+func preferred_body_size() -> Vector2:
+	var width := 0.0
+	for column: Control in _columns.get_children():
+		width += column.get_combined_minimum_size().x
+	width += _columns.get_theme_constant(&"h_separation") * maxi(0, _columns.get_child_count() - 1)
+	return Vector2(width, body.get_combined_minimum_size().y)
 
 
 func open(target_character: Character) -> void:
@@ -82,7 +90,7 @@ func rebuild() -> void:
 	if not inventory.has(_selected_id):
 		_selected_id = ""
 	var class_def := character.classes.get_active_definition()
-	_header.text = "Inventory %d/%d    -    Equipment of %s (only the active class's gear is effective)" % [
+	_header.text = "Bag %d/%d  -  equipment of %s (only the active class's gear is effective)" % [
 		inventory.used_slots(), inventory.capacity, class_def.display_name if class_def else "-"]
 	_rebuild_grid()
 	_rebuild_equipment()
@@ -94,9 +102,8 @@ func _rebuild_grid() -> void:
 		child.queue_free()
 	var items := character.inventory.items()
 	for index in character.inventory.capacity:
-		var button := Button.new()
-		button.custom_minimum_size = SLOT_SIZE
-		button.clip_text = true
+		var button := ItemSlotButton.new()
+		button.custom_minimum_size = UiTheme.SLOT_SIZE
 		button.toggle_mode = true
 		if index < items.size():
 			var item := items[index]
@@ -107,7 +114,7 @@ func _rebuild_grid() -> void:
 			if character.equipment.is_equipped(item.instance_id):
 				text = "[E] " + text
 			button.text = text
-			button.tooltip_text = definition.display_name
+			button.tooltip_text = "\n".join(_item_lines(item, definition))
 			button.add_theme_color_override(&"font_color", definition.rarity_color())
 			button.button_pressed = item.instance_id == _selected_id
 			button.pressed.connect(_select.bind(item.instance_id))
@@ -121,13 +128,13 @@ func _rebuild_equipment() -> void:
 		child.queue_free()
 	for slot: int in EquipSlot.Slot.values():
 		var item := character.equipment.get_item(slot)
-		var button := Button.new()
+		var button := ItemSlotButton.new()
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.clip_text = true
-		button.custom_minimum_size = Vector2(130, 13)
+		button.custom_minimum_size = Vector2(EQUIPMENT_WIDTH, UiTheme.SLOT_SIZE.y)
 		if item != null:
 			var definition := character.database.get_item(item.definition_id)
 			button.text = "%s: %s" % [EquipSlot.display_name(slot), definition.display_name]
+			button.tooltip_text = "\n".join(_item_lines(item, definition))
 			button.add_theme_color_override(&"font_color", definition.rarity_color())
 			button.pressed.connect(_select.bind(item.instance_id))
 		else:
@@ -165,6 +172,12 @@ func _show_details() -> void:
 		_details.text = "Select an item."
 		return
 	var definition := character.database.get_item(item.definition_id)
+	_details.text = "\n".join(_item_lines(item, definition))
+	_add_actions(item, definition)
+
+
+## Item description used by the details column and the slot tooltips.
+func _item_lines(item: ItemInstance, definition: ItemDefinition) -> PackedStringArray:
 	var lines: PackedStringArray = [
 		definition.display_name,
 		"%s %s%s" % [ItemDefinition.Rarity.keys()[definition.rarity].capitalize(),
@@ -185,8 +198,7 @@ func _show_details() -> void:
 		lines.append("Requires: %s" % ", ".join(PackedStringArray(definition.required_class_ids)))
 	if definition.description != "":
 		lines.append(definition.description)
-	_details.text = "\n".join(lines)
-	_add_actions(item, definition)
+	return lines
 
 
 func _add_actions(item: ItemInstance, definition: ItemDefinition) -> void:
