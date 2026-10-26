@@ -38,6 +38,6 @@ theme_override_constants/line_spacing = -2
 theme_override_font_sizes/font_size = 15
 text = "WASD move  |  Mouse aim  |  LMB light  |  hold/release RMB heavy  |  Space dash (towards mouse)  |  1/2 weapon
 F1 hitboxes+vectors  |  F2 spawn enemy  |  F3 +mastery XP  |  F5 reset  |  F7 item kit  |  F8 +class XP
-G interact  |  I inventory  |  O options  |  F11 fullscreen  |  F6 save  |  F9 load"
+Q E R F skills  |  C class & talents  |  F10 +5 class levels  |  G interact  |  I inventory  |  O options  |  F11 fullscreen  |  F6 save  |  F9 load"
 autowrap_mode = 3
 vertical_alignment = 2

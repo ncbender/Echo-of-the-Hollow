@@ -24,7 +24,9 @@
 Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Skalierung, Kamera-Ausgleich),
 `ui_layout` (alle Fenster bei allen UI-Skalierungen im Bild, Scrollen bei 200 %). Crafting Foundation 0.1:
 `crafting_save`, `affix_pool`, `crafting_stats`, `crafting_ops`, `essences`, `sockets_quality`,
-`evolution`, `crafting_loop` (E2E).
+`evolution`, `crafting_loop` (E2E). Class Foundation 0.2: `attack_speed`, `status_effects`, `talents`, `skills`, `warrior`,
+`arcanist`, `shadowrunner`, `prologue` (Trials, Wahl, Klassenquests, Migration v3→v4, Prolog-Map), `presets`,
+`class_ui` (Klassenstation-Fenster bedient die echten Dienste).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -58,6 +60,14 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 | Essenz-/Runen-/Mutations-Effekte, `item_effect_runner.gd` | essences, sockets_quality, evolution, item_effects |
 | neue Stats / `character_stat_modifier.gd` | crafting_stats, item_effects |
 | `crafting_panel.gd`, Schmiede-Interaktion | crafting_loop, ui_layout (+ `crafting_playtest.gd`) |
+| `combat_component.gd` Attack Speed / Phasen | attack_speed, light_attack, heavy_attack, combo, lunge, combo_reach |
+| `status_component.gd`, Status-Daten, `enemy.gd` Slow | status_effects, enemy |
+| `item_effect_runner.gd` (dispatch_hit), `hit_data.gd` | status_effects, item_effects, essences, talents |
+| Talent-/Skill-Code (`scripts/rpg/talents`, `skills`), `class_runtime.gd` | talents, skills, presets (+ betroffene Klassen-Suite) |
+| Klassendaten (`data/skills`, `skill_mods`, `talents`, `classes`) | warrior / arcanist / shadowrunner (die betroffene Klasse) |
+| `player.gd` Skill-Hooks / Skill-Bewegung | skills, shadowrunner, movement, dash |
+| Prolog / Quests / Trials, `character_classes.gd` | prologue, classes |
+| `class_station_panel.gd`, `talent_tree_view.gd`, HUD | class_ui, ui_layout (+ `class_playtest.gd`) |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
 | `character.gd`, `player_progression_bridge.gd` | mastery, classes, equipment, item_effects, save |
 | `inventory.gd`, Items | inventory, pickup, equipment, save |
@@ -126,3 +136,22 @@ Layout, ob „Confirm“ erreichbar ist und die Idle-Frame-Zeit, und macht einen
 - F6 und F9, danach Vergleich der Iteminstanz
 
 Screenshots liegen in `tests/output/crafting/`. Bewegt den echten Mauszeiger.
+
+## Klassen-Playtests (Class Foundation 0.2)
+```
+Godot_v4.7.2-stable_win64_console.exe --path . -s res://tests/playtest/class_playtest.gd                       # UI 1080p/4K x 100/150 %
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/class_playtest.gd -- --prologue
+```
+**Ohne Argument** zeigt der Playtest:
+- alle fünf Seiten der Klassenstation und die Klassenwahl, je in vier Konfigurationen
+- einen Hover-Tooltip auf einem Talent mit echter Maus
+- einen echten Mausklick, der einen Rang lernt
+- Layoutprüfungen: im Bild, nicht gequetscht, Fensterrand
+
+**`--prologue`** spielt den kompletten Prolog im Fenster:
+- G am Tor
+- alle drei Trials, von einem Skript gegen echte Grunts mit Skills gekämpft
+- die Wahl am Altar
+- F6 und F9, danach die Prüfung, dass genau die gewählte Klasse freigeschaltet ist
+
+Screenshots liegen in `tests/output/classes/`. Bewegt den echten Mauszeiger.

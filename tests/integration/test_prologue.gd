@@ -232,3 +232,16 @@ func test_prologue_map_flow() -> void:
 	await get_tree().process_frame
 	session.save_path = previous_path
 	session.set_character(previous_character)
+
+
+func test_debug_class_levels_never_touch_trials() -> void:
+	PrologueService.begin_trial(character, &"trial_warrior")
+	check_eq(GameMap.give_class_levels(character, 5), "Not during a class trial", "refused during a trial")
+	check(not character.classes.is_unlocked(&"warrior"), "trial class untouched")
+	PrologueService.end_trial(character, false)
+	character.classes.unlock(&"warrior")
+	character.switch_class(&"warrior", true)
+	var gold := character.inventory.count(&"gold_coin")
+	GameMap.give_class_levels(character, 5)
+	check_eq(character.classes.get_level(&"warrior"), 6, "+5 levels")
+	check_eq(character.inventory.count(&"gold_coin"), gold + GameMap.DEBUG_GOLD, "+gold")

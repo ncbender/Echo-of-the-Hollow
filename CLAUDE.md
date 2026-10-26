@@ -2,7 +2,7 @@
 
 2D-Pixel-Art-Action-RPG, schräge Top-Down-Perspektive. **Godot 4.7.2, ausschließlich GDScript.**
 Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1
-+ Crafting Foundation 0.1 (Resonanzschmieden).
++ Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_arena.tscn`.
 
@@ -11,7 +11,8 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Startprüfung (Import + Parse + 300 Frames, Fehler UND Warnungen): `./tools/check_project.ps1`
 - Tests gezielt: `./tools/run_tests.ps1 -Suite dash,combo` (Suite = `tests/**/test_<name>.gd`)
 - Playtests (Fenster): `-s res://tests/playtest/visual_playtest.gd` (Combat), `rpg_playtest.gd` (RPG),
-  `loop_playtest.gd` (Gameplay-Loop), `ui_playtest.gd` (Auflösungen/UI-Skalierung)
+  `loop_playtest.gd` (Gameplay-Loop), `ui_playtest.gd` (Auflösungen/UI-Skalierung),
+  `crafting_playtest.gd` (Forge), `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen)
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
 ## Feste Regeln
@@ -36,6 +37,13 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
   Revision); gewürfelte Werte nie neu berechnen; Uniques nur über `CraftingProfile.allowed_operations`;
   Combat-Wirkung nur als `ItemEffect`/`AttackModifier`. Design: `docs/CRAFTING_DESIGN.md`.
+- Klassen (`docs/CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`): Talent-/Skill-/
+  Preset-/Prolog-/Quest-Regeln nur in `TalentService`, `SkillBook`, `PresetService`, `PrologueService`,
+  `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).
+  Skill-Treffer nur über `SkillCast.deliver`, alle Treffer des Charakters über `ItemEffectRunner.dispatch_hit`
+  (Quelle/Tiefe in `HitData`). Skills nutzen Player-Hooks (`ability_handler`, `begin_skill`,
+  `start_skill_motion`) - nie den Dash. Trials sind temporär (nie speichern, nie freischalten).
+  Spielerseitige Texte Englisch; neue UI-Chrome-Texte über `localization/ui.csv` (`tr("UI_...")`).
 - Neue Maps erben von `GameMap`, brauchen `Player`, `GameHud`, `SpawnPoint` "default" und eine `MapDefinition`.
   Übergänge nur über `SessionState.travel()`. Weltzustand nur in `WorldState`.
 
@@ -44,4 +52,4 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Nie behaupten, ein Test/Playtest sei gelaufen, wenn er nicht lief. Ergebnisse in den Overnight-Reports.
 
 ## Git
-- Arbeitsbranch der jeweiligen Sitzung (`dev/rpg-foundation`); kleine Commits pro Phase. Kein Push, kein Force.
+- Arbeitsbranch der jeweiligen Sitzung (zuletzt `dev/class-foundation`); kleine Commits pro Phase. Kein Push, kein Force.

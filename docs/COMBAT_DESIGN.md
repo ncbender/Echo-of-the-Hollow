@@ -13,7 +13,8 @@ Konflikte unter „Offene Designfragen“.
 | Rechtsklick halten / loslassen | Heavy aufladen / ausführen |
 | Space | Dash in Blickrichtung (zur Maus, WASD egal) |
 | Shift | später: defensiver Aktionsslot (gebunden, ohne Funktion) |
-| Q/E/R/F | später: Klassenfähigkeiten (gebunden, ohne Funktion) |
+| Q/E/R/F | aktive Klassenfähigkeiten (Class Foundation 0.2, `SKILL_SYSTEM.md`) |
+| C | Klassen-/Talentfenster (Talente lernen überall, Rest an der Klassenstation) |
 | 1 / 2 | Waffenfamilie wechseln (Prototyp) |
 | F1 / F2 / F3 / F5 | Debug: Hitboxen + Lunge-/Knockback-Vektoren, Gegner spawnen, Mastery-XP, Map neu laden |
 
@@ -220,3 +221,34 @@ Heranziehen: die Richtung bestimmt allein die Maus.
 - Reaktionsdauern (v. a. STUN 0,6 s) im Kampf gegen mehrere Grunts prüfen.
 - Dash durch Gegner erlauben? (siehe offene Designfragen)
 - Hitstop-Gefühl jetzt lokal: prüfen, ob schwere Treffer weiterhin „Gewicht“ haben.
+
+## Class Foundation 0.2 (Erweiterungen, bestehende Werte unverändert)
+Unverändert geblieben sind:
+- alle Angriffs-, Dash-, Bewegungs-, Combo-, Knockback- und Lunge-Werte
+- die Gegner-KI
+
+Neu (Details in `SKILL_SYSTEM.md`):
+- **Angriffsgeschwindigkeit wirkt:** `attack_speed = clamp(1 + Attack Speed % / 100, 0,75, 1,4)`.
+  - Beschleunigt Startup, Active, Recovery und `chain_delay`; die Lunge-Distanz bleibt exakt.
+  - Nicht beschleunigt: Heavy-Charge-Stufen, Combo-Fenster, Input-Buffer, Dash.
+  - Ohne Attack-Speed-Quellen ist sie 1,0, das alte Timing bleibt also exakt.
+  - Neue Quellen: Talente, Buffs, Shadowrunner-Grundwert +5 %. Bestehende Quellen sind die
+    Storm-Ore-Prägung (+3 %) und der Swift-Affix; sie verändern jetzt tatsächlich die Timings.
+- **Skills (Q/E/R/F):**
+  - Starten nur dort, wo ein Dash-Cancel erlaubt wäre, und brechen Light-Angriffe ab.
+  - Cast-Lock je Skill, den ein Dash beendet.
+  - Skill-Bewegungen (Blade Rush, Shadow Strike, Shadowstep) sind **kein Dash**: eigene Distanz,
+    keine Ladung, keine iFrames, Wände stoppen sie. Der Dash bleibt auf Space, zur Maus, mit
+    2 Ladungen.
+- **Status:**
+  - Bleeding (Schaden über Zeit) und Chill (nur Fortbewegung des Gegners, Boss-Grenze).
+  - Marken: Arcane Mark, Weak Point, Death Mark; Smoked (Verlangsamung).
+- **Trefferquellen:** direkt, Skill, ausgelöst, Status. Ausgelöste Ketten enden nach Tiefe 1.
+
+### Vorschläge für den Feel-Test (Class Foundation 0.2, NICHT umgesetzt)
+- **Cast-Locks:** 0,12–0,4 s (Whirlwind 1,2 s). Prüfen, ob sich Skills zwischen Combos flüssig anfühlen.
+- **Trials:** Drei Grunts sterben im Fenster-Playtest in 2–4 s, da sie eng stehen und die Trial
+  auf Level 12 läuft. Für einen echten Lerneffekt eventuell mehr oder zähere Gegner.
+- **Arcane Bolt:** 0,45 s Cooldown und 8 Mana bei 8 Mana/s Regeneration. Prüfen, ob die
+  Rotation ohne Nahkampf trägt.
+- **Shadowstep:** prüfen, ob 80 px genug Abstand zum normalen Dash (110 px, iFrames) haben.

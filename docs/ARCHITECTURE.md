@@ -111,7 +111,7 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
   keine RefCounted-Zyklen entstehen (Leck in der Startprüfung gefunden und behoben).
 - Neue Combat-Bausteine aus Phase 1: `HitReactionComponent` (+Config), `BodyContact`, lokaler Hitstop
   (`apply_hitstop` an Player/Enemy).
-- Details: `PROGRESSION_SYSTEM.md`, `CLASS_SYSTEM.md`, `ITEM_SYSTEM.md`, `EQUIPMENT_SYSTEM.md`,
+- Details: `PROGRESSION_SYSTEM.md`, `CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`, `ITEM_SYSTEM.md`, `EQUIPMENT_SYSTEM.md`,
   `SAVE_SYSTEM.md`.
 
 ## Welt-Schicht (Overnight 3)
@@ -158,3 +158,33 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
 1 `world` (Wände, Dummies) · 2 `player` · 3 `enemy` · 4 `hurtbox` (nur Abfragen, kein Monitoring).
 Player-Körper kollidiert mit `world` + `enemy`; Gegner mit `world`, `player`, `enemy`. Interactables
 und Pickups überwachen nur `player`.
+
+## Klassen-Schicht (Class Foundation 0.2, Details `CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`)
+```
+ data/classes, talents, skills, skill_mods, status, trials, quests  ──►  GameDatabase (+ TalentService.validate_data)
+ Character
+  ├─ CharacterClasses   aktive Klasse, Level/XP; trial_class_id (temporär, nie gespeichert)
+  ├─ ClassBuilds        ClassBuild je Klasse: Talente, Slots, Mods, Freischaltungen, Presets (+ Trial-Build)
+  ├─ PrologueState      Trials, Wahl     ├─ QuestLog   Klassenquests
+  └─ _runtime_modifiers Buff-Statquellen (nicht gespeichert)
+ PlayerProgressionBridge
+  ├─ ClassRuntime       Ressource, Cooldowns, Buffs, Pressure; Player.ability_handler = try_cast
+  ├─ ItemEffectRunner   Item- + Talent- + Klassen-Effekte; dispatch_hit = einziger Trefferstrom
+  └─ apply_status       Status auf Gegnern, dem Spieler gutgeschrieben
+```
+- Regeln stehen zentral und zustandslos in `TalentService`, `SkillBook`, `PresetService`,
+  `PrologueService` und `QuestService`. Die UI ruft nur diese Dienste auf.
+- Der Player kennt keine Klassen. Er bietet generische Hooks:
+  - `ability_handler` (Q/E/R/F mit Puffer)
+  - `can_start_skill`, also dieselbe Cancel-Regel wie der Dash
+  - `begin_skill` für den Cast-Lock
+  - `start_skill_motion`, eine exakte Distanz, kein Dash
+- Generische Combat-Bausteine: `StatusComponent`, `StatusEffectDefinition`, `SkillProjectile` und
+  `SkillZone`. `CombatComponent.attack_speed` beschleunigt die Phasen.
+- `HitData` trägt jetzt:
+  - `source` und `depth` (Kettenschutz)
+  - `broke_poise` und `killed`
+  - einen Status-Snapshot des Ziels
+- `ItemEffect.hit_sources` filtert pro Effekt, welche Treffer ihn erreichen.
+- Eine Trial schaltet die Klasse über die Getter-Eigenschaft `active_class_id` um. Alle Systeme
+  sehen dadurch automatisch die Trial-Klasse, `to_dict` schreibt aber immer die echte Klasse.

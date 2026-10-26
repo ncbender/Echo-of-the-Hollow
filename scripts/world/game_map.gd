@@ -11,6 +11,9 @@ extends Node2D
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const DEBUG_MASTERY_XP := 100
 const DEBUG_CLASS_XP := 100
+## F10: class levels (talent points) and gold for testing builds and respecs.
+const DEBUG_CLASS_LEVELS := 5
+const DEBUG_GOLD := 100
 ## F7 debug kit: one of every equippable test item plus building materials.
 const DEBUG_MATERIALS := {&"iron_ore": 10, &"timber": 10, &"stone": 10}
 ## F4 crafting kit: craftable bases + crafting materials (Resonance Forge vertical slice).
@@ -174,6 +177,8 @@ func _handle_debug_input(event: InputEvent) -> bool:
 		hud.notify("Debug item kit: %d items added" % give_debug_items(bridge.character))
 	elif event.is_action_pressed(&"debug_crafting_kit") and bridge != null:
 		hud.notify("Debug crafting kit: %d stacks added" % give_crafting_kit(bridge.character))
+	elif event.is_action_pressed(&"debug_class_levels") and bridge != null:
+		hud.notify(give_class_levels(bridge.character, DEBUG_CLASS_LEVELS))
 	elif event.is_action_pressed(&"debug_reset_arena"):
 		get_tree().reload_current_scene()
 	else:
@@ -224,3 +229,19 @@ static func give_crafting_kit(character: Character) -> int:
 		if character.database.get_item(item_id) != null:
 			added += character.inventory.add_item(item_id, DEBUG_CRAFTING_ITEMS[item_id]).size()
 	return added
+
+
+## Debug (F10): `levels` class levels for the active (unlocked) class plus gold.
+## Never during a trial - trials must stay temporary.
+static func give_class_levels(character: Character, levels: int) -> String:
+	if character.classes.in_trial():
+		return "Not during a class trial"
+	var class_id := character.classes.active_class_id
+	var definition := character.database.get_class_def(class_id)
+	var xp := -character.classes.get_xp(class_id)
+	var level := character.classes.get_level(class_id)
+	for step in levels:
+		xp += definition.xp_to_next(mini(level + step, definition.max_level))
+	character.classes.add_xp(class_id, maxi(xp, 0))
+	character.inventory.add_item(&"gold_coin", DEBUG_GOLD)
+	return "Debug: %s is now level %d (+%d gold)" % [definition.display_name, character.classes.get_level(class_id), DEBUG_GOLD]
