@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WaystoneDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/waystone_definition.gd" id="1_way"]
+
+[resource]
+script = ExtResource("1_way")
+id = &"whispering_stone"
+display_name = "The Whispering Stone"
+map_id = &"whispering_stone"
+available = true
+starts_active = false
+order = 1

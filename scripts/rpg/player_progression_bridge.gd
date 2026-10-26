@@ -282,6 +282,8 @@ func _on_hit_dispatched(hit: HitData) -> void:
 		PrologueService.record(character, TrialObjective.Kind.SKILL_HITS, hit.skill_id, 1.0)
 	if hit.killed and hit.target != null and is_instance_valid(hit.target) and not hit.target.is_in_group(&"training_target"):
 		PrologueService.record(character, TrialObjective.Kind.KILLS, &"", 1.0)
+	if hit.broke_poise and hit.target is Enemy and is_instance_valid(hit.target):
+		PrologueService.record(character, TrialObjective.Kind.POISE_BREAKS, (hit.target as Enemy).config.id, 1.0)
 	for tag in hit.tags:
 		if String(tag).begins_with("rupture_"):
 			PrologueService.record(character, TrialObjective.Kind.STATUS_CONSUMED, StringName(String(tag).trim_prefix("rupture_")), 1.0)
@@ -304,7 +306,7 @@ func _on_player_died() -> void:
 func _on_trial_finished(trial_id: StringName, completed: bool) -> void:
 	var trial: TrialDefinition = character.database.trials.get(trial_id)
 	var name := trial.display_name if trial != null else String(trial_id)
-	message.emit("%s complete! You are a Basic Adventurer again." % name if completed else "%s left." % name)
+	message.emit("%s walked. The echo fades; you are a Basic Adventurer again." % name if completed else "%s fades. You can walk it again at any time." % name)
 
 
 ## Talents, slots or mods changed: talent effects may differ (stats re-resolve

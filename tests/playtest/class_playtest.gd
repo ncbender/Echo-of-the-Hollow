@@ -158,7 +158,7 @@ func _prologue() -> void:
 	root.size = Vector2i(1600, 900)
 	session.set_character(CharacterFactory.create_new(session.database))
 	var character := session.character
-	await _load_map("res://scenes/maps/home_base.tscn", &"home_base")
+	await _load_map("res://scenes/arena/test_arena.tscn", &"test_arena")   # the Prologue Grounds gate is a developer gate in the arena
 	_check(character.classes.active_class_id == &"basic_adventurer", "starts as Basic Adventurer")
 	var gate := map.get_node("GatePrologue") as MapGate
 	map.player.global_position = gate.global_position

@@ -1,11 +1,14 @@
 class_name ClassChoiceStation
 extends Interactable
-## Prologue altar: opens the one-time starting class choice (ClassChoicePanel).
+## The heart of the Whispering Stone: opens the one-time choice of the first
+## class (ClassChoicePanel) once all three echoes were walked.
+
+@export var title: String = "Altar of Choice"
 
 
 func _ready() -> void:
 	super._ready()
-	prompt = "Choose your class"
+	prompt = "Listen to %s" % title
 
 
 func interact(hud: GameHud) -> void:
@@ -24,8 +27,6 @@ func _draw() -> void:
 	for i in 3:
 		draw_arc(Vector2.ZERO, 14.0 + i * 7.0, 0.0, TAU, 32, Color(color, 0.25 + 0.25 * pulse), 1.5)
 	draw_set_transform(Vector2.ZERO)
-	draw_rect(Rect2(-6, -20, 12, 18), Color(0.45, 0.4, 0.3))
-	draw_circle(Vector2(0, -24), 5.0, Color(color, 0.6 + 0.4 * pulse))
-	var text := "Altar of Choice"
-	var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
-	WorldText.draw(self, Vector2(-width * 0.5, -34), text, 7, color, 2, Color.BLACK)
+	draw_colored_polygon(PackedVector2Array([Vector2(-9, -2), Vector2(-7, -24), Vector2(0, -30), Vector2(7, -23), Vector2(9, -2)]), Color(0.45, 0.44, 0.5))
+	draw_circle(Vector2(0, -16), 3.5, Color(color, 0.5 + 0.5 * pulse))
+	WorldText.draw(self, Vector2(-WorldText.width(title, 7) * 0.5, -36), title, 7, color, 2, Color.BLACK)

@@ -14,8 +14,12 @@ extends Resource
 ## Temporary Q/E/R/F skills.
 @export var skill_slots: Array[StringName] = []
 @export var objectives: Array[TrialObjective] = []
-## Grunts spawned for the trial.
+## Grunts spawned for the trial (used when `enemy_configs` is empty).
 @export var enemy_count: int = 3
+## Enemy variants spawned for the trial, one per entry (Whispering Stone echoes).
+@export var enemy_configs: Array[EnemyConfig] = []
+## Text of this path on the class choice at the Whispering Stone.
+@export_multiline var choice_text: String
 
 
 func make_build(slot_count: int) -> ClassBuild:

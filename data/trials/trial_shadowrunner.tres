@@ -2,6 +2,23 @@
 
 [ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="1_pnsx4"]
 [ext_resource type="Script" path="res://scripts/rpg/prologue/trial_definition.gd" id="2_8qc0q"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="3_cfg"]
+[ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="4_husk"]
+[ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="5_wolf"]
+
+[sub_resource type="Resource" id="Resource_focus"]
+script = ExtResource("1_pnsx4")
+kind = 0
+target_id = &"focus"
+amount = 40.0
+description = "Let your focus build up to 40"
+
+[sub_resource type="Resource" id="Resource_step"]
+script = ExtResource("1_pnsx4")
+kind = 2
+target_id = &"shadowstep"
+amount = 1.0
+description = "Close in with Shadowstep (R)"
 
 [sub_resource type="Resource" id="Resource_0sif0"]
 script = ExtResource("1_pnsx4")
@@ -10,28 +27,24 @@ target_id = &"weak_point"
 amount = 2.0
 description = "Expose Weak Points (light finisher or E)"
 
-[sub_resource type="Resource" id="Resource_4n48n"]
-script = ExtResource("1_pnsx4")
-kind = 0
-target_id = &"focus"
-amount = 40.0
-description = "Build up 40 focus"
-
-[sub_resource type="Resource" id="Resource_uixyh"]
+[sub_resource type="Resource" id="Resource_exec"]
 script = ExtResource("1_pnsx4")
 kind = 4
 target_id = &"weak_point"
+amount = 1.0
 description = "Execute a Weak Point (F)"
 
 [resource]
 script = ExtResource("2_8qc0q")
 id = &"trial_shadowrunner"
 class_id = &"shadowrunner"
-display_name = "Trial of Shadows"
-description = "Fight as a Shadowrunner: expose weak points, build focus, and finish with Execution."
+display_name = "Echo of the Shadowrunner"
+description = "A moment is enough, if you know where to strike."
 talents = Dictionary[StringName, int]({
 &"sr_as_eye": 1,
 &"sr_as_precision": 2
 })
 skill_slots = Array[StringName]([&"shadow_strike", &"expose_weakness", &"shadowstep", &"execution"])
-objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_0sif0"), SubResource("Resource_4n48n"), SubResource("Resource_uixyh")])
+objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_focus"), SubResource("Resource_step"), SubResource("Resource_0sif0"), SubResource("Resource_exec")])
+enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("5_wolf"), ExtResource("4_husk"), ExtResource("5_wolf")])
+choice_text = "A swift and precise fighter who exploits weak points and strikes when the moment is right."

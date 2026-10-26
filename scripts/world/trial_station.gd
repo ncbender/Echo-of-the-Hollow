@@ -39,12 +39,21 @@ func interact(hud: GameHud) -> void:
 func spawn_enemies(map: GameMap) -> void:
 	clear_enemies()
 	var points := get_node_or_null("Spawns")
-	var count := trial().enemy_count if trial() != null else 0
+	var definition := trial()
+	var configs: Array[EnemyConfig] = definition.enemy_configs if definition != null else []
+	var count := configs.size() if not configs.is_empty() else (definition.enemy_count if definition != null else 0)
 	for index in count:
 		var at := global_position + Vector2(-30 + 30 * index, 80)
 		if points != null and index < points.get_child_count():
 			at = (points.get_child(index) as Node2D).global_position
-		_enemies.append(map.spawn_enemy(at))
+		_enemies.append(map.spawn_enemy(at, configs[index] if index < configs.size() else null))
+
+
+func _all_down() -> bool:
+	for enemy in _enemies:
+		if is_instance_valid(enemy) and enemy.state != Enemy.State.DEAD:
+			return false
+	return true
 
 
 func clear_enemies() -> void:
@@ -58,9 +67,11 @@ func _process(_delta: float) -> void:
 	var map := get_tree().current_scene as GameMap
 	var character := map.bridge.character if map != null and map.bridge != null else null
 	var running := character != null and character.prologue.active_trial == trial_id
-	prompt = "Leave the trial" if running else "Start %s" % (trial().display_name if trial() != null else "trial")
+	prompt = "Leave the echo" if running else "Walk the %s" % (trial().display_name if trial() != null else "trial")
 	if character != null and not running and character.prologue.active_trial == &"" and not _enemies.is_empty():
 		clear_enemies()   # the trial ended (completed or left elsewhere)
+	elif running and _all_down() and map != null:
+		spawn_enemies(map)   # goals not met yet: the echo sends a new wave, never a dead end
 	queue_redraw()
 
 
@@ -77,7 +88,7 @@ func _draw() -> void:
 	draw_circle(Vector2(0, -21), 4.0, Color(color, 0.7 + 0.3 * pulse))
 	var title := trial().display_name if trial() != null else String(trial_id)
 	if done:
-		title += "  (done)"
+		title += "  (walked)"
 	var font := ThemeDB.fallback_font
 	var width := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 	WorldText.draw(self, Vector2(-width * 0.5, -30), title, 7, color.lightened(0.3), 2, Color.BLACK)

@@ -16,6 +16,8 @@ enum Kind {
 	STATUS_CONSUMED,
 	## Enemies killed (training targets never count).
 	KILLS,
+	## Poise breaks of enemy variant `target_id` (EnemyConfig.id; &"" = any).
+	POISE_BREAKS,
 }
 
 @export var kind: Kind = Kind.KILLS

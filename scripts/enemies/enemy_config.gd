@@ -4,6 +4,8 @@ extends Resource
 ## ...) are configs of the same grunt scene: data, not new enemy code.
 
 @export_group("Identity")
+## Stable variant id (trial objectives: "break the guard of a hardened_husk").
+@export var id: StringName = &"hollow_grunt"
 @export var display_name: String = "Hollow Grunt"
 @export var body_color: Color = Color("b5524a")
 @export var body_radius: float = 8.0

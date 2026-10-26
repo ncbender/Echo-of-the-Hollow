@@ -42,6 +42,9 @@ func _run() -> void:
 	await _road()
 	if until != "road":
 		await _haven()
+	if until != "road" and until != "haven":
+		await _stone()
+		await _return()
 	_log("play time (character clock): %.0f s, wall clock: %.0f s" % [session.character.play_time if session.character else 0.0,
 		(Time.get_ticks_msec() - _started_ms) / 1000.0])
 	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
@@ -175,6 +178,136 @@ func _haven() -> void:
 	await _walk_into(map.get_node("ToShrine") as Node2D)
 	await _await_map(&"whispering_stone")
 	_check(StoryService.at_step(character, &"the_whispering_stone", 1), "reached the Whispering Stone")
+
+
+func _stone() -> void:
+	var character := session.character
+	await _shot("p12_shrine_path")
+	await _walk_to(Vector2(0, 160))
+	await _fight(map.get_node("Encounters/ShrinePath") as Encounter)
+	# optional side area: the Memory Fragment
+	await _walk_to(Vector2(0, 0))
+	await _walk_to(Vector2(300, 0))
+	await _fight(map.get_node("Encounters/SideWolves") as Encounter, true)
+	await _walk_to(Vector2(470, 0))
+	await _press(&"interact")
+	_check(map.hud.dialogue_panel.current_text() == "Three stood here when the stone was whole.", "Memory Fragment read")
+	await _shot("p13_memory_fragment")
+	await _press(&"interact")
+	await _walk_to(Vector2(200, 0))
+	await _walk_to(Vector2(0, -60))
+	# the three echoes, in free order
+	for entry: Array in [["TrialShadowrunner", [1, 2, 1, 3]], ["TrialWarrior", [0, 1, 0, 3]], ["TrialArcanist", [0, 0, 0, 1, 0, 0, 1]]]:
+		var station := map.get_node(entry[0]) as TrialStation
+		for attempt in 3:
+			if character.prologue.has_completed_trial(station.trial_id):
+				break
+			await _walk_to(station.global_position + Vector2(0, 8))
+			await _press(&"interact")
+			_check(character.classes.in_trial(), "%s started (attempt %d)" % [station.trial().display_name, attempt + 1])
+			if attempt == 0:
+				await _ticks(20)
+				await _shot("p14_%s" % String(station.trial_id))
+			await _echo_fight(entry[1], 60.0)
+			map.player.health.heal(map.player.health.max_health)
+		_check(character.prologue.has_completed_trial(station.trial_id), "%s walked in real combat" % station.trial().display_name)
+		_check(character.classes.active_class_id == &"basic_adventurer", "back to Basic Adventurer after %s" % station.trial_id)
+	_check(StoryService.at_step(character, &"the_whispering_stone", 2), "three echoes walked")
+	# the choice
+	var stone := map.get_node("TheStone") as ClassChoiceStation
+	await _walk_to(stone.global_position + Vector2(0, 26))
+	await _press(&"interact")
+	var panel := map.hud.class_choice_panel
+	_check(panel.visible and _label_texts(panel).has(ClassChoicePanel.INTRO), "the stone: three paths linger ...")
+	await _shot("p15_choice")
+	_click_button(panel, "Choose Shadowrunner")
+	await _ticks(3)
+	_click_button(panel, "Confirm Shadowrunner")
+	for i in 30:
+		if panel.save_state != "saving":
+			break
+		await _ticks(1)
+	_check(panel.save_state == "saved" and panel.status_text().contains("taken root"), "success shown after the save: %s" % panel.status_text())
+	await _shot("p16_chosen")
+	_check(character.classes.active_class_id == &"shadowrunner" and not character.classes.is_unlocked(&"warrior")
+		and not character.classes.is_unlocked(&"arcanist"), "Shadowrunner chosen, the others locked")
+	map.hud.close_windows()
+	# the damaged waystone
+	var waystone := map.get_node("Waystone") as Waystone
+	await _walk_to(waystone.global_position + Vector2(0, 22))
+	await _press(&"interact")
+	_check(map.hud.dialogue_panel.current_text() == WaystoneService.ACTIVATION_LINE, "May the road remember those who return.")
+	await _shot("p17_waystone")
+	await _press(&"interact")
+	_check(StoryService.at_step(character, &"the_first_binding", 0), "waystone awakened: return to Haven")
+
+
+func _return() -> void:
+	var character := session.character
+	var waystone := map.get_node("Waystone") as Waystone
+	await _walk_to(waystone.global_position + Vector2(0, 22))
+	await _press(&"interact")
+	_check(map.hud.waystone_panel.visible, "waystone travel window")
+	await _shot("p18_fast_travel")
+	var row := map.hud.waystone_panel.find_child("Waystone_haven", true, false)
+	if row != null:
+		_click_button(row, "Travel")
+	await _await_map(&"home_base")
+	_check(StoryService.at_step(character, &"the_first_binding", 1), "back in Haven by fast travel")
+	await _talk_to(map.get_node("Mara") as StoryNpc)
+	_check(StoryService.at_step(character, &"the_first_binding", 2), "Mara: You left here carrying a sword ...")
+	await _talk_to(map.get_node("Edrin") as StoryNpc)
+	_check(character.world.has_flag(&"prologue.completed"), "prologue complete")
+	_check(StoryService.at_step(character, &"the_first_signs", 0), "main quest The Roots Remember: The First Signs")
+	await _ticks(20)
+	await _shot("p19_prologue_complete")
+
+
+## Scripted fighter for an echo: walks to the nearest enemy (the warrior goes for
+## the Hardened Husk), light attacks and presses the skill slots of `rotation`.
+func _echo_fight(rotation: Array, seconds: float) -> void:
+	var character := session.character
+	var ticks := 0
+	var step := 0
+	while character.classes.in_trial() and ticks < seconds * 60.0:
+		var target := _nearest_enemy(character.classes.active_class_id == &"warrior")
+		f.move = Vector2.ZERO
+		f.light_pressed = false
+		f.ability_slot = -1
+		if target != null:
+			var to := target.global_position - map.player.global_position
+			f.aim_direction = to.normalized()
+			var next_slot: int = rotation[step % rotation.size()]
+			var wanted := 60.0 if character.classes.active_class_id == &"arcanist" and next_slot != 1 else 22.0
+			if to.length() > wanted:
+				f.move = to.normalized()
+			if ticks % 15 == 0 and to.length() < 34.0:
+				f.light_pressed = true
+			if ticks % 50 == 25:
+				f.ability_slot = rotation[step % rotation.size()]
+				step += 1
+		ticks += 1
+		await physics_frame
+	f.move = Vector2.ZERO
+	f.light_pressed = false
+	f.ability_slot = -1
+	_log("  echo fight ended after %.1f s (in trial: %s, deaths %d)" % [ticks / 60.0, character.classes.in_trial(), _deaths])
+	if character.classes.in_trial():
+		await _press(&"interact")   # step out; the next attempt starts fresh
+	await _ticks(30)
+
+
+func _nearest_enemy(prefer_robust: bool = false) -> Enemy:
+	var best: Enemy = null
+	for node in map.find_children("*", "Enemy", true, false):
+		var enemy := node as Enemy
+		if enemy.state == Enemy.State.DEAD:
+			continue
+		if prefer_robust and enemy.config.id == &"hardened_husk":
+			return enemy
+		if best == null or enemy.global_position.distance_to(map.player.global_position) < best.global_position.distance_to(map.player.global_position):
+			best = enemy
+	return best
 
 
 func _label_texts(node: Node) -> PackedStringArray:

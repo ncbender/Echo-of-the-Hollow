@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="14_cond"]
 [ext_resource type="Script" path="res://scripts/world/story_conditional.gd" id="15_cond_node"]
 [ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="16_trigger"]
+[ext_resource type="Script" path="res://scripts/world/waystone.gd" id="17_waystone"]
 
 [sub_resource type="RectangleShape2D" id="Rect_gate_ns"]
 size = Vector2(56, 12)
@@ -219,6 +220,19 @@ condition = SubResource("C_in_haven")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Edrin"]
 shape = SubResource("Circle_npc")
+
+[node name="Waystone" type="Area2D" parent="."]
+position = Vector2(72, -8)
+script = ExtResource("17_waystone")
+waystone_id = &"haven"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Waystone"]
+shape = SubResource("Circle_npc")
+
+[node name="SpawnWaystone" type="Marker2D" parent="."]
+position = Vector2(72, 18)
+script = ExtResource("9_spawn")
+spawn_id = &"waystone"
 
 [node name="ToShrine" type="Area2D" parent="."]
 position = Vector2(0, -254)

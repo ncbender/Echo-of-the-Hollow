@@ -111,7 +111,7 @@ static func can_choose(character: Character, class_id: StringName) -> String:
 	for other in prologue_classes(character.database):
 		var trial := trial_for_class(character.database, other)
 		if trial != null and not prologue.has_completed_trial(trial.id):
-			return "Complete all three class trials first."
+			return "Walk all three echoes first."
 	return ""
 
 

@@ -53,8 +53,8 @@ func _ready() -> void:
 	bridge = session.bind_player(player)
 	hud.setup(bridge)
 	hud.objectives.show_prologue_hint = map_id == session.database.rules.prologue_map_id
-	if character.classes.in_trial() and map_id != session.database.rules.prologue_map_id:
-		PrologueService.end_trial(character, false)   # trials only exist on the prologue map
+	if character.classes.in_trial() and not map_id in session.database.rules.trial_map_ids:
+		PrologueService.end_trial(character, false)   # trials only exist at the Whispering Stone (and the dev grounds)
 	session.message.connect(hud.notify)
 	for text in session.consume_messages():
 		hud.notify(text)

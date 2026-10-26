@@ -126,7 +126,8 @@ func _station_button(text: String, action: Callable, enabled: bool = true, reaso
 
 func _build_classes() -> void:
 	_content.add_child(UiTheme.wrapped("Weapon mastery, inventory, crafting materials and the home base are shared by all classes. Each class has its own level, talents, skills, presets and equipment loadout.", UiTheme.COLOR_DIM, 900))
-	var definitions: Array = character.database.classes.values()
+	# prepared classes (Guardian, Soulbinder) stay hidden until they are playable
+	var definitions: Array = character.database.classes.values().filter(func(d: ClassDefinition) -> bool: return d.playable)
 	definitions.sort_custom(func(a: ClassDefinition, b: ClassDefinition) -> bool: return a.display_name < b.display_name)
 	for definition: ClassDefinition in definitions:
 		_content.add_child(_class_row(definition))
@@ -348,7 +349,7 @@ func _preset_row(class_id: StringName, index: int) -> Control:
 
 func _build_quests() -> void:
 	_content.add_child(UiTheme.wrapped("Classes you did not choose in the prologue - and later classes - are unlocked by their class quests. Take and turn them in at a class station.", UiTheme.COLOR_DIM, 900))
-	for quest in QuestService.quests_for(character):
+	for quest in QuestService.quests_for(character).filter(func(q: ClassQuestDefinition) -> bool: return q.available):
 		_content.add_child(_quest_row(quest))
 
 

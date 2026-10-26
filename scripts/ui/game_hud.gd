@@ -19,6 +19,7 @@ var pause_menu: PauseMenu
 var save_indicator: SaveIndicator
 var dialogue_panel: DialoguePanel
 var restoration_panel: RestorationPanel
+var waystone_panel: WaystonePanel
 ## Contextual tutorial hint (top centre).
 var hint_panel: PanelContainer
 var _hint_label: Label
@@ -87,6 +88,7 @@ func _ready() -> void:
 	dialogue_panel = _add_window(DialoguePanel.new()) as DialoguePanel
 	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
 	restoration_panel.hud = self
+	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
 	hint_panel = PanelContainer.new()
 	hint_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_panel.offset_top = UiTheme.SCREEN_MARGIN * 3
@@ -200,6 +202,14 @@ func open_class_choice(station: ClassChoiceStation) -> void:
 		return
 	close_windows()
 	class_choice_panel.open(bridge.character, station)
+
+
+## Fast travel at an awake waystone.
+func open_waystones(waystone: Waystone) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	waystone_panel.open(bridge.character, waystone)
 
 
 ## A ruin of Haven: costs and the Restore button (or "unavailable for now").

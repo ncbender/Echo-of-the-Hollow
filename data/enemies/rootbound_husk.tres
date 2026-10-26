@@ -10,6 +10,7 @@ quantity = 2
 
 [resource]
 script = ExtResource("1_cfg")
+id = &"rootbound_husk"
 display_name = "Rootbound Husk"
 body_color = Color(0.48, 0.4, 0.26, 1)
 max_health = 70.0

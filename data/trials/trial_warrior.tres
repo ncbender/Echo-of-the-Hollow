@@ -2,13 +2,16 @@
 
 [ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="1_cfrdq"]
 [ext_resource type="Script" path="res://scripts/rpg/prologue/trial_definition.gd" id="2_rknk4"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="3_cfg"]
+[ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="4_husk"]
+[ext_resource type="Resource" path="res://data/enemies/hardened_husk.tres" id="5_hardened"]
 
 [sub_resource type="Resource" id="Resource_6xp1e"]
 script = ExtResource("1_cfrdq")
 kind = 0
 target_id = &"rage"
 amount = 50.0
-description = "Build up 50 rage"
+description = "Build up 50 Rage through aggression"
 
 [sub_resource type="Resource" id="Resource_khnw1"]
 script = ExtResource("1_cfrdq")
@@ -17,20 +20,24 @@ target_id = &"furious_strike"
 amount = 2.0
 description = "Hit enemies with Furious Strike (Q)"
 
-[sub_resource type="Resource" id="Resource_8frox"]
+[sub_resource type="Resource" id="Resource_break"]
 script = ExtResource("1_cfrdq")
-amount = 2.0
-description = "Defeat two hollow creatures"
+kind = 6
+target_id = &"hardened_husk"
+amount = 1.0
+description = "Break the guard of the Hardened Husk (heavy attacks, Furious Strike)"
 
 [resource]
 script = ExtResource("2_rknk4")
 id = &"trial_warrior"
 class_id = &"warrior"
-display_name = "Trial of Steel"
-description = "Fight as a Warrior: build rage with your blows, then spend it on Furious Strike."
+display_name = "Echo of the Warrior"
+description = "Strength is not the blade. It is the will to stand."
 talents = Dictionary[StringName, int]({
 &"war_b_seething": 2,
 &"war_wb_hands": 1
 })
 skill_slots = Array[StringName]([&"furious_strike", &"battle_cry", &"blade_rush", &"warbreaker"])
-objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_8frox")])
+objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_break")])
+enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("4_husk"), ExtResource("4_husk"), ExtResource("5_hardened")])
+choice_text = "A relentless fighter who builds Rage through aggression and overwhelms enemies with powerful strikes."

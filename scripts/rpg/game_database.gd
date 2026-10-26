@@ -32,6 +32,7 @@ const DIRS := {
 	&"story_quests": "res://data/story",
 	&"npcs": "res://data/npcs",
 	&"ruins": "res://data/haven/ruins",
+	&"waystones": "res://data/world/waystones",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -68,6 +69,7 @@ var quests: Dictionary = {}           # quest id -> ClassQuestDefinition
 var story_quests: Dictionary = {}     # quest id -> StoryQuestDefinition (prologue, main quest)
 var npcs: Dictionary = {}             # npc id -> NpcDefinition (dialogues inline)
 var ruins: Dictionary = {}            # ruin id -> RuinDefinition (Haven restoration)
+var waystones: Dictionary = {}        # waystone id -> WaystoneDefinition (fast travel)
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -144,6 +146,8 @@ func register(resource: Resource) -> bool:
 		table = npcs; key = resource.id
 	elif resource is RuinDefinition:
 		table = ruins; key = resource.id
+	elif resource is WaystoneDefinition:
+		table = waystones; key = resource.id
 	elif resource is ClassQuestDefinition:
 		table = quests; key = resource.id
 	elif resource is TalentTreeDefinition:
@@ -240,6 +244,7 @@ func validate() -> PackedStringArray:
 		errors.append_array(StoryService.validate_data(self))
 	errors.append_array(DialogueService.validate_data(self))
 	errors.append_array(RestorationService.validate_data(self))
+	errors.append_array(WaystoneService.validate_data(self))
 	return errors
 
 

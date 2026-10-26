@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WaystoneDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/waystone_definition.gd" id="1_way"]
+
+[resource]
+script = ExtResource("1_way")
+id = &"haven"
+display_name = "Haven"
+map_id = &"home_base"
+available = true
+starts_active = true
+order = 0
