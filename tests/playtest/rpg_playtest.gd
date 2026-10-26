@@ -79,6 +79,7 @@ func _pickup_and_inventory_flow() -> void:
 	_check(hud.inventory_panel.visible, "inventory opened with I")
 	await _shot("r03_inventory")
 	await _equipment_flow()
+	await _legendary_flow()
 
 
 func _equipment_flow() -> void:
@@ -99,6 +100,33 @@ func _equipment_flow() -> void:
 	await _shot("r04_equipment")
 	await _press(&"ui_inventory")
 	_check(not panel.visible, "inventory closed with I")
+
+
+func _legendary_flow() -> void:
+	var character := session.character
+	var blade := character.inventory.add_item(&"echo_blade")[0]
+	_check(character.equipment.equip(blade.instance_id) == "", "echo blade equipped")
+	await _ticks(3)
+	var extra: Node2D = load("res://scenes/dummy/training_dummy.tscn").instantiate()
+	var dummy_a: Node2D = arena.get_node("Dummies/DummyA")
+	extra.position = dummy_a.position + Vector2(10, 34)
+	arena.get_node("Dummies").add_child(extra)
+	await _walk_to(dummy_a.global_position + Vector2(-26, 0))
+	var bridge: PlayerProgressionBridge = player.get_node("ProgressionBridge")
+	f.aim_direction = Vector2.RIGHT
+	for i in 2:
+		f.light_pressed = true
+		await _ticks(14)
+	f.heavy_pressed = true
+	var shot_taken := false
+	for i in 40:
+		await _ticks(1)
+		if not shot_taken and not arena.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.get_script() == preload("res://scripts/fx/shockwave_fx.gd")).is_empty():
+			await _shot("r05_echo_shockwave")
+			shot_taken = true
+	_check(shot_taken, "shockwave visual spawned")
+	_check((extra.get(&"hits_taken") as int) >= 1, "nearby dummy hit by the shockwave")
+	_check(bridge.effects.has_effect(&"echo_shockwave"), "legendary effect active")
 
 
 func _instance_of(item_id: StringName) -> String:

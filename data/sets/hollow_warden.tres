@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="SetDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/set_definition.gd" id="1_set"]
+[ext_resource type="Script" path="res://scripts/rpg/items/set_bonus.gd" id="2_bonus"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="3_mod"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/heal_on_hit_effect.gd" id="4_heal"]
+
+[sub_resource type="Resource" id="Mod_hp"]
+script = ExtResource("3_mod")
+stat = &"max_health"
+flat = 20.0
+
+[sub_resource type="Resource" id="Mod_damage"]
+script = ExtResource("3_mod")
+stat = &"physical_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Mod_poise"]
+script = ExtResource("3_mod")
+stat = &"poise_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Effect_heal"]
+script = ExtResource("4_heal")
+effect_id = &"wardens_resolve"
+description = "Finisher hits heal 3 HP (1 s cooldown)."
+required_tag = &"finisher"
+heal_amount = 3.0
+cooldown = 1.0
+
+[sub_resource type="Resource" id="Bonus_2"]
+script = ExtResource("2_bonus")
+pieces_required = 2
+stat_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_hp")])
+description = "(2) +20 Max Health"
+
+[sub_resource type="Resource" id="Bonus_3"]
+script = ExtResource("2_bonus")
+pieces_required = 3
+stat_modifiers = Array[ExtResource("3_mod")]([SubResource("Mod_damage"), SubResource("Mod_poise")])
+effects = Array[ExtResource("4_heal")]([SubResource("Effect_heal")])
+description = "(3) +10% Damage, +10% Poise Damage, finishers heal 3 HP"
+
+[resource]
+script = ExtResource("1_set")
+id = &"hollow_warden"
+display_name = "Hollow Warden"
+piece_item_ids = Array[StringName]([&"warden_helm", &"warden_mail", &"warden_greaves"])
+bonuses = Array[ExtResource("2_bonus")]([SubResource("Bonus_2"), SubResource("Bonus_3")])

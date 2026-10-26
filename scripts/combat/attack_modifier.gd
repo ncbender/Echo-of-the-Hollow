@@ -13,3 +13,9 @@ func applies_to(_attack: AttackDefinition) -> bool:
 ## Adjust the hit before delivery (damage, poise, tags, knockback...).
 func modify_hit(_hit: HitData) -> void:
 	pass
+
+
+## Adjust the hit-sector reach of `attack` (called whenever the reach is queried).
+## Must not modify the AttackDefinition itself.
+func modify_reach(_attack: AttackDefinition, reach: float) -> float:
+	return reach

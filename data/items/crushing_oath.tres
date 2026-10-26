@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/combo_modifier_effect.gd" id="3_combo"]
+
+[sub_resource type="Resource" id="Mod_damage"]
+script = ExtResource("2_mod")
+stat = &"physical_damage"
+flat = 4.0
+
+[sub_resource type="Resource" id="Effect_oath"]
+script = ExtResource("3_combo")
+effect_id = &"crushing_oath"
+description = "L-L-H Crushing Arc: +25% reach and +50% poise damage."
+attack_ids = Array[StringName]([&"sword_llh_crush"])
+reach_multiplier = 1.25
+poise_multiplier = 1.5
+damage_multiplier = 1.0
+
+[resource]
+script = ExtResource("1_item")
+id = &"crushing_oath"
+display_name = "Crushing Oath"
+description = "Unique. Sworn to break every guard."
+category = 0
+rarity = 5
+max_stack = 1
+slot_kind = 10
+weapon_family_id = &"one_handed_sword"
+base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_damage")])
+effects = Array[ExtResource("3_combo")]([SubResource("Effect_oath")])

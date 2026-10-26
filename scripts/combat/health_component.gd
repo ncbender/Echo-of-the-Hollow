@@ -44,6 +44,14 @@ func set_max_health(value: float) -> void:
 	health_changed.emit(health, max_health)
 
 
+## Restores health (never above max, never revives).
+func heal(amount: float) -> void:
+	if is_dead() or amount <= 0.0:
+		return
+	health = minf(max_health, health + amount)
+	health_changed.emit(health, max_health)
+
+
 func is_dead() -> bool:
 	return health <= 0.0
 

@@ -171,7 +171,11 @@ func get_charge_tier_preview() -> int:
 
 func get_reach(attack: AttackDefinition, tier: int) -> float:
 	var profile := attack.charge_profile
-	return attack.reach * (profile.reach_multiplier(tier) if profile != null else 1.0)
+	var reach := attack.reach * (profile.reach_multiplier(tier) if profile != null else 1.0)
+	for modifier in modifiers:
+		if modifier.applies_to(attack):
+			reach = modifier.modify_reach(attack, reach)
+	return reach
 
 
 func _try_begin_action(input: InputFrame, aim: Vector2) -> void:

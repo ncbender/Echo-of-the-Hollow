@@ -18,10 +18,13 @@ var rewards: CombatRewardTracker
 var stat_modifier := CharacterStatModifier.new()
 ## Runtime pool of the active class's resource (null if the class has none).
 var resource_pool: ClassResourcePool
+## Special item and set effects of the active loadout.
+var effects := ItemEffectRunner.new()
 ## Weapon family waiting to be applied (combat must be idle to switch).
 var _pending_weapon: WeaponFamily
 
 var _connections: Array[Array] = []   # [Signal, Callable]
+var _installed_modifiers: Array[AttackModifier] = []
 
 
 func bind(target_player: Player, target_character: Character) -> void:
@@ -41,11 +44,15 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(player.combat.hit_landed, _on_player_hit_landed)
 	_track(player.hurtbox.hit_received, _on_player_hit_taken)
 	_track(character.equipment.changed, sync_weapon)
+	_track(character.equipment.changed, rebuild_effects)
+	_track(player.combat.hit_landed, effects.on_hit_landed)
+	effects.player = player
 	player.weapon_slot_handler = quick_equip_weapon
 	refresh_unlocks()
 	apply_stats()
 	_rebuild_resource_pool()
 	sync_weapon()
+	rebuild_effects()
 
 
 func unbind() -> void:
@@ -60,6 +67,7 @@ func unbind() -> void:
 	if player != null and is_instance_valid(player):
 		player.combat.modifiers.erase(stat_modifier)
 		player.weapon_slot_handler = Callable()
+		_uninstall_modifiers()
 
 
 func is_bound() -> bool:
@@ -80,6 +88,22 @@ func apply_stats() -> void:
 	player.health.set_max_health(stats.get(Stats.MAX_HEALTH, 100.0))
 	var armor := maxf(0.0, stats.get(Stats.ARMOR, 0.0))
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
+
+
+## Re-collects item/set effects from the active loadout and swaps the combo
+## modifiers on the player (never adds twice, never leaves stale ones).
+func rebuild_effects() -> void:
+	_uninstall_modifiers()
+	effects.rebuild(character)
+	for modifier in effects.attack_modifiers:
+		player.combat.modifiers.append(modifier)
+		_installed_modifiers.append(modifier)
+
+
+func _uninstall_modifiers() -> void:
+	for modifier in _installed_modifiers:
+		player.combat.modifiers.erase(modifier)
+	_installed_modifiers.clear()
 
 
 ## The combat weapon follows the active main-hand item (fallback: rules).
@@ -117,6 +141,7 @@ func debug_add_mastery_xp(amount: int) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	effects.step(delta)
 	if _pending_weapon != null:
 		_apply_pending_weapon()
 	if resource_pool != null:

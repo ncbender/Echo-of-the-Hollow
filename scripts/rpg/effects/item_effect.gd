@@ -17,7 +17,7 @@ func get_attack_modifiers() -> Array[AttackModifier]:
 	return []
 
 
-## `runner` is an ItemEffectRunner; `source_key` identifies the owning item/set
+## `source_key` identifies the owning item/set
 ## so runtime state of two sources never mixes.
-func on_hit_landed(_hit: HitData, _runner: RefCounted, _source_key: String) -> void:
+func on_hit_landed(_hit: HitData, _runner: ItemEffectRunner, _source_key: String) -> void:
 	pass
