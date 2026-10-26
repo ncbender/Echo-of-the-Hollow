@@ -190,9 +190,12 @@ func _handle_debug_input(event: InputEvent) -> bool:
 	return true
 
 
-## Debug spawning (F2). Returns the spawned enemy.
-func spawn_enemy(at: Vector2) -> Enemy:
+## Spawns a grunt (F2, trials, encounters); `config` picks the variant
+## (Rootbound Husk, Hollowfang Wolf ...). Returns the spawned enemy.
+func spawn_enemy(at: Vector2, config: EnemyConfig = null) -> Enemy:
 	var enemy: Enemy = GRUNT_SCENE.instantiate()
+	if config != null:
+		enemy.config = config
 	enemy.position = at
 	enemy.target = player
 	var parent := get_node_or_null("Enemies")

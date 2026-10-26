@@ -36,6 +36,10 @@ var status: StatusComponent
 func _ready() -> void:
 	if config == null:
 		config = EnemyConfig.new()
+	if config.max_health > 0.0 or config.max_poise > 0.0:
+		health.max_health = config.max_health if config.max_health > 0.0 else health.max_health
+		health.max_poise = config.max_poise if config.max_poise > 0.0 else health.max_poise
+		health.reset()
 	status = StatusComponent.of(self, true)
 	status.resistances = config.status_resistances
 	status.max_slow_cap = config.max_slow

@@ -57,7 +57,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 9.0, Color(0, 0, 0, 0.35 * alpha))
 	draw_set_transform(Vector2.ZERO)
 
-	var body := COLOR_BODY
+	var body := enemy.config.body_color
 	if enemy.state == Enemy.State.STAGGERED:
 		body = body.lerp(COLOR_STAGGER, 0.6)
 	elif enemy.state == Enemy.State.TELEGRAPH:
@@ -65,7 +65,7 @@ func _draw() -> void:
 	body = body.lerp(Color.WHITE, fx.flash)
 	body.a = alpha
 	var o := fx.offset
-	draw_circle(o + Vector2(0, -4), 8.0, body)
+	draw_circle(o + Vector2(0, -4), enemy.config.body_radius, body)
 	var look := combat.attack_direction if combat.is_busy() else enemy.velocity.normalized()
 	if look == Vector2.ZERO:
 		look = Vector2.DOWN

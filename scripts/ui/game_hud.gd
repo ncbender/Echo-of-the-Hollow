@@ -17,6 +17,15 @@ var objectives: ObjectivePanel
 var class_choice_panel: ClassChoicePanel
 var pause_menu: PauseMenu
 var save_indicator: SaveIndicator
+var dialogue_panel: DialoguePanel
+## Contextual tutorial hint (top centre).
+var hint_panel: PanelContainer
+var _hint_label: Label
+var _hint_left: float = 0.0
+var _hint_queue: PackedStringArray = []
+## Arrival time (ms) per queued hint: hints older than HINT_STALE_MS are dropped.
+var _hint_queued_at: PackedInt64Array = []
+const HINT_STALE_MS := 6000
 ## Player display preferences (from GameSession); null when running without one.
 var settings: UserSettings
 
@@ -74,6 +83,17 @@ func _ready() -> void:
 	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
 	crafting_panel = _add_window(CraftingPanel.new()) as CraftingPanel
 	class_choice_panel = _add_window(ClassChoicePanel.new()) as ClassChoicePanel
+	dialogue_panel = _add_window(DialoguePanel.new()) as DialoguePanel
+	hint_panel = PanelContainer.new()
+	hint_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	hint_panel.offset_top = UiTheme.SCREEN_MARGIN * 3
+	hint_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_panel.visible = false
+	_hint_label = UiTheme.wrapped("", UiTheme.COLOR_PROMPT, 640)
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint_panel.add_child(_hint_label)
+	_root.add_child(hint_panel)
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
@@ -101,6 +121,51 @@ func setup(progression_bridge: PlayerProgressionBridge) -> void:
 	skill_bar.bridge = bridge
 	objectives.bridge = bridge
 	bridge.message.connect(toasts.push.bind(UiTheme.COLOR_ACCENT))
+
+
+## Contextual tutorial hint, top centre, fades after `seconds`. A hint arriving
+## while another is shown waits its turn (the current one is shortened).
+func show_hint(text: String, seconds: float = 8.0) -> void:
+	if hint_panel.visible and _hint_left > 0.6:
+		if text != _hint_label.text and not _hint_queue.has(text):
+			_hint_queue.append(text)
+			_hint_queued_at.append(Time.get_ticks_msec())
+			_hint_left = minf(_hint_left, 2.5)
+		return
+	_hint_label.text = text
+	_hint_left = seconds
+	hint_panel.modulate.a = 1.0
+	hint_panel.visible = true
+	hint_panel.reset_size()
+	hint_panel.offset_left = -hint_panel.size.x * 0.5
+	hint_panel.offset_right = hint_panel.size.x * 0.5
+
+
+func current_hint() -> String:
+	return _hint_label.text if hint_panel.visible else ""
+
+
+## True if a hint containing `text` is shown or waiting to be shown.
+func has_hint(text: String) -> bool:
+	if current_hint().contains(text):
+		return true
+	for queued in _hint_queue:
+		if queued.contains(text):
+			return true
+	return false
+
+
+func open_dialogue(dialogue: DialogueDefinition, on_done: Callable = Callable()) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	dialogue_panel.open_dialogue(bridge.character, dialogue, on_done)
+
+
+## Plain lines (signs, notes, scenes): [{"name", "text", "color"}].
+func open_lines(lines: Array[Dictionary], on_done: Callable = Callable()) -> void:
+	close_windows()
+	dialogue_panel.open_lines(lines, on_done)
 
 
 func notify(text: String) -> void:
@@ -199,9 +264,21 @@ func _exit_tree() -> void:
 		settings.changed.disconnect(_refit_windows)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var target := Interactable.find_active(get_tree())
 	_prompt.text = "[G] %s" % target.prompt if target != null and not is_window_open() else ""
+	if hint_panel.visible:
+		_hint_left -= delta
+		hint_panel.modulate.a = clampf(_hint_left / 0.6, 0.0, 1.0)
+		hint_panel.visible = _hint_left > 0.0
+		while not hint_panel.visible and not _hint_queue.is_empty():
+			var next := _hint_queue[0]
+			var stale := Time.get_ticks_msec() - _hint_queued_at[0] > HINT_STALE_MS
+			_hint_queue.remove_at(0)
+			_hint_queued_at.remove_at(0)
+			if stale:
+				continue   # the moment has passed
+			show_hint(next)
 
 
 func _unhandled_input(event: InputEvent) -> void:

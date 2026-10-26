@@ -30,6 +30,7 @@ const DIRS := {
 	&"trials": "res://data/trials",
 	&"quests": "res://data/quests",
 	&"story_quests": "res://data/story",
+	&"npcs": "res://data/npcs",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -64,6 +65,7 @@ var trials: Dictionary = {}           # trial id -> TrialDefinition
 var quests: Dictionary = {}           # quest id -> ClassQuestDefinition
 # Story (docs/PROLOGUE.md)
 var story_quests: Dictionary = {}     # quest id -> StoryQuestDefinition (prologue, main quest)
+var npcs: Dictionary = {}             # npc id -> NpcDefinition (dialogues inline)
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -136,6 +138,8 @@ func register(resource: Resource) -> bool:
 		table = trials; key = resource.id
 	elif resource is StoryQuestDefinition:
 		table = story_quests; key = resource.id
+	elif resource is NpcDefinition:
+		table = npcs; key = resource.id
 	elif resource is ClassQuestDefinition:
 		table = quests; key = resource.id
 	elif resource is TalentTreeDefinition:
@@ -230,6 +234,7 @@ func validate() -> PackedStringArray:
 	errors.append_array(_validate_classes())
 	if not story_quests.is_empty():   # test databases may run without story data
 		errors.append_array(StoryService.validate_data(self))
+	errors.append_array(DialogueService.validate_data(self))
 	return errors
 
 

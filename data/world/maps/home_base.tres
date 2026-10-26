@@ -6,6 +6,6 @@
 script = ExtResource("1_map")
 id = &"home_base"
 region_id = &"hollow_outskirts"
-display_name = "Hollow Home"
+display_name = "Haven"
 scene_path = "res://scenes/maps/home_base.tscn"
 default_spawn_id = &"default"

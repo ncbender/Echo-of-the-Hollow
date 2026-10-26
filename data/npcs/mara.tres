@@ -1,0 +1,206 @@
+[gd_resource type="Resource" script_class="NpcDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/story/npc_definition.gd" id="1_npc"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_definition.gd" id="2_dlg"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_line.gd" id="3_line"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="4_cond"]
+
+[sub_resource type="Resource" id="C_return"]
+script = ExtResource("4_cond")
+quest_id = &"the_first_binding"
+quest_state = "active"
+min_step = 1
+max_step = 1
+
+[sub_resource type="Resource" id="L_return_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "You left here carrying a sword. You came back carrying something else."
+
+[sub_resource type="Resource" id="L_return_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "I'm still figuring out what."
+
+[sub_resource type="Resource" id="L_return_3"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Good. Be worried if you ever stop."
+
+[sub_resource type="Resource" id="D_return"]
+script = ExtResource("2_dlg")
+id = &"mara_return"
+condition = SubResource("C_return")
+lines = Array[ExtResource("3_line")]([SubResource("L_return_1"), SubResource("L_return_2"), SubResource("L_return_3")])
+event_id = &"talk:mara_return"
+repeatable = false
+
+[sub_resource type="Resource" id="C_welcome"]
+script = ExtResource("4_cond")
+quest_id = &"shelter_among_the_trees"
+quest_state = "active"
+min_step = 1
+max_step = 1
+
+[sub_resource type="Resource" id="L_welcome_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Welcome to Haven. Don't let the name fool you. We work hard to keep it true."
+
+[sub_resource type="Resource" id="L_welcome_2"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Those crates from the cart were meant for the Old Smithy. Bring them there and we'll have a fire going again."
+
+[sub_resource type="Resource" id="D_welcome"]
+script = ExtResource("2_dlg")
+id = &"mara_welcome"
+condition = SubResource("C_welcome")
+lines = Array[ExtResource("3_line")]([SubResource("L_welcome_1"), SubResource("L_welcome_2")])
+event_id = &"talk:mara_welcome"
+repeatable = false
+
+[sub_resource type="Resource" id="C_smithy"]
+script = ExtResource("4_cond")
+quest_id = &"shelter_among_the_trees"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="L_smithy_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "The Old Smithy is the ruin with the cold chimney. Use the supplies there."
+
+[sub_resource type="Resource" id="D_smithy"]
+script = ExtResource("2_dlg")
+id = &"mara_smithy_hint"
+condition = SubResource("C_smithy")
+lines = Array[ExtResource("3_line")]([SubResource("L_smithy_1")])
+
+[sub_resource type="Resource" id="C_road_end"]
+script = ExtResource("4_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 4
+max_step = 4
+
+[sub_resource type="Resource" id="L_road_end_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "There's a place north of here. Haven. Not much to look at, but it's got walls, a forge, and people who still give a damn."
+
+[sub_resource type="Resource" id="L_road_end_2"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "The cart stays. The crates come with us. Lead the way, I'll keep up."
+
+[sub_resource type="Resource" id="D_road_end"]
+script = ExtResource("2_dlg")
+id = &"mara_road_end"
+condition = SubResource("C_road_end")
+lines = Array[ExtResource("3_line")]([SubResource("L_road_end_1"), SubResource("L_road_end_2")])
+event_id = &"talk:mara_road_end"
+repeatable = false
+
+[sub_resource type="Resource" id="C_cart"]
+script = ExtResource("4_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 1
+max_step = 1
+
+[sub_resource type="Resource" id="L_cart_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "You could've kept walking."
+
+[sub_resource type="Resource" id="L_cart_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "You looked like you needed help."
+
+[sub_resource type="Resource" id="L_cart_3"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "I did. Doesn't mean I'm used to getting it."
+
+[sub_resource type="Resource" id="L_cart_4"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Mara Veyne. Those beasts scattered my supply crates. Help me find two of them before more show up."
+
+[sub_resource type="Resource" id="D_cart"]
+script = ExtResource("2_dlg")
+id = &"mara_cart"
+condition = SubResource("C_cart")
+lines = Array[ExtResource("3_line")]([SubResource("L_cart_1"), SubResource("L_cart_2"), SubResource("L_cart_3"), SubResource("L_cart_4")])
+event_id = &"talk:mara_cart"
+repeatable = false
+
+[sub_resource type="Resource" id="C_crates"]
+script = ExtResource("4_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="L_crates_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Two crates. One went into the brush west of the cart, the other rolled down past the wheel."
+
+[sub_resource type="Resource" id="D_crates"]
+script = ExtResource("2_dlg")
+id = &"mara_crates_hint"
+condition = SubResource("C_crates")
+lines = Array[ExtResource("3_line")]([SubResource("L_crates_1")])
+
+[sub_resource type="Resource" id="C_follow"]
+script = ExtResource("4_cond")
+required_flags = Array[StringName]([&"prologue.cart_done"])
+forbidden_flags = Array[StringName]([&"prologue.haven_discovered"])
+
+[sub_resource type="Resource" id="L_follow_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Haven is straight up the road. Go on, I'm right behind you."
+
+[sub_resource type="Resource" id="D_follow"]
+script = ExtResource("2_dlg")
+id = &"mara_follow"
+condition = SubResource("C_follow")
+lines = Array[ExtResource("3_line")]([SubResource("L_follow_1")])
+
+[sub_resource type="Resource" id="C_history"]
+script = ExtResource("4_cond")
+required_flags = Array[StringName]([&"dialogue.mara_welcome"])
+
+[sub_resource type="Resource" id="L_history_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Haven wasn't always this quiet. Most of these houses had families in them once."
+
+[sub_resource type="Resource" id="L_history_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "What happened?"
+
+[sub_resource type="Resource" id="L_history_3"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Depends who you ask. Maybe one day we'll have the luxury of finding out."
+
+[sub_resource type="Resource" id="D_history"]
+script = ExtResource("2_dlg")
+id = &"mara_history"
+condition = SubResource("C_history")
+lines = Array[ExtResource("3_line")]([SubResource("L_history_1"), SubResource("L_history_2"), SubResource("L_history_3")])
+
+[resource]
+script = ExtResource("1_npc")
+id = &"mara"
+display_name = "Mara Veyne"
+color = Color(0.78, 0.5, 0.32, 1)
+dialogues = Array[ExtResource("2_dlg")]([SubResource("D_return"), SubResource("D_welcome"), SubResource("D_smithy"), SubResource("D_road_end"), SubResource("D_cart"), SubResource("D_crates"), SubResource("D_follow"), SubResource("D_history")])
+idle_lines = PackedStringArray("Keep your guard up.", "Not now!", "Watch the treeline.")

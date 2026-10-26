@@ -1,6 +1,17 @@
 class_name EnemyConfig
 extends Resource
-## Tuning for a simple melee enemy.
+## Tuning for a simple melee enemy. Variants (Rootbound Husk, Hollowfang Wolf
+## ...) are configs of the same grunt scene: data, not new enemy code.
+
+@export_group("Identity")
+@export var display_name: String = "Hollow Grunt"
+@export var body_color: Color = Color("b5524a")
+@export var body_radius: float = 8.0
+## Overrides of the scene's HealthComponent (0 = keep the scene value).
+@export var max_health: float = 0.0
+@export var max_poise: float = 0.0
+
+@export_group("Movement")
 
 @export var move_speed: float = 70.0
 ## Starts chasing when the target is closer than this.

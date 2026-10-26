@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_cost")
+item_id = &"gold_coin"
+quantity = 1
+
+[resource]
+script = ExtResource("1_cfg")
+display_name = "Hollowfang Wolf"
+body_color = Color(0.45, 0.48, 0.58, 1)
+body_radius = 6.5
+max_health = 50.0
+max_poise = 20.0
+move_speed = 100.0
+aggro_range = 240.0
+attack_cooldown = 1.2
+heavy_attack_interval = 0
+knockback_resistance = -0.3
+mastery_xp_reward = 15
+class_xp_reward = 20
+drops = Array[ExtResource("2_cost")]([SubResource("Drop_gold")])

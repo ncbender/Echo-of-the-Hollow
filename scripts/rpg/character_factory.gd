@@ -15,6 +15,9 @@ static func create_new(database: GameDatabase) -> Character:
 		if not unlocked.is_empty():
 			character.classes.set_active(unlocked[0])
 	equip_starting_gear(character)
+	if database.maps.has(database.rules.new_game_map_id):
+		character.world.map_id = database.rules.new_game_map_id
+		character.world.spawn_id = database.rules.new_game_spawn_id
 	StoryService.begin_prologue(character)
 	return character
 

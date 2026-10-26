@@ -42,6 +42,9 @@ extends Resource
 ## Classes tried in the prologue; exactly one of them is chosen permanently.
 @export var prologue_class_ids: Array[StringName] = [&"warrior", &"arcanist", &"shadowrunner"]
 @export var prologue_map_id: StringName = &"prologue"
+## Where a new journey begins (the Old Road south of Haven).
+@export var new_game_map_id: StringName = &"old_road"
+@export var new_game_spawn_id: StringName = &"default"
 
 @export_group("Inventory")
 @export var inventory_capacity: int = 40

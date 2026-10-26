@@ -1,0 +1,122 @@
+[gd_resource type="Resource" script_class="NpcDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/story/npc_definition.gd" id="1_npc"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_definition.gd" id="2_dlg"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_line.gd" id="3_line"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="4_cond"]
+
+[sub_resource type="Resource" id="C_threat"]
+script = ExtResource("4_cond")
+quest_id = &"the_first_binding"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="L_threat_1"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "So the stone answered you. It has been a long time since it answered anyone."
+
+[sub_resource type="Resource" id="L_threat_2"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "The roots under the Hollowwood are moving. Something deep in those woods is pulling at them, and every night it pulls a little harder."
+
+[sub_resource type="Resource" id="L_threat_3"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "When it reaches the old roads, Haven will need more than walls. Rest while you can."
+
+[sub_resource type="Resource" id="D_threat"]
+script = ExtResource("2_dlg")
+id = &"edrin_threat"
+condition = SubResource("C_threat")
+lines = Array[ExtResource("3_line")]([SubResource("L_threat_1"), SubResource("L_threat_2"), SubResource("L_threat_3")])
+event_id = &"talk:edrin_threat"
+repeatable = false
+
+[sub_resource type="Resource" id="C_intro"]
+script = ExtResource("4_cond")
+quest_id = &"shelter_among_the_trees"
+quest_state = "active"
+min_step = 3
+max_step = 3
+
+[sub_resource type="Resource" id="L_intro_1"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "Mara says you came in from the southern road. Then you've seen what walks out there."
+
+[sub_resource type="Resource" id="L_intro_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "Those things weren't normal."
+
+[sub_resource type="Resource" id="L_intro_3"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "No. And they weren't always like that."
+
+[sub_resource type="Resource" id="L_intro_4"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "They've barely reached Haven, Edrin."
+
+[sub_resource type="Resource" id="L_intro_5"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "And the thing in those woods gets closer every night."
+
+[sub_resource type="Resource" id="L_intro_6"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "North of this gate lies an old shrine, the Whispering Stone. If you mean to stand against what is coming, go and listen to it."
+
+[sub_resource type="Resource" id="D_intro"]
+script = ExtResource("2_dlg")
+id = &"edrin_intro"
+condition = SubResource("C_intro")
+lines = Array[ExtResource("3_line")]([SubResource("L_intro_1"), SubResource("L_intro_2"), SubResource("L_intro_3"), SubResource("L_intro_4"), SubResource("L_intro_5"), SubResource("L_intro_6")])
+event_id = &"talk:edrin_intro"
+repeatable = false
+
+[sub_resource type="Resource" id="C_early"]
+script = ExtResource("4_cond")
+quest_id = &"shelter_among_the_trees"
+quest_state = "active"
+max_step = 2
+
+[sub_resource type="Resource" id="L_early_1"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "Settle in first. Mara will want that forge burning before anyone talks about the woods."
+
+[sub_resource type="Resource" id="D_early"]
+script = ExtResource("2_dlg")
+id = &"edrin_early"
+condition = SubResource("C_early")
+lines = Array[ExtResource("3_line")]([SubResource("L_early_1")])
+
+[sub_resource type="Resource" id="C_shrine"]
+script = ExtResource("4_cond")
+quest_id = &"the_whispering_stone"
+quest_state = "active"
+
+[sub_resource type="Resource" id="L_shrine_1"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "The Whispering Stone is north of the gate. Follow the path and listen."
+
+[sub_resource type="Resource" id="D_shrine"]
+script = ExtResource("2_dlg")
+id = &"edrin_shrine_hint"
+condition = SubResource("C_shrine")
+lines = Array[ExtResource("3_line")]([SubResource("L_shrine_1")])
+
+[resource]
+script = ExtResource("1_npc")
+id = &"edrin"
+display_name = "Edrin Vale"
+color = Color(0.45, 0.58, 0.42, 1)
+dialogues = Array[ExtResource("2_dlg")]([SubResource("D_threat"), SubResource("D_intro"), SubResource("D_early"), SubResource("D_shrine")])
+idle_lines = PackedStringArray("The north road is quiet. For now.", "Keep your blade close.")

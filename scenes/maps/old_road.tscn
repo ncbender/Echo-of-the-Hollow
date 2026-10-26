@@ -1,0 +1,562 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/game_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/arena/arena_floor.gd" id="2_floor"]
+[ext_resource type="Script" path="res://scripts/arena/wall_block.gd" id="3_wall"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_overlay"]
+[ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
+[ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="8_spawn"]
+[ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="9_trigger"]
+[ext_resource type="Script" path="res://scripts/world/readable.gd" id="10_read"]
+[ext_resource type="Script" path="res://scripts/world/encounter.gd" id="11_enc"]
+[ext_resource type="Script" path="res://scripts/world/encounter_spawn.gd" id="12_espawn"]
+[ext_resource type="Script" path="res://scripts/world/companion_npc.gd" id="13_companion"]
+[ext_resource type="Script" path="res://scripts/world/story_pickup.gd" id="14_pickup"]
+[ext_resource type="Script" path="res://scripts/world/story_conditional.gd" id="15_cond_node"]
+[ext_resource type="Script" path="res://scripts/world/checkpoint.gd" id="16_checkpoint"]
+[ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="17_transition"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="18_cond"]
+[ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="19_husk"]
+[ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="20_wolf"]
+[ext_resource type="Resource" path="res://data/enemies/hardened_husk.tres" id="21_hardened"]
+[ext_resource type="PackedScene" path="res://scenes/world/resource_node.tscn" id="22_node"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/oak_tree.tres" id="23_oak"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="24_rock"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="25_cost"]
+
+[sub_resource type="RectangleShape2D" id="Rect_band"]
+size = Vector2(520, 40)
+
+[sub_resource type="RectangleShape2D" id="Rect_side"]
+size = Vector2(30, 160)
+
+[sub_resource type="RectangleShape2D" id="Rect_exit"]
+size = Vector2(80, 12)
+
+[sub_resource type="CircleShape2D" id="Circle_use"]
+radius = 20.0
+
+[sub_resource type="CircleShape2D" id="Circle_rest"]
+radius = 28.0
+
+[sub_resource type="Resource" id="C_sign"]
+script = ExtResource("18_cond")
+quest_id = &"a_road_forgotten"
+quest_state = "active"
+min_step = 0
+max_step = 0
+
+[sub_resource type="Resource" id="C_ambush"]
+script = ExtResource("18_cond")
+quest_id = &"a_road_forgotten"
+quest_state = "active"
+min_step = 1
+max_step = 1
+
+[sub_resource type="Resource" id="C_cart_reach"]
+script = ExtResource("18_cond")
+quest_id = &"a_road_forgotten"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="C_cart_attack"]
+script = ExtResource("18_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 0
+max_step = 0
+
+[sub_resource type="Resource" id="C_crates"]
+script = ExtResource("18_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="C_wave"]
+script = ExtResource("18_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+min_step = 3
+max_step = 3
+
+[sub_resource type="Resource" id="C_mara"]
+script = ExtResource("18_cond")
+required_flags = Array[StringName]([&"prologue.road_walked"])
+forbidden_flags = Array[StringName]([&"prologue.haven_discovered"])
+
+[sub_resource type="Resource" id="C_follow"]
+script = ExtResource("18_cond")
+required_flags = Array[StringName]([&"prologue.cart_done"])
+forbidden_flags = Array[StringName]([&"prologue.haven_discovered"])
+
+[sub_resource type="Resource" id="C_support"]
+script = ExtResource("18_cond")
+quest_id = &"the_broken_cart"
+quest_state = "active"
+max_step = 3
+
+[sub_resource type="Resource" id="C_debris"]
+script = ExtResource("18_cond")
+forbidden_flags = Array[StringName]([&"prologue.cart_done"])
+
+[sub_resource type="Resource" id="Reward_gold"]
+script = ExtResource("25_cost")
+item_id = &"gold_coin"
+quantity = 12
+
+[sub_resource type="Resource" id="Reward_timber"]
+script = ExtResource("25_cost")
+item_id = &"timber"
+quantity = 2
+
+[node name="OldRoad" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_map")
+map_id = &"old_road"
+spawn_area = Rect2(-240, -660, 480, 1300)
+
+[node name="Floor" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_floor")
+area = Rect2(-260, -688, 520, 1356)
+color_a = Color(0.14, 0.19, 0.12, 1)
+color_b = Color(0.16, 0.21, 0.13, 1)
+
+[node name="SideFloor" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_floor")
+area = Rect2(-580, -140, 320, 160)
+color_a = Color(0.13, 0.17, 0.12, 1)
+color_b = Color(0.15, 0.19, 0.13, 1)
+
+[node name="Road" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(-36, -688, 72, 1356)
+tile_size = 24.0
+color_a = Color(0.32, 0.27, 0.2, 1)
+color_b = Color(0.35, 0.29, 0.21, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="WestSouth" type="StaticBody2D" parent="Walls"]
+position = Vector2(-268, 344)
+script = ExtResource("3_wall")
+size = Vector2(16, 648)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="WestNorth" type="StaticBody2D" parent="Walls"]
+position = Vector2(-268, -414)
+script = ExtResource("3_wall")
+size = Vector2(16, 548)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="SideNorth" type="StaticBody2D" parent="Walls"]
+position = Vector2(-424, -148)
+script = ExtResource("3_wall")
+size = Vector2(312, 16)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="SideSouth" type="StaticBody2D" parent="Walls"]
+position = Vector2(-424, 28)
+script = ExtResource("3_wall")
+size = Vector2(312, 16)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="SideWest" type="StaticBody2D" parent="Walls"]
+position = Vector2(-588, -60)
+script = ExtResource("3_wall")
+size = Vector2(16, 192)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="East" type="StaticBody2D" parent="Walls"]
+position = Vector2(268, -10)
+script = ExtResource("3_wall")
+size = Vector2(16, 1372)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="South" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 676)
+script = ExtResource("3_wall")
+size = Vector2(552, 16)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="NorthLeft" type="StaticBody2D" parent="Walls"]
+position = Vector2(-158, -696)
+script = ExtResource("3_wall")
+size = Vector2(236, 16)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="NorthRight" type="StaticBody2D" parent="Walls"]
+position = Vector2(158, -696)
+script = ExtResource("3_wall")
+size = Vector2(236, 16)
+color = Color(0.13, 0.2, 0.12, 1)
+top_color = Color(0.2, 0.3, 0.17, 1)
+
+[node name="FallenTree" type="StaticBody2D" parent="Walls"]
+position = Vector2(-110, 300)
+script = ExtResource("3_wall")
+size = Vector2(300, 12)
+color = Color(0.32, 0.23, 0.15, 1)
+top_color = Color(0.42, 0.31, 0.2, 1)
+
+[node name="Cart" type="StaticBody2D" parent="Walls"]
+position = Vector2(34, -346)
+script = ExtResource("3_wall")
+size = Vector2(44, 20)
+color = Color(0.4, 0.28, 0.17, 1)
+top_color = Color(0.55, 0.4, 0.25, 1)
+
+[node name="Tree1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-180, 500)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree2" type="StaticBody2D" parent="Walls"]
+position = Vector2(150, 460)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree3" type="StaticBody2D" parent="Walls"]
+position = Vector2(-200, 190)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree4" type="StaticBody2D" parent="Walls"]
+position = Vector2(196, 230)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree5" type="StaticBody2D" parent="Walls"]
+position = Vector2(-150, -190)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree6" type="StaticBody2D" parent="Walls"]
+position = Vector2(200, -160)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree7" type="StaticBody2D" parent="Walls"]
+position = Vector2(-206, -500)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="Tree8" type="StaticBody2D" parent="Walls"]
+position = Vector2(180, -530)
+script = ExtResource("3_wall")
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.18, 0.32, 0.16, 1)
+
+[node name="NorthDebris" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("15_cond_node")
+condition = SubResource("C_debris")
+
+[node name="Trunks" type="StaticBody2D" parent="NorthDebris"]
+position = Vector2(0, -612)
+script = ExtResource("3_wall")
+size = Vector2(520, 14)
+color = Color(0.32, 0.23, 0.15, 1)
+top_color = Color(0.42, 0.31, 0.2, 1)
+
+[node name="DebrisHint" type="Area2D" parent="NorthDebris"]
+position = Vector2(0, -585)
+script = ExtResource("9_trigger")
+hint = "Fallen trunks block the road north. There is no way through on your own."
+hint_id = &"debris"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthDebris/DebrisHint"]
+shape = SubResource("Rect_band")
+
+[node name="Triggers" type="Node2D" parent="."]
+
+[node name="HintMove" type="Area2D" parent="Triggers"]
+position = Vector2(0, 600)
+script = ExtResource("9_trigger")
+hint = "Use WASD to move. You always face the mouse cursor."
+hint_id = &"move"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/HintMove"]
+shape = SubResource("Rect_band")
+
+[node name="ReachSignpost" type="Area2D" parent="Triggers"]
+position = Vector2(0, 420)
+script = ExtResource("9_trigger")
+event_id = &"reach:road_signpost"
+condition = SubResource("C_sign")
+hint = "Press G to read or use things nearby."
+hint_id = &"interact"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/ReachSignpost"]
+shape = SubResource("Rect_band")
+
+[node name="HintDash" type="Area2D" parent="Triggers"]
+position = Vector2(0, 345)
+script = ExtResource("9_trigger")
+hint = "Press Space to dash where you aim. A dash makes you briefly untouchable."
+hint_id = &"dash"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/HintDash"]
+shape = SubResource("Rect_band")
+
+[node name="HintBlock" type="Area2D" parent="Triggers"]
+position = Vector2(0, 10)
+script = ExtResource("9_trigger")
+hint = "Hold Shift to block. Press it just before a hit lands to parry."
+hint_id = &"block"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/HintBlock"]
+shape = SubResource("Rect_band")
+
+[node name="HintRest" type="Area2D" parent="Triggers"]
+position = Vector2(0, -70)
+script = ExtResource("9_trigger")
+hint = "If you fall, you return to the last rest area you passed. Important progress is saved automatically."
+hint_id = &"rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/HintRest"]
+shape = SubResource("Rect_band")
+
+[node name="HintMenu" type="Area2D" parent="Triggers"]
+position = Vector2(-290, -60)
+script = ExtResource("9_trigger")
+hint = "Esc opens the menu: save, load and options. I opens your inventory."
+hint_id = &"menu"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/HintMenu"]
+shape = SubResource("Rect_side")
+
+[node name="ReachCart" type="Area2D" parent="Triggers"]
+position = Vector2(0, -225)
+script = ExtResource("9_trigger")
+event_id = &"reach:cart_site"
+condition = SubResource("C_cart_reach")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Triggers/ReachCart"]
+shape = SubResource("Rect_band")
+
+[node name="Signpost" type="Area2D" parent="."]
+position = Vector2(40, 410)
+script = ExtResource("10_read")
+persistent_id = &"road_signpost"
+title = "Old Signpost"
+text = "The paint has nearly worn away. One arm still points north: HAVEN. The other arm lies rotting in the grass."
+look = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Signpost"]
+shape = SubResource("Circle_use")
+
+[node name="RestArea" type="Area2D" parent="."]
+position = Vector2(46, -70)
+script = ExtResource("16_checkpoint")
+spawn_id = &"rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RestArea"]
+position = Vector2(-46, 0)
+shape = SubResource("Rect_band")
+
+[node name="Note" type="Area2D" parent="."]
+position = Vector2(-555, -60)
+script = ExtResource("10_read")
+persistent_id = &"road_note"
+title = "Torn Note"
+text = "Third shipment delayed. Mara went ahead before sunrise."
+rewards = Array[ExtResource("25_cost")]([SubResource("Reward_gold"), SubResource("Reward_timber")])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Note"]
+shape = SubResource("Circle_use")
+
+[node name="SideTree" parent="." instance=ExtResource("22_node")]
+position = Vector2(-360, -112)
+definition = ExtResource("23_oak")
+node_id = &"road_side_tree"
+
+[node name="SideRock" parent="." instance=ExtResource("22_node")]
+position = Vector2(-470, 6)
+definition = ExtResource("24_rock")
+node_id = &"road_side_rock"
+
+[node name="Mara" type="Area2D" parent="."]
+position = Vector2(-22, -330)
+script = ExtResource("13_companion")
+npc_id = &"mara"
+condition = SubResource("C_mara")
+follow_condition = SubResource("C_follow")
+support_condition = SubResource("C_support")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Mara"]
+shape = SubResource("Circle_use")
+
+[node name="CrateWest" type="Area2D" parent="."]
+position = Vector2(-176, -372)
+script = ExtResource("14_pickup")
+persistent_id = &"cart_crate_west"
+item_id = &"supply_crate"
+event_id = &"interact:supply_crate"
+condition = SubResource("C_crates")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CrateWest"]
+shape = SubResource("Circle_use")
+
+[node name="CrateSouth" type="Area2D" parent="."]
+position = Vector2(128, -262)
+script = ExtResource("14_pickup")
+persistent_id = &"cart_crate_south"
+item_id = &"supply_crate"
+event_id = &"interact:supply_crate"
+condition = SubResource("C_crates")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CrateSouth"]
+shape = SubResource("Circle_use")
+
+[node name="Encounters" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="RoadAmbush" type="Node2D" parent="Encounters"]
+position = Vector2(0, 150)
+script = ExtResource("11_enc")
+encounter_id = &"road_ambush"
+condition = SubResource("C_ambush")
+trigger_radius = 120.0
+hint = "Click LMB to attack. Keep clicking to chain a combo."
+
+[node name="A" type="Marker2D" parent="Encounters/RoadAmbush"]
+position = Vector2(-60, -40)
+script = ExtResource("12_espawn")
+config = ExtResource("19_husk")
+
+[node name="B" type="Marker2D" parent="Encounters/RoadAmbush"]
+position = Vector2(60, -50)
+script = ExtResource("12_espawn")
+config = ExtResource("19_husk")
+
+[node name="SideWolves" type="Node2D" parent="Encounters"]
+position = Vector2(-430, -60)
+script = ExtResource("11_enc")
+encounter_id = &"road_side_wolves"
+trigger_radius = 90.0
+persistent = false
+
+[node name="A" type="Marker2D" parent="Encounters/SideWolves"]
+position = Vector2(-20, -40)
+script = ExtResource("12_espawn")
+config = ExtResource("20_wolf")
+
+[node name="B" type="Marker2D" parent="Encounters/SideWolves"]
+position = Vector2(-50, 35)
+script = ExtResource("12_espawn")
+config = ExtResource("20_wolf")
+
+[node name="CartAttack" type="Node2D" parent="Encounters"]
+position = Vector2(0, -330)
+script = ExtResource("11_enc")
+encounter_id = &"cart_attack"
+condition = SubResource("C_cart_attack")
+trigger_radius = 150.0
+bark_npc_id = &"mara"
+bark_text = "If you've got a blade, now's the time to use it!"
+hint = "Hold RMB to charge a heavy attack. Release to strike."
+
+[node name="A" type="Marker2D" parent="Encounters/CartAttack"]
+position = Vector2(-100, -50)
+script = ExtResource("12_espawn")
+config = ExtResource("19_husk")
+
+[node name="B" type="Marker2D" parent="Encounters/CartAttack"]
+position = Vector2(100, -60)
+script = ExtResource("12_espawn")
+config = ExtResource("19_husk")
+
+[node name="C" type="Marker2D" parent="Encounters/CartAttack"]
+position = Vector2(90, 50)
+script = ExtResource("12_espawn")
+config = ExtResource("20_wolf")
+
+[node name="SecondWave" type="Node2D" parent="Encounters"]
+position = Vector2(0, -330)
+script = ExtResource("11_enc")
+encounter_id = &"cart_second_wave"
+condition = SubResource("C_wave")
+trigger_radius = 0.0
+bark_npc_id = &"mara"
+bark_text = "More of them! From the north!"
+hint = "Heavy foes barely flinch. Charged heavy attacks break their guard."
+
+[node name="A" type="Marker2D" parent="Encounters/SecondWave"]
+position = Vector2(-70, -150)
+script = ExtResource("12_espawn")
+config = ExtResource("20_wolf")
+
+[node name="B" type="Marker2D" parent="Encounters/SecondWave"]
+position = Vector2(70, -160)
+script = ExtResource("12_espawn")
+config = ExtResource("20_wolf")
+
+[node name="C" type="Marker2D" parent="Encounters/SecondWave"]
+position = Vector2(0, -190)
+script = ExtResource("12_espawn")
+config = ExtResource("21_hardened")
+
+[node name="ToHaven" type="Area2D" parent="."]
+position = Vector2(0, -694)
+script = ExtResource("17_transition")
+target_map_id = &"home_base"
+target_spawn_id = &"from_road"
+label = "Haven"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToHaven"]
+shape = SubResource("Rect_exit")
+
+[node name="Enemies" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="SpawnDefault" type="Marker2D" parent="."]
+position = Vector2(0, 610)
+script = ExtResource("8_spawn")
+
+[node name="SpawnFromHaven" type="Marker2D" parent="."]
+position = Vector2(0, -650)
+script = ExtResource("8_spawn")
+spawn_id = &"from_haven"
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(0, 610)
+
+[node name="HitstopController" type="Node" parent="."]
+script = ExtResource("6_hitstop")
+
+[node name="GameHud" type="CanvasLayer" parent="."]
+script = ExtResource("7_hud")
+
+[node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_overlay")]
+player = NodePath("../Player")

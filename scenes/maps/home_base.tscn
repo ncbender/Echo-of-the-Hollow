@@ -12,6 +12,18 @@
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="10_transition"]
 [ext_resource type="PackedScene" path="res://scenes/base/build_plot.tscn" id="11_plot"]
 [ext_resource type="Script" path="res://scripts/world/map_gate.gd" id="12_gate"]
+[ext_resource type="Script" path="res://scripts/world/story_npc.gd" id="13_npc"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="14_cond"]
+
+[sub_resource type="RectangleShape2D" id="Rect_door_south"]
+size = Vector2(48, 12)
+
+[sub_resource type="CircleShape2D" id="Circle_npc"]
+radius = 20.0
+
+[sub_resource type="Resource" id="C_mara_haven"]
+script = ExtResource("14_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
 [sub_resource type="RectangleShape2D" id="Rect_door_east"]
 size = Vector2(12, 48)
@@ -51,13 +63,19 @@ size = Vector2(264, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
-[node name="South" type="StaticBody2D" parent="Walls"]
-position = Vector2(0, 176)
+[node name="SouthLeft" type="StaticBody2D" parent="Walls"]
+position = Vector2(-160, 176)
 script = ExtResource("3_wall")
-size = Vector2(592, 16)
+size = Vector2(272, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
+[node name="SouthRight" type="StaticBody2D" parent="Walls"]
+position = Vector2(160, 176)
+script = ExtResource("3_wall")
+size = Vector2(272, 16)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
 [node name="West" type="StaticBody2D" parent="Walls"]
 position = Vector2(-296, 0)
 script = ExtResource("3_wall")
@@ -146,6 +164,30 @@ shape = SubResource("Circle_gate")
 position = Vector2(-70, 100)
 script = ExtResource("9_spawn")
 spawn_id = &"from_prologue"
+
+[node name="ToRoad" type="Area2D" parent="."]
+position = Vector2(0, 182)
+script = ExtResource("10_transition")
+target_map_id = &"old_road"
+target_spawn_id = &"from_haven"
+label = "The Old Road"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToRoad"]
+shape = SubResource("Rect_door_south")
+
+[node name="SpawnFromRoad" type="Marker2D" parent="."]
+position = Vector2(0, 140)
+script = ExtResource("9_spawn")
+spawn_id = &"from_road"
+
+[node name="Mara" type="Area2D" parent="."]
+position = Vector2(-40, 30)
+script = ExtResource("13_npc")
+npc_id = &"mara"
+condition = SubResource("C_mara_haven")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Mara"]
+shape = SubResource("Circle_npc")
 
 [node name="Player" parent="." instance=ExtResource("4_player")]
 position = Vector2(0, 60)

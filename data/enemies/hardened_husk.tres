@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Drop_essence"]
+script = ExtResource("2_cost")
+item_id = &"hollow_essence"
+
+[sub_resource type="Resource" id="Drop_gold"]
+script = ExtResource("2_cost")
+item_id = &"gold_coin"
+quantity = 4
+
+[resource]
+script = ExtResource("1_cfg")
+display_name = "Hardened Husk"
+body_color = Color(0.36, 0.3, 0.2, 1)
+body_radius = 10.0
+max_health = 160.0
+max_poise = 70.0
+move_speed = 50.0
+aggro_range = 240.0
+attack_cooldown = 1.2
+heavy_attack_interval = 2
+knockback_resistance = 0.5
+mastery_xp_reward = 30
+class_xp_reward = 40
+drops = Array[ExtResource("2_cost")]([SubResource("Drop_essence"), SubResource("Drop_gold")])
