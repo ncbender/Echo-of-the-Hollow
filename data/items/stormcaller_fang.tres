@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_p5vrv"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_profile.gd" id="2_y41k0"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="3_rx7qs"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="4_a10ky"]
+
+[sub_resource type="Resource" id="Resource_hsaeq"]
+script = ExtResource("1_p5vrv")
+stat = &"physical_damage"
+flat = 8.0
+
+[sub_resource type="Resource" id="Resource_2wptl"]
+script = ExtResource("1_p5vrv")
+stat = &"poise_damage"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_2nhim"]
+script = ExtResource("2_y41k0")
+allowed_operations = Array[StringName]([&"evolve", &"quality", &"essence_insert", &"essence_extract"])
+essence_slots = 2
+base_item_level = 15
+evolution_id = &"stormcaller"
+
+[resource]
+script = ExtResource("4_a10ky")
+id = &"stormcaller_fang"
+display_name = "Stormcaller Fang"
+description = "Evolving sword. Learns from every real fight (item XP) and awakens at the Resonance Forge."
+category = 0
+rarity = 3
+slot_kind = 10
+weapon_family_id = &"one_handed_sword"
+base_stats = Array[ExtResource("1_p5vrv")]([SubResource("Resource_hsaeq"), SubResource("Resource_2wptl")])
+crafting = SubResource("Resource_2nhim")
+tags = Array[StringName]([&"evolving"])

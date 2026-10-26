@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingCurrencyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_currency_definition.gd" id="1_tupwb"]
+
+[resource]
+script = ExtResource("1_tupwb")
+id = &"awakening_stone"
+item_id = &"awakening_stone"
+kind = 1
+description = "Rare upgrade resource. Needed for the final awakening of an evolving item."

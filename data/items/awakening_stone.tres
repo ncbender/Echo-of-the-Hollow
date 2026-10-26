@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_1xcsj"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_3j1o3"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_4xha2"]
+
+[resource]
+script = ExtResource("3_4xha2")
+id = &"awakening_stone"
+display_name = "Awakening Stone"
+description = "Rare upgrade resource. Needed for the final awakening of an evolving item."
+rarity = 3
+max_stack = 99
+tags = Array[StringName]([&"crafting", &"currency"])

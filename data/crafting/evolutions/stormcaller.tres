@@ -1,0 +1,102 @@
+[gd_resource type="Resource" script_class="EvolutionDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/evolution_definition.gd" id="1_flf6u"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/evolution_stage.gd" id="2_7tswp"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="3_dpshk"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="4_d82ne"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="5_kh4p2"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/evolution_mutation.gd" id="6_5b5mu"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/tagged_hit_modifier_effect.gd" id="7_q6iag"]
+
+[sub_resource type="Resource" id="Resource_pi4d3"]
+script = ExtResource("2_7tswp")
+display_name = "Dormant"
+description = "The blade sleeps."
+
+[sub_resource type="Resource" id="Resource_42p7p"]
+script = ExtResource("3_dpshk")
+item_id = &"iron_ore"
+quantity = 5
+
+[sub_resource type="Resource" id="Resource_xh0wy"]
+script = ExtResource("3_dpshk")
+item_id = &"hollow_essence"
+quantity = 2
+
+[sub_resource type="Resource" id="Resource_5vkh2"]
+script = ExtResource("5_kh4p2")
+stat = &"physical_damage"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_x5bee"]
+script = ExtResource("5_kh4p2")
+stat = &"finisher_power"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_x1d4v"]
+script = ExtResource("2_7tswp")
+stage = 2
+display_name = "Awakened Edge"
+description = "+6 Physical Damage %, +10 Heavy Finisher Power %."
+xp_required = 60
+costs = Array[ExtResource("3_dpshk")]([SubResource("Resource_42p7p"), SubResource("Resource_xh0wy")])
+modifiers = Array[ExtResource("5_kh4p2")]([SubResource("Resource_5vkh2"), SubResource("Resource_x5bee")])
+
+[sub_resource type="Resource" id="Resource_ocbmq"]
+script = ExtResource("3_dpshk")
+item_id = &"awakening_stone"
+
+[sub_resource type="Resource" id="Resource_ktcr3"]
+script = ExtResource("3_dpshk")
+item_id = &"hollow_essence"
+quantity = 3
+
+[sub_resource type="Resource" id="Resource_jwr5k"]
+script = ExtResource("7_q6iag")
+required_tags = Array[StringName]([&"heavy", &"finisher"])
+damage_multiplier = 1.3
+knockback_multiplier = 1.3
+effect_id = &"storm_charge"
+description = "Heavy finishers: +30% damage and +30% knockback."
+
+[sub_resource type="Resource" id="Resource_aux0a"]
+script = ExtResource("6_5b5mu")
+id = &"storm_charge"
+display_name = "Path A - Storm Charge"
+description = "Heavy finishers: +30% damage and +30% knockback."
+effects = Array[ExtResource("4_d82ne")]([SubResource("Resource_jwr5k")])
+
+[sub_resource type="Resource" id="Resource_sufej"]
+script = ExtResource("7_q6iag")
+full_charge_only = true
+poise_multiplier = 1.4
+effect_id = &"steadfast"
+description = "+40 Armor. Fully charged heavy attacks: +40% poise damage."
+
+[sub_resource type="Resource" id="Resource_4ldui"]
+script = ExtResource("5_kh4p2")
+stat = &"armor"
+flat = 40.0
+
+[sub_resource type="Resource" id="Resource_fs8pt"]
+script = ExtResource("6_5b5mu")
+id = &"steadfast"
+display_name = "Path B - Steadfast"
+description = "+40 Armor. Fully charged heavy attacks: +40% poise damage."
+modifiers = Array[ExtResource("5_kh4p2")]([SubResource("Resource_4ldui")])
+effects = Array[ExtResource("4_d82ne")]([SubResource("Resource_sufej")])
+
+[sub_resource type="Resource" id="Resource_4jdnh"]
+script = ExtResource("2_7tswp")
+stage = 3
+display_name = "Ascended"
+description = "Choose a permanent mutation."
+xp_required = 150
+costs = Array[ExtResource("3_dpshk")]([SubResource("Resource_ocbmq"), SubResource("Resource_ktcr3")])
+mutations = Array[ExtResource("6_5b5mu")]([SubResource("Resource_aux0a"), SubResource("Resource_fs8pt")])
+
+[resource]
+script = ExtResource("1_flf6u")
+id = &"stormcaller"
+display_name = "Stormcaller"
+stages = Array[ExtResource("2_7tswp")]([SubResource("Resource_pi4d3"), SubResource("Resource_x1d4v"), SubResource("Resource_4jdnh")])

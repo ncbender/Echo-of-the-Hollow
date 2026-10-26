@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_du6lf"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_k376t"]
+
+[resource]
+script = ExtResource("2_k376t")
+id = &"evolve"
+display_name = "Evolve"
+description = "Evolve an evolving item into its next stage (needs item XP and the stage's resources)."

@@ -114,6 +114,7 @@ static func _checks() -> Dictionary:
 		CraftingOps.SOCKET_INSERT: _check_socket_insert,
 		CraftingOps.SOCKET_REMOVE: _check_socket_remove,
 		CraftingOps.QUALITY: _check_quality,
+		CraftingOps.EVOLVE: _check_evolve,
 	}
 
 
@@ -134,6 +135,7 @@ static func _appliers() -> Dictionary:
 		CraftingOps.SOCKET_INSERT: _apply_socket_insert,
 		CraftingOps.SOCKET_REMOVE: _apply_socket_remove,
 		CraftingOps.QUALITY: _apply_quality,
+		CraftingOps.EVOLVE: _apply_evolve,
 	}
 
 
@@ -390,6 +392,48 @@ static func _apply_socket_remove(context: Context, _rolled: Dictionary) -> Strin
 static func _apply_quality(context: Context, _rolled: Dictionary) -> String:
 	context.item.quality += 1
 	return "Quality raised to %d." % context.item.quality
+
+
+# --- evolution ------------------------------------------------------------------
+
+static func _check_evolve(context: Context) -> void:
+	var preview := context.preview
+	var db := context.character.database
+	var evolution := ItemStats.evolution_of(context.definition, db)
+	if evolution == null:
+		preview.error = "%s cannot evolve." % context.definition.display_name
+		return
+	var stage := ItemEvolution.next_stage(context.item, context.definition, db)
+	if stage == null:
+		preview.error = "%s is fully evolved." % context.definition.display_name
+		return
+	var xp := context.item.evolution_xp()
+	if xp < stage.xp_required:
+		preview.error = "Needs %d more item XP (%d / %d). Item XP comes from hits on real enemies with this weapon in the main hand." % [
+			stage.xp_required - xp, xp, stage.xp_required]
+		return
+	for cost in stage.costs:
+		preview.add_cost(cost.item_id, cost.quantity)
+	if not stage.mutations.is_empty():
+		var mutation := stage.get_mutation(context.request.mutation_id)
+		if mutation == null:
+			preview.error = "Choose a mutation path (permanent)."
+			return
+		preview.notes.append("Permanent choice: %s - %s" % [mutation.display_name, mutation.description])
+	preview.notes.append("Evolves into stage %d: %s. %s" % [stage.stage, stage.display_name, stage.description])
+
+
+static func _apply_evolve(context: Context, _rolled: Dictionary) -> String:
+	var item := context.item
+	var stage := ItemEvolution.next_stage(item, context.definition, context.character.database)
+	item.evolution["stage"] = stage.stage
+	if not item.evolution.has("xp"):
+		item.evolution["xp"] = 0
+	var mutation := stage.get_mutation(context.request.mutation_id)
+	item.evolution["path"] = String(mutation.id) if mutation != null else str(item.evolution.get("path", ""))
+	if mutation != null:
+		return "%s evolved into %s - %s." % [context.definition.display_name, stage.display_name, mutation.display_name]
+	return "%s evolved into %s." % [context.definition.display_name, stage.display_name]
 
 
 # --- helpers ----------------------------------------------------------------------

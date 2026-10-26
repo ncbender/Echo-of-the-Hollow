@@ -167,13 +167,26 @@ func _track(sig: Signal, callable: Callable) -> void:
 		_connections.append([sig, callable])
 
 
-func _on_player_hit_landed(_hit: HitData) -> void:
+func _on_player_hit_landed(hit: HitData) -> void:
 	var stats := character.get_stats()
 	if resource_pool != null:
 		resource_pool.gain(resource_pool.definition.gain_per_hit_dealt * _resource_gain_factor())
 	var life: float = stats.get(Stats.LIFE_ON_HIT, 0.0)
 	if life > 0.0:
 		player.health.heal(life)
+	_grant_item_xp(hit)
+
+
+## Evolving main-hand items learn from real fights (separate from weapon mastery).
+func _grant_item_xp(hit: HitData) -> void:
+	var item := character.equipment.get_item(EquipSlot.Slot.MAIN_HAND)
+	if item == null:
+		return
+	var definition := character.database.get_item(item.definition_id)
+	var was_ready := ItemEvolution.is_ready(item, definition, character.database)
+	if ItemEvolution.grant_hit_xp(character, hit) > 0 and not was_ready \
+			and ItemEvolution.is_ready(item, definition, character.database):
+		message.emit("%s is ready to evolve (Resonance Forge)" % definition.display_name)
 
 
 func _on_player_hit_taken(_hit: HitData) -> void:
