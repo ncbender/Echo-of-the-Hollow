@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/map_definition.gd" id="1_map"]
+
+[resource]
+script = ExtResource("1_map")
+id = &"whisper_forest"
+region_id = &"hollow_outskirts"
+display_name = "Whisper Forest"
+scene_path = "res://scenes/maps/whisper_forest.tscn"
+default_spawn_id = &"default"

@@ -19,11 +19,23 @@ var save_path: String = DEFAULT_SAVE_PATH
 var last_load: SaveSystem.LoadResult
 
 var _pending_spawn: StringName = &""
+var _traveling: bool = false
+var _fade: ColorRect
+
+const FADE_TIME := 0.2
 var _messages: PackedStringArray = []
 
 
 func _ready() -> void:
 	database = GameDatabase.get_default()
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	_fade = ColorRect.new()
+	_fade.color = Color(0, 0, 0, 0)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_fade)
 
 
 func get_character() -> Character:
@@ -65,15 +77,42 @@ func load_game() -> SaveSystem.LoadResult:
 	return last_load
 
 
-## Changes to the scene of `map_id` (or reloads the current one) and spawns the
-## player at `spawn_id`. Map definitions come from the database (Phase 8).
-func travel(map_id: StringName, spawn_id: StringName) -> void:
+## Central map transition API: changes to the scene of `map_id` and spawns the
+## player at `spawn_id`. Unknown map ids reload the current scene. Requests
+## while a transition is running are ignored (no double loads). Returns false
+## when the request was ignored.
+func travel(map_id: StringName, spawn_id: StringName, fade: bool = true) -> bool:
+	if _traveling:
+		return false
+	_traveling = true
 	_pending_spawn = spawn_id
+	if fade and is_inside_tree():
+		var tween := create_tween()
+		tween.tween_property(_fade, "color:a", 1.0, FADE_TIME)
+		tween.tween_callback(_change_scene.bind(map_id))
+	else:
+		_change_scene.call_deferred(map_id)
+	return true
+
+
+func is_traveling() -> bool:
+	return _traveling
+
+
+## Called by GameMap once the new map is ready.
+func map_ready() -> void:
+	_traveling = false
+	if _fade.color.a > 0.0:
+		var tween := create_tween()
+		tween.tween_property(_fade, "color:a", 0.0, FADE_TIME)
+
+
+func _change_scene(map_id: StringName) -> void:
 	var map_def: MapDefinition = database.maps.get(map_id)
 	if map_def != null and map_def.scene_path != "":
-		get_tree().change_scene_to_file.call_deferred(map_def.scene_path)
+		get_tree().change_scene_to_file(map_def.scene_path)
 	else:
-		get_tree().reload_current_scene.call_deferred()
+		get_tree().reload_current_scene()
 
 
 func consume_pending_spawn() -> StringName:

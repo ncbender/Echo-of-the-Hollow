@@ -7,9 +7,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
   `%APPDATA%\Godot\app_userdata\Echoes of the Hollow\saves\`). **F6** speichern, **F9** laden.
 - Tests/Playtests nutzen ausschließlich `user://test_saves/…` und überschreiben den Spieler-Slot nie.
 
-## Format (Version 1) ✅
+## Format (Version 2) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 1, "saved_at": 1761460000,
+{ "format": "echoes_of_the_hollow_save", "version": 2, "saved_at": 1761460000,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>" }
 ```
 Die Nutzdaten werden als **exakter JSON-Text** gespeichert, damit die SHA-256-Prüfsumme genau die
@@ -48,11 +48,11 @@ Es werden **keine** Spielstände automatisch gelöscht (nur die eigene `.bak` wi
 - Werte außerhalb der Grenzen (Level, XP) → geklemmt; ungültige aktive Klasse → Fallback.
 Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 
-## Migrationen 🔧
-`SaveMigrations.STEPS` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
+## Migrationen ✅
+`SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell existiert nur Version 1 (keine Schritte).
+Aktuell: Version 2; Schritt 1→2 ergänzt `world.map_states` (Overnight 3).
 
 ## Offen
 ⬜ Mehrere Slots/Slot-Auswahl-UI, ⬜ Autosave, ⬜ exakte Position statt Spawnpunkt.

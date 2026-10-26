@@ -117,8 +117,14 @@ func validate() -> PackedStringArray:
 			if not items.has(piece):
 				errors.append("set %s lists unknown item %s" % [set_def.id, piece])
 	for map_def: MapDefinition in maps.values():
+		if map_def.scene_path == "" or not ResourceLoader.exists(map_def.scene_path):
+			errors.append("map %s: scene %s missing" % [map_def.id, map_def.scene_path])
 		if map_def.region_id != &"" and not regions.has(map_def.region_id):
 			errors.append("map %s references unknown region %s" % [map_def.id, map_def.region_id])
+	for region: RegionDefinition in regions.values():
+		for map_id in region.map_ids:
+			if not maps.has(map_id):
+				errors.append("region %s lists unknown map %s" % [region.id, map_id])
 	for building: BuildingDefinition in buildings.values():
 		for cost in building.costs:
 			if not items.has(cost.item_id):

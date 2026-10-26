@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/map_definition.gd" id="1_map"]
+
+[resource]
+script = ExtResource("1_map")
+id = &"home_base"
+region_id = &"hollow_outskirts"
+display_name = "Hollow Home"
+scene_path = "res://scenes/maps/home_base.tscn"
+default_spawn_id = &"default"

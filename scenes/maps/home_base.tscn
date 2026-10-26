@@ -1,0 +1,124 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/game_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/arena/arena_floor.gd" id="2_floor"]
+[ext_resource type="Script" path="res://scripts/arena/wall_block.gd" id="3_wall"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_overlay"]
+[ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
+[ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="9_spawn"]
+[ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="10_transition"]
+
+[sub_resource type="RectangleShape2D" id="Rect_door_east"]
+size = Vector2(12, 48)
+
+[sub_resource type="RectangleShape2D" id="Rect_door_north"]
+size = Vector2(48, 12)
+
+[node name="HomeBase" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_map")
+map_id = &"home_base"
+
+[node name="Floor" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_floor")
+area = Rect2(-288, -168, 576, 336)
+color_a = Color(0.2, 0.18, 0.15, 1)
+color_b = Color(0.23, 0.2, 0.17, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="NorthLeft" type="StaticBody2D" parent="Walls"]
+position = Vector2(-156, -176)
+script = ExtResource("3_wall")
+size = Vector2(264, 16)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="NorthRight" type="StaticBody2D" parent="Walls"]
+position = Vector2(156, -176)
+script = ExtResource("3_wall")
+size = Vector2(264, 16)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="South" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 176)
+script = ExtResource("3_wall")
+size = Vector2(592, 16)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="West" type="StaticBody2D" parent="Walls"]
+position = Vector2(-296, 0)
+script = ExtResource("3_wall")
+size = Vector2(16, 368)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="EastTop" type="StaticBody2D" parent="Walls"]
+position = Vector2(296, -100)
+script = ExtResource("3_wall")
+size = Vector2(16, 152)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="EastBottom" type="StaticBody2D" parent="Walls"]
+position = Vector2(296, 100)
+script = ExtResource("3_wall")
+size = Vector2(16, 152)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="ClassStation" parent="." instance=ExtResource("8_station")]
+position = Vector2(-220, -110)
+
+[node name="SpawnDefault" type="Marker2D" parent="."]
+position = Vector2(0, 60)
+script = ExtResource("9_spawn")
+
+[node name="SpawnFromForest" type="Marker2D" parent="."]
+position = Vector2(250, 0)
+script = ExtResource("9_spawn")
+spawn_id = &"from_forest"
+
+[node name="SpawnFromArena" type="Marker2D" parent="."]
+position = Vector2(0, -130)
+script = ExtResource("9_spawn")
+spawn_id = &"from_arena"
+
+[node name="ToForest" type="Area2D" parent="."]
+position = Vector2(300, 0)
+script = ExtResource("10_transition")
+target_map_id = &"whisper_forest"
+target_spawn_id = &"from_home"
+label = "Whisper Forest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToForest"]
+shape = SubResource("Rect_door_east")
+
+[node name="ToArena" type="Area2D" parent="."]
+position = Vector2(0, -180)
+script = ExtResource("10_transition")
+target_map_id = &"test_arena"
+target_spawn_id = &"from_home"
+label = "Proving Arena"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToArena"]
+shape = SubResource("Rect_door_north")
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(0, 60)
+
+[node name="HitstopController" type="Node" parent="."]
+script = ExtResource("6_hitstop")
+
+[node name="GameHud" type="CanvasLayer" parent="."]
+script = ExtResource("7_hud")
+
+[node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_overlay")]
+player = NodePath("../Player")

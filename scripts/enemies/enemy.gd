@@ -11,6 +11,10 @@ enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
 
 @export var config: EnemyConfig
 @export var attacks: WeaponFamily
+## Non-empty for boss/quest enemies: once defeated, a world flag keeps them
+## defeated across map changes and saves. Normal enemies leave it empty and
+## respawn whenever the map is loaded again.
+@export var persistent_id: StringName
 
 var target: Node2D
 var state: State = State.CHASE

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/map_definition.gd" id="1_map"]
+
+[resource]
+script = ExtResource("1_map")
+id = &"test_arena"
+region_id = &"hollow_outskirts"
+display_name = "Proving Arena"
+scene_path = "res://scenes/arena/test_arena.tscn"
+default_spawn_id = &"default"
