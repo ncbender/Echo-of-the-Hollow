@@ -7,6 +7,8 @@ const PHASE_NAMES := ["-", "STARTUP", "ACTIVE", "RECOVERY"]
 
 @export var player: Player
 
+var _last_target: Enemy
+
 @onready var _status: Label = $Status
 @onready var _help: Label = $Help
 
@@ -63,5 +65,35 @@ func _lines() -> PackedStringArray:
 	for requirement: StringName in combat.combo.unlocks:
 		unlocks.append(String(requirement).get_slice(".", 1))
 	lines.append("Unlocks  %s" % (", ".join(unlocks) if not unlocks.is_empty() else "-"))
+	lines.append("Lunge    " + _lunge_line(combat))
+	lines.append("Knockbk  " + _knockback_line())
 	lines.append("FPS      %d" % Engine.get_frames_per_second())
 	return lines
+
+
+func _lunge_line(combat: CombatComponent) -> String:
+	if combat.state != CombatComponent.State.ATTACKING or combat.current_attack.lunge_distance <= 0.0:
+		return "-"
+	var direction := combat.attack_direction
+	var running := combat.get_lunge_velocity() != Vector2.ZERO
+	return "%.0f px  dir (%.2f, %.2f)  %s" % [combat.current_attack.lunge_distance, direction.x, direction.y, "MOVING" if running else "done"]
+
+
+## Last enemy struck by the player: applied distance after resistance and the
+## distance it really moved (less when a wall or another body stopped it).
+func _knockback_line() -> String:
+	if not player.combat.hit_landed.is_connected(_on_hit_landed):
+		player.combat.hit_landed.connect(_on_hit_landed)
+	var text := "-"
+	if _last_target != null and is_instance_valid(_last_target):
+		var motion := _last_target.knockback
+		text = "dealt %.1f px (res %.2f) moved %.1f px  vec (%.1f, %.1f)" % [motion.last_offset.length(),
+				_last_target.config.knockback_resistance, motion.last_traveled, motion.last_offset.x, motion.last_offset.y]
+	if player.knockback.is_active():
+		text += "  | taken %.1f px left" % player.knockback.remaining().length()
+	return text
+
+
+func _on_hit_landed(hit: HitData) -> void:
+	if hit.target is Enemy:
+		_last_target = hit.target

@@ -13,6 +13,8 @@ const FX_SCRIPT: GDScript = preload("res://scripts/fx/shockwave_fx.gd")
 ## Fraction of the triggering hit's damage dealt by the shockwave.
 @export var damage_ratio: float = 0.4
 @export var poise_damage: float = 10.0
+## Knockback distance in px (same model as attacks, see KnockbackMotion).
+@export var knockback_distance: float = 5.0
 @export var cooldown: float = 0.5
 
 
@@ -39,7 +41,7 @@ func on_hit_landed(hit: HitData, runner: ItemEffectRunner, source_key: String) -
 		echo.attack_instance_id = hit.attack_instance_id
 		echo.damage = hit.damage * damage_ratio
 		echo.poise_damage = poise_damage
-		echo.knockback = (hurtbox.global_position - center).normalized() * 40.0
+		echo.knockback = (hurtbox.global_position - center).normalized() * knockback_distance
 		echo.position = hurtbox.global_position
 		echo.tags.append(&"echo_shockwave")
 		if hurtbox.receive_hit(echo):

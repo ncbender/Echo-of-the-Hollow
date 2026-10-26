@@ -49,6 +49,8 @@ var buffer := InputBuffer.new()
 
 ## RMB went down and was not consumed yet; charging starts once free while still held.
 var _heavy_hold_pending: bool = false
+## Lunge distance the running attack may still cover (see take_lunge_velocity).
+var _lunge_left: float = 0.0
 
 
 func _ready() -> void:
@@ -153,14 +155,27 @@ func get_move_multiplier() -> float:
 	return 1.0
 
 
-## Forward lunge velocity during startup + active of attacks with lunge_distance.
+## Forward lunge velocity during startup + active of attacks with lunge_distance
+## (query only; movement uses take_lunge_velocity).
 func get_lunge_velocity() -> Vector2:
-	if state != State.ATTACKING or current_attack.lunge_distance <= 0.0:
+	if state != State.ATTACKING or current_attack.lunge_distance <= 0.0 or _lunge_left <= 0.0:
 		return Vector2.ZERO
 	if phase != Phase.STARTUP and phase != Phase.ACTIVE:
 		return Vector2.ZERO
 	var lunge_time := current_attack.startup + current_attack.active
 	return attack_direction * current_attack.lunge_distance / lunge_time
+
+
+## Lunge velocity for this movement tick. Consumes the attack's lunge budget, so a
+## swing never covers more than lunge_distance even when the active phase ends
+## mid-tick (blocked movement still consumes it - nothing is saved up).
+func take_lunge_velocity(delta: float) -> Vector2:
+	var velocity := get_lunge_velocity()
+	if velocity == Vector2.ZERO or delta <= 0.0:
+		return Vector2.ZERO
+	var travel := minf(velocity.length() * delta, _lunge_left)
+	_lunge_left -= travel
+	return attack_direction * (travel / delta)
 
 
 func get_charge_tier_preview() -> int:
@@ -231,6 +246,7 @@ func _start_attack(attack: AttackDefinition, aim: Vector2, tier: int) -> void:
 	combo.commit(attack)
 	attack_instance += 1
 	current_attack = attack
+	_lunge_left = attack.lunge_distance
 	charge_tier = tier
 	state = State.ATTACKING
 	phase = Phase.STARTUP
@@ -294,6 +310,7 @@ func _clear_attack() -> void:
 	if hitbox != null:
 		hitbox.deactivate()
 	current_attack = null
+	_lunge_left = 0.0
 	state = State.IDLE
 	phase = Phase.NONE
 	phase_time = 0.0

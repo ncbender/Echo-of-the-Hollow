@@ -14,7 +14,7 @@ const DASH_BUFFER_ACTION := &"dash"
 @export var weapons: Array[WeaponFamily] = []
 ## Prototype: seconds until the player stands up again at the spawn point after dying.
 @export var respawn_delay: float = 1.5
-## px/s² decay of knockback received from enemy hits.
+## Deceleration (px/s²) of knockback received from enemy hits; distance comes from the hit.
 @export var knockback_decay: float = 900.0
 
 ## When true, physics ticks consume frames given via feed_input() instead of devices
@@ -31,7 +31,7 @@ var incoming_damage_multiplier: float = 1.0
 var _external_frame := InputFrame.new()
 var _locomotion_velocity: Vector2 = Vector2.ZERO
 var _dash_buffer: InputBuffer
-var _knockback: Vector2 = Vector2.ZERO
+var knockback := KnockbackMotion.new()
 var _spawn_position: Vector2
 var _respawn_left: float = 0.0
 
@@ -46,6 +46,7 @@ var _respawn_left: float = 0.0
 
 func _ready() -> void:
 	_dash_buffer = InputBuffer.new(input_buffer_time)
+	knockback.deceleration = knockback_decay
 	combat.input_buffer_time = input_buffer_time
 	combat.buffer.window = input_buffer_time
 	add_to_group(&"player")
@@ -120,7 +121,7 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 			and not reaction.blocks_dash():
 		_dash_buffer.clear()
 		combat.cancel(&"dash")
-		_start_dash(frame)
+		_start_dash()
 
 	combat.step(delta, frame, aim_direction, dash.is_dashing() or reaction.blocks_actions())
 
@@ -132,9 +133,8 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		var move_input := Vector2.ZERO if reaction.blocks_movement() else frame.move
 		_locomotion_velocity = movement.compute_velocity(
 				_locomotion_velocity, move_input, combat.get_move_multiplier(), delta)
-		velocity = _locomotion_velocity + combat.get_lunge_velocity()
-	velocity += _knockback
-	_knockback = _knockback.move_toward(Vector2.ZERO, knockback_decay * delta)
+		velocity = _locomotion_velocity + combat.take_lunge_velocity(delta)
+	velocity += knockback.step(delta)
 	velocity = BodyContact.strip_push(self, velocity, delta)
 	move_and_slide()
 
@@ -147,10 +147,12 @@ func _step_frozen(frame: InputFrame, delta: float) -> void:
 	velocity = Vector2.ZERO
 
 
-func _start_dash(frame: InputFrame) -> void:
-	# No movement input: dash backwards relative to the aim direction.
-	var direction := frame.move if frame.move.length_squared() > 0.01 else -aim_direction
-	dash.try_start(direction.normalized())
+## Design rule (Combat Polish 0.2): the dash always goes where the character faces,
+## i.e. towards the mouse; WASD is ignored. aim_direction is the last valid aim, so
+## a cursor on top of the character keeps the previous facing. DashComponent keeps
+## the direction fixed for the whole dash.
+func _start_dash() -> void:
+	dash.try_start(aim_direction)
 
 
 ## Hits deal damage and knockback; the attack's reaction type decides whether the
@@ -161,7 +163,7 @@ func _on_hit_received(hit: HitData) -> void:
 	if health.is_dead():
 		return
 	var type := reaction.apply(hit, combat, dash)
-	_knockback += hit.knockback * reaction.knockback_multiplier(type)
+	knockback.start(hit.knockback * reaction.knockback_multiplier(type))
 
 
 func _on_died() -> void:
@@ -174,7 +176,7 @@ func _step_down(delta: float) -> void:
 	_respawn_left -= delta
 	if _respawn_left <= 0.0:
 		global_position = _spawn_position
-		_knockback = Vector2.ZERO
+		knockback.stop()
 		hitstop_left = 0.0
 		health.reset()
 		respawned.emit()

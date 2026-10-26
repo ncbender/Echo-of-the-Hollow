@@ -1,7 +1,8 @@
 # Echoes of the Hollow – Projektregeln
 
 2D-Pixel-Art-Action-RPG, schräge Top-Down-Perspektive. **Godot 4.7.2, ausschließlich GDScript.**
-Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3). Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
+Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2.
+Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_arena.tscn`.
 
 ## Werkzeuge
@@ -18,6 +19,8 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Spieldaten sind Resources unter `data/` mit stabilen `StringName`-IDs. Keine `match`/`if`-Ketten
   für einzelne Waffen, Angriffe, Items oder Klassen.
 - Definitionen (Resources) ≠ Laufzeitinstanzen (`Character`, `ItemInstance`, …) ≠ Spielstand (Dict/JSON).
+- Knockback ist eine Distanz in px und läuft nur über `KnockbackMotion` (eine Skalierung beim Empfänger).
+  Dash geht immer in Blickrichtung (Maus), nie nach WASD.
 - Combat ↔ RPG nur über `PlayerProgressionBridge`; Items wirken über `AttackModifier`, nie über
   geänderte `AttackDefinition`-Daten oder eigene Schadenslogik.
 - Items existieren nur im `Inventory`; Loadouts referenzieren Instanz-IDs (Shared-Item-Policy).

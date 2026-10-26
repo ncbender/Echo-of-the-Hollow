@@ -26,7 +26,9 @@ func _ready() -> void:
 
 func _on_hit_received(hit: HitData) -> void:
 	flash = 1.0
-	var push := hit.knockback.normalized() * minf(max_offset, 2.0 + hit.knockback.length() / 25.0)
+	# knockback is a distance in px since Combat Polish 0.2 (was a speed-like value; /25 -> /5
+	# keeps the old look for sword light hits).
+	var push := hit.knockback.normalized() * minf(max_offset, 2.0 + hit.knockback.length() / 5.0)
 	_offset_velocity += push * 30.0
 	_spawn_number(hit)
 

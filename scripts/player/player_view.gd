@@ -71,6 +71,17 @@ func _draw() -> void:
 	var aim := player.aim_direction
 	var side := aim.orthogonal() * 3.0
 	draw_colored_polygon(PackedVector2Array([aim * 18.0, aim * 13.0 + side, aim * 13.0 - side]), Color(COLOR_AIM, 0.8))
+	if DebugView.show_hitboxes:
+		_draw_debug_vectors()
+
+
+## F1 debug: full lunge of the running attack (green) and remaining received knockback (red).
+func _draw_debug_vectors() -> void:
+	var combat := player.combat
+	if combat.get_lunge_velocity() != Vector2.ZERO:
+		DebugView.draw_vector(self, combat.attack_direction * combat.current_attack.lunge_distance, DebugView.COLOR_LUNGE)
+	if player.knockback.is_active():
+		DebugView.draw_vector(self, player.knockback.remaining(), DebugView.COLOR_KNOCKBACK)
 
 
 func _weapon_color() -> Color:

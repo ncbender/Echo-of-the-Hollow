@@ -20,7 +20,8 @@
 `project`, `combat_data`, `combo`, `dash`, `movement`, `light_attack`, `heavy_attack`, `hits`,
 `weapon_switch`, `enemy`, `input`; Overnight 2: `collision`, `hit_reaction`, `mastery`, `classes`,
 `inventory`, `pickup`, `equipment`, `item_effects`, `save`; Overnight 3: `world`, `base`, `gathering`,
-`loop` (End-to-End).
+`loop` (End-to-End); Combat Polish 0.2: `knockback`, `lunge`, `combo_reach` (Knockback × Lunge ×
+Combo-Fenster gegen echte Grunts).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -42,6 +43,9 @@
 | `player.gd` (Kompositionswurzel) | movement, dash + alle Player-basierten Integrations-Suites |
 | Gegner | enemy, hits |
 | `player_input.gd` | input |
+| `knockback_motion.gd`, Knockback-/Resistenzwerte | knockback, combo_reach, collision, hit_reaction |
+| `lunge_distance`, Lunge-Logik in `combat_component.gd` | lunge, combo_reach |
+| Dash-Richtung (`player.gd`) | dash (+ visueller Playtest `--polish`) |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
 | `character.gd`, `player_progression_bridge.gd` | mastery, classes, equipment, item_effects, save |
 | `inventory.gd`, Items | inventory, pickup, equipment, save |
@@ -74,6 +78,7 @@ F6 → F9 → Vergleich). Nutzt `user://test_saves/loop_playtest.save.json`.
 Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/visual_playtest.gd
   [-- --weapon=1]   # Zweihänder
   [-- --enemy]      # Gegner: Telegraph, Dash-Ausweichen, Kampf bis zum Tod
+  [-- --polish]     # Combat Polish 0.2: Lunge-/Knockback-Vektoren, gemessene Distanzen, Dash zur Maus
 ```
 Öffnet ein Fenster, spielt eine feste Eingabesequenz, schreibt Screenshots und ein Event-Log nach
 `tests/output/` (git-ignoriert). Prüft Lesbarkeit, nicht das Spielgefühl unter echter Maus/Tastatur.

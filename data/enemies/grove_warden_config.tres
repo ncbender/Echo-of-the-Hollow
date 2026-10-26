@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+
+[sub_resource type="Resource" id="Drop_essence"]
+script = ExtResource("2_cost")
+item_id = &"hollow_essence"
+
+[sub_resource type="Resource" id="Drop_ore"]
+script = ExtResource("2_cost")
+item_id = &"iron_ore"
+quantity = 2
+
+[resource]
+script = ExtResource("1_cfg")
+move_speed = 70.0
+aggro_range = 260.0
+attack_range = 28.0
+stop_distance = 18.0
+attack_cooldown = 0.9
+heavy_attack_interval = 3
+knockback_resistance = 1.0
+knockback_decay = 1000.0
+despawn_delay = 0.8
+mastery_xp_reward = 20
+class_xp_reward = 30
+drops = Array[ExtResource("2_cost")]([SubResource("Drop_essence"), SubResource("Drop_ore")])

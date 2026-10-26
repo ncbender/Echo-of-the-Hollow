@@ -25,11 +25,12 @@ Player.physics_step:          ▼
   2. DashComponent.step()        – Dauer, iFrames, sequentielle Regeneration
   3. Dash-Buffer (120 ms) → wenn dash.can_dash() && combat.can_dash_cancel():
         combat.cancel("dash")  → Hitbox aus, Combo-Reset, Buffer leer
-        dash.try_start(dir)
+        dash.try_start(aim_direction)   – immer Blickrichtung (letzte gültige Maus-Richtung)
   4. CombatComponent.step(delta, frame, aim, blocked = dashing)
         Buffer → Charge/Attack starten, Phasen fortschalten, Treffer scannen
-  5. Velocity = Dash ODER (Movement × combat.get_move_multiplier() + Lunge) + Knockback
-  6. move_and_slide()
+  5. Velocity = Dash ODER (Movement × combat.get_move_multiplier() + combat.take_lunge_velocity())
+               + knockback.step()   (KnockbackMotion, Distanz in px)
+  6. BodyContact.strip_push → move_and_slide()
 ```
 Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input`, oder
 `physics_step` manuell mit festem `delta`).
@@ -52,6 +53,7 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
 | `scripts/combat/hit_data.gd` | Ein aufgelöster Treffer (Schaden, Haltung, Knockback, Hitstop, Tags, Tier). |
 | `scripts/combat/health_component.gd` | Leben, Haltung (Poise), Stagger, Tod. |
 | `scripts/combat/attack_modifier.gd` | Basisklasse für Item-/Talent-/Mastery-Effekte auf Treffer. |
+| `scripts/combat/knockback_motion.gd` | **Einziges Knockback-Modell** (Spieler + Gegner): Distanz in px mit konstanter Verzögerung, über `move_and_slide` (Wände/Körper schlucken den Rest), Debug-Messung. Gegner skalieren mit `EnemyConfig.knockback_taken()`, der Spieler mit dem Reaktions-Multiplikator – genau eine Skalierung. |
 | `scripts/enemies/enemy.gd` (+`EnemyConfig`) | KI erzeugt `InputFrame`s für eine eigene `CombatComponent`. |
 | `scripts/fx/*`, `*_view.gd`, `scripts/ui/debug_overlay.gd` | Darstellung / Game Feel. |
 

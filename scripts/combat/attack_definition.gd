@@ -28,7 +28,10 @@ const CANCEL_RECOVERY := 4
 @export var damage: float = 10.0
 @export var damage_type: StringName = &"physical"
 @export var poise_damage: float = 10.0
-@export var knockback: float = 40.0
+## Knockback DISTANCE in px against a standard target (resistance 0). The receiver
+## scales it once (EnemyConfig.knockback_resistance, player reaction multiplier);
+## KnockbackMotion covers exactly that distance unless a wall/character blocks it.
+@export var knockback: float = 6.0
 ## Hitstop in seconds applied by feedback systems when this attack connects.
 @export var hitstop: float = 0.0
 
@@ -47,7 +50,10 @@ const CANCEL_RECOVERY := 4
 @export_group("Movement")
 ## Multiplier on base move speed while this attack runs.
 @export var move_multiplier: float = 0.85
-## Forward displacement along the aim direction spread over startup + active.
+## Attack lunge: forward displacement in px along the attack direction fixed at attack
+## start, spread evenly over startup + active. Ends with the attack (cancel, dash,
+## hit reaction, recovery); walls and characters block it like normal movement.
+## 0 = stationary attack.
 @export var lunge_distance: float = 0.0
 
 @export_group("Combo")

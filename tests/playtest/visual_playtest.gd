@@ -34,7 +34,9 @@ func _run() -> void:
 		f.weapon_slot = weapon_slot
 		await _ticks(2)
 		prefix = String(player.combat.weapon.id)
-	if "--enemy" in OS.get_cmdline_user_args():
+	if "--polish" in OS.get_cmdline_user_args():
+		await _polish_sequence()
+	elif "--enemy" in OS.get_cmdline_user_args():
 		await _enemy_sequence()
 	else:
 		await _combat_sequence()
@@ -82,9 +84,12 @@ func _combat_sequence() -> void:
 	await _shot("05_lh_thrust_active")
 	await _until_idle(dummy_a)
 
-	# 4) Dash away (no move input -> backwards from aim)
+	# 4) Dash away: the dash follows the facing (mouse), WASD is ignored (Combat Polish 0.2).
+	f.aim_direction = (player.global_position - dummy_a.global_position).normalized()
+	f.move = Vector2.DOWN
 	f.dash_pressed = true
-	await _ticks_aim(dummy_a, 4)
+	await _ticks(4)
+	f.move = Vector2.ZERO
 	await _shot("06_dash_iframes")
 	await _ticks_aim(dummy_a, 40)
 
@@ -122,7 +127,9 @@ func _enemy_sequence() -> void:
 			telegraph_seen = true
 			await _shot("e02_enemy_telegraph")
 			f.dash_pressed = true
-			f.move = Vector2.LEFT
+			f.move = Vector2.RIGHT   # ignored: the dash follows the aim
+			f.aim_direction = Vector2.LEFT
+			await _ticks(2)   # resume happens before the player tick: keep LEFT for one full tick
 		await _ticks_aim(enemy, 1)
 		f.move = Vector2.ZERO
 	await _shot("e03_after_dodge")
@@ -141,6 +148,105 @@ func _enemy_sequence() -> void:
 	_log("enemy defeated: %s after %d ticks" % [not is_instance_valid(enemy) or enemy.get(&"health").is_dead(), guard])
 
 
+## Combat Polish 0.2: lunge/knockback vectors (F1 debug on), weapon knockback
+## profiles against a standard grunt, dash towards the mouse, then a real fight.
+func _polish_sequence() -> void:
+	prefix = "polish"
+	DebugView.show_hitboxes = true
+	var enemy: Enemy = arena.call(&"spawn_enemy", player.global_position + Vector2(40, 0))
+	var active_config := enemy.config
+	var normal_health := enemy.health.max_health
+	enemy.health.set_max_health(5000.0)   # survives the measuring phase
+	enemy.config = enemy.config.duplicate()
+	enemy.config.attack_range = 0.0
+	enemy.config.move_speed = 0.0
+	await _ticks_aim(enemy, 10)
+	# 1) sword L1: lunge vector (green) during startup, knockback vector (red) after the hit
+	f.light_pressed = true
+	await _ticks_aim(enemy, 3)
+	await _shot("p01_sword_l1_lunge")
+	await _until_phase(CombatComponent.Phase.ACTIVE, enemy)
+	await _ticks_aim(enemy, 3)
+	await _shot("p02_sword_l1_knockback")
+	await _until_idle(enemy)
+	await _ticks_aim(enemy, 30)
+	_log_knockback(enemy, "sword light")
+	# 2) sword L-L-L without walking
+	for i in 3:
+		f.light_pressed = true
+		await _until_phase(CombatComponent.Phase.RECOVERY, enemy)
+		await _ticks_aim(enemy, 2)
+	await _until_idle(enemy)
+	await _ticks_aim(enemy, 30)
+	_log_knockback(enemy, "sword L3")
+	# 3) sword heavy tap
+	await _walk_to(enemy, 26.0)
+	f.heavy_pressed = true
+	await _until_phase(CombatComponent.Phase.ACTIVE, enemy)
+	await _ticks_aim(enemy, 4)
+	await _shot("p03_sword_heavy_knockback")
+	await _until_idle(enemy)
+	await _ticks_aim(enemy, 30)
+	_log_knockback(enemy, "sword heavy")
+	# 4) greatsword light and heavy
+	f.weapon_slot = 1
+	await _ticks(2)
+	await _walk_to(enemy, 34.0)
+	f.light_pressed = true
+	await _until_idle(enemy)
+	await _ticks_aim(enemy, 30)
+	_log_knockback(enemy, "greatsword light")
+	await _walk_to(enemy, 34.0)
+	f.heavy_pressed = true
+	await _until_phase(CombatComponent.Phase.ACTIVE, enemy)
+	await _ticks_aim(enemy, 4)
+	await _shot("p04_greatsword_heavy_knockback")
+	await _until_idle(enemy)
+	await _ticks_aim(enemy, 30)
+	_log_knockback(enemy, "greatsword heavy")
+	# 5) dash: WASD left, mouse right -> dash right
+	f.move = Vector2.LEFT
+	f.aim_direction = Vector2.RIGHT
+	f.dash_pressed = true
+	await _ticks(4)
+	await _shot("p05_dash_wasd_left_mouse_right")
+	f.move = Vector2.ZERO
+	await _ticks(30)
+	# 6) normal fight against the active grunt with the greatsword, then the sword
+	enemy.config = active_config
+	enemy.health.set_max_health(normal_health)
+	f.weapon_slot = 0
+	var guard := 0
+	while is_instance_valid(enemy) and not enemy.health.is_dead() and guard < 1500:
+		guard += 1
+		var to_enemy := enemy.global_position - player.global_position
+		f.move = to_enemy.normalized() if to_enemy.length() > 24.0 else Vector2.ZERO
+		if player.combat.state != CombatComponent.State.CHARGING and to_enemy.length() < 34.0:
+			f.light_pressed = true
+		player.health.heal(1000.0)
+		if guard == 120:
+			await _shot("p06_fight")
+		await _ticks_aim(enemy, 1)
+	f.move = Vector2.ZERO
+	_log("polish fight: enemy defeated=%s after %d ticks" % [not is_instance_valid(enemy) or enemy.health.is_dead(), guard])
+
+
+func _walk_to(target: Node2D, distance: float) -> void:
+	for i in 120:
+		var to := target.global_position - player.global_position
+		if to.length() <= distance:
+			break
+		f.move = to.normalized()
+		await _ticks_aim(target, 1)
+	f.move = Vector2.ZERO
+	await _ticks_aim(target, 2)
+
+
+func _log_knockback(enemy: Enemy, label: String) -> void:
+	var motion := enemy.knockback
+	_log("knockback %s: dealt %.2f px (res %.2f) moved %.2f px" % [label, motion.last_offset.length(), enemy.config.knockback_resistance, motion.last_traveled])
+
+
 func _connect_logging() -> void:
 	var combat := player.combat
 	combat.attack_started.connect(func(attack: AttackDefinition, tier: int) -> void:
@@ -151,7 +257,7 @@ func _connect_logging() -> void:
 		_log("hit %s -> %s dmg=%.1f poise=%.1f tier=%d hitstop=%.3f" % [hit.attack.id, hit.target.name, hit.damage, hit.poise_damage, hit.charge_tier, hit.hitstop]))
 	combat.charge_tier_changed.connect(func(tier: int) -> void: _log("charge tier -> %d" % tier))
 	player.dash.dash_started.connect(func(direction: Vector2) -> void:
-		_log("dash %s charges=%d" % [direction, player.dash.charges]))
+		_log("dash %s charges=%d (aim %s, move %s)" % [direction, player.dash.charges, f.aim_direction, f.move]))
 	for dummy in arena.get_node("Dummies").get_children():
 		dummy.health.poise_broken.connect(func() -> void: _log("POISE BREAK %s" % dummy.name))
 

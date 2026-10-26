@@ -3,6 +3,10 @@ extends Node
 ## Captures device input. Clicks are collected from input events so every
 ## physical press counts exactly once, independent of frame timing.
 
+## Cursor closer to the character than this (px) gives no aim; the character keeps
+## its last valid facing (attacks and dash).
+const AIM_DEADZONE := 4.0
+
 var _pending := InputFrame.new()
 
 
@@ -28,7 +32,7 @@ func poll(character: Node2D) -> InputFrame:
 	var frame := InputFrame.new()
 	frame.move = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
 	var to_mouse := character.get_global_mouse_position() - character.global_position
-	frame.aim_direction = to_mouse.normalized() if to_mouse.length_squared() > 1.0 else Vector2.ZERO
+	frame.aim_direction = to_mouse.normalized() if to_mouse.length() > AIM_DEADZONE else Vector2.ZERO
 	frame.heavy_held = Input.is_action_pressed(&"attack_heavy")
 	frame.light_pressed = _pending.light_pressed
 	frame.heavy_pressed = _pending.heavy_pressed

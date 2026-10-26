@@ -4,7 +4,8 @@ extends GameplayTestCase
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 
 
-func _hit(type: HitReaction.Type, damage: float = 1.0, knockback: Vector2 = Vector2(-60, 0)) -> HitData:
+## knockback is a distance in px (KnockbackMotion); -3 px matches the old -60 speed value.
+func _hit(type: HitReaction.Type, damage: float = 1.0, knockback: Vector2 = Vector2(-3, 0)) -> HitData:
 	var hit := HitData.new()
 	hit.damage = damage
 	hit.knockback = knockback

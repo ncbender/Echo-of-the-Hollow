@@ -19,7 +19,7 @@ enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
 var target: Node2D
 var state: State = State.CHASE
 var _cooldown: float = 0.0
-var _knockback: Vector2 = Vector2.ZERO
+var knockback := KnockbackMotion.new()
 var dead_time: float = 0.0
 ## Remaining local hitstop; while > 0 the enemy (AI, combat, movement) is frozen.
 var hitstop_left: float = 0.0
@@ -33,6 +33,7 @@ var _attacks_started: int = 0
 func _ready() -> void:
 	if config == null:
 		config = EnemyConfig.new()
+	knockback.deceleration = config.knockback_decay
 	combat.set_weapon(attacks)
 	combat.attack_finished.connect(func(_attack: AttackDefinition) -> void: _cooldown = config.attack_cooldown)
 	hurtbox.invulnerability_check = health.is_dead
@@ -115,17 +116,21 @@ func _sync_state() -> void:
 func _move(to_target: Vector2, delta: float) -> void:
 	var desired := Vector2.ZERO
 	var distance := to_target.length()
-	if state == State.CHASE and distance > config.stop_distance and distance < config.aggro_range:
+	var knocked := knockback.is_active()
+	if knocked:
+		desired = knockback.step(delta)   # own steps/lunge pause, so the push distance is exact
+	elif state == State.CHASE and distance > config.stop_distance and distance < config.aggro_range:
 		desired = to_target.normalized() * config.move_speed
 	elif combat.state == CombatComponent.State.ATTACKING:
-		desired = combat.get_lunge_velocity()
-	velocity = BodyContact.strip_push(self, desired + _knockback, delta)
-	_knockback = _knockback.move_toward(Vector2.ZERO, config.knockback_decay * delta)
+		desired = combat.take_lunge_velocity(delta)
+	velocity = BodyContact.strip_push(self, desired, delta)
 	move_and_slide()
+	if knocked:
+		knockback.record(get_position_delta())
 
 
 func _on_hit_received(hit: HitData) -> void:
-	_knockback += hit.knockback * (1.0 - config.knockback_resistance) * config.knockback_scale
+	knockback.start(hit.knockback * config.knockback_taken())
 	health.apply_hit(hit)
 
 

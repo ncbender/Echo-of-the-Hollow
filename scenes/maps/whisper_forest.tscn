@@ -15,6 +15,7 @@
 [ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="def_forest_rock"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/iron_vein.tres" id="def_iron_vein"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/ancient_deposit.tres" id="def_ancient_deposit"]
+[ext_resource type="Resource" path="res://data/enemies/grove_warden_config.tres" id="13_warden_cfg"]
 
 [sub_resource type="RectangleShape2D" id="Rect_door_west"]
 size = Vector2(12, 48)
@@ -180,6 +181,7 @@ position = Vector2(230, -100)
 [node name="GroveWarden" parent="Enemies" instance=ExtResource("8_grunt")]
 position = Vector2(260, 120)
 scale = Vector2(1.3, 1.3)
+config = ExtResource("13_warden_cfg")
 persistent_id = &"whisper_forest_grove_warden"
 
 [node name="Player" parent="." instance=ExtResource("4_player")]

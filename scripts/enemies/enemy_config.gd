@@ -13,11 +13,11 @@ extends Resource
 @export var attack_cooldown: float = 0.9
 ## Every n-th attack uses the family's heavy root (0 = never).
 @export var heavy_attack_interval: int = 3
-## 0 = full knockback, 1 = immovable.
-@export_range(0.0, 1.0) var knockback_resistance: float = 0.2
-## Converts HitData.knockback (attack data) into launch speed for this enemy.
-@export var knockback_scale: float = 3.0
-## How fast knockback velocity decays (px/s²).
+## Scales the knockback distance of every hit; poise damage is unaffected.
+## Tiers (docs/COMBAT_DESIGN.md): small -0.5 (pushed 1.5x), standard 0, heavy 0.5,
+## elite 0.8, boss 1 (no positional knockback).
+@export_range(-1.0, 1.0) var knockback_resistance: float = 0.0
+## Deceleration of knockback movement in px/s² (speed of the push, not its distance).
 @export var knockback_decay: float = 1000.0
 ## Seconds the corpse stays before it is removed.
 @export var despawn_delay: float = 0.8
@@ -29,3 +29,8 @@ extends Resource
 @export var mastery_xp_reward: int = 20
 ## Class XP for the active class.
 @export var class_xp_reward: int = 30
+
+
+## Factor applied to HitData.knockback distances (1 = standard, 0 = immovable).
+func knockback_taken() -> float:
+	return maxf(0.0, 1.0 - knockback_resistance)

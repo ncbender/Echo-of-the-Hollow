@@ -72,25 +72,115 @@ func test_iframes_cover_first_180ms_only() -> void:
 	check(not dash.is_dashing(), "dash over at 300 ms")
 
 
-func test_player_dash_follows_move_input() -> void:
+# --- Dash direction = facing (mouse aim), Combat Polish 0.2 -------------------
+
+func _dash_with(move: Vector2, aim: Vector2) -> InputFrame:
 	spawn_player()
 	await wait_physics(1)
-	var f := frame(Vector2.UP, Vector2.RIGHT)
-	f.dash_pressed = true
-	await tick(f, 1)
+	var f := frame(move, aim)
+	await tick(dash_press(f))
+	return f
+
+
+func test_dash_ignores_wasd_left_aim_right() -> void:
+	await _dash_with(Vector2.LEFT, Vector2.RIGHT)
 	check(player.dash.is_dashing(), "dash started")
-	check_eq(player.dash.direction, Vector2.UP, "dash direction from WASD")
+	check_eq(player.dash.direction, Vector2.RIGHT, "dash follows the aim, not WASD")
 	check_eq(player.dash.charges, 1, "one charge spent")
 
 
-func test_player_dash_without_input_goes_backwards() -> void:
+func test_dash_ignores_wasd_down_aim_up() -> void:
+	var f := await _dash_with(Vector2.DOWN, Vector2.UP)
+	check_eq(player.dash.direction, Vector2.UP, "dash up")
+	await tick(f, seconds_to_ticks(0.3) - 1)
+	check(player.global_position.y < -player.dash.config.distance + 5.0, "moved up the full distance despite holding down (y=%.1f)" % player.global_position.y)
+
+
+func test_dash_without_move_input_goes_to_aim() -> void:
+	var f := await _dash_with(Vector2.ZERO, Vector2.LEFT)
+	await tick(f, seconds_to_ticks(0.3) - 1)
+	check_eq(player.dash.direction, Vector2.LEFT, "dash left")
+	check_near(player.global_position.x, -player.dash.config.distance, 1.0, "covers the unchanged dash distance")
+	check_near(player.global_position.y, 0.0, 0.01, "straight line")
+
+
+func test_dash_direction_is_normalized_for_diagonal_aim() -> void:
+	await _dash_with(Vector2.ZERO, Vector2(3, -1))
+	check_near(player.dash.direction.length(), 1.0, 0.0001, "normalized")
+	check_near(player.dash.direction.angle_to(Vector2(3, -1)), 0.0, 0.0001, "towards the cursor")
+
+
+func test_dash_direction_stays_fixed_when_aim_moves() -> void:
+	var f := await _dash_with(Vector2.ZERO, Vector2.RIGHT)
+	for aim: Vector2 in [Vector2.UP, Vector2.LEFT, Vector2.DOWN, Vector2(-1, 1)]:
+		f.aim_direction = aim.normalized()
+		f.move = -aim
+		await tick(f, 4)
+		check_eq(player.dash.direction, Vector2.RIGHT, "direction unchanged after aiming %s" % aim)
+	check_near(player.global_position.y, 0.0, 0.01, "no sideways drift during the dash")
+
+
+func test_invalid_aim_uses_last_valid_facing() -> void:
 	spawn_player()
 	await wait_physics(1)
-	var f := frame(Vector2.ZERO, Vector2(1, 1))
-	f.dash_pressed = true
-	await tick(f, seconds_to_ticks(0.3))
-	check_near(player.dash.direction.angle_to(Vector2(-1, -1).normalized()), 0.0, 0.001, "dashes away from aim")
-	check_near(player.position.length(), player.dash.config.distance, 1.0, "covers dash distance")
+	await tick(frame(Vector2.ZERO, Vector2.UP))   # last valid facing: up
+	var f := frame(Vector2.RIGHT, Vector2.ZERO)   # cursor on the character -> no aim
+	f.aim_direction = Vector2.ZERO
+	await tick(dash_press(f))
+	check(player.dash.is_dashing(), "dash still possible")
+	check_eq(player.dash.direction, Vector2.UP, "last valid facing used")
+
+
+func test_dash_cancels_light_attack() -> void:
+	spawn_player()
+	await wait_physics(1)
+	var cancelled: Array[StringName] = []
+	player.combat.attack_cancelled.connect(func(_a: AttackDefinition, reason: StringName) -> void: cancelled.append(reason))
+	var f := frame(Vector2.ZERO, Vector2.DOWN)
+	await tick(light(f), 3)
+	check_eq(player.combat.state, CombatComponent.State.ATTACKING, "attacking")
+	f.aim_direction = Vector2.LEFT
+	await tick(dash_press(f))
+	check(player.dash.is_dashing(), "dash cancelled the light attack")
+	check_eq(cancelled, [&"dash"] as Array[StringName], "cancel reason dash")
+	check_eq(player.dash.direction, Vector2.LEFT, "dash towards the current aim")
+	check_eq(player.combat.get_lunge_velocity(), Vector2.ZERO, "no lunge after the cancel")
+
+
+func test_dash_cancels_heavy_charge() -> void:
+	spawn_player()
+	await wait_physics(1)
+	var reasons: Array[StringName] = []
+	player.combat.charge_cancelled.connect(func(reason: StringName) -> void: reasons.append(reason))
+	var f := frame(Vector2.ZERO, Vector2.RIGHT)
+	await tick(heavy_down(f), 10)
+	check_eq(player.combat.state, CombatComponent.State.CHARGING, "charging")
+	f.aim_direction = Vector2.UP
+	await tick(dash_press(f))
+	check(player.dash.is_dashing(), "dash out of the charge")
+	check_eq(reasons, [&"dash"] as Array[StringName], "charge cancelled")
+	check_eq(player.dash.direction, Vector2.UP, "dash towards the aim")
+	await tick(f, 20)
+	check_eq(player.combat.state, CombatComponent.State.IDLE, "no heavy released after the dash")
+
+
+func test_player_without_charges_cannot_dash() -> void:
+	spawn_player()
+	await wait_physics(1)
+	player.dash.charges = 0
+	await tick(dash_press(frame(Vector2.ZERO, Vector2.RIGHT)))
+	check(not player.dash.is_dashing(), "no dash at 0 charges")
+	check_near(player.global_position.x, 0.0, 0.01, "not moved")
+
+
+func test_dash_into_wall_stops_at_the_wall() -> void:
+	spawn_player()
+	add_wall(Vector2(60, 0), Vector2(16, 120))   # face at x = 52
+	await wait_physics(2)
+	var f := frame(Vector2.LEFT, Vector2.RIGHT)
+	await tick(dash_press(f), seconds_to_ticks(0.3))
+	check(player.global_position.x < 52.0, "stopped in front of the wall (x=%.1f)" % player.global_position.x)
+	check(player.global_position.x > 30.0, "dash went towards the wall")
 
 
 func test_player_dash_buffered_but_not_infinite() -> void:
