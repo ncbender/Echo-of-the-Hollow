@@ -47,6 +47,12 @@ func rebuild() -> void:
 	var stage := RestorationService.stage(character, ruin.id)
 	_list.add_child(JournalPanel.StageTrack.make(stage))
 	_list.add_child(UiTheme.wrapped(ruin.description, UiTheme.TEXT_SECONDARY, WIDTH))
+	if ruin.profession_id != &"":   # the workshop's bench works while ruined
+		var profession: ProfessionDefinition = character.database.professions.get(ruin.profession_id)
+		var bench := UiTheme.button("Use the Workbench (%s)" % (profession.display_name if profession else "Profession"), &"", _open_workbench)
+		bench.name = "Workbench"
+		bench.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_list.add_child(bench)
 	var error := RestorationService.restore_error(character, ruin)
 	# before -> after
 	var compare := HBoxContainer.new()
@@ -91,6 +97,10 @@ func _note(text: String) -> Label:
 	var label := UiTheme.wrapped(text, UiTheme.TEXT_MUTED, WIDTH)
 	label.theme_type_variation = &"SmallLabel"
 	return label
+
+
+func _open_workbench() -> void:
+	hud.open_professions(site.ruin_id, site)
 
 
 ## Restore button (UI and tests).

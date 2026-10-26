@@ -5,7 +5,9 @@ extends RefCounted
 
 const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
-	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored", "pause", "save", "load", "options", "confirm"]
+	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
+	"professions", "professions_locked", "professions_tooltip", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
+	"pause", "save", "load", "options", "confirm"]
 
 
 static func open(gallery: Object, screen: String) -> String:
@@ -164,6 +166,39 @@ static func open(gallery: Object, screen: String) -> String:
 			hud.close_windows()
 			hud.stash_panel.open(other, store)
 			hud.stash_panel.select_category(StashService.COLLECTION)
+		"professions", "professions_locked", "professions_tooltip":
+			var lodge := map.get_node("Ruins/TannersLodge") as RuinSite
+			await _stand_at(gallery, lodge)
+			if character.inventory.count(&"raw_hide") < 4:
+				character.inventory.add_item(&"raw_hide", 6)
+				character.inventory.add_item(&"flax_fiber", 4)
+			lodge.interact(hud)
+			await gallery.frames(3)
+			if screen == "professions" and not character.professions.crafted_before(&"lw_tan_hide"):
+				hud.professions_panel.craft_selected()   # real craft: XP bar and feedback shown
+			if screen == "professions_locked":
+				hud.professions_panel.select_recipe(&"lw_leather_bracers")
+			if screen == "professions_tooltip":
+				hud.professions_panel.select_recipe(&"lw_leather_gloves")
+				await gallery.frames(3)
+				var output := hud.professions_panel.find_child("Output", true, false) as Control
+				if output != null:
+					hud.professions_panel._show_item(output, &"leather_gloves", 1)
+		"professions_gathering":
+			hud.toggle_professions()
+			hud.professions_panel.show_page("Gathering")
+			hud.professions_panel.select_profession(&"herbalism")
+		"professions_smithy":
+			var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
+			await _stand_at(gallery, smithy)
+			character.world.set_restoration(&"old_storehouse", &"restored")   # stash materials reach the bench
+			if character.stash.count(&"iron_ore") == 0:
+				character.stash.add_item(&"iron_ore", 6)
+			hud.open_professions(&"old_smithy", smithy)
+			hud.professions_panel.select_recipe(&"bs_smelt_iron")
+		"hud_artisan_quarter":
+			map.player.global_position = Vector2(-560, 0)
+			await gallery.frames(12)   # the old station's prompt has left
 		"pause":
 			hud.open_pause_menu()
 		"save":

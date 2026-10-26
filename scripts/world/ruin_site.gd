@@ -43,7 +43,9 @@ func refresh() -> void:
 	super.refresh()
 	var definition := ruin()
 	var title := definition.display_name if definition != null else String(ruin_id)
-	if not is_restored():
+	if definition != null and definition.profession_id != &"" and not definition.restorable:
+		prompt = "Work at %s" % title
+	elif not is_restored():
 		prompt = "Inspect %s" % title
 	elif built_building() != null:
 		prompt = "Use %s" % title
@@ -61,6 +63,9 @@ func interact(hud: GameHud) -> void:
 	var definition := ruin()
 	if definition != null and definition.stash_access:
 		hud.open_stash(self)   # the stash works in every stage; restoring is offered there
+		return
+	if definition != null and definition.profession_id != &"" and not definition.restorable:
+		hud.open_professions(ruin_id, self)   # Artisan Quarter workshop: the bench works while ruined
 		return
 	if not is_restored():
 		hud.open_restoration(self)
@@ -105,3 +110,27 @@ func _draw() -> void:
 		draw_circle(at, 2.5, stone.lightened(0.1))
 	var color := Color(0.95, 0.85, 0.6, 0.95 if player_inside else 0.75)
 	WorldText.draw(self, Vector2(-WorldText.width(title, 7) * 0.5, -size.y * 0.5 - 6), title, 7, color, 2, Color.BLACK)
+	if definition != null and definition.profession_id != &"":
+		_draw_workstation(definition, rect)
+
+
+## Workstation of a workshop ruin (usable in every stage) and its hanging sign
+## with the profession's colour and name.
+func _draw_workstation(definition: RuinDefinition, rect: Rect2) -> void:
+	var profession: ProfessionDefinition = GameDatabase.get_default().professions.get(definition.profession_id)
+	var tint := profession.color if profession != null else Color(0.7, 0.6, 0.4)
+	var bench := Rect2(rect.position + Vector2(rect.size.x * 0.5 - 13, rect.size.y - 17), Vector2(26, 9))
+	draw_rect(bench, Color(0.42, 0.3, 0.19))
+	draw_rect(Rect2(bench.position, Vector2(bench.size.x, 2)), Color(0.55, 0.41, 0.26))
+	draw_rect(Rect2(bench.position + Vector2(3, 9), Vector2(2, 5)), Color(0.3, 0.21, 0.13))
+	draw_rect(Rect2(bench.position + Vector2(bench.size.x - 5, 9), Vector2(2, 5)), Color(0.3, 0.21, 0.13))
+	draw_circle(bench.position + Vector2(bench.size.x * 0.5, -2), 3.0, tint)   # the tool of the trade
+	# sign on a post at the right front corner
+	var post := rect.position + Vector2(rect.size.x + 4, rect.size.y - 2)
+	draw_line(post, post + Vector2(0, -22), Color(0.36, 0.26, 0.16), 2.0)
+	var board := Rect2(post + Vector2(-9, -22), Vector2(18, 10))
+	draw_rect(board, Color(0.5, 0.38, 0.24))
+	draw_rect(Rect2(board.position + Vector2(2, 2), board.size - Vector2(4, 4)), tint.darkened(0.2))
+	if profession != null:
+		var label := profession.display_name
+		WorldText.draw(self, Vector2(-WorldText.width(label, 6) * 0.5, -rect.size.y * 0.5 + 6), label, 6, tint.lightened(0.35), 2, Color.BLACK)

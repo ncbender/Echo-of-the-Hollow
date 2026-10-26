@@ -11,6 +11,8 @@ extends UiWindow
 ## holds no item state except the selection. No overlapping sub-windows.
 
 signal recipes_requested(plot: BuildPlot)
+## The Blacksmithing workbench of this smithy (professions window).
+signal workbench_requested(plot: BuildPlot)
 
 const ITEMS_WIDTH := 300
 const STATE_WIDTH := 490
@@ -705,6 +707,11 @@ func _build_craft() -> void:
 		_confirm.disabled = true
 		return
 	_state.add_child(_line(building.description, UiTheme.TEXT_SECONDARY))
+	var bench := UiTheme.button("Blacksmithing Workbench", &"", func() -> void: workbench_requested.emit(plot))
+	bench.name = "Workbench"
+	bench.tooltip_text = "Smelt ore and craft Blacksmithing recipes."
+	bench.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_state.add_child(bench)
 	for recipe in building.recipes:
 		_state.add_child(_recipe_row(recipe))
 	if _last_craft != "":

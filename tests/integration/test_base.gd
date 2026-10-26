@@ -46,7 +46,7 @@ func test_data() -> void:
 		if plot is RuinSite:
 			ruin_ids[(plot as RuinSite).ruin_id] = true
 			check(db.ruins.has((plot as RuinSite).ruin_id), "ruin %s defined" % (plot as RuinSite).ruin_id)
-	check_eq(ruin_ids.size(), 6, "six ruins placed in Haven")
+	check_eq(ruin_ids.size(), 10, "ten fixed buildings in Haven (six + four Artisan Quarter workshops)")
 	home.free()
 
 

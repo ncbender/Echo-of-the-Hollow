@@ -34,6 +34,7 @@ var stash_panel: StashPanel
 var waystone_panel: WaystonePanel
 var journal_panel: JournalPanel
 var world_map_panel: WorldMapPanel
+var professions_panel: ProfessionsPanel
 ## Shared confirmation dialog (overwrite, discard, delete ...).
 var confirm_dialog: UiConfirmDialog
 ## Contextual tutorial hint (top centre).
@@ -181,11 +182,13 @@ func _ready() -> void:
 	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
 	journal_panel = _add_window(JournalPanel.new()) as JournalPanel
 	world_map_panel = _add_window(WorldMapPanel.new()) as WorldMapPanel
+	professions_panel = _add_window(ProfessionsPanel.new()) as ProfessionsPanel
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
 	confirm_dialog = _add_window(UiConfirmDialog.new()) as UiConfirmDialog
 	crafting_panel.recipes_requested.connect(open_build_panel)
+	crafting_panel.workbench_requested.connect(_open_smithy_workbench)
 	var session := SessionState.find(get_tree())
 	if session != null:
 		settings = session.settings
@@ -346,9 +349,16 @@ func open_crafting_panel(plot: BuildPlot) -> void:
 	crafting_panel.open(bridge.character, plot)
 
 
-## Keys of the windows added with the UI redesign (journal, map). Registered at
+## The forge's Blacksmithing workbench (the Old Smithy is that workstation).
+func _open_smithy_workbench(plot: BuildPlot) -> void:
+	var site := plot as RuinSite
+	if site != null:
+		open_professions(site.ruin_id, site)
+
+
+## Keys of the windows added after the first input map (journal, map, professions). Registered at
 ## runtime so the project's input map file stays untouched; shown in Controls.
-const EXTRA_ACTIONS := {&"ui_journal": KEY_J, &"ui_map": KEY_M}
+const EXTRA_ACTIONS := {&"ui_journal": KEY_J, &"ui_map": KEY_M, &"ui_professions": KEY_P}
 
 
 static func ensure_input_actions() -> void:
@@ -370,6 +380,25 @@ func toggle_journal() -> void:
 	else:
 		close_windows()
 		journal_panel.open(bridge.character)
+
+
+## P: professions (looking only; crafting needs a workstation in Haven).
+func toggle_professions() -> void:
+	if bridge == null:
+		return
+	if professions_panel.visible:
+		professions_panel.hide()
+	else:
+		close_windows()
+		professions_panel.open(bridge.character)
+
+
+## A workstation (Haven workshop, Old Smithy): professions at that station.
+func open_professions(station_id: StringName, site: Node2D = null) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	professions_panel.open(bridge.character, station_id, site)
 
 
 ## M: the region map.
@@ -453,6 +482,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"ui_map"):
 		toggle_map()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(&"ui_professions"):
+		toggle_professions()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(&"ui_cancel"):

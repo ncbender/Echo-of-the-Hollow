@@ -15,6 +15,9 @@
 [ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="def_forest_rock"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/iron_vein.tres" id="def_iron_vein"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/ancient_deposit.tres" id="def_ancient_deposit"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/wild_flax.tres" id="def_wild_flax"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/duskleaf_patch.tres" id="def_duskleaf"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/stag_remains.tres" id="def_stag"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_config.tres" id="13_warden_cfg"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="14_warden_attacks"]
 
@@ -165,6 +168,30 @@ prompt = "Gather"
 position = Vector2(290, -150)
 definition = ExtResource("def_ancient_deposit")
 node_id = &"deposit"
+prompt = "Gather"
+
+[node name="FlaxA" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-250, 40)
+definition = ExtResource("def_wild_flax")
+node_id = &"flaxa"
+prompt = "Gather"
+
+[node name="FlaxB" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(70, 100)
+definition = ExtResource("def_wild_flax")
+node_id = &"flaxb"
+prompt = "Gather"
+
+[node name="Duskleaf" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-60, -100)
+definition = ExtResource("def_duskleaf")
+node_id = &"duskleaf"
+prompt = "Gather"
+
+[node name="StagRemains" parent="Resources" instance=ExtResource("12_node")]
+position = Vector2(-240, -50)
+definition = ExtResource("def_stag")
+node_id = &"stag"
 prompt = "Gather"
 
 [node name="Enemies" type="Node2D" parent="."]

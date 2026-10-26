@@ -14,7 +14,7 @@ const CONTROLS := [
 	[&"defensive", "Block / parry"], [&"ability_1", "Skill 1"], [&"ability_2", "Skill 2"], [&"ability_3", "Skill 3"],
 	[&"ability_4", "Skill 4"], [&"weapon_slot_1", "Weapon 1"], [&"weapon_slot_2", "Weapon 2"], [&"interact", "Interact / talk / continue"],
 	[&"ui_inventory", "Inventory"], [&"ui_character", "Character, talents and skills"], [&"ui_journal", "Journal"],
-	[&"ui_map", "Map"], [&"ui_options", "Options"], [&"ui_cancel", "Pause menu / close"], [&"toggle_fullscreen", "Fullscreen"],
+	[&"ui_map", "Map"], [&"ui_professions", "Professions"], [&"ui_options", "Options"], [&"ui_cancel", "Pause menu / close"], [&"toggle_fullscreen", "Fullscreen"],
 ]
 
 var settings: UserSettings

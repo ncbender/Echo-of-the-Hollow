@@ -49,7 +49,7 @@ func _world_tour() -> void:
 	await _walk_into_door("ToHomeBase")
 	await _await_map(&"home_base")
 	_check(_at_spawn(&"from_forest"), "home: arrived at the east door")
-	await _walk_into_door("ToArena")
+	await _walk_into_door("ToArena", 900)   # through the Artisan Quarter
 	await _await_map(&"test_arena")
 	_check(_at_spawn(&"from_home"), "arena: entered at the west door")
 	await _shot("l03_arena")
