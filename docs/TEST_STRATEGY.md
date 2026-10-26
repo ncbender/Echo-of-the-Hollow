@@ -19,7 +19,8 @@
 ## Suites (Name = `test_<name>.gd`)
 `project`, `combat_data`, `combo`, `dash`, `movement`, `light_attack`, `heavy_attack`, `hits`,
 `weapon_switch`, `enemy`, `input`; Overnight 2: `collision`, `hit_reaction`, `mastery`, `classes`,
-`inventory`, `pickup`, `equipment`, `item_effects`, `save` (später ggf. `world`, `base`).
+`inventory`, `pickup`, `equipment`, `item_effects`, `save`; Overnight 3: `world`, `base`, `gathering`,
+`loop` (End-to-End).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -46,7 +47,9 @@
 | `inventory.gd`, Items | inventory, pickup, equipment, save |
 | `character_equipment.gd` | equipment, item_effects, save |
 | `save_system.gd` / Schema (`to_dict`) | save (+ Playtest-Schritt Save/Load) |
-| `game_map.gd`, Arena-Szene | project, enemy, pickup |
+| `game_map.gd`, Map-Szenen, `session_state.gd` | world, project, enemy, pickup (+ loop bei Loop-relevanten Änderungen) |
+| `base_builder.gd`, Gebäude-/Platzdaten | base |
+| `resource_gathering.gd`, Ressourcenknoten | gathering, loop |
 
 **Pflicht:** Änderungen am Persistenzschema → `save`; Änderungen an Ausrüstung → `equipment` (Stats,
 Loadout- und Inventar-Invarianten).
@@ -58,6 +61,13 @@ Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/pla
 Skriptierter Integrationsablauf mit echten Input-Events und UI-Buttons: Klassenstation → Pickups →
 Inventar/Ausrüstung → Legendary-Effekt → F3 Mastery → F6 Speichern → Zustand ändern → F9 Laden →
 Vergleich. Nutzt `user://test_saves/rpg_playtest.save.json`. Exit-Code 1 bei fehlgeschlagenem Check.
+
+## Loop-Playtest (Overnight 3)
+```
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/loop_playtest.gd [-- --tour | --build-only]
+```
+Ohne Argument: kompletter Gameplay-Loop (Basis → Wald → Kampf → Sammeln (G) → zurück → Bauen (UI) →
+F6 → F9 → Vergleich). Nutzt `user://test_saves/loop_playtest.save.json`.
 
 ## Visueller Playtest
 ```

@@ -112,6 +112,15 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
 - Details: `PROGRESSION_SYSTEM.md`, `CLASS_SYSTEM.md`, `ITEM_SYSTEM.md`, `EQUIPMENT_SYSTEM.md`,
   `SAVE_SYSTEM.md`.
 
+## Welt-Schicht (Overnight 3)
+- `GameMap` = Basisskript jeder Map; `SessionState.travel()` = einzige Übergangs-API (mit Fade,
+  Doppelanfragen-Schutz). Kein zusätzlicher Manager; der Character bleibt ein einziges Objekt im Autoload.
+- Weltzustand ausschließlich in `WorldState` (Flags, Mapzustände, Gebäude) → automatisch gespeichert.
+- Basisbau-Regeln zustandslos in `BaseBuilder`, Sammelregeln in `ResourceGathering` (Zeit injiziert).
+- Interaktion: alles „mit G Benutzbare“ erbt von `Interactable` (Klassenstation, Bauplatz, Ressourcenknoten,
+  Schalter).
+- Details: `WORLD_SYSTEM.md`.
+
 ## Kollisionslayer
 1 `world` (Wände, Dummies) · 2 `player` · 3 `enemy` · 4 `hurtbox` (nur Abfragen, kein Monitoring).
 Player-Körper kollidiert mit `world` + `enemy`; Gegner mit `world`, `player`, `enemy`. Interactables

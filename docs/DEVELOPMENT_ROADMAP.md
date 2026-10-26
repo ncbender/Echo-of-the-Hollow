@@ -20,8 +20,9 @@
 | 5 | Equipment & Klassen-Loadouts | ✅ |
 | 6 | Legendary/Unique/Set | ✅ |
 | 7 | Save/Load | ✅ |
-| 8 (optional) | Maps & Regionen | siehe Report |
-| 9 (optional) | Basisbau | siehe Report |
+| 8 | Regionen & Maps (Overnight 3) | ✅ |
+| 9 | Basisbau mit festen Bauplätzen (Overnight 3) | ✅ |
+| 10 | Erster integrierter Gameplay-Loop (Overnight 3) | ✅ |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen
