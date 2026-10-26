@@ -13,6 +13,7 @@ script = ExtResource("1_class")
 id = &"basic_adventurer"
 display_name = "Basic Adventurer"
 description = "Starting class. Uses any weapon, no shields. Neutral stats."
+tagline = "Starting class. Any weapon, neutral stats."
 max_level = 10
 xp_base = 120
 xp_growth = 1.2

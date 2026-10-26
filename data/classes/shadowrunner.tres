@@ -67,6 +67,7 @@ script = ExtResource("8_c4a1t")
 id = &"shadowrunner"
 display_name = "Shadowrunner"
 description = "Precise, mobile fighter. Light finishers expose Weak Points; Focus regenerates steadily (6 per second, in and out of combat) and pays for skills and executions. Talents can add bonus Focus on hits. Trees: Assassin, Bladestorm, Night Hunter."
+tagline = "Mobile duelist. Finishers expose Weak Points."
 max_level = 60
 xp_base = 100
 xp_growth = 1.07

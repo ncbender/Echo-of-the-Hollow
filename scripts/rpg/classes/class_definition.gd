@@ -6,6 +6,8 @@ extends Resource
 @export var id: StringName
 @export var display_name: String
 @export_multiline var description: String
+## One or two short lines for the compact class card (presentation only).
+@export var tagline: String
 
 @export_group("Progression")
 @export var max_level: int = 30

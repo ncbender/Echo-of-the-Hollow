@@ -11,10 +11,14 @@ const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests"]
 const FORM := SkillModDefinition.Slot.FORM
 const RESONANCE := SkillModDefinition.Slot.RESONANCE
 const CONTENT_WIDTH := 900
+const CLASS_CARD := Vector2(320, 104)
+const CLASS_DETAILS_WIDTH := 480
 
 var character: Character
 var station: ClassStation
 var page: String = "Classes"
+## Class shown in the details area of the Classes page (default: the active one).
+var selected_class: StringName
 
 var _tabs: UiTabs
 var _summary: HBoxContainer
@@ -141,72 +145,225 @@ func _station_button(text: String, action: Callable, enabled: bool = true, reaso
 
 # --- Classes --------------------------------------------------------------------
 
+## Compact cards (emblem, name, status, level, two short lines) on the left; the
+## selected card's details (resource, playstyle, trees, requirements, Activate)
+## on the right. Prepared classes (Guardian, Soulbinder) are listed as Locked.
 func _build_classes() -> void:
-	_content.add_child(UiTheme.wrapped("Weapon mastery, inventory, crafting materials and Haven are shared by all classes. Each class has its own level, talents, skills, presets and equipment loadout.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
-	# prepared classes (Guardian, Soulbinder) stay hidden until they are playable
-	var definitions: Array = character.database.classes.values().filter(func(d: ClassDefinition) -> bool: return d.playable)
-	definitions.sort_custom(func(a: ClassDefinition, b: ClassDefinition) -> bool: return a.display_name < b.display_name)
-	var grid := HFlowContainer.new()
+	var intro := UiTheme.styled("Mastery, inventory, materials and Haven are shared. Each class keeps its own level, talents, skills, presets and loadout.", &"SmallLabel")
+	intro.add_theme_color_override(&"font_color", UiTheme.TEXT_SECONDARY)
+	_content.add_child(intro)
+	var definitions := class_order()
+	if not character.database.classes.has(selected_class):
+		selected_class = character.classes.active_class_id
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", UiTheme.GAP * 3)
+	var grid := GridContainer.new()
+	grid.name = "ClassCards"
+	grid.columns = 2
 	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP * 2)
 	grid.add_theme_constant_override(&"v_separation", UiTheme.GAP * 2)
+	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var group := ButtonGroup.new()
 	for definition: ClassDefinition in definitions:
-		grid.add_child(_class_card(definition))
-	_content.add_child(grid)
+		grid.add_child(_class_card(definition, group))
+	row.add_child(grid)
+	row.add_child(_class_details(character.database.get_class_def(selected_class)))
+	_content.add_child(row)
 
 
-func _class_card(definition: ClassDefinition) -> Control:
+## Active first, then unlocked, then locked; prepared classes last.
+func class_order() -> Array:
 	var classes := character.classes
-	var unlocked := classes.is_unlocked(definition.id)
-	var active := classes.active_class_id == definition.id
-	var card := UiTheme.card(&"SelectedCardPanel" if active else &"CardPanel")
+	var rank := func(d: ClassDefinition) -> int:
+		if classes.active_class_id == d.id:
+			return 0
+		if not d.playable:
+			return 3
+		return 1 if classes.is_unlocked(d.id) else 2
+	var definitions: Array = character.database.classes.values()
+	definitions.sort_custom(func(a: ClassDefinition, b: ClassDefinition) -> bool:
+		return rank.call(a) < rank.call(b) if rank.call(a) != rank.call(b) else a.display_name < b.display_name)
+	return definitions
+
+
+## "Active" / "Unlocked" / "Locked" (prepared classes are always Locked).
+func class_status(definition: ClassDefinition) -> String:
+	if character.classes.active_class_id == definition.id:
+		return "Active"
+	return "Unlocked" if definition.playable and character.classes.is_unlocked(definition.id) else "Locked"
+
+
+func _status_color(status: String) -> Color:
+	return {"Active": UiTheme.RESONANCE, "Unlocked": UiTheme.SUCCESS}.get(status, UiTheme.TEXT_MUTED)
+
+
+func _class_card(definition: ClassDefinition, group: ButtonGroup) -> Control:
+	var status := class_status(definition)
+	var locked := status == "Locked"
+	var card := Button.new()
 	card.name = "Class_%s" % definition.id
-	card.custom_minimum_size = Vector2(430, 0)
-	var box := card.get_node("Box") as VBoxContainer
-	var top := HBoxContainer.new()
-	var title := UiTheme.heading(definition.display_name)
+	card.theme_type_variation = &"CardButton"
+	card.toggle_mode = true
+	card.button_group = group
+	card.button_pressed = definition.id == selected_class
+	card.custom_minimum_size = CLASS_CARD
+	card.pressed.connect(select_class.bind(definition.id))
+	var inner := HBoxContainer.new()
+	inner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 10)
+	inner.add_theme_constant_override(&"separation", UiTheme.GAP + 4)
+	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(inner)
+	var emblem := ClassEmblem.new().setup(definition, locked)
+	emblem.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	inner.add_child(emblem)
+	var text := VBoxContainer.new()
+	text.add_theme_constant_override(&"separation", 0)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inner.add_child(text)
+	var head := HBoxContainer.new()
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var title := UiTheme.styled(definition.display_name, &"SubheadingLabel")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if not unlocked:
-		title.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
-	top.add_child(title)
-	var badge := UiTheme.styled("ACTIVE" if active else ("UNLOCKED" if unlocked else "LOCKED"), &"CaptionLabel")
-	badge.add_theme_color_override(&"font_color", UiTheme.RESONANCE if active else (UiTheme.SUCCESS if unlocked else UiTheme.TEXT_MUTED))
-	top.add_child(badge)
-	box.add_child(top)
-	box.add_child(UiTheme.wrapped(definition.description, UiTheme.TEXT_SECONDARY if unlocked else UiTheme.TEXT_MUTED, 400))
-	if definition.resource != null:
-		box.add_child(UiTheme.styled("Resource: %s" % definition.resource.display_name, &"SmallLabel"))
-	if unlocked:
+	title.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED if locked else UiTheme.PARCHMENT)
+	head.add_child(title)
+	var badge := UiTheme.styled(status.to_upper(), &"CaptionLabel")
+	badge.name = "Status"
+	badge.add_theme_color_override(&"font_color", _status_color(status))
+	head.add_child(badge)
+	text.add_child(head)
+	var level := UiTheme.styled("Level %d" % character.classes.get_level(definition.id) if not locked else ("Not playable yet" if not definition.playable else "Not unlocked"), &"CaptionLabel")
+	text.add_child(level)
+	var line := UiTheme.styled(definition.tagline if definition.tagline != "" else definition.description, &"CaptionLabel")
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.max_lines_visible = 2
+	line.custom_minimum_size = Vector2(CLASS_CARD.x - 92, 0)
+	line.add_theme_color_override(&"font_color", UiTheme.TEXT_SECONDARY if not locked else UiTheme.TEXT_MUTED)
+	text.add_child(line)
+	for label: Control in inner.find_children("*", "Control", true, false):
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return card
+
+
+func select_class(class_id: StringName) -> void:
+	selected_class = class_id
+	rebuild()
+	var card := _content.find_child("Class_%s" % class_id, true, false) as Control
+	if card != null:
+		card.grab_focus.call_deferred()   # keyboard users stay on the card they picked
+
+
+## Details of the selected class, all read from data: resource, playstyle,
+## talent trees, level, requirements (prologue rule, class quest state).
+func _class_details(definition: ClassDefinition) -> Control:
+	var classes := character.classes
+	var status := class_status(definition)
+	var panel := UiTheme.card(&"InsetPanel")
+	panel.name = "ClassDetails"
+	panel.custom_minimum_size = Vector2(CLASS_DETAILS_WIDTH, 0)
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var box := panel.get_node("Box") as VBoxContainer
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override(&"separation", UiTheme.GAP + 4)
+	head.add_child(ClassEmblem.new().setup(definition, status == "Locked", 56.0))
+	var names := VBoxContainer.new()
+	names.add_theme_constant_override(&"separation", 0)
+	names.add_child(UiTheme.heading(definition.display_name))
+	var badge := UiTheme.styled(status.to_upper(), &"CaptionLabel")
+	badge.add_theme_color_override(&"font_color", _status_color(status))
+	names.add_child(badge)
+	head.add_child(names)
+	box.add_child(head)
+	if status != "Locked":
 		box.add_child(UiTheme.styled("Level %d  ·  %d / %d XP" % [classes.get_level(definition.id), classes.get_xp(definition.id), classes.xp_to_next(definition.id)], &"SmallLabel"))
-	else:
-		var reason := UiTheme.wrapped(_unlock_text(definition), UiTheme.WARNING, 400)
-		reason.theme_type_variation = &"SmallLabel"
-		box.add_child(reason)
+		var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.BRONZE)
+		bar.max_value = maxi(1, classes.xp_to_next(definition.id))
+		bar.value = classes.get_xp(definition.id)
+		box.add_child(bar)
+	var text_width := CLASS_DETAILS_WIDTH - 32
+	box.add_child(UiTheme.section("CLASS RESOURCE"))
+	box.add_child(_small_wrapped(resource_text(definition.resource), UiTheme.TEXT_PRIMARY, text_width))
+	box.add_child(UiTheme.section("PLAYSTYLE"))
+	box.add_child(_small_wrapped(definition.description, UiTheme.TEXT_SECONDARY, text_width))
+	box.add_child(UiTheme.section("TALENT TREES"))
+	var trees := TalentService.trees_of(character.database, definition.id)
+	var tree_names: PackedStringArray = []
+	for tree in trees:
+		tree_names.append(tree.display_name)
+	box.add_child(_small_wrapped("  ·  ".join(tree_names) if not tree_names.is_empty() else "No talent trees.", UiTheme.TEXT_PRIMARY, text_width))
+	if status == "Locked":
+		box.add_child(UiTheme.section("REQUIREMENTS"))
+		for requirement in requirements(definition):
+			box.add_child(_small_wrapped("·  " + requirement, UiTheme.WARNING, text_width))
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_END
-	if active:
+	if status == "Active":
 		var current := UiTheme.button("Active")
 		current.name = "Active_%s" % definition.id
 		current.disabled = true
 		row.add_child(current)
-	elif unlocked:
+	elif status == "Unlocked":
 		var button := _station_button("Activate", func() -> void:
 			_say(character.switch_class(definition.id, at_station()), "Now playing as %s." % definition.display_name), true, "", &"PrimaryButton")
 		button.name = "Activate_%s" % definition.id
 		row.add_child(button)
+		if not at_station():
+			row.add_child(UiTheme.styled("Change classes at the class station in Haven.", &"CaptionLabel"))
+			row.move_child(row.get_child(1), 0)
 	else:
 		var locked := UiTheme.button("Locked")
 		locked.disabled = true
 		row.add_child(locked)
 	box.add_child(row)
-	return card
+	return panel
 
 
-func _unlock_text(definition: ClassDefinition) -> String:
+func _small_wrapped(text: String, color: Color, width: float) -> Label:
+	var label := UiTheme.wrapped(text, color, width)
+	label.theme_type_variation = &"SmallLabel"
+	return label
+
+
+## The class resource in words, from its data (no per-class text).
+static func resource_text(resource: ClassResourceDefinition) -> String:
+	if resource == null:
+		return "None."
+	var parts: PackedStringArray = ["%s (max %d)" % [resource.display_name, roundi(resource.max_value)]]
+	if resource.regen_per_second > 0.0:
+		parts.append("regenerates %s per second" % _number(resource.regen_per_second))
+	if resource.gain_per_hit_dealt > 0.0:
+		parts.append("+%s per hit dealt" % _number(resource.gain_per_hit_dealt))
+	if resource.gain_per_hit_taken > 0.0:
+		parts.append("+%s per hit taken" % _number(resource.gain_per_hit_taken))
+	if resource.gain_per_kill > 0.0:
+		parts.append("+%s per kill" % _number(resource.gain_per_kill))
+	return ", ".join(parts) + "."
+
+
+static func _number(value: float) -> String:
+	return str(roundi(value)) if is_equal_approx(value, roundf(value)) else "%.1f" % value
+
+
+## Why a class is locked, from the class data, the prologue rules and its
+## class quest (state and start condition).
+func requirements(definition: ClassDefinition) -> PackedStringArray:
+	var result: PackedStringArray = []
 	if not definition.playable:
-		return "Coming later."
+		result.append("Not playable in this version.")
 	if definition.id in character.database.rules.prologue_class_ids and not character.prologue.is_completed():
-		return "Walk its echo at the Whispering Stone, then choose one path."
-	return "Locked: complete its class quest (Quests page)."
+		result.append("Walk its echo at the Whispering Stone, then choose one path.")
+	for quest in QuestService.quests_for(character):
+		if quest.class_id != definition.id:
+			continue
+		var state := character.quests.state(quest.id)
+		if state == "active":
+			result.append("Class quest \"%s\" in progress - turn it in at a class station." % quest.display_name)
+		elif state == "":
+			var reason := QuestService.can_start(character, quest.id)
+			result.append("Class quest \"%s\"%s" % [quest.display_name, ": " + reason if reason != "" else " - take it on the Quests page."])
+	if result.is_empty():
+		result.append("Not unlocked yet.")
+	return result
 
 
 # --- Talents ----------------------------------------------------------------------

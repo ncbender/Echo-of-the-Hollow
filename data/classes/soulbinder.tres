@@ -16,6 +16,7 @@ script = ExtResource("4_nx6pg")
 id = &"soulbinder"
 display_name = "Soulbinder"
 description = "Binds souls and echoes. Prepared: Soul Energy and echo summons. Unlocked later by its class quest."
+tagline = "Binds souls and echoes to fight beside you."
 max_level = 60
 xp_base = 100
 xp_growth = 1.07

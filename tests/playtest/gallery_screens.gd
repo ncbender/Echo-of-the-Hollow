@@ -3,7 +3,7 @@ extends RefCounted
 ## The screens of the UI gallery (tests/playtest/ui_gallery.gd) and how to open
 ## each one with real data. Returns the screen label, or "" when skipped.
 
-const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "character", "classes", "talents", "skills", "presets", "forge_imprint",
+const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "character", "classes", "classes_locked", "talents", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "pause", "save", "load", "options", "confirm"]
 
@@ -52,6 +52,10 @@ static func open(gallery: Object, screen: String) -> String:
 		"classes", "talents", "skills", "presets":
 			await _stand_at(gallery, map.get_node("ClassStation"))
 			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, screen.capitalize())
+		"classes_locked":
+			await _stand_at(gallery, map.get_node("ClassStation"))
+			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, "Classes")
+			hud.class_panel.select_class(&"arcanist")
 		"forge", "forge_imprint", "forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft":
 			var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
 			await _stand_at(gallery, smithy)

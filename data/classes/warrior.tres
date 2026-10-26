@@ -52,6 +52,7 @@ script = ExtResource("1_class")
 id = &"warrior"
 display_name = "Warrior"
 description = "Frontline fighter. Builds Rage by hitting and getting hit; Combat Pressure (consecutive hits) speeds up rage gain. Spends rage on powerful strikes. Trees: Berserker, Warbreaker, Bloodblade."
+tagline = "Frontline bruiser. Rage fuels heavy strikes."
 max_level = 60
 xp_base = 100
 xp_growth = 1.07

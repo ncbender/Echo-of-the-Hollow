@@ -16,6 +16,7 @@ script = ExtResource("4_cdly3")
 id = &"guardian"
 display_name = "Guardian"
 description = "Holy defender (paladin). Prepared: talent-dependent sacred oaths and Resolve. Unlocked later by its class quest."
+tagline = "Holy defender sworn to sacred oaths."
 max_level = 60
 xp_base = 100
 xp_growth = 1.07

@@ -117,3 +117,49 @@ func test_station_actions_skills_mods_presets() -> void:
 	var quest := panel.find_children("Quest_unlock_arcanist", "VBoxContainer", true, false)[0]
 	var start := _button(quest, "Start")
 	check(start != null and start.disabled and start.tooltip_text.contains("prologue"), "quests wait for the prologue choice")
+
+
+func test_compact_class_cards_and_details() -> void:
+	map.hud.toggle_character()
+	await get_tree().process_frame
+	panel.show_page("Classes")
+	await get_tree().process_frame
+	var status := func(class_id: String) -> String:
+		var card := panel.find_child("Class_%s" % class_id, true, false)
+		return (card.find_child("Status", true, false) as Label).text if card != null else "missing"
+	check_eq(status.call("warrior"), "ACTIVE", "active class card")
+	check_eq(status.call("basic_adventurer"), "UNLOCKED", "unlocked class card")
+	check_eq(status.call("arcanist"), "LOCKED", "locked class card")
+	check_eq(status.call("guardian"), "LOCKED", "prepared class is never shown as playable")
+	check_eq(status.call("soulbinder"), "LOCKED", "prepared class is never shown as playable")
+	var details := panel.find_child("ClassDetails", true, false)
+	check(details != null and _labels(details).contains("Rage (max"), "details show the class resource from data")
+	check(_labels(details).contains("Berserker"), "details list the talent trees")
+	(panel.find_child("Class_arcanist", true, false) as Button).pressed.emit()
+	await get_tree().process_frame
+	details = panel.find_child("ClassDetails", true, false)
+	check(_labels(details).contains("Complete the prologue first."), "requirement from the class quest data: %s" % _labels(details))
+	(panel.find_child("Class_guardian", true, false) as Button).pressed.emit()
+	await get_tree().process_frame
+	check(_labels(panel.find_child("ClassDetails", true, false)).contains("Not playable in this version."), "prepared class says so")
+	(panel.find_child("Class_basic_adventurer", true, false) as Button).pressed.emit()
+	await get_tree().process_frame
+	var activate := _button(panel, "Activate_basic_adventurer")
+	check(activate != null and activate.disabled, "changing class needs the class station")
+	var station := await _at_station()
+	map.hud.open_class_panel(station)
+	panel.show_page("Classes")
+	panel.select_class(&"basic_adventurer")
+	await get_tree().process_frame
+	activate = _button(panel, "Activate_basic_adventurer")
+	check(activate != null and not activate.disabled, "at the station the class can be activated")
+	activate.pressed.emit()
+	await get_tree().process_frame
+	check_eq(character.classes.active_class_id, &"basic_adventurer", "class changed through the details button")
+
+
+func _labels(root: Node) -> String:
+	var texts: PackedStringArray = []
+	for label: Label in root.find_children("*", "Label", true, false):
+		texts.append(label.text)
+	return " | ".join(texts)
