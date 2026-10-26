@@ -55,11 +55,13 @@ func _pass(resolution: Vector2i, scale: float) -> void:
 		if screen == "title":
 			continue
 		map.hud.close_windows()
-		await _frames(3)
+		await GalleryScreens.reset(self)
 		var label: String = await GalleryScreens.open(self, screen)
 		if label == "":
 			continue
 		await _frames(6)
+		if not screen.begins_with("hud"):
+			_check(map.hud.is_window_open(), "%s %s window open" % [tag, screen])
 		_check_layout(screen)
 		await _shot(screen)
 	map.hud.close_windows()

@@ -54,8 +54,7 @@ static func open(gallery: Object, screen: String) -> String:
 			hud.class_panel.open(character, map.get_node("ClassStation") as ClassStation, screen.capitalize())
 		"forge", "forge_imprint", "forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft":
 			var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
-			map.player.global_position = smithy.global_position + Vector2(0, 26)
-			await gallery.frames(6)
+			await _stand_at(gallery, smithy)
 			hud.open_crafting_panel(smithy)
 			var panel := hud.crafting_panel
 			var pick := func(item_id: StringName) -> void:
@@ -130,13 +129,28 @@ static func open(gallery: Object, screen: String) -> String:
 	return screen
 
 
+## Clean state between screens: no enemies from the combat screens, the player
+## alive again (otherwise stations would not open after "hud_death").
+static func reset(gallery: Object) -> void:
+	var map: GameMap = gallery.map
+	for enemy in map.find_children("*", "Enemy", true, false):
+		enemy.queue_free()
+	for i in 240:
+		if not map.player.health.is_dead():
+			break
+		await gallery.frames(1)
+	await gallery.frames(2)
+
+
 ## Puts the player into the interaction area of `node` (stations close their
 ## windows when the player walks away).
 static func _stand_at(gallery: Object, node: Node2D) -> void:
 	var map: GameMap = gallery.map
 	map.player.global_position = node.global_position + Vector2(0, 20)
 	map.player.reset_physics_interpolation()
-	await gallery.frames(10)
+	for i in 8:   # the station area sees the player only after physics steps
+		await (gallery as SceneTree).physics_frame
+	await gallery.frames(4)
 
 
 static func _damage(amount: float) -> HitData:
