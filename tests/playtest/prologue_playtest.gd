@@ -488,7 +488,7 @@ func _press(action: StringName) -> void:
 	release.action = action
 	release.pressed = false
 	Input.parse_input_event(release)
-	await _ticks(2)
+	await _ticks(14 if action == &"interact" else 2)   # dialogues ignore presses for 0.18 s after a line
 
 
 func _click_button(container: Node, text: String) -> bool:

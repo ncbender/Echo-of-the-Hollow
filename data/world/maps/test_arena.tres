@@ -9,3 +9,6 @@ region_id = &"hollow_outskirts"
 display_name = "Proving Arena"
 scene_path = "res://scenes/arena/test_arena.tscn"
 default_spawn_id = &"default"
+map_cell = Vector2i(-1, 1)
+neighbors = Array[StringName]([&"home_base", &"prologue"])
+show_on_map = true

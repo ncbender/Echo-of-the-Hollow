@@ -5,7 +5,7 @@ extends RefCounted
 
 const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "character", "classes", "talents", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
-	"recipes", "restoration", "dialogue", "choice", "waystones", "pause", "save", "load", "options", "confirm"]
+	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "pause", "save", "load", "options", "confirm"]
 
 
 static func open(gallery: Object, screen: String) -> String:
@@ -95,6 +95,7 @@ static func open(gallery: Object, screen: String) -> String:
 		"restoration":
 			await _stand_at(gallery, map.get_node("Ruins/OldStorehouse"))
 			hud.open_restoration(map.get_node("Ruins/OldStorehouse") as RuinSite)
+			await gallery.frames(3)
 		"dialogue":
 			var lines: Array[Dictionary] = [{"name": "Mara Veyne", "text": "There's a place north of here. Haven. Not much to look at, but it's got walls, a forge, and people who still give a damn.", "color": UiTheme.RESONANCE}]
 			hud.open_lines(lines)
@@ -103,6 +104,13 @@ static func open(gallery: Object, screen: String) -> String:
 		"waystones":
 			await _stand_at(gallery, map.get_node("Waystone"))
 			hud.open_waystones(map.get_node("Waystone") as Waystone)
+		"journal":
+			hud.toggle_journal()
+		"journal_haven":
+			hud.toggle_journal()
+			hud.journal_panel.show_page("Haven")
+		"map":
+			hud.toggle_map()
 		"pause":
 			hud.open_pause_menu()
 		"save":
@@ -128,7 +136,7 @@ static func _stand_at(gallery: Object, node: Node2D) -> void:
 	var map: GameMap = gallery.map
 	map.player.global_position = node.global_position + Vector2(0, 20)
 	map.player.reset_physics_interpolation()
-	await gallery.frames(6)
+	await gallery.frames(10)
 
 
 static func _damage(amount: float) -> HitData:

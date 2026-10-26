@@ -9,3 +9,6 @@ region_id = &"hollow_outskirts"
 display_name = "The Whispering Stone"
 scene_path = "res://scenes/maps/whispering_stone.tscn"
 default_spawn_id = &"default"
+map_cell = Vector2i(0, 0)
+neighbors = Array[StringName]([&"home_base"])
+show_on_map = true

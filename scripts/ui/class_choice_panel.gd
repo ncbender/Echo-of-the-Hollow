@@ -23,7 +23,8 @@ var _session: SessionState
 
 func _ready() -> void:
 	set_title(tr("UI_CHOOSE_CLASS_TITLE"))
-	_intro = UiTheme.wrapped(INTRO, UiTheme.COLOR_TEXT, 900)
+	_intro = UiTheme.wrapped(INTRO, UiTheme.PARCHMENT, 900)
+	_intro.add_theme_font_size_override(&"font_size", UiTheme.FONT_SUBHEADING)
 	body.add_child(_intro)
 	_status = UiTheme.wrapped("", UiTheme.COLOR_DIM, 900)
 	body.add_child(_status)
@@ -127,7 +128,8 @@ func _card(class_id: StringName) -> Control:
 	var definition := character.database.get_class_def(class_id)
 	var trial := PrologueService.trial_for_class(character.database, class_id)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(300, 0)
+	panel.theme_type_variation = &"SelectedCardPanel" if _pending == class_id or character.prologue.chosen_class == class_id else &"CardPanel"
+	panel.custom_minimum_size = Vector2(320, 0)
 	var box := VBoxContainer.new()
 	panel.add_child(box)
 	box.add_child(UiTheme.heading(definition.display_name))
@@ -140,6 +142,7 @@ func _card(class_id: StringName) -> Control:
 			UiTheme.COLOR_ACCENT if done else UiTheme.COLOR_WARN))
 	var button := Button.new()
 	button.name = "Choose_%s" % class_id
+	button.theme_type_variation = &"PrimaryButton" if _pending == class_id else &""
 	var chosen := character.prologue.chosen_class == class_id
 	if character.prologue.is_completed():
 		button.text = "Chosen" if chosen else "Locked (learn later)"

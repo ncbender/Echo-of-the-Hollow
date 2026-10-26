@@ -9,3 +9,6 @@ region_id = &"hollow_outskirts"
 display_name = "Haven"
 scene_path = "res://scenes/maps/home_base.tscn"
 default_spawn_id = &"default"
+map_cell = Vector2i(0, 1)
+neighbors = Array[StringName]([&"old_road", &"whispering_stone", &"whisper_forest", &"test_arena"])
+show_on_map = true

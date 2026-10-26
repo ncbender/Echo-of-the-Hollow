@@ -9,3 +9,6 @@ region_id = &"hollow_outskirts"
 display_name = "The Old Road"
 scene_path = "res://scenes/maps/old_road.tscn"
 default_spawn_id = &"default"
+map_cell = Vector2i(0, 2)
+neighbors = Array[StringName]([&"home_base"])
+show_on_map = true

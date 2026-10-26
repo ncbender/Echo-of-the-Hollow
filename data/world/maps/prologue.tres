@@ -9,3 +9,6 @@ region_id = &"hollow_outskirts"
 display_name = "Prologue Grounds"
 scene_path = "res://scenes/maps/prologue.tscn"
 default_spawn_id = &"default"
+map_cell = Vector2i(-1, 0)
+neighbors = Array[StringName]([&"test_arena"])
+show_on_map = false

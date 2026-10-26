@@ -26,6 +26,8 @@ func _ready() -> void:
 	_lines.add_theme_font_size_override(&"font_size", UiTheme.FONT_SMALL)
 	box.add_child(_title)
 	box.add_child(_lines)
+	var keys := UiTheme.styled("[J] Journal    [M] Map", &"CaptionLabel")
+	box.add_child(keys)
 
 
 func _process(_delta: float) -> void:

@@ -31,6 +31,8 @@ var save_indicator: SaveIndicator
 var dialogue_panel: DialoguePanel
 var restoration_panel: RestorationPanel
 var waystone_panel: WaystonePanel
+var journal_panel: JournalPanel
+var world_map_panel: WorldMapPanel
 ## Shared confirmation dialog (overwrite, discard, delete ...).
 var confirm_dialog: UiConfirmDialog
 ## Contextual tutorial hint (top centre).
@@ -53,6 +55,7 @@ var _windows: Array[UiWindow] = []
 
 func _ready() -> void:
 	layer = 20
+	ensure_input_actions()
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -159,6 +162,8 @@ func _ready() -> void:
 	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
 	restoration_panel.hud = self
 	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
+	journal_panel = _add_window(JournalPanel.new()) as JournalPanel
+	world_map_panel = _add_window(WorldMapPanel.new()) as WorldMapPanel
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
@@ -316,6 +321,43 @@ func open_crafting_panel(plot: BuildPlot) -> void:
 	crafting_panel.open(bridge.character, plot)
 
 
+## Keys of the windows added with the UI redesign (journal, map). Registered at
+## runtime so the project's input map file stays untouched; shown in Controls.
+const EXTRA_ACTIONS := {&"ui_journal": KEY_J, &"ui_map": KEY_M}
+
+
+static func ensure_input_actions() -> void:
+	for action: StringName in EXTRA_ACTIONS:
+		if InputMap.has_action(action):
+			continue
+		InputMap.add_action(action)
+		var key := InputEventKey.new()
+		key.physical_keycode = EXTRA_ACTIONS[action]
+		InputMap.action_add_event(action, key)
+
+
+## J: story, side quests and Haven.
+func toggle_journal() -> void:
+	if bridge == null:
+		return
+	if journal_panel.visible:
+		journal_panel.hide()
+	else:
+		close_windows()
+		journal_panel.open(bridge.character)
+
+
+## M: the region map.
+func toggle_map() -> void:
+	if bridge == null:
+		return
+	if world_map_panel.visible:
+		world_map_panel.hide()
+	else:
+		close_windows()
+		world_map_panel.open(bridge.character)
+
+
 func toggle_options() -> void:
 	if settings == null:
 		return
@@ -377,6 +419,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"ui_options"):
 		toggle_options()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(&"ui_journal"):
+		toggle_journal()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(&"ui_map"):
+		toggle_map()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(&"ui_cancel"):

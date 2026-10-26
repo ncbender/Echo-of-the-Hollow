@@ -1,8 +1,11 @@
 class_name WaystonePanel
 extends UiWindow
-## Fast travel at an awake waystone: every waystone of the Hollowwood, awake
-## ones with a Travel button (free), the others undiscovered. Never while
-## enemies are near (WaystoneService.travel_error).
+## Fast travel at an awake waystone: all four waystones of the Hollowwood.
+## Awake ones have a free Travel button, the others say "Undiscovered"; the
+## current one says "You are here". Never while enemies are near
+## (WaystoneService.travel_error) - the window says so before you click.
+
+const WIDTH := 520
 
 var character: Character
 var waystone: Waystone
@@ -14,9 +17,11 @@ var _status: Label
 func _ready() -> void:
 	set_title("Waystones")
 	set_close_text("Close [G / Esc]")
+	body.add_child(UiTheme.styled("Travel between awake waystones is free.", &"SmallLabel"))
 	_list = VBoxContainer.new()
+	_list.add_theme_constant_override(&"separation", UiTheme.SLOT_GAP)
 	body.add_child(_list)
-	_status = UiTheme.wrapped("", UiTheme.COLOR_WARN)
+	_status = UiTheme.wrapped("", UiTheme.WARNING, WIDTH)
 	body.add_child(_status)
 
 
@@ -37,24 +42,38 @@ func rebuild() -> void:
 	for child in _list.get_children():
 		_list.remove_child(child)
 		child.queue_free()
+	var danger := waystone != null and waystone.enemies_near()
+	if danger:
+		_status.text = "You cannot travel while enemies are near."
 	for target in WaystoneService.all(character.database):
-		var row := HBoxContainer.new()
-		row.name = "Waystone_%s" % target.id
 		var awake := target.available and WaystoneService.is_active(character, target.id)
 		var here := waystone != null and target.id == waystone.waystone_id
-		var label := UiTheme.label(target.display_name if awake else "%s  -  undiscovered" % target.display_name,
-			UiTheme.COLOR_TEXT if awake else UiTheme.COLOR_DIM)
-		label.custom_minimum_size = Vector2(360, 0)
-		row.add_child(label)
+		var card := UiTheme.card(&"SelectedCardPanel" if here else (&"CardPanel" if awake else &"InsetPanel"))
+		var row := HBoxContainer.new()
+		row.name = "Waystone_%s" % target.id
+		var names := VBoxContainer.new()
+		names.add_theme_constant_override(&"separation", 0)
+		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var title := UiTheme.styled(target.display_name, &"SubheadingLabel")
+		if not awake:
+			title.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
+		names.add_child(title)
+		var map_def: MapDefinition = character.database.maps.get(target.map_id)
+		names.add_child(UiTheme.styled(map_def.display_name if awake and map_def != null else "Somewhere in the Hollowwood", &"CaptionLabel"))
+		row.add_child(names)
 		if here:
-			row.add_child(UiTheme.label("You are here", UiTheme.COLOR_ACCENT))
+			row.add_child(UiTheme.label("You are here", UiTheme.RESONANCE))
 		elif awake:
-			var button := Button.new()
+			var button := UiTheme.button("Travel", &"PrimaryButton", travel.bind(target.id))
 			button.name = "Travel"
-			button.text = "Travel"
-			button.pressed.connect(travel.bind(target.id))
+			button.disabled = danger
+			button.tooltip_text = "You cannot travel while enemies are near." if danger else ""
 			row.add_child(button)
-		_list.add_child(row)
+		else:
+			row.add_child(UiTheme.label("Undiscovered", UiTheme.TEXT_MUTED))
+		(card.get_node("Box") as VBoxContainer).add_child(row)
+		card.custom_minimum_size = Vector2(WIDTH, 0)
+		_list.add_child(card)
 
 
 ## Travel button (UI and tests). Returns "" when the journey started.

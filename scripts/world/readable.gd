@@ -32,7 +32,7 @@ func is_read() -> bool:
 
 
 func interact(hud: GameHud) -> void:
-	var lines: Array[Dictionary] = [{"name": title, "text": text, "color": UiTheme.COLOR_WARN}]
+	var lines: Array[Dictionary] = [{"name": title, "text": text, "color": UiTheme.PARCHMENT, "note": true}]
 	hud.open_lines(lines)
 	if character == null or is_read():
 		return

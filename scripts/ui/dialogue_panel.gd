@@ -1,30 +1,44 @@
 class_name DialoguePanel
 extends UiWindow
-## Conversation window in the lower part of the screen: one line at a time,
-## speaker name in the speaker's colour. Continue with G, Enter or the button;
-## Esc leaves early (nothing is completed then, the conversation can simply be
-## started again). The completion callback runs only after the last line.
+## Conversation window in the lower part of the screen: one short line at a
+## time, the speaker's name in their colour (serif), a line counter. Signs,
+## notes and memory fragments use the same window in a "note" look.
+## Continue with G, Enter or the button; Esc leaves early (nothing is
+## completed then, the conversation can simply be started again). The
+## completion callback runs only after the last line. Player input is ignored
+## for a moment after each line, so one double press never skips a line.
+
+## Seconds after showing a line in which player input cannot advance it.
+const INPUT_GUARD := 0.18
 
 var _speaker: Label
+var _counter: Label
 var _text: Label
 var _next: Button
-## [{"name", "text", "color"}]
+## [{"name", "text", "color", "note"?}]
 var _lines: Array[Dictionary] = []
 var _index: int = 0
 var _on_done: Callable
+var _guard_left: float = 0.0
 
 
 func _ready() -> void:
 	set_close_text("Leave [Esc]")
+	auto_focus = false
+	var head := HBoxContainer.new()
 	_speaker = UiTheme.heading()
-	body.add_child(_speaker)
-	_text = UiTheme.wrapped("", UiTheme.COLOR_TEXT, 760)
+	_speaker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(_speaker)
+	_counter = UiTheme.styled("", &"CaptionLabel")
+	head.add_child(_counter)
+	body.add_child(head)
+	_text = UiTheme.wrapped("", UiTheme.PARCHMENT, 760)
+	_text.add_theme_font_size_override(&"font_size", UiTheme.FONT_SUBHEADING)
 	_text.custom_minimum_size.y = 72
 	body.add_child(_text)
-	_next = Button.new()
+	_next = UiTheme.button("", &"PrimaryButton", _on_continue_pressed)
 	_next.name = "Continue"
 	_next.size_flags_horizontal = Control.SIZE_SHRINK_END
-	_next.pressed.connect(advance)
 	body.add_child(_next)
 
 
@@ -67,19 +81,31 @@ func advance() -> void:
 		done.call()
 
 
+## Player input (key or button): guarded against double presses.
+func _on_continue_pressed() -> void:
+	if _guard_left > 0.0:
+		return
+	advance()
+
+
 func _show_line() -> void:
 	var line: Dictionary = _lines[_index]
+	var note: bool = line.get("note", false)
 	_speaker.text = str(line.get("name", ""))
 	_speaker.visible = _speaker.text != ""
-	_speaker.add_theme_color_override(&"font_color", line.get("color", UiTheme.COLOR_ACCENT))
+	_speaker.add_theme_color_override(&"font_color", UiTheme.BRONZE if note else line.get("color", UiTheme.RESONANCE))
 	_text.text = str(line.get("text", ""))
-	_next.text = "Continue [G]" if _index < _lines.size() - 1 else "End [G]"
+	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if note else HORIZONTAL_ALIGNMENT_LEFT
+	_counter.text = "%d / %d" % [_index + 1, _lines.size()] if _lines.size() > 1 else ""
+	_next.text = "Continue  [G]" if _index < _lines.size() - 1 else ("Close  [G]" if note else "End  [G]")
+	_guard_left = INPUT_GUARD
+	_next.grab_focus.call_deferred()
 	queue_fit()
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and (event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_accept")):
-		advance()
+		_on_continue_pressed()
 		get_viewport().set_input_as_handled()
 
 
@@ -88,3 +114,7 @@ func fit() -> void:
 	super.fit()
 	if visible and is_inside_tree():
 		position.y = maxf(UiTheme.SCREEN_MARGIN, get_viewport_rect().size.y - size.y - UiTheme.SCREEN_MARGIN * 8)
+
+
+func _process(delta: float) -> void:
+	_guard_left = maxf(0.0, _guard_left - delta)   # game time: also exact in scripted runs
