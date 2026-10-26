@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SocketableDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_c1h3a"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/socketable_definition.gd" id="2_rs7lv"]
+
+[sub_resource type="Resource" id="Resource_2fdin"]
+script = ExtResource("1_c1h3a")
+stat = &"max_health"
+flat = 20.0
+
+[resource]
+script = ExtResource("2_rs7lv")
+id = &"garnet"
+display_name = "Garnet"
+description = "Gem. +20 Max Health."
+item_id = &"garnet"
+modifiers = Array[ExtResource("1_c1h3a")]([SubResource("Resource_2fdin")])

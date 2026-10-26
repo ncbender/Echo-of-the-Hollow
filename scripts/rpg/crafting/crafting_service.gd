@@ -110,6 +110,10 @@ static func _checks() -> Dictionary:
 		CraftingOps.REFORGE: _check_reforge,
 		CraftingOps.ESSENCE_INSERT: _check_essence_insert,
 		CraftingOps.ESSENCE_EXTRACT: _check_essence_extract,
+		CraftingOps.SOCKET_OPEN: _check_socket_open,
+		CraftingOps.SOCKET_INSERT: _check_socket_insert,
+		CraftingOps.SOCKET_REMOVE: _check_socket_remove,
+		CraftingOps.QUALITY: _check_quality,
 	}
 
 
@@ -126,6 +130,10 @@ static func _appliers() -> Dictionary:
 		CraftingOps.REFORGE: _apply_reforge,
 		CraftingOps.ESSENCE_INSERT: _apply_essence_insert,
 		CraftingOps.ESSENCE_EXTRACT: _apply_essence_extract,
+		CraftingOps.SOCKET_OPEN: _apply_socket_open,
+		CraftingOps.SOCKET_INSERT: _apply_socket_insert,
+		CraftingOps.SOCKET_REMOVE: _apply_socket_remove,
+		CraftingOps.QUALITY: _apply_quality,
 	}
 
 
@@ -305,6 +313,83 @@ static func _apply_essence_extract(context: Context, _rolled: Dictionary) -> Str
 static func _essence_name(context: Context, essence_id: StringName) -> String:
 	var essence: EssenceDefinition = context.character.database.essences.get(essence_id)
 	return essence.display_name if essence != null else String(essence_id)
+
+
+# --- sockets & quality ----------------------------------------------------------
+
+static func _check_socket_open(context: Context) -> void:
+	if context.item.sockets.size() >= context.profile.socket_slots:
+		context.preview.error = "All %d sockets are already open." % context.profile.socket_slots
+		return
+	context.preview.notes.append("Opens socket %d of %d (independent of essence slots)." % [context.item.sockets.size() + 1, context.profile.socket_slots])
+
+
+static func _check_socket_insert(context: Context) -> void:
+	var preview := context.preview
+	var socketable: SocketableDefinition = context.character.database.socketables.get(context.request.socketable_id)
+	if socketable == null:
+		preview.error = "Choose a gem or rune."
+		return
+	if not socketable.allowed_slot_kinds.is_empty() and not context.definition.slot_kind in socketable.allowed_slot_kinds:
+		preview.error = "%s does not fit into this kind of item." % socketable.display_name
+		return
+	var slot := context.request.slot_index
+	if slot < 0:
+		slot = context.item.sockets.find(&"")
+	if slot < 0:
+		preview.error = "No empty open socket. Open a socket or remove a gem/rune first." if context.item.sockets.size() < context.profile.socket_slots \
+				else "All sockets are filled. Remove a gem/rune first (it is returned)."
+		return
+	if slot >= context.item.sockets.size() or context.item.sockets[slot] != &"":
+		preview.error = "That socket is not empty. Remove its gem/rune first."
+		return
+	context.request.slot_index = slot
+	preview.add_cost(socketable.item_id, 1)
+
+
+static func _check_socket_remove(context: Context) -> void:
+	var slot := context.request.slot_index
+	if slot < 0 or slot >= context.item.sockets.size() or context.item.sockets[slot] == &"":
+		context.preview.error = "Choose a filled socket."
+		return
+	var socketable: SocketableDefinition = context.character.database.socketables.get(context.item.sockets[slot])
+	if socketable == null:
+		context.preview.error = "Unknown socket content cannot be removed."
+		return
+	var back := ItemCost.new()
+	back.item_id = socketable.item_id
+	back.quantity = 1
+	context.returns.append(back)
+	context.preview.notes.append("Returns %s to the inventory." % socketable.display_name)
+
+
+static func _check_quality(context: Context) -> void:
+	if context.item.quality >= context.profile.max_quality:
+		context.preview.error = "Maximum quality (%d) reached." % context.profile.max_quality
+		return
+	context.preview.notes.append("Quality %d -> %d: base stats +%d %% (affixes and special effects unchanged)." % [
+		context.item.quality, context.item.quality + 1, roundi((context.item.quality + 1) * ItemStats.QUALITY_PERCENT_PER_POINT)])
+
+
+static func _apply_socket_open(context: Context, _rolled: Dictionary) -> String:
+	context.item.sockets.append(&"")
+	return "Opened socket %d." % context.item.sockets.size()
+
+
+static func _apply_socket_insert(context: Context, _rolled: Dictionary) -> String:
+	context.item.sockets[context.request.slot_index] = context.request.socketable_id
+	return "Socketed %s." % context.character.database.socketables[context.request.socketable_id].display_name
+
+
+static func _apply_socket_remove(context: Context, _rolled: Dictionary) -> String:
+	var socketable: SocketableDefinition = context.character.database.socketables[context.item.sockets[context.request.slot_index]]
+	context.item.sockets[context.request.slot_index] = &""
+	return "Removed %s (returned to the inventory)." % socketable.display_name
+
+
+static func _apply_quality(context: Context, _rolled: Dictionary) -> String:
+	context.item.quality += 1
+	return "Quality raised to %d." % context.item.quality
 
 
 # --- helpers ----------------------------------------------------------------------

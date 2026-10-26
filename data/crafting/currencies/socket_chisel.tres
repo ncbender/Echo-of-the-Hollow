@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CraftingCurrencyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_currency_definition.gd" id="1_l31ps"]
+
+[resource]
+script = ExtResource("1_l31ps")
+id = &"socket_chisel"
+item_id = &"socket_chisel"
+description = "Crafting currency. Opens one more socket (up to the item's limit)."

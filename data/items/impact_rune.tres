@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_357r5"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_j8ad5"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_e1qub"]
+
+[resource]
+script = ExtResource("3_e1qub")
+id = &"impact_rune"
+display_name = "Rune of Impact"
+description = "Rune. Heavy attacks: +25% knockback and +15% poise damage."
+rarity = 2
+max_stack = 20
+tags = Array[StringName]([&"crafting", &"socketable"])

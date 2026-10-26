@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingCurrencyDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_currency_definition.gd" id="1_6nhor"]
+
+[resource]
+script = ExtResource("1_6nhor")
+id = &"forge_crystal"
+item_id = &"forge_crystal"
+kind = 1
+description = "Upgrade currency. Raises item quality by 1 (max 20): +1% base stats per point."

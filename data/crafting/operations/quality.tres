@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_15obm"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_21gfr"]
+
+[sub_resource type="Resource" id="Resource_81htp"]
+script = ExtResource("1_15obm")
+item_id = &"forge_crystal"
+
+[resource]
+script = ExtResource("2_21gfr")
+id = &"quality"
+display_name = "Upgrade Quality"
+description = "Raise quality by 1 with a Forge Crystal."
+costs = Array[ExtResource("1_15obm")]([SubResource("Resource_81htp")])

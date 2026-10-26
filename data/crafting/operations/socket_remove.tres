@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_u5req"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_c01qd"]
+
+[resource]
+script = ExtResource("2_c01qd")
+id = &"socket_remove"
+display_name = "Remove Gem/Rune"
+description = "Take a gem or rune out of its socket (returned to the inventory)."

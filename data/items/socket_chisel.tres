@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="1_u0nvc"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_15xm7"]
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="3_sopi3"]
+
+[resource]
+script = ExtResource("3_sopi3")
+id = &"socket_chisel"
+display_name = "Socket Chisel"
+description = "Crafting currency. Opens one more socket (up to the item's limit)."
+rarity = 2
+max_stack = 99
+tags = Array[StringName]([&"crafting", &"currency"])

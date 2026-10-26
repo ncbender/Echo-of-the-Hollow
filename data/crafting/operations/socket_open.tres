@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_j4sph"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_yvwek"]
+
+[sub_resource type="Resource" id="Resource_uwidk"]
+script = ExtResource("1_j4sph")
+item_id = &"socket_chisel"
+
+[resource]
+script = ExtResource("2_yvwek")
+id = &"socket_open"
+display_name = "Open Socket"
+description = "Open one more socket with a Socket Chisel."
+costs = Array[ExtResource("1_j4sph")]([SubResource("Resource_uwidk")])

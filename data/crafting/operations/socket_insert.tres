@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CraftingOperationDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_4mtvt"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/crafting_operation_definition.gd" id="2_hhoo8"]
+
+[resource]
+script = ExtResource("2_hhoo8")
+id = &"socket_insert"
+display_name = "Insert Gem/Rune"
+description = "Put a gem or rune into an empty socket."
