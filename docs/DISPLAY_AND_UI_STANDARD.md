@@ -71,6 +71,8 @@ Stand: UI Foundation 0.1. Gilt für alle neuen Maps, HUD-Elemente und RPG-Fenste
 - **Alle RPG-Fenster erben von `UiWindow`:**
   - Aufbau: Titel, scrollbarer Body, Schließen-Button.
   - Größe: bevorzugte Inhaltsgröße, höchstens sichtbare Fläche minus `SCREEN_MARGIN`; der Rest scrollt.
+  - Optionale feste Fußzeile `footer` (zwischen Body und Schließen): die primäre Aktion eines scrollenden
+    Fensters (Craft, Restore/Revitalize) bleibt bei jeder UI-Skalierung sichtbar; versteckt, solange leer.
   - Zentriert und neu eingepasst bei Inhalts-, Fenster- und Skalierungsänderungen. Mindestgröße ist
     `WINDOW_MIN_SIZE`.
 - Inventar: drei Spalten (Taschenraster, Details, Ausrüstung) in einem `HFlowContainer`. Auf breiten

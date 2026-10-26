@@ -58,27 +58,49 @@ wiederholbar). Erster passender Dialog gewinnt. `DialoguePanel`: G/Enter weiter,
   - Nach Laden oder Mapwechsel erscheint Mara neben dem Spieler.
 
 ## Haven & Restaurierung ✅
-- Ummauertes Ruinendorf mit sechs festen Ruinen (`data/haven/ruins`). Freie Bauplätze gibt es nicht.
+- Ummauertes Ruinendorf mit zehn festen Ruinen (`data/haven/ruins`, davon vier Werkstätten im Artisan Quarter).
+  Freie Bauplätze gibt es nicht.
 - Vier Tore: Süden zur Old Road, Norden zum Whispering Stone (gesperrt bis zu Edrins Gespräch), Osten zum
   Whisper Forest, Westen zur Proving Arena.
 - Haven hat Klassenstation (Klassenwechsel, Talente, Presets, Respec) und Wegstein, aber keine Gegner.
-- `RestorationService.restore` ist atomar. Der Ablauf:
-  1. Bedingung und Kosten prüfen.
-  2. Die Kosten einmal verbrauchen.
-  3. Flag `haven.<id>.restored` setzen.
-  4. Stufe `restored` setzen. `WorldState.restoration_changed` löst den Meilenstein-Save aus.
+- `RestorationService.advance(character, ruin, target)` ist atomar; `restore` ist der Schritt nach `restored`.
+  Der Ablauf:
+  1. Ziel prüfen: genau die nächste Stufe (wiederholte oder veraltete Anfragen, z. B. Doppelklick, werden
+     abgelehnt - nie wird eine Stufe übersprungen), Bedingung, Materialplan.
+  2. Den Materialplan einmal verbrauchen (`ProfessionService.material_plan`/`consume_plan`, derselbe Plan wie
+     an den Werkbänken: Tasche, nach Restaurierung des Old Storehouse auch das Haven-Lager, Tasche zuerst).
+  3. Flag `haven.<id>.restored` bzw. `haven.<id>.revitalized` setzen.
+  4. Stufe setzen. `WorldState.restoration_changed` löst den Meilenstein-Save aus.
   5. Kapazität neu berechnen.
-  6. Story-Event melden.
-- Stufen: Ruined → Restored → Revitalized. Revitalized ist in den Daten vorbereitet, im Slice aber nicht
-  angeboten.
+  6. Story-Event melden (nur beim Restaurieren).
+- Stufen: Ruined → Restored → Revitalized. Revitalisieren gibt es, wo die Daten `revitalize_costs` haben
+  (die vier Werkstätten des Artisan Quarter). Old Smithy und Old Storehouse: nur Restored.
+- Restaurieren und Revitalisieren ändern Aussehen, Ordnung und Atmosphäre - nie Werte, Kapazität oder
+  Produktionsmengen.
 - `RuinSite` erweitert `BuildPlot`. Restauriert zeigt sie das Gebäude der Ruine mit seiner bisherigen
   Funktion (Schmiede: Resonance Forge und Rezepte, Lager: +10 Slots, Kaserne: Trainingsplatz).
+- Werkstätten (Ruine mit `profession_id`, ohne `building_id`): G öffnet in jeder Stufe zuerst die Werkbank.
+  Dort zeigt das Berufefenster die Stufe und den Knopf „Restore/Revitalize the workshop“. Das
+  Restaurierungsfenster zeigt Kosten (Bestand, Tasche/Lager, Fehlmenge) und das Ergebnis; der Knopf steht
+  in der festen Fußzeile, nach einem Schritt schließt das Fenster.
+- In der Welt sind die drei Stufen unterscheidbar: Trümmer; geschlossene Wände, Dielen, Vorrat;
+  zusätzlich Laternen, Werkzeugleiste, Banner in Berufsfarbe, Pflanzkasten. Werkbank und Schild bleiben
+  an ihrem Platz.
+- Save bleibt v7: Stufen standen schon im Save (`world.restoration`); alte Spielstände laden die
+  Werkstätten als Ruined, ohne etwas abzubuchen.
 
 | Ruine | Restaurierbar | Kosten | Bedingung |
 |---|---|---|---|
 | The Old Smithy („A Fire Rekindled“, Pflicht) | ja | 2 Supply Crate (vom Wagen) | Haven erreicht |
 | The Old Storehouse (optional, +10 Slots) | ja | 4 Timber, 2 Stone (Seitenweg der Old Road) | Old Smithy restauriert |
+| The Tanner's Lodge | ja + Revitalized | 6 Timber, 3 Stone, 2 Raw Hide · Revitalized: 4 Oak Plank, 3 Cured Leather, 2 Iron Ingot | Haven erreicht |
+| The Weaver's House | ja + Revitalized | 6 Timber, 3 Stone, 4 Flax Fiber · Revitalized: 4 Oak Plank, 3 Linen Cloth, 1 Cured Leather | Haven erreicht |
+| The Woodwright's Workshop | ja + Revitalized | 8 Timber, 4 Stone · Revitalized: 6 Oak Plank, 2 Iron Ingot, 1 Cured Leather | Haven erreicht |
+| The Alchemist's Cottage | ja + Revitalized | 6 Timber, 3 Stone, 2 Duskleaf · Revitalized: 4 Oak Plank, 2 Linen Cloth, 4 Duskleaf | Haven erreicht |
 | The Fallen Barracks, The Common Hall, The Trading House, The Forgotten Study | nein | – | „Restoration unavailable for now.“ |
+
+Werkstattkosten sind provisorisch balanciert (Overnight Artisan Crafting 01): nur Material aus Whisper Forest
+bzw. Whispering Stone und deren Verarbeitung auf Stufe 1, keine Mine nötig.
 
 ## Whispering Stone & Klassenwahl ✅
 - Pfad mit Begegnung, optionaler Seitenbereich (Memory Fragment „Three stood here when the stone was
@@ -109,7 +131,7 @@ wiederholbar). Erster passender Dialog gewinnt. `DialoguePanel`: G/Enter weiter,
 
 ## Offen
 - ⬜ Mehr Hollowwood mit Chapel Waystone und Warden's Rest
-- ⬜ Revitalisierung der Ruinen
+- ✅ Revitalisierung der vier Werkstätten (Overnight Artisan Crafting 01); ⬜ für die übrigen Ruinen
 - ⬜ Weitere Restaurierungen
 - ⬜ Echte Grafik und Sound
 - ⬜ Begleiter-KI über die gescriptete Hilfe hinaus

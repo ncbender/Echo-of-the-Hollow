@@ -172,8 +172,8 @@ Crafting-Aufrufe, Talente, Preset, Quest). Prüft je Bildschirm:
 Zwischen den Bildschirmen räumt sie Gegner weg und wartet auf den Respawn. Screenshots und Log:
 `tests/output/gallery/`. Belegt kurz den Bildschirm.
 
-**Veraltet:** `loop_playtest.gd` und `crafting_playtest.gd` (ohne `--loop`) nutzen die Bauplätze
-(`Plots/PlotWest`), die mit Prologue & Haven 0.1 entfallen sind. Die Forge-Ansicht deckt die Galerie ab.
+**Bauplätze:** `loop_playtest.gd` und `crafting_playtest.gd` erreichen die Schmiede seit Overnight Artisan Crafting 01
+über die Ruine Old Smithy (Restaurieren per Fenster bzw. `RestorationService`) statt über `Plots/PlotWest`.
 
 ## Crafting-Playtests (Crafting Foundation 0.1)
 ```
@@ -235,3 +235,14 @@ Lager-Materialien an Haven-Werkbänken, Sammel-XP und Erschöpfung über Save/Lo
 `professions_ui` (zehn Gebäude, Artisan Quarter zu Fuß erreichbar, alte Orte unverändert, Westtor erreichbar,
 Werkstatt öffnet ihren Beruf, Herstellen und Lernen per Mausklick, Sperrgründe, P ohne Station, Old Smithy
 ruiniert/restauriert, Fenster bei 75–150 %). Galerie-Screens `professions*` und `hud_artisan_quarter`.
+
+Overnight Artisan Crafting 01: `workshops` (vier Werkstätten Ruined → Restored → Revitalized, Vorschau = Verbrauch,
+Ablehnungen ohne Änderung, Doppel-/Mehrfachanfragen überspringen keine Stufe, keine Werte-/Kapazitätsänderung,
+Save/Load, alter v7-Stand ohne Werkstattstufen, Lager-Materialien gesperrt/allein/gemischt/genau/eins zu wenig,
+Fensterablauf Werkbank → Restaurierung mit Doppelklick), `hollowwood` (vier Sammelberufe mit Stufe-1- und
+Stufe-3-Knoten und Verwendung, zu Fuß erreichbar ohne ausgelöste Begegnung, Stufenprüfung/Ertrag/XP/Erschöpfung
+über Save/Load, Leather-Bracers-Pattern einmalig und dauerhaft, neue Rezepte: fehlendes Material, falsche
+Werkbank, schnelle Klicks, volle Tasche; keine Tränke/Bögen). `professions_ui` prüft zusätzlich, dass Craft bei
+jeder UI-Skalierung in der festen Fußzeile sichtbar ist. Galerie-Screens `hud_artisan_stages`, `restoration_revitalize`.
+Bei Änderungen an `restoration_service.gd`, `ruin_definition.gd`, `ruin_site.gd`, `restoration_panel.gd`, Ruinendaten:
+workshops, haven, world_ui, stash_ui. Bei Rezepten, Sammelknoten, Karten mit Knoten: hollowwood, professions, professions_ui.

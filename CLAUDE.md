@@ -5,7 +5,8 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
 + Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine)
 + UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1 + Talent UI Polish 1.2
-+ Inventory & Haven Stash 1.0 (Haven-Lager, Save v6) + Professions Foundation 1.0 (neun Berufe, Artisan Quarter, Save v7).
++ Inventory & Haven Stash 1.0 (Haven-Lager, Save v6) + Professions Foundation 1.0 (neun Berufe, Artisan Quarter, Save v7)
++ Overnight Artisan Crafting 01 (Werkstätten Ruined/Restored/Revitalized, Hollowwood-Sammeln, Restaurierung aus dem Lager).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -20,7 +21,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen), `prologue_playtest.gd`
   (`--fixed-fps 60`), `ui_gallery.gd` (alle Bildschirme, `-- --res=... --scale=... --only=...`).
   `stash_playtest.gd` (Haven-Lager, echte Maus, 720p/1080p/4K × 100/125/150 %).
-  Veraltet: `loop_playtest.gd`, `crafting_playtest.gd` ohne `--loop` (Bauplätze entfallen).
+  `loop_playtest.gd`/`crafting_playtest.gd` erreichen die Schmiede über die Ruine Old Smithy.
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
 ## Feste Regeln
@@ -46,6 +47,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   (`user://settings.cfg`, nie im Save). Standard: `docs/DISPLAY_AND_UI_STANDARD.md`.
   Farben/Schriften/Komponenten nur aus `UiTheme` (Designsystem: `docs/UI_DESIGN_SYSTEM.md`); Item-Texte nur
   über `ItemDescriber`; Bestätigungen nur über `UiConfirmDialog`; neue Bildschirme in `GalleryScreens` eintragen.
+  Primäre Aktion eines scrollenden Fensters (Craft, Restore) in `UiWindow.footer` (scrollt nie weg).
   Inventar: Hover = `ItemTooltip`, Rechtsklick = `CharacterEquipment.quick_slot`, keine Aktions-/Discard-Knöpfe;
   Währung (`is_currency`) ist ein Zähler, kein Taschenplatz.
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
@@ -67,7 +69,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - Story: Fortschritt nur über `StoryService.notify(event)`; Quests, Dialoge, NPCs, Ruinen, Wegsteine sind
   Daten (`data/story`, `data/npcs`, `data/haven/ruins`, `data/world/waystones`); Platzierung/Sichtbarkeit
   über `StoryCondition`, nie über questspezifischen Code. Haven hat feste Ruinen (`RestorationService`,
-  atomar), keine freien Bauplätze. Design: `docs/PROLOGUE_AND_HAVEN.md`.
+  atomar), keine freien Bauplätze. Stufenwechsel nur über `RestorationService.advance` mit Zielstufe
+  (Kosten über denselben Materialplan wie die Werkbänke); Werkstätten öffnen zuerst die Werkbank.
+  Design: `docs/PROLOGUE_AND_HAVEN.md`.
 - Berufe (`docs/PROFESSIONS.md`): Regeln nur in `ProfessionService` (Lernen, XP, Herstellen als Transaktion mit  einem Materialplan für Zählen und Verbrauchen), Zustand in `Character.professions`; Berufe, Rezepte, Sammelknoten  sind Daten (`data/professions`, `data/world/resource_nodes`); Werkbänke sind Haven-Ruinen mit `profession_id`.
 - Saves nur über `SaveCoordinator` (manuell/periodisch/Meilenstein); Meilensteine nie unterdrücken,
   Erfolg erst nach erfolgreichem Schreiben anzeigen. Tod/Respawn speichert nie.

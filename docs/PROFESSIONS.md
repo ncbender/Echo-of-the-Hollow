@@ -9,10 +9,10 @@ Neun klassenunabhängige Berufe. Jeder Charakter hat alle neun, jeweils Stufe 1�
 | Herstellung | Tailoring | The Weaver's House | – |
 | Herstellung | Woodworking | The Woodwright's Workshop | – |
 | Herstellung | Alchemy | The Alchemist's Cottage | – |
-| Sammeln | Mining | – | Iron Vein, Ancient Deposit, Forest Rock |
-| Sammeln | Herbalism | – | Wild Flax, Duskleaf Patch |
-| Sammeln | Woodcutting | – | Oak Tree |
-| Sammeln | Skinning | – | Stag Remains |
+| Sammeln | Mining | – | Iron Vein, Ancient Deposit, Forest Rock · Rich Iron Vein (Stufe 3) |
+| Sammeln | Herbalism | – | Wild Flax, Duskleaf Patch · Duskleaf Cluster (Stufe 3) |
+| Sammeln | Woodcutting | – | Oak Tree · Old Oak (Stufe 3) |
+| Sammeln | Skinning | – | Stag Remains (2×) · Elk Remains (Stufe 3) |
 
 ## Architektur
 - **Definitionen (Resources):**
@@ -43,6 +43,8 @@ Neun klassenunabhängige Berufe. Jeder Charakter hat alle neun, jeweils Stufe 1�
 - `RECIPE_ITEM`: `ProfessionService.learn_from_item` verbraucht den Gegenstand und lernt das Rezept in einem Schritt.
   Ist das Rezept schon bekannt, wird abgelehnt und der Gegenstand bleibt erhalten.
 - `TRAINER`, `QUEST`, `DROP`: als Daten vorbereitet, noch ohne Quelle im Spiel.
+- Pattern: Leather Bracers liegt einmal im Whisper Forest („Hunter's Pack“ nahe dem Eingang, `StoryPickup`, Flag
+  `pickup.forest_hunters_pack`): kein zweites Exemplar über Save/Load oder Mapwechsel.
 - Gelernte Rezepte bleiben dauerhaft. Doppeltes Lernen ändert nichts (keine XP, keine Items).
 
 ## Herstellen (Transaktion)
@@ -77,6 +79,10 @@ jede Einheit wird über `Inventory.count` einmal gezählt. Ohne Werkbank wird ni
 | Linen Trousers | Tailoring | 1 | 25 | 4 Linen Cloth → Linen Trousers |
 | Saw Oak Planks (Verarbeitung) | Woodworking | 1 | 8 | 2 Timber → Oak Plank |
 | Oak Shield | Woodworking | 1 | 30 | 4 Oak Plank + 1 Cured Leather → Oak Shield (Schild, vorhandener Itemtyp; keine Bögen) |
+| Rope Belt | Tailoring | 1 | 20 | 4 Flax Fiber → Rope Belt (Gürtel) |
+| Padded Mantle | Tailoring | 2 | 28 | 3 Linen Cloth + 1 Cured Leather → Padded Mantle (Schultern) |
+| Traveler's Cloak | Tailoring | 3 | 32 | 5 Linen Cloth → Traveler's Cloak (Umhang) |
+| Worn Boots | Leatherworking | 2 | 28 | 3 Cured Leather + 1 Linen Cloth → Worn Boots (Füße) |
 | Stoneskin Draught | Alchemy | 1 | 25 | 2 Duskleaf + 1 Stone → nur Daten, **nicht herstellbar** |
 
 Alchemie: Das Spiel hat noch kein Verbrauchsgut-System mit Buffs. Der Trank ist deshalb nur als Daten angelegt und
@@ -87,13 +93,33 @@ in UI und Service klar als „Potions cannot be used yet“ gekennzeichnet. Es w
 Die Erschöpfung liegt in `WorldState.map_states` mit Echtzeit-Stempel. Sie wird gespeichert, also setzt Save/Load
 einen Knoten nicht zurück und es gibt keine doppelte Ernte oder XP.
 
+| Knoten | Karte | Beruf | Stufe | Ertrag | XP | Respawn |
+|---|---|---|---|---|---|---|
+| Oak Tree (4×; 1× Old Road) | Whisper Forest | Woodcutting | 1 | 3 Timber | 6 | 90 s |
+| Forest Rock (3×; 1× Old Road) | Whisper Forest | Mining | 1 | 3 Stone | 5 | 90 s |
+| Iron Vein (2×) | Whisper Forest | Mining | 1 | 2 Iron Ore | 8 | 120 s |
+| Ancient Ore Deposit | Whisper Forest | Mining | 1 | 3 Iron Ore | 12 | einmalig |
+| Wild Flax (2×) | Whisper Forest | Herbalism | 1 | 2 Flax Fiber | 6 | 90 s |
+| Duskleaf | Whisper Forest | Herbalism | 1 | 1 Duskleaf | 8 | 150 s |
+| Stag Remains (2×) | Whisper Forest | Skinning | 1 | 2 Raw Hide | 8 | 180 s |
+| Old Oak | Whispering Stone | Woodcutting | 3 | 5 Timber | 14 | 150 s |
+| Rich Iron Vein | Whispering Stone | Mining | 3 | 3 Iron Ore | 16 | 180 s |
+| Duskleaf Cluster | Whispering Stone | Herbalism | 3 | 2 Duskleaf | 14 | 180 s |
+| Elk Remains | Whispering Stone | Skinning | 3 | 3 Raw Hide | 16 | 240 s |
+
+Die Stufe-3-Knoten liegen abseits des Pfads mit der Pflichtbegegnung (der Test geht sie zu Fuß ab). Respawn ist
+die bestehende Echtzeitregel. Verwendung: Timber/Stone → Restaurierungen, Bretter; Iron Ore → Barren; Flax →
+Leinen, Rope Belt; Raw Hide → Leder; Duskleaf → Alchemist's Cottage. Alchemie hat weiterhin kein herstellbares
+Ergebnis (kein Verbrauchsgut-System).
+
 ## Artisan Quarter (Haven)
 - Haven wächst nach Westen: ein ummauerter Bereich (x −728…−400) hinter dem verbreiterten Westdurchgang.
   Vier Werkstätten in zwei Reihen an einem Weg. Das Tor zur Proving Arena sitzt jetzt an der Westmauer des Viertels.
 - Haven hat zehn feste Gebäude (keine freien Bauplätze).
 - Werkstätten sind `RuinSite`s mit `profession_id`. Werkbank und Schild sind gezeichnet, die Werkbank funktioniert
-  schon als Ruine. Ihre Stufen kommen aus dem bestehenden Restaurierungssystem; die Restaurierung ist in dieser Version
-  noch nicht freigegeben.
+  in jeder Stufe (G öffnet zuerst die Werkbank). Restaurieren und Revitalisieren (Kosten, Ablauf:
+  `docs/PROLOGUE_AND_HAVEN.md`) bietet das Berufefenster an der Werkstatt an; beides ändert nur Aussehen und
+  Atmosphäre, nie Rezepte, Mengen oder Werte. Kein Rezept setzt eine Werkstattstufe voraus.
 - Old Smithy = Blacksmithing:
   - Ruine: Restaurierungsfenster wie bisher (Prolog), mit Knopf „Use the Workbench“.
   - Restauriert: Resonance Forge, im Reiter Craft mit Knopf „Blacksmithing Workbench“.
