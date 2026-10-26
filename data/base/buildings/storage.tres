@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/building_definition.gd" id="1_building"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="PackedScene" path="res://scenes/base/storage.tscn" id="3_scene"]
+
+[sub_resource type="Resource" id="Cost_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 8
+
+[sub_resource type="Resource" id="Cost_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 2
+
+[resource]
+script = ExtResource("1_building")
+id = &"storage"
+display_name = "Storage"
+description = "Crates and shelves: +10 inventory slots while it stands."
+costs = Array[ExtResource("2_cost")]([SubResource("Cost_timber"), SubResource("Cost_stone")])
+size = 1
+color = Color(0.5, 0.38, 0.25, 1)
+unique = true
+scene = ExtResource("3_scene")
+inventory_capacity_bonus = 10

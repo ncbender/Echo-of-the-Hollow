@@ -13,6 +13,7 @@ const DIRS := {
 	&"regions": "res://data/world/regions",
 	&"maps": "res://data/world/maps",
 	&"buildings": "res://data/base/buildings",
+	&"plots": "res://data/base/plots",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -26,6 +27,7 @@ var sets: Dictionary = {}             # set id -> SetDefinition
 var regions: Dictionary = {}          # region id -> RegionDefinition
 var maps: Dictionary = {}             # map id -> MapDefinition
 var buildings: Dictionary = {}        # building id -> BuildingDefinition
+var plots: Dictionary = {}            # plot id -> BuildingPlotDefinition
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -68,6 +70,8 @@ func register(resource: Resource) -> bool:
 		table = maps; key = resource.id
 	elif resource is BuildingDefinition:
 		table = buildings; key = resource.id
+	elif resource is BuildingPlotDefinition:
+		table = plots; key = resource.id
 	else:
 		load_errors.append("unsupported resource %s" % resource.resource_path)
 		return false
@@ -129,6 +133,18 @@ func validate() -> PackedStringArray:
 		for cost in building.costs:
 			if not items.has(cost.item_id):
 				errors.append("building %s costs unknown item %s" % [building.id, cost.item_id])
+		for recipe in building.recipes:
+			if not items.has(recipe.output_item_id):
+				errors.append("recipe %s outputs unknown item %s" % [recipe.id, recipe.output_item_id])
+			for input in recipe.inputs:
+				if not items.has(input.item_id):
+					errors.append("recipe %s needs unknown item %s" % [recipe.id, input.item_id])
+	for plot: BuildingPlotDefinition in plots.values():
+		if not maps.has(plot.map_id):
+			errors.append("plot %s on unknown map %s" % [plot.id, plot.map_id])
+		for building_id in plot.allowed_building_ids:
+			if not buildings.has(building_id):
+				errors.append("plot %s allows unknown building %s" % [plot.id, building_id])
 	return errors
 
 

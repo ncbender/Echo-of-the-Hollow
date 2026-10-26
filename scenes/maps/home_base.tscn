@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="9_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="10_transition"]
+[ext_resource type="PackedScene" path="res://scenes/base/build_plot.tscn" id="11_plot"]
 
 [sub_resource type="RectangleShape2D" id="Rect_door_east"]
 size = Vector2(12, 48)
@@ -76,6 +77,21 @@ top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="ClassStation" parent="." instance=ExtResource("8_station")]
 position = Vector2(-220, -110)
+
+[node name="Plots" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="PlotWest" parent="Plots" instance=ExtResource("11_plot")]
+position = Vector2(-150, 80)
+plot_id = &"plot_west"
+
+[node name="PlotEast" parent="Plots" instance=ExtResource("11_plot")]
+position = Vector2(150, 80)
+plot_id = &"plot_east"
+
+[node name="PlotNorth" parent="Plots" instance=ExtResource("11_plot")]
+position = Vector2(130, -90)
+plot_id = &"plot_north"
 
 [node name="SpawnDefault" type="Marker2D" parent="."]
 position = Vector2(0, 60)

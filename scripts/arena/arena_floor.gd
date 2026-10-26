@@ -9,9 +9,9 @@ extends Node2D
 
 
 func _draw() -> void:
-	var columns := int(area.size.x / tile_size)
-	var rows := int(area.size.y / tile_size)
+	var columns := ceili(area.size.x / tile_size)
+	var rows := ceili(area.size.y / tile_size)
 	for x in columns:
 		for y in rows:
-			var tile := Rect2(area.position + Vector2(x, y) * tile_size, Vector2.ONE * tile_size)
+			var tile := Rect2(area.position + Vector2(x, y) * tile_size, Vector2.ONE * tile_size).intersection(area)
 			draw_rect(tile, color_a if (x + y) % 2 == 0 else color_b)

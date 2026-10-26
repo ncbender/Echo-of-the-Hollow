@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/building_definition.gd" id="1_building"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="PackedScene" path="res://scenes/base/smithy.tscn" id="3_scene"]
+[ext_resource type="Script" path="res://scripts/rpg/base/recipe_definition.gd" id="4_recipe"]
+
+[sub_resource type="Resource" id="Cost_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 6
+
+[sub_resource type="Resource" id="Cost_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 4
+
+[sub_resource type="Resource" id="Cost_ore"]
+script = ExtResource("2_cost")
+item_id = &"iron_ore"
+quantity = 3
+
+[sub_resource type="Resource" id="In_ore"]
+script = ExtResource("2_cost")
+item_id = &"iron_ore"
+quantity = 3
+
+[sub_resource type="Resource" id="In_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 1
+
+[sub_resource type="Resource" id="Recipe_sword"]
+script = ExtResource("4_recipe")
+id = &"forge_iron_sword"
+display_name = "Forge Iron Sword"
+inputs = Array[ExtResource("2_cost")]([SubResource("In_ore"), SubResource("In_timber")])
+output_item_id = &"iron_sword"
+output_quantity = 1
+
+[resource]
+script = ExtResource("1_building")
+id = &"smithy"
+display_name = "Smithy"
+description = "Simple forge. Technical crafting test: turns ore and timber into an Iron Sword."
+costs = Array[ExtResource("2_cost")]([SubResource("Cost_timber"), SubResource("Cost_stone"), SubResource("Cost_ore")])
+size = 1
+color = Color(0.42, 0.4, 0.42, 1)
+unique = true
+scene = ExtResource("3_scene")
+recipes = Array[ExtResource("4_recipe")]([SubResource("Recipe_sword")])

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuildingPlotDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/building_plot_definition.gd" id="1_plot"]
+
+[resource]
+script = ExtResource("1_plot")
+id = &"plot_west"
+display_name = "West Plot"
+map_id = &"home_base"
+size = 1

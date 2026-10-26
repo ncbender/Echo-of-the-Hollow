@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/base/build_plot.gd" id="1_plot"]
+
+[sub_resource type="CircleShape2D" id="Circle_area"]
+radius = 40.0
+
+[node name="BuildPlot" type="Area2D"]
+z_index = -2
+script = ExtResource("1_plot")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Circle_area")

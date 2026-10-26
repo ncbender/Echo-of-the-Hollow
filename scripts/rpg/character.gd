@@ -59,6 +59,13 @@ func switch_class(class_id: StringName, in_safe_zone: bool) -> String:
 	return ""
 
 
+## Inventory capacity = rules + bonuses of standing buildings (storage). Never
+## drops items: if items exceed a reduced capacity they all stay (inventory
+## only refuses new slots until there is room again).
+func refresh_inventory_capacity() -> void:
+	inventory.capacity = database.rules.inventory_capacity + BaseBuilder.capacity_bonus(self)
+
+
 ## Destroys an item instance on purpose (player discards it). Loadout references
 ## are removed automatically (Inventory.item_removed).
 func discard_item(instance_id: String) -> bool:
@@ -116,6 +123,7 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 	character.orphaned_items = orphans
 	character.equipment.from_dict(_dict(data, "loadouts"), warnings)
 	character.world.from_dict(_dict(data, "world"), warnings)
+	character.refresh_inventory_capacity()
 	character.invalidate_stats()
 	return character
 

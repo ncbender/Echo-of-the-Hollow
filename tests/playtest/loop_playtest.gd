@@ -26,6 +26,8 @@ func _run() -> void:
 	change_scene_to_file("res://scenes/maps/home_base.tscn")
 	await _await_map(&"home_base")
 	await _world_tour()
+	if "--build-only" in OS.get_cmdline_user_args():
+		await _build_check()
 	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
 	var file := FileAccess.open(OUTPUT.path_join("loop_playtest_log.txt"), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
@@ -50,6 +52,26 @@ func _world_tour() -> void:
 	await _walk_into_door("ToHomeBase")
 	await _await_map(&"home_base")
 	_check(_at_spawn(&"from_arena"), "home: arrived at the north door")
+
+
+func _build_check() -> void:
+	var character := session.character
+	var smithy: BuildingDefinition = session.database.buildings[&"smithy"]
+	for cost in smithy.costs:
+		character.inventory.add_item(cost.item_id, cost.quantity)
+	character.inventory.add_item(&"iron_ore", 3)
+	character.inventory.add_item(&"timber", 1)
+	var plot := map.get_node("Plots/PlotWest") as BuildPlot
+	await _walk_to(plot.global_position + Vector2(0, 28))
+	await _press(&"interact")
+	_check(map.hud.build_panel.visible, "build panel opened at the plot")
+	await _shot("l04_build_menu")
+	_click_button(map.hud.build_panel, "Build")
+	await _ticks(3)
+	_check(plot.built_building() != null and plot.built_building().id == &"smithy", "smithy built via UI")
+	_click_button(map.hud.build_panel, "Craft")
+	_check(character.inventory.count(&"iron_sword") == 2, "smithy recipe crafted a second Iron Sword")
+	await _shot("l05_smithy_built")
 
 
 # --- helpers ---------------------------------------------------------------

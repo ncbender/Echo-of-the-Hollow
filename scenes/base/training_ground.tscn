@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/base/building_visual.gd" id="1_visual"]
+[ext_resource type="PackedScene" path="res://scenes/dummy/training_dummy.tscn" id="2_dummy"]
+
+[node name="TrainingGround" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Visual" type="Node2D" parent="."]
+z_index = -1
+script = ExtResource("1_visual")
+size = Vector2(64, 44)
+label = "Training Ground"
+detail = 3
+yard_only = true
+
+[node name="TrainingDummy" parent="." instance=ExtResource("2_dummy")]
+position = Vector2(0, 4)

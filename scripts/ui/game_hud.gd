@@ -9,6 +9,7 @@ var mastery_panel: MasteryPanel
 var class_info: ClassInfoPanel
 var class_panel: ClassPanel
 var inventory_panel: InventoryPanel
+var build_panel: BuildPanel
 
 var _root: Control
 var _prompt: Label
@@ -56,6 +57,7 @@ func _ready() -> void:
 
 	class_panel = _add_window(ClassPanel.new()) as ClassPanel
 	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
+	build_panel = _add_window(BuildPanel.new()) as BuildPanel
 
 
 func setup(progression_bridge: PlayerProgressionBridge) -> void:
@@ -86,6 +88,13 @@ func open_class_panel(station: ClassStation) -> void:
 		return
 	close_windows()
 	class_panel.open(bridge.character, station)
+
+
+func open_build_panel(plot: BuildPlot) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	build_panel.open(bridge.character, plot)
 
 
 func toggle_inventory() -> void:

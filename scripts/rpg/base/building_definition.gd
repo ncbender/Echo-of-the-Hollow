@@ -11,3 +11,11 @@ extends Resource
 ## Plot size class; a plot accepts buildings whose size is <= its own size.
 @export var size: int = 1
 @export var color: Color = Color("8a7a5a")
+## Only one building of this type per base.
+@export var unique: bool = true
+## Scene instantiated on the plot once built (visuals, blocking bodies, dummies ...).
+@export var scene: PackedScene
+## Extra inventory slots while this building stands (storage).
+@export var inventory_capacity_bonus: int = 0
+## Recipes offered by this building (smithy crafting test).
+@export var recipes: Array[RecipeDefinition] = []
