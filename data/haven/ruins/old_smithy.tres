@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_definition.gd" id="4_dlg"]
+[ext_resource type="Script" path="res://scripts/rpg/story/dialogue_line.gd" id="5_line"]
+
+[sub_resource type="Resource" id="Cost_crates"]
+script = ExtResource("2_cost")
+item_id = &"supply_crate"
+quantity = 2
+
+[sub_resource type="Resource" id="C_haven"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"prologue.haven_discovered"])
+
+[sub_resource type="Resource" id="L_1"]
+script = ExtResource("5_line")
+speaker = &"mara"
+text = "This place isn't dead. Just buried under years of neglect."
+
+[sub_resource type="Resource" id="L_2"]
+script = ExtResource("5_line")
+speaker = &"player"
+text = "Think we can bring it back?"
+
+[sub_resource type="Resource" id="L_3"]
+script = ExtResource("5_line")
+speaker = &"mara"
+text = "One stone at a time."
+
+[sub_resource type="Resource" id="D_fire"]
+script = ExtResource("4_dlg")
+id = &"restoration_old_smithy"
+lines = Array[ExtResource("5_line")]([SubResource("L_1"), SubResource("L_2"), SubResource("L_3")])
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"old_smithy"
+display_name = "The Old Smithy"
+description = "A Fire Rekindled: the forge is cold and half buried, but the anvil still stands. The tools and parts from Mara's supply crates are enough to light it again."
+restorable = true
+condition = SubResource("C_haven")
+costs = Array[ExtResource("2_cost")]([SubResource("Cost_crates")])
+building_id = &"smithy"
+event_id = &"restore:old_smithy"
+completion_dialogue = SubResource("D_fire")
+footprint = Vector2(60, 40)

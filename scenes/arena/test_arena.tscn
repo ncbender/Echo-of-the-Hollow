@@ -13,8 +13,13 @@
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="10_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="11_transition"]
 
+[ext_resource type="Script" path="res://scripts/world/map_gate.gd" id="12_gate"]
+
 [sub_resource type="RectangleShape2D" id="Rect_door_west"]
 size = Vector2(12, 48)
+
+[sub_resource type="CircleShape2D" id="Circle_gate"]
+radius = 20.0
 
 [node name="TestArena" type="Node2D"]
 y_sort_enabled = true
@@ -124,10 +129,21 @@ position = Vector2(-332, 0)
 script = ExtResource("11_transition")
 target_map_id = &"home_base"
 target_spawn_id = &"from_arena"
-label = "Hollow Home"
+label = "Haven"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToHomeBase"]
 shape = SubResource("Rect_door_west")
+
+[node name="GatePrologue" type="Area2D" parent="."]
+position = Vector2(250, 150)
+script = ExtResource("12_gate")
+prompt = "Enter the Prologue Grounds (developer)"
+target_map_id = &"prologue"
+label = "Prologue Grounds (dev)"
+color = Color(1, 0.85, 0.45, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GatePrologue"]
+shape = SubResource("Circle_gate")
 
 [node name="Player" parent="." instance=ExtResource("3_player")]
 position = Vector2(0, 40)

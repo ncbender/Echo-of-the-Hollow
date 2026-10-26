@@ -108,10 +108,17 @@ func get_character() -> Character:
 func set_character(new_character: Character) -> void:
 	if character != null and character.quests.story_progressed.is_connected(_on_story_progressed):
 		character.quests.story_progressed.disconnect(_on_story_progressed)
+		character.world.restoration_changed.disconnect(_on_restoration_changed)
 	character = new_character
 	if character != null:
 		character.quests.story_progressed.connect(_on_story_progressed)
+		character.world.restoration_changed.connect(_on_restoration_changed)
 	character_changed.emit(character)
+
+
+## A restored ruin is a milestone: always saved.
+func _on_restoration_changed(ruin_id: StringName, stage: StringName) -> void:
+	request_critical_save("restoration %s %s" % [ruin_id, stage])
 
 
 ## Every completed story step is a milestone: shown and saved (critical save).

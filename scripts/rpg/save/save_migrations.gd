@@ -107,7 +107,7 @@ static func _v3_to_v4(data: Dictionary) -> Dictionary:
 ## v5 (Prologue & Haven Vertical Slice 0.1): play time, activated waystones,
 ## Haven ruin restoration and the story prologue quests.
 ##  * plot buildings become restored ruins (smithy -> Old Smithy, storage -> Old
-##    Storehouse, training ground -> Fallen Barracks); the buildings entry stays
+##    Storehouse, training ground -> Fallen Barracks) and leave the plot list
 ##  * a v4 character already lives in Haven, so the road part of the prologue is
 ##    complete and the Old Smithy counts as rekindled (forge access as before);
 ##    with a finished class choice the whole prologue is complete and the main
@@ -122,9 +122,12 @@ static func _v4_to_v5(data: Dictionary) -> Dictionary:
 	var restoration: Dictionary = world.get("restoration", {}) if world.get("restoration") is Dictionary else {}
 	var plot_buildings: Dictionary = world.get("buildings", {}) if world.get("buildings") is Dictionary else {}
 	var ruin_of := {"smithy": "old_smithy", "storage": "old_storehouse", "training_ground": "fallen_barracks"}
-	for building: Variant in plot_buildings.values():
-		if ruin_of.has(str(building)):
-			restoration[ruin_of[str(building)]] = "restored"
+	for plot: Variant in plot_buildings.keys():
+		var building := str(plot_buildings[plot])
+		if ruin_of.has(building):
+			restoration[ruin_of[building]] = "restored"
+			plot_buildings.erase(plot)   # the ruin now provides it (no double storage bonus)
+	world["buildings"] = plot_buildings
 	restoration["old_smithy"] = "restored"
 	world["restoration"] = restoration
 	var flags: Dictionary = world.get("flags", {}) if world.get("flags") is Dictionary else {}
@@ -132,6 +135,8 @@ static func _v4_to_v5(data: Dictionary) -> Dictionary:
 			"prologue.supplies_recovered", "prologue.cart_defended", "prologue.cart_done", "prologue.haven_discovered",
 			"prologue.smithy_restored", "prologue.haven_settled"]:
 		flags[flag] = true
+	for ruin: String in restoration:
+		flags["haven.%s.restored" % ruin] = true   # RestorationService flag of every restored ruin
 	var quests: Dictionary = data.get("quests", {}) if data.get("quests") is Dictionary else {}
 	var prologue: Dictionary = data.get("prologue", {}) if data.get("prologue") is Dictionary else {}
 	var finished := str(prologue.get("stage", "")) == "completed"

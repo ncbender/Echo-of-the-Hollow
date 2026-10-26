@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="3_cond"]
+
+[sub_resource type="Resource" id="Cost_timber"]
+script = ExtResource("2_cost")
+item_id = &"timber"
+quantity = 4
+
+[sub_resource type="Resource" id="Cost_stone"]
+script = ExtResource("2_cost")
+item_id = &"stone"
+quantity = 2
+
+[sub_resource type="Resource" id="C_after_smithy"]
+script = ExtResource("3_cond")
+required_flags = Array[StringName]([&"haven.old_smithy.restored"])
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"old_storehouse"
+display_name = "The Old Storehouse"
+description = "Collapsed shelves and a roof full of holes. Fresh timber and a few stones would make it dry again: more room for everything you carry."
+restorable = true
+condition = SubResource("C_after_smithy")
+costs = Array[ExtResource("2_cost")]([SubResource("Cost_timber"), SubResource("Cost_stone")])
+building_id = &"storage"
+footprint = Vector2(60, 40)

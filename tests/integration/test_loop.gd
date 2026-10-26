@@ -100,12 +100,16 @@ func test_full_loop() -> void:
 	if home == null:
 		return
 	check(home.player.global_position.distance_to(home.find_spawn(&"from_forest").global_position) < 2.0, "arrived at the forest door")
-	# 7./8. build the smithy on the west plot with the gathered materials
-	var plot := home.get_node("Plots/PlotWest") as BuildPlot
+	# 7./8. restore the Old Storehouse with the gathered materials (Haven has
+	# fixed ruins; the prologue already rekindled the smithy in this story state)
+	character.world.set_flag(&"haven.old_smithy.restored")
+	var capacity_before := character.inventory.capacity
+	var plot := home.get_node("Ruins/OldStorehouse") as RuinSite
 	await _teleport(home, plot.global_position + Vector2(0, 26))
-	var smithy: BuildingDefinition = session.database.buildings[&"smithy"]
-	check_eq(BaseBuilder.build(character, plot.definition(), smithy), "", "smithy built from gathered materials")
-	plot.refresh()
+	plot.interact(home.hud)
+	check(home.hud.restoration_panel.visible, "restoration window at the ruin")
+	check_eq(home.hud.restoration_panel.restore(), "", "storehouse restored from gathered materials")
+	check_eq(character.inventory.capacity, capacity_before + 10, "storehouse adds inventory slots")
 	var timber_after_build := character.inventory.count(&"timber")
 	# 9. save and load
 	check_eq(session.save_game(), OK, "saved")
@@ -116,8 +120,9 @@ func test_full_loop() -> void:
 		return
 	# 10. building and progress are still there
 	var loaded := session.character
-	check_eq(BaseBuilder.plot_state(loaded, &"plot_west"), &"smithy", "smithy persisted")
-	check((home.get_node("Plots/PlotWest") as BuildPlot).built_building() != null, "smithy shown in the base")
+	check_eq(RestorationService.stage(loaded, &"old_storehouse"), &"restored", "restoration persisted")
+	check((home.get_node("Ruins/OldStorehouse") as RuinSite).built_building() != null, "storehouse shown in Haven")
+	check_eq(loaded.inventory.capacity, capacity_before + 10, "capacity bonus after loading")
 	check_eq(loaded.inventory.count(&"timber"), timber_after_build, "inventory persisted")
 	check_eq(loaded.mastery.to_dict(), character.mastery.to_dict(), "mastery persisted")
 	check(not ResourceGathering.is_available(loaded.world, &"whisper_forest", &"deposit", Time.get_unix_time_from_system() + 1.0e9), "permanent deposit stays exhausted")

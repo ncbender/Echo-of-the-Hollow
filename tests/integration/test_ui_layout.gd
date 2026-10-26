@@ -60,7 +60,7 @@ func test_windows_fit_at_every_ui_scale() -> void:
 	warrior.classes.unlock(&"warrior")
 	warrior.classes.set_active(&"warrior")
 	warrior.classes.add_xp(&"warrior", 200000)   # level 60: all talent tiers and skills shown
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
+	var ruin := map.get_node("Ruins/OldSmithy") as RuinSite
 	for value in UserSettings.UI_SCALES:
 		session.settings.set_ui_scale(value)
 		await _settle()
@@ -79,9 +79,13 @@ func test_windows_fit_at_every_ui_scale() -> void:
 		await _settle()
 		_check_window(map.hud.class_choice_panel, tag + " class choice")
 		map.hud.close_windows()
-		map.hud.build_panel.open(session.character, plot)
+		map.hud.restoration_panel.open(session.character, ruin)
 		await _settle()
-		_check_window(map.hud.build_panel, tag + " build panel")
+		_check_window(map.hud.restoration_panel, tag + " restoration")
+		map.hud.close_windows()
+		map.hud.open_lines([{"name": "Mara Veyne", "text": "There's a place north of here. Haven. Not much to look at, but it's got walls, a forge, and people who still give a damn.", "color": UiTheme.COLOR_ACCENT}] as Array[Dictionary])
+		await _settle()
+		_check_window(map.hud.dialogue_panel, tag + " dialogue")
 		map.hud.close_windows()
 		map.hud.toggle_options()
 		await _settle()

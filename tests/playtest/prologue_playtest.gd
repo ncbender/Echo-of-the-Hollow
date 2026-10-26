@@ -77,6 +77,11 @@ func _road() -> void:
 	# optional side path: the note
 	await _walk_to(Vector2(-300, -60))
 	await _fight(map.get_node("Encounters/SideWolves") as Encounter, true)
+	await _walk_to(Vector2(-360, -96))   # optional: timber and stone for the Old Storehouse
+	await _press(&"interact")
+	await _walk_to(Vector2(-470, 22))
+	await _press(&"interact")
+	_log("  gathered: timber %d, stone %d" % [character.inventory.count(&"timber"), character.inventory.count(&"stone")])
 	await _walk_to(Vector2(-540, -60))
 	await _press(&"interact")
 	_check(map.hud.dialogue_panel.current_text() == "Third shipment delayed. Mara went ahead before sunrise.", "note read")
@@ -120,7 +125,63 @@ func _road() -> void:
 
 
 func _haven() -> void:
-	pass   # Phase D/E: restoration, Edrin, shrine
+	var character := session.character
+	var mara := map.get_node("Mara") as StoryNpc
+	var edrin := map.get_node("Edrin") as StoryNpc
+	_check(mara.visible and edrin.visible, "Mara and Edrin in Haven")
+	await _talk_to(mara)
+	_check(StoryService.at_step(character, &"shelter_among_the_trees", 2), "Mara: Welcome to Haven")
+	# ruins that cannot be restored yet
+	var hall := map.get_node("Ruins/CommonHall") as RuinSite
+	await _walk_to(hall.global_position + Vector2(0, 30))
+	await _press(&"interact")
+	_check(map.hud.restoration_panel.visible and _label_texts(map.hud.restoration_panel).has("Restoration unavailable for now."),
+		"Common Hall: Restoration unavailable for now.")
+	await _shot("p08_ruin_unavailable")
+	await _press(&"interact")
+	# A Fire Rekindled
+	var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
+	await _walk_to(Vector2(-200, -100))
+	await _walk_to(smithy.global_position + Vector2(0, 30))
+	await _press(&"interact")
+	await _shot("p09_smithy_ruin")
+	_click_button(map.hud.restoration_panel, "Restore")
+	await _ticks(2)
+	_check(map.hud.dialogue_panel.current_text() == "This place isn't dead. Just buried under years of neglect.", "Mara: This place isn't dead ...")
+	for i in 3:
+		await _press(&"interact")
+	_check(RestorationService.is_restored(character, &"old_smithy") and character.inventory.count(&"supply_crate") == 0, "Old Smithy restored with the cart supplies")
+	_check(StoryService.at_step(character, &"shelter_among_the_trees", 3), "on to Edrin")
+	await _shot("p10_smithy_restored")
+	await _press(&"interact")
+	_check(map.hud.crafting_panel.visible, "the restored smithy opens the forge")
+	await _press(&"interact")
+	# optional: the Old Storehouse
+	var store := map.get_node("Ruins/OldStorehouse") as RuinSite
+	await _walk_to(Vector2(-200, 100))
+	await _walk_to(store.global_position + Vector2(0, 30))
+	await _press(&"interact")
+	var capacity := character.inventory.capacity
+	if _click_button(map.hud.restoration_panel, "Restore"):
+		_check(character.inventory.capacity == capacity + 10, "Old Storehouse: +10 inventory slots")
+	map.hud.close_windows()
+	await _walk_to(Vector2(0, 0))
+	await _talk_to(mara)
+	_check(map.hud.dialogue_panel.visible == false, "Mara: Haven wasn't always this quiet ...")
+	await _walk_to(Vector2(0, -150))
+	await _talk_to(edrin)
+	_check(StoryService.at_step(character, &"the_whispering_stone", 0), "Edrin: the Whispering Stone")
+	await _shot("p11_north_gate_open")
+	await _walk_into(map.get_node("ToShrine") as Node2D)
+	await _await_map(&"whispering_stone")
+	_check(StoryService.at_step(character, &"the_whispering_stone", 1), "reached the Whispering Stone")
+
+
+func _label_texts(node: Node) -> PackedStringArray:
+	var texts: PackedStringArray = []
+	for label: Label in node.find_children("*", "Label", true, false):
+		texts.append(label.text.strip_edges())
+	return texts
 
 
 # --- helpers ----------------------------------------------------------------

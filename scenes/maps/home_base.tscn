@@ -10,187 +10,287 @@
 [ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="9_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="10_transition"]
-[ext_resource type="PackedScene" path="res://scenes/base/build_plot.tscn" id="11_plot"]
-[ext_resource type="Script" path="res://scripts/world/map_gate.gd" id="12_gate"]
+[ext_resource type="Script" path="res://scripts/world/ruin_site.gd" id="11_ruin"]
 [ext_resource type="Script" path="res://scripts/world/story_npc.gd" id="13_npc"]
 [ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="14_cond"]
+[ext_resource type="Script" path="res://scripts/world/story_conditional.gd" id="15_cond_node"]
+[ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="16_trigger"]
 
-[sub_resource type="RectangleShape2D" id="Rect_door_south"]
-size = Vector2(48, 12)
+[sub_resource type="RectangleShape2D" id="Rect_gate_ns"]
+size = Vector2(56, 12)
+
+[sub_resource type="RectangleShape2D" id="Rect_gate_ew"]
+size = Vector2(12, 56)
+
+[sub_resource type="RectangleShape2D" id="Rect_gate_hint"]
+size = Vector2(120, 40)
 
 [sub_resource type="CircleShape2D" id="Circle_npc"]
 radius = 20.0
 
-[sub_resource type="Resource" id="C_mara_haven"]
+[sub_resource type="CircleShape2D" id="Circle_ruin"]
+radius = 34.0
+
+[sub_resource type="Resource" id="C_in_haven"]
 script = ExtResource("14_cond")
 required_flags = Array[StringName]([&"prologue.haven_discovered"])
 
-[sub_resource type="RectangleShape2D" id="Rect_door_east"]
-size = Vector2(12, 48)
+[sub_resource type="Resource" id="C_gate_barred"]
+script = ExtResource("14_cond")
+forbidden_flags = Array[StringName]([&"prologue.haven_settled"])
 
-[sub_resource type="RectangleShape2D" id="Rect_door_north"]
-size = Vector2(48, 12)
-
-[sub_resource type="CircleShape2D" id="Circle_gate"]
-radius = 20.0
-
-[node name="HomeBase" type="Node2D"]
+[node name="Haven" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_map")
 map_id = &"home_base"
+spawn_area = Rect2(-380, -220, 760, 440)
 
 [node name="Floor" type="Node2D" parent="."]
 z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-288, -168, 576, 336)
-color_a = Color(0.2, 0.18, 0.15, 1)
-color_b = Color(0.23, 0.2, 0.17, 1)
+area = Rect2(-400, -240, 800, 480)
+color_a = Color(0.23, 0.2, 0.16, 1)
+color_b = Color(0.25, 0.22, 0.17, 1)
+
+[node name="Plaza" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(-96, -64, 192, 128)
+tile_size = 16.0
+color_a = Color(0.31, 0.28, 0.23, 1)
+color_b = Color(0.33, 0.3, 0.25, 1)
+
+[node name="Path" type="Node2D" parent="."]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(-24, -240, 48, 480)
+tile_size = 16.0
+color_a = Color(0.31, 0.28, 0.23, 1)
+color_b = Color(0.33, 0.3, 0.25, 1)
 
 [node name="Walls" type="Node2D" parent="."]
 y_sort_enabled = true
 
 [node name="NorthLeft" type="StaticBody2D" parent="Walls"]
-position = Vector2(-156, -176)
+position = Vector2(-218, -248)
 script = ExtResource("3_wall")
-size = Vector2(264, 16)
+size = Vector2(380, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="NorthRight" type="StaticBody2D" parent="Walls"]
-position = Vector2(156, -176)
+position = Vector2(218, -248)
 script = ExtResource("3_wall")
-size = Vector2(264, 16)
+size = Vector2(380, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="SouthLeft" type="StaticBody2D" parent="Walls"]
-position = Vector2(-160, 176)
+position = Vector2(-218, 248)
 script = ExtResource("3_wall")
-size = Vector2(272, 16)
+size = Vector2(380, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="SouthRight" type="StaticBody2D" parent="Walls"]
-position = Vector2(160, 176)
+position = Vector2(218, 248)
 script = ExtResource("3_wall")
-size = Vector2(272, 16)
+size = Vector2(380, 16)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
-[node name="West" type="StaticBody2D" parent="Walls"]
-position = Vector2(-296, 0)
+
+[node name="WestTop" type="StaticBody2D" parent="Walls"]
+position = Vector2(-408, -142)
 script = ExtResource("3_wall")
-size = Vector2(16, 368)
+size = Vector2(16, 228)
+color = Color(0.33, 0.27, 0.22, 1)
+top_color = Color(0.46, 0.38, 0.3, 1)
+
+[node name="WestBottom" type="StaticBody2D" parent="Walls"]
+position = Vector2(-408, 142)
+script = ExtResource("3_wall")
+size = Vector2(16, 228)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="EastTop" type="StaticBody2D" parent="Walls"]
-position = Vector2(296, -100)
+position = Vector2(408, -142)
 script = ExtResource("3_wall")
-size = Vector2(16, 152)
+size = Vector2(16, 228)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
 [node name="EastBottom" type="StaticBody2D" parent="Walls"]
-position = Vector2(296, 100)
+position = Vector2(408, 142)
 script = ExtResource("3_wall")
-size = Vector2(16, 152)
+size = Vector2(16, 228)
 color = Color(0.33, 0.27, 0.22, 1)
 top_color = Color(0.46, 0.38, 0.3, 1)
 
-[node name="ClassStation" parent="." instance=ExtResource("8_station")]
-position = Vector2(-220, -110)
+[node name="NorthGate" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("15_cond_node")
+condition = SubResource("C_gate_barred")
 
-[node name="Plots" type="Node2D" parent="."]
+[node name="Bar" type="StaticBody2D" parent="NorthGate"]
+position = Vector2(0, -240)
+script = ExtResource("3_wall")
+size = Vector2(56, 10)
+color = Color(0.4, 0.3, 0.2, 1)
+top_color = Color(0.55, 0.42, 0.28, 1)
+
+[node name="GateHint" type="Area2D" parent="NorthGate"]
+position = Vector2(0, -205)
+script = ExtResource("16_trigger")
+hint = "The north gate is barred. Edrin keeps watch here."
+hint_id = &"north_gate"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthGate/GateHint"]
+shape = SubResource("Rect_gate_hint")
+
+[node name="ClassStation" parent="." instance=ExtResource("8_station")]
+position = Vector2(300, -175)
+
+[node name="Ruins" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="PlotWest" parent="Plots" instance=ExtResource("11_plot")]
-position = Vector2(-150, 80)
-plot_id = &"plot_west"
+[node name="OldSmithy" type="Area2D" parent="Ruins"]
+position = Vector2(-285, -150)
+script = ExtResource("11_ruin")
+ruin_id = &"old_smithy"
 
-[node name="PlotEast" parent="Plots" instance=ExtResource("11_plot")]
-position = Vector2(150, 80)
-plot_id = &"plot_east"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/OldSmithy"]
+shape = SubResource("Circle_ruin")
 
-[node name="PlotNorth" parent="Plots" instance=ExtResource("11_plot")]
-position = Vector2(130, -90)
-plot_id = &"plot_north"
+[node name="CommonHall" type="Area2D" parent="Ruins"]
+position = Vector2(-130, -160)
+script = ExtResource("11_ruin")
+ruin_id = &"common_hall"
 
-[node name="SpawnDefault" type="Marker2D" parent="."]
-position = Vector2(0, 60)
-script = ExtResource("9_spawn")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/CommonHall"]
+shape = SubResource("Circle_ruin")
 
-[node name="SpawnFromForest" type="Marker2D" parent="."]
-position = Vector2(250, 0)
-script = ExtResource("9_spawn")
-spawn_id = &"from_forest"
+[node name="ForgottenStudy" type="Area2D" parent="Ruins"]
+position = Vector2(150, -160)
+script = ExtResource("11_ruin")
+ruin_id = &"forgotten_study"
 
-[node name="SpawnFromArena" type="Marker2D" parent="."]
-position = Vector2(0, -130)
-script = ExtResource("9_spawn")
-spawn_id = &"from_arena"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/ForgottenStudy"]
+shape = SubResource("Circle_ruin")
 
-[node name="ToForest" type="Area2D" parent="."]
-position = Vector2(300, 0)
+[node name="OldStorehouse" type="Area2D" parent="Ruins"]
+position = Vector2(-285, 150)
+script = ExtResource("11_ruin")
+ruin_id = &"old_storehouse"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/OldStorehouse"]
+shape = SubResource("Circle_ruin")
+
+[node name="TradingHouse" type="Area2D" parent="Ruins"]
+position = Vector2(-130, 160)
+script = ExtResource("11_ruin")
+ruin_id = &"trading_house"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/TradingHouse"]
+shape = SubResource("Circle_ruin")
+
+[node name="FallenBarracks" type="Area2D" parent="Ruins"]
+position = Vector2(220, 150)
+script = ExtResource("11_ruin")
+ruin_id = &"fallen_barracks"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ruins/FallenBarracks"]
+shape = SubResource("Circle_ruin")
+
+[node name="Mara" type="Area2D" parent="."]
+position = Vector2(-40, 26)
+script = ExtResource("13_npc")
+npc_id = &"mara"
+condition = SubResource("C_in_haven")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Mara"]
+shape = SubResource("Circle_npc")
+
+[node name="Edrin" type="Area2D" parent="."]
+position = Vector2(46, -206)
+script = ExtResource("13_npc")
+npc_id = &"edrin"
+condition = SubResource("C_in_haven")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Edrin"]
+shape = SubResource("Circle_npc")
+
+[node name="ToShrine" type="Area2D" parent="."]
+position = Vector2(0, -254)
 script = ExtResource("10_transition")
-target_map_id = &"whisper_forest"
-target_spawn_id = &"from_home"
-label = "Whisper Forest"
+target_map_id = &"whispering_stone"
+target_spawn_id = &"from_haven"
+label = "Whispering Stone"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ToForest"]
-shape = SubResource("Rect_door_east")
-
-[node name="ToArena" type="Area2D" parent="."]
-position = Vector2(0, -180)
-script = ExtResource("10_transition")
-target_map_id = &"test_arena"
-target_spawn_id = &"from_home"
-label = "Proving Arena"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ToArena"]
-shape = SubResource("Rect_door_north")
-
-[node name="GatePrologue" type="Area2D" parent="."]
-position = Vector2(-70, 130)
-script = ExtResource("12_gate")
-prompt = "Enter the Prologue"
-target_map_id = &"prologue"
-label = "Prologue"
-color = Color(1, 0.85, 0.45, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="GatePrologue"]
-shape = SubResource("Circle_gate")
-
-[node name="SpawnFromPrologue" type="Marker2D" parent="."]
-position = Vector2(-70, 100)
-script = ExtResource("9_spawn")
-spawn_id = &"from_prologue"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToShrine"]
+shape = SubResource("Rect_gate_ns")
 
 [node name="ToRoad" type="Area2D" parent="."]
-position = Vector2(0, 182)
+position = Vector2(0, 254)
 script = ExtResource("10_transition")
 target_map_id = &"old_road"
 target_spawn_id = &"from_haven"
 label = "The Old Road"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToRoad"]
-shape = SubResource("Rect_door_south")
+shape = SubResource("Rect_gate_ns")
+
+[node name="ToForest" type="Area2D" parent="."]
+position = Vector2(414, 0)
+script = ExtResource("10_transition")
+target_map_id = &"whisper_forest"
+target_spawn_id = &"from_home"
+label = "Whisper Forest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToForest"]
+shape = SubResource("Rect_gate_ew")
+
+[node name="ToArena" type="Area2D" parent="."]
+position = Vector2(-414, 0)
+script = ExtResource("10_transition")
+target_map_id = &"test_arena"
+target_spawn_id = &"from_home"
+label = "Proving Arena"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToArena"]
+shape = SubResource("Rect_gate_ew")
+
+[node name="SpawnDefault" type="Marker2D" parent="."]
+position = Vector2(0, 40)
+script = ExtResource("9_spawn")
 
 [node name="SpawnFromRoad" type="Marker2D" parent="."]
-position = Vector2(0, 140)
+position = Vector2(0, 205)
 script = ExtResource("9_spawn")
 spawn_id = &"from_road"
 
-[node name="Mara" type="Area2D" parent="."]
-position = Vector2(-40, 30)
-script = ExtResource("13_npc")
-npc_id = &"mara"
-condition = SubResource("C_mara_haven")
+[node name="SpawnFromShrine" type="Marker2D" parent="."]
+position = Vector2(0, -200)
+script = ExtResource("9_spawn")
+spawn_id = &"from_shrine"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Mara"]
-shape = SubResource("Circle_npc")
+[node name="SpawnFromForest" type="Marker2D" parent="."]
+position = Vector2(365, 0)
+script = ExtResource("9_spawn")
+spawn_id = &"from_forest"
+
+[node name="SpawnFromArena" type="Marker2D" parent="."]
+position = Vector2(-365, 0)
+script = ExtResource("9_spawn")
+spawn_id = &"from_arena"
+
+[node name="SpawnFromPrologue" type="Marker2D" parent="."]
+position = Vector2(-60, 110)
+script = ExtResource("9_spawn")
+spawn_id = &"from_prologue"
 
 [node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(0, 60)
+position = Vector2(0, 40)
 
 [node name="HitstopController" type="Node" parent="."]
 script = ExtResource("6_hitstop")

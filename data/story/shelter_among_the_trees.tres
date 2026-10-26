@@ -29,6 +29,7 @@ objectives = Array[ExtResource("3_obj")]([SubResource("O_welcome")])
 script = ExtResource("3_obj")
 event_id = &"restore:old_smithy"
 description = "Restore the Old Smithy"
+cumulative = true
 
 [sub_resource type="Resource" id="S_smithy"]
 script = ExtResource("2_step")

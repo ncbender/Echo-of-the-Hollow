@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RuinDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/haven/ruin_definition.gd" id="1_ruin"]
+
+[resource]
+script = ExtResource("1_ruin")
+id = &"fallen_barracks"
+display_name = "The Fallen Barracks"
+description = "Broken racks and a training yard swallowed by weeds. Haven will need fighters again one day."
+building_id = &"training_ground"
+footprint = Vector2(70, 44)

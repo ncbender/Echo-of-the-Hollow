@@ -63,9 +63,9 @@ func test_crafting_vertical_slice() -> void:
 	var home := await _await_map(&"home_base")
 	if home == null:
 		return
-	# smithy on the west plot, then interact (G) -> Resonance Forge
-	var plot := home.get_node("Plots/PlotWest") as BuildPlot
-	check_eq(BaseBuilder.build(character, plot.definition(), session.database.buildings[&"smithy"]), "", "smithy built")
+	# the restored Old Smithy, then interact (G) -> Resonance Forge
+	var plot := home.get_node("Ruins/OldSmithy") as RuinSite
+	character.world.set_restoration(&"old_smithy", &"restored")   # the prologue rekindled it
 	plot.refresh()
 	home.player.global_position = plot.global_position + Vector2(0, 26)
 	for i in 4:

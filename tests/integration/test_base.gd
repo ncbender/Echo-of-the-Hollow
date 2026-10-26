@@ -38,12 +38,15 @@ func test_data() -> void:
 	check_eq(db.plots.size(), 3, "three plots")
 	for id: StringName in [&"smithy", &"storage", &"training_ground"]:
 		check(db.buildings.has(id) and _building(id).scene != null, "%s defined with scene" % id)
+	# Haven has no free build plots any more: six fixed ruins (Prologue & Haven slice)
 	var home: Node = load(db.maps[&"home_base"].scene_path).instantiate()
-	var plot_ids := {}
+	var ruin_ids := {}
 	for plot: BuildPlot in home.find_children("*", "BuildPlot", true, false):
-		plot_ids[plot.plot_id] = true
-		check(db.plots.has(plot.plot_id), "scene plot %s defined" % plot.plot_id)
-	check_eq(plot_ids.size(), 3, "three plots placed in the home base")
+		check(plot is RuinSite, "only ruins in Haven (%s)" % plot.name)
+		if plot is RuinSite:
+			ruin_ids[(plot as RuinSite).ruin_id] = true
+			check(db.ruins.has((plot as RuinSite).ruin_id), "ruin %s defined" % (plot as RuinSite).ruin_id)
+	check_eq(ruin_ids.size(), 6, "six ruins placed in Haven")
 	home.free()
 
 
@@ -115,18 +118,19 @@ func test_smithy_recipe_is_atomic() -> void:
 	check(BaseBuilder.craft(character, recipe) != "", "second craft refused without inputs")
 
 
-func test_built_plot_survives_map_change() -> void:
+func test_restored_ruin_survives_map_change() -> void:
 	var session := SessionState.find(get_tree())
 	var previous := session.character
 	session.set_character(character)
-	_give(_building(&"smithy").costs)
-	BaseBuilder.build(character, _plot(&"plot_west"), _building(&"smithy"))
+	character.world.set_flag(&"prologue.haven_discovered")
+	character.inventory.add_item(&"supply_crate", 2)
+	check_eq(RestorationService.restore(character, db.ruins[&"old_smithy"]), "", "Old Smithy restored")
 	for i in 2:
 		var home: Node = load(db.maps[&"home_base"].scene_path).instantiate()
 		add_child(home)
 		await get_tree().process_frame
-		var plot := home.get_node("Plots/PlotWest") as BuildPlot
-		check(plot.built_building() != null and plot.built_building().id == &"smithy", "plot shows smithy (load %d)" % i)
+		var plot := home.get_node("Ruins/OldSmithy") as RuinSite
+		check(plot.built_building() != null and plot.built_building().id == &"smithy", "ruin shows the smithy (load %d)" % i)
 		check(plot.get_child_count() >= 2, "building scene instantiated (load %d)" % i)
 		home.queue_free()
 		await get_tree().process_frame

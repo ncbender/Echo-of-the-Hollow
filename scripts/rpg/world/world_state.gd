@@ -3,6 +3,8 @@ extends RefCounted
 ## Persistent world progress of one character: location and simple flags.
 
 signal flag_changed(flag: StringName, value: Variant)
+## A Haven ruin changed its stage (RestorationService). Milestone save.
+signal restoration_changed(ruin_id: StringName, stage: StringName)
 
 var map_id: StringName = &"home_base"
 var spawn_id: StringName = &"default"
@@ -35,6 +37,13 @@ func get_flag(flag: StringName, default: Variant = false) -> Variant:
 
 func has_flag(flag: StringName) -> bool:
 	return flags.has(flag) and flags[flag] != false
+
+
+func set_restoration(ruin_id: StringName, stage: StringName) -> void:
+	if restoration.get(ruin_id) == stage:
+		return
+	restoration[ruin_id] = stage
+	restoration_changed.emit(ruin_id, stage)
 
 
 func get_map_value(map: StringName, key: String, default: Variant = null) -> Variant:

@@ -78,7 +78,8 @@ func switch_class(class_id: StringName, in_safe_zone: bool) -> String:
 ## drops items: if items exceed a reduced capacity they all stay (inventory
 ## only refuses new slots until there is room again).
 func refresh_inventory_capacity() -> void:
-	inventory.capacity = database.rules.inventory_capacity + BaseBuilder.capacity_bonus(self)
+	inventory.capacity = database.rules.inventory_capacity + BaseBuilder.capacity_bonus(self) \
+		+ RestorationService.capacity_bonus(self)
 
 
 ## Destroys an item instance on purpose (player discards it). Loadout references

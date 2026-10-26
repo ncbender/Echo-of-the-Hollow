@@ -99,7 +99,7 @@ position = Vector2(-332, 0)
 script = ExtResource("10_transition")
 target_map_id = &"home_base"
 target_spawn_id = &"from_forest"
-label = "Hollow Home"
+label = "Haven"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToHomeBase"]
 shape = SubResource("Rect_door_west")

@@ -18,6 +18,7 @@ var class_choice_panel: ClassChoicePanel
 var pause_menu: PauseMenu
 var save_indicator: SaveIndicator
 var dialogue_panel: DialoguePanel
+var restoration_panel: RestorationPanel
 ## Contextual tutorial hint (top centre).
 var hint_panel: PanelContainer
 var _hint_label: Label
@@ -84,6 +85,8 @@ func _ready() -> void:
 	crafting_panel = _add_window(CraftingPanel.new()) as CraftingPanel
 	class_choice_panel = _add_window(ClassChoicePanel.new()) as ClassChoicePanel
 	dialogue_panel = _add_window(DialoguePanel.new()) as DialoguePanel
+	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
+	restoration_panel.hud = self
 	hint_panel = PanelContainer.new()
 	hint_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_panel.offset_top = UiTheme.SCREEN_MARGIN * 3
@@ -197,6 +200,14 @@ func open_class_choice(station: ClassChoiceStation) -> void:
 		return
 	close_windows()
 	class_choice_panel.open(bridge.character, station)
+
+
+## A ruin of Haven: costs and the Restore button (or "unavailable for now").
+func open_restoration(site: RuinSite) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	restoration_panel.open(bridge.character, site)
 
 
 func open_build_panel(plot: BuildPlot) -> void:
