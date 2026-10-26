@@ -309,7 +309,7 @@ func test_learning_by_mouse_keeps_layout_and_tooltip_and_survives_save_load() ->
 
 ## Book Tabs Stability Fix 1.3: the registers, the window frame and the gaps
 ## never move while all five pages are cycled (twice, by click and by keyboard),
-## at 100 / 150 / 200 % UI scale; the frame stays inside the viewport.
+## at 100 / 125 / 150 % UI scale; the frame stays inside the viewport.
 func _tab_snapshot(tabs: BookTabs) -> Dictionary:
 	var shot := {"window": panel.get_global_rect(), "column": tabs.get_global_rect()}
 	for id: String in ClassStationPanel.PAGES:
@@ -321,7 +321,7 @@ func _tab_snapshot(tabs: BookTabs) -> Dictionary:
 
 func test_book_tabs_never_move_when_switching_pages() -> void:
 	var station := await _at_station()
-	for scale: float in [1.0, 1.5, 2.0]:
+	for scale: float in [1.0, 1.25, 1.5]:
 		session.settings.set_ui_scale(scale)
 		map.hud.open_class_panel(station)
 		panel.show_page("Classes")
@@ -362,8 +362,10 @@ func test_book_tabs_never_move_when_switching_pages() -> void:
 	check(not scroll.get_v_scroll_bar().visible and not scroll.get_h_scroll_bar().visible and not panel.talent_layout.compact, "talents still complete without scrolling at 100 %")
 
 
-func test_learning_keeps_the_scrolled_tree_view_at_200_percent() -> void:
-	session.settings.set_ui_scale(2.0)
+func test_learning_keeps_the_scrolled_tree_view_when_room_is_short() -> void:
+	# 200 % is no player option any more (UI Scaling Standard 1.1); the factor is set
+	# directly to keep testing the "very little room" path of the talent page
+	get_tree().root.content_scale_factor = 2.0
 	map.hud.toggle_character()
 	for i in 4:
 		await get_tree().process_frame
@@ -371,7 +373,7 @@ func test_learning_keeps_the_scrolled_tree_view_at_200_percent() -> void:
 	scroll.scroll_vertical = 60
 	await get_tree().process_frame
 	var before := scroll.scroll_vertical
-	check(before > 0, "the tree area scrolls at 200 %")
+	check(before > 0, "the tree area scrolls when room is short")
 	panel.tree_view(&"war_berserker").button_for(&"war_b_temper").pressed.emit()
 	for i in 4:
 		await get_tree().process_frame
@@ -383,4 +385,4 @@ func test_learning_keeps_the_scrolled_tree_view_at_200_percent() -> void:
 	for i in 3:
 		await get_tree().process_frame
 	check_eq((panel.find_child("TreeScroll", true, false) as ScrollContainer).scroll_vertical, 0, "a page switch starts at the top")
-	session.settings.set_ui_scale(1.0)
+	get_tree().root.content_scale_factor = session.settings.ui_scale

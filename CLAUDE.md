@@ -19,7 +19,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   `prologue_playtest.gd` (kompletter Prolog ab Titel, `--fixed-fps 60`),
   `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen), `prologue_playtest.gd`
   (`--fixed-fps 60`), `ui_gallery.gd` (alle Bildschirme, `-- --res=... --scale=... --only=...`).
-  `stash_playtest.gd` (Haven-Lager, echte Maus, 720p/1080p/4K × 100/150/200 %).
+  `stash_playtest.gd` (Haven-Lager, echte Maus, 720p/1080p/4K × 100/125/150 %).
   Veraltet: `loop_playtest.gd`, `crafting_playtest.gd` ohne `--loop` (Bauplätze entfallen).
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 

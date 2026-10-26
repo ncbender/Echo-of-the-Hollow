@@ -22,7 +22,7 @@
 `inventory`, `pickup`, `equipment`, `item_effects`, `save`; Overnight 3: `world`, `base`, `gathering`,
 `loop` (End-to-End); Combat Polish 0.2: `knockback`, `lunge`, `combo_reach` (Knockback × Lunge ×
 Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Skalierung, Kamera-Ausgleich),
-`ui_layout` (alle Fenster bei allen UI-Skalierungen im Bild, Scrollen bei 200 %). Crafting Foundation 0.1:
+`ui_layout` (alle Fenster bei allen UI-Skalierungen im Bild, Fenster im Canvas bei 150 %). Crafting Foundation 0.1:
 `crafting_save`, `affix_pool`, `crafting_stats`, `crafting_ops`, `essences`, `sockets_quality`,
 `evolution`, `crafting_loop` (E2E). Class Foundation 0.2: `attack_speed`, `status_effects`, `talents`, `skills`, `warrior`,
 `arcanist`, `shadowrunner`, `prologue` (Trials, Wahl, Klassenquests, Migration v3→v4, Prolog-Map), `presets`,
@@ -52,8 +52,11 @@ Inventory & Haven Stash 1.0: `stash` (Kategorien, Identität und Crafting-Zustan
 und Preset-Items, schnelle Wiederholungen, Deposit All, Sort, Kapazität vor/nach Restaurierung, Save/Load, Migration
 v5→v6, beschädigter Save), `stash_ui` (Rechtsklick und Drag & Drop über echte Mausereignisse, Ablehnungsgründe,
 Restaurierung aus dem Lager, Save/Load mitten in der Nutzung, Inventar-Rechtsklick außerhalb bleibt Equip).
-`stash_playtest.gd` (Fenster, 720p/1080p/4K × 100/150/200 %, echter Cursor: Hover, Rechtsklick, Drag in beide Richtungen,
+`stash_playtest.gd` (Fenster, 720p/1080p/4K × 100/125/150 %, echter Cursor: Hover, Rechtsklick, Drag in beide Richtungen,
 Deposit All, Sort, Tabs, Mengenbilanz).
+UI Scaling Standard 1.1: Spieler-Skalierungen 75/100/125/150 % (`settings` prüft auch das Abbilden alter Werte:
+200 % → 150 %, 80 % → 75 %). Galerie und Playtests laufen mit 100/125/150 %; der Platzmangel-Fall der Talentseite
+wird über den direkt gesetzten Faktor 2,0 getestet.
 
 **Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
 `-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte

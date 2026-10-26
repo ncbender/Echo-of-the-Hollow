@@ -26,7 +26,7 @@ func test_defaults() -> void:
 	var settings := UserSettings.new()
 	check_eq(settings.ui_scale, 1.0, "100 % by default")
 	check_eq(settings.window_mode, UserSettings.WindowMode.WINDOWED, "windowed by default")
-	check_eq(UserSettings.UI_SCALES, [0.8, 1.0, 1.25, 1.5, 2.0] as Array[float], "offered scales")
+	check_eq(UserSettings.UI_SCALES, [0.75, 1.0, 1.25, 1.5] as Array[float], "offered scales (UI Scaling Standard 1.1)")
 
 
 func test_only_offered_scales_are_accepted() -> void:
@@ -38,9 +38,10 @@ func test_only_offered_scales_are_accepted() -> void:
 		check_eq(settings.ui_scale, value, "%.2f stored" % value)
 	check(not settings.set_ui_scale(3.0), "300 % refused")
 	check(not settings.set_ui_scale(0.5), "50 % refused")
-	check_eq(settings.ui_scale, 2.0, "refused values change nothing")
-	check_eq(changes[0], UserSettings.UI_SCALES.size(), "one change per new value (1.0 -> 0.8 -> 1.0 -> ...), none for refused ones")
-	settings.set_ui_scale(2.0)
+	check(not settings.set_ui_scale(2.0), "200 % is no longer offered")
+	check_eq(settings.ui_scale, 1.5, "refused values change nothing")
+	check_eq(changes[0], UserSettings.UI_SCALES.size(), "one change per new value (1.0 -> 0.75 -> 1.0 -> ...), none for refused ones")
+	settings.set_ui_scale(1.5)
 	check_eq(changes[0], UserSettings.UI_SCALES.size(), "same value again: no change")
 
 
@@ -69,7 +70,7 @@ func test_invalid_file_values_fall_back_to_defaults() -> void:
 	config.set_value(UserSettings.SECTION, "window_mode", "huge")
 	config.save(PATH)
 	var loaded := UserSettings.load_from(PATH)
-	check_eq(loaded.ui_scale, 1.0, "out-of-range scale ignored")
+	check_eq(loaded.ui_scale, 1.5, "a too large saved scale is limited to 150 %")
 	check_eq(loaded.window_mode, UserSettings.WindowMode.WINDOWED, "invalid mode ignored")
 	var garbage := FileAccess.open(PATH, FileAccess.WRITE)
 	garbage.store_string("not a config file [[[")
@@ -79,7 +80,7 @@ func test_invalid_file_values_fall_back_to_defaults() -> void:
 
 func test_reset_to_defaults() -> void:
 	var settings := UserSettings.new()
-	settings.set_ui_scale(2.0)
+	settings.set_ui_scale(1.5)
 	settings.set_window_mode(UserSettings.WindowMode.FULLSCREEN)
 	var changes := [0]
 	settings.changed.connect(func() -> void: changes[0] += 1)
@@ -114,3 +115,13 @@ func test_apply_sets_content_scale_and_camera_keeps_world_view() -> void:
 		visible_world[value] = root.get_visible_rect().size.x / camera.zoom.x
 		check_near(visible_world[value], 512.0, 0.01, "visible world width at %.2f" % value)
 	camera.free()
+
+
+func test_old_saved_scales_are_mapped_into_the_new_range() -> void:
+	DirAccess.make_dir_recursive_absolute(PATH.get_base_dir())
+	for entry: Array in [[2.0, 1.5], [1.75, 1.5], [0.8, 0.75], [1.25, 1.25], [0.5, 0.75]]:
+		var config := ConfigFile.new()
+		config.set_value(UserSettings.SECTION, "ui_scale", entry[0])
+		config.save(PATH)
+		check_eq(UserSettings.load_from(PATH).ui_scale, entry[1], "saved %.2f -> %.2f" % [entry[0], entry[1]])
+	check(UserSettings.UI_SCALES.max() <= UserSettings.MAX_UI_SCALE, "no offered scale above the maximum")

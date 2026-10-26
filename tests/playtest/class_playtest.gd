@@ -15,9 +15,9 @@ extends SceneTree
 ## Screenshots and log: tests/output/classes/.
 
 const OUTPUT := "res://tests/output/classes"
-const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1280, 720), 1.5], [Vector2i(1280, 720), 2.0], [Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5],
-	[Vector2i(1920, 1080), 2.0], [Vector2i(2560, 1440), 1.0],
-	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5], [Vector2i(3840, 2160), 2.0]]
+const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1280, 720), 1.5], [Vector2i(1280, 720), 1.25], [Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5],
+	[Vector2i(1920, 1080), 1.25], [Vector2i(2560, 1440), 1.0],
+	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5], [Vector2i(3840, 2160), 1.25]]
 
 var session: SessionState
 var map: GameMap

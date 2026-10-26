@@ -101,18 +101,18 @@ func test_windows_fit_at_every_ui_scale() -> void:
 	session.settings.reset_to_defaults()
 
 
-func test_inventory_scrolls_instead_of_overflowing_at_200_percent() -> void:
+func test_inventory_scrolls_instead_of_overflowing_at_150_percent() -> void:
 	var map := await _load_home()
 	if map == null:
 		return
-	session.settings.set_ui_scale(2.0)
+	session.settings.set_ui_scale(UserSettings.MAX_UI_SCALE)   # the smallest canvas a player can choose
 	map.hud.toggle_inventory()
 	await _settle()
 	var inventory := map.hud.inventory_panel
 	inventory.fit()
 	var canvas := get_tree().root.get_visible_rect().size
-	check(inventory.preferred_body_size().x > canvas.x, "content wider than the 200 %% canvas (%s)" % canvas)
-	check(inventory.size.x <= canvas.x - 2 * UiTheme.SCREEN_MARGIN + 0.5, "window clamped to the canvas")
+	check(inventory.size.x <= canvas.x - 2 * UiTheme.SCREEN_MARGIN + 0.5 and inventory.size.y <= canvas.y - 2 * UiTheme.SCREEN_MARGIN + 0.5,
+		"window clamped to the 150 %% canvas (%s): %s" % [canvas, inventory.size])
 	var scroll := inventory.find_children("*", "ScrollContainer", true, false)[0] as ScrollContainer
 	check(scroll.get_v_scroll_bar().max_value > scroll.size.y, "body scrolls vertically")
 	session.settings.reset_to_defaults()

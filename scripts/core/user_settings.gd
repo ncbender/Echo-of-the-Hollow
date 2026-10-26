@@ -14,7 +14,11 @@ signal changed
 enum WindowMode { WINDOWED, FULLSCREEN }
 
 const DEFAULT_PATH := "user://settings.cfg"
-const UI_SCALES: Array[float] = [0.8, 1.0, 1.25, 1.5, 2.0]
+## UI Scaling Standard 1.1: the selectable scales. 150 % is the maximum; older
+## settings files with a larger (e.g. 200 %) or an old 80 % value are mapped to the
+## nearest allowed one on load (the UI itself still copes with any factor).
+const UI_SCALES: Array[float] = [0.75, 1.0, 1.25, 1.5]
+const MAX_UI_SCALE := 1.5
 const DEFAULT_UI_SCALE := 1.0
 const DEFAULT_WINDOW_MODE := WindowMode.WINDOWED
 ## Default windowed size: this share of the usable screen, 16:9.
@@ -46,8 +50,8 @@ static func load_from(file_path: String) -> UserSettings:
 	if config.load(file_path) != OK:
 		return settings
 	var scale: Variant = config.get_value(SECTION, "ui_scale", DEFAULT_UI_SCALE)
-	if (scale is float or scale is int) and is_valid_ui_scale(float(scale)):
-		settings.ui_scale = _snap(float(scale))
+	if scale is float or scale is int:
+		settings.ui_scale = nearest_ui_scale(float(scale))   # 200 % -> 150 %, 80 % -> 75 %
 	var mode: Variant = config.get_value(SECTION, "window_mode", DEFAULT_WINDOW_MODE)
 	if mode is int and mode in WindowMode.values():
 		settings.window_mode = mode
@@ -58,6 +62,18 @@ static func load_from(file_path: String) -> UserSettings:
 	settings.show_save_indicator = bool(config.get_value(GAMEPLAY_SECTION, "show_save_indicator", true))
 	settings.reduce_motion = bool(config.get_value(SECTION, "reduce_motion", false))
 	return settings
+
+
+## The allowed scale closest to `value`, never above MAX_UI_SCALE (saved values
+## from older versions). Non-positive values give the default.
+static func nearest_ui_scale(value: float) -> float:
+	if value <= 0.0 or is_nan(value):
+		return DEFAULT_UI_SCALE
+	var best := DEFAULT_UI_SCALE
+	for allowed in UI_SCALES:
+		if absf(allowed - minf(value, MAX_UI_SCALE)) < absf(best - minf(value, MAX_UI_SCALE)):
+			best = allowed
+	return best
 
 
 static func is_valid_ui_scale(value: float) -> bool:

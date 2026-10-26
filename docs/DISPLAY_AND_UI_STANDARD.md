@@ -18,7 +18,7 @@ Stand: UI Foundation 0.1. Gilt für alle neuen Maps, HUD-Elemente und RPG-Fenste
 | Schicht | Mechanismus | Wirkung |
 |---|---|---|
 | Auflösung | `canvas_items`-Stretch | 1920×1080-Design wird auf jedes Fenster abgebildet (720p ×0,667, 1440p ×1,333, 4K ×2) |
-| UI-Skalierung (Spieler) | `Window.content_scale_factor` = 0,8 / 1,0 / 1,25 / 1,5 / 2,0 | UI-Fläche = 1920/f × 1080/f Design-Px; Anker und Container passen sich an |
+| UI-Skalierung (Spieler) | `Window.content_scale_factor` = 0,75 / 1,0 / 1,25 / 1,5 (UI Scaling Standard 1.1) | UI-Fläche = 1920/f × 1080/f Design-Px; Anker und Container passen sich an |
 | Spielwelt | `Camera2D.zoom = 3,75 / f` (`CameraShake.base_zoom`) | sichtbare Welt **immer 512×288 Welt-Px**, unabhängig von Auflösung und UI-Skalierung |
 
 - Eine Doppelskalierung auf 4K gibt es nicht. Der Stretch-Faktor (×2) kommt von der Auflösung, die
@@ -80,10 +80,13 @@ Stand: UI Foundation 0.1. Gilt für alle neuen Maps, HUD-Elemente und RPG-Fenste
   `preferred_body_size()` überschreiben.
 
 ## 6. Benutzereinstellung UI-Skalierung
-- `UserSettings` (`scripts/core/user_settings.gd`): `ui_scale` ∈ {0,8; 1,0; 1,25; 1,5; 2,0},
+- `UserSettings` (`scripts/core/user_settings.gd`): `ui_scale` ∈ {0,75; 1,0 (Standard); 1,25; 1,5 (Maximum)}
+  (UI Scaling Standard 1.1, Professions Foundation 1.0; 200 % ist keine Option mehr). Gespeicherte Werte
+  werden beim Laden auf den nächsten erlaubten Wert abgebildet: über 150 % → 150 %, alte 80 % → 75 %.
   `window_mode` (Fenster/Vollbild).
 - Gespeichert in **`user://settings.cfg`**, unabhängig von Spielständen (kein Feld im Save).
-  Ungültige oder beschädigte Werte fallen auf die Standards zurück.
+  Beschädigte Werte fallen auf die Standards zurück. Die UI selbst verkraftet weiter jeden Faktor
+  (Tests setzen 2,0 direkt, um den Platzmangel-Fall abzusichern).
 - Ort in der Laufzeit: `GameSession.settings` (kein neues Autoload). Sie werden beim Start geladen und
   angewendet und bei jeder Änderung gespeichert.
 - Skriptläufe (Tests, Playtests: MainLoop ist ein Skript) nutzen nur In-Memory-Standards und berühren
@@ -94,7 +97,7 @@ Stand: UI Foundation 0.1. Gilt für alle neuen Maps, HUD-Elemente und RPG-Fenste
 ## 7. Unterstützte Auflösungen (getestet, siehe UI_FOUNDATION_01_REPORT.md)
 | Auflösung | UI-Fläche bei 100 % | Welt-Px → Bildschirm-Px | Status |
 |---|---|---|---|
-| 1280×720 | 1920×1080 | 2,5 | ✅ (100–200 %; 80 % sehr klein, s. u.) |
+| 1280×720 | 1920×1080 | 2,5 | ✅ (75–150 %; 75 % sehr klein, s. u.) |
 | 1920×1080 | 1920×1080 | 3,75 | ✅ |
 | 2560×1440 | 1920×1080 | 5 | ✅ |
 | 3840×2160 | 1920×1080 | 7,5 | ✅ (Fenster randlos und echtes Vollbild) |
@@ -105,13 +108,11 @@ geprüft (UI-Galerie, `UI_UX_REDESIGN_01_REPORT.md`). Farben, Schriften und Komp
 `UI_DESIGN_SYSTEM.md`.
 
 ## 8. Bekannte Probleme / Grenzen
-- **80 % auf 720p:** Kleinschrift ist dort nur noch ~8 physische Px hoch, funktional, aber kaum lesbar.
-  80 % ist für 1440p/4K gedacht; bei 720p mindestens 100 % verwenden.
-- Bei 150 %/200 % nimmt die rechte HUD-Spalte einen großen Teil der Breite ein (bei 200 % auf jeder
-  Auflösung ~37 %).
+- **75 % auf 720p:** Kleinschrift ist dort nur noch ~7 physische Px hoch, funktional, aber kaum lesbar.
+  75 % ist für 1440p/4K gedacht; bei 720p mindestens 100 % verwenden.
+- Bei 150 % nimmt die rechte HUD-Spalte einen großen Teil der Breite ein.
 - Welt-Pixelmaßstab nicht ganzzahlig (s. 3). Ohne echte Sprites derzeit unsichtbar.
 - Das Debug-Overlay ist Entwicklerwerkzeug, seit dem Redesign standardmäßig aus (F12 schaltet es ein).
-- Bei 200 % steht die Skillleiste über dem Spielerrahmen, der Loot-Feed (max. 2 Zeilen) unten rechts
-  und der Hinweis unter dem Quest-Tracker. Überlappungsfrei geprüft, aber das HUD bedeckt dann etwa die
-  Hälfte der Spielfläche.
+- Das HUD-Layout für sehr schmale Canvases (Skillleiste über dem Spielerrahmen, Loot-Feed unten rechts,
+  Hinweis unter dem Tracker) bleibt erhalten, greift mit dem 150-%-Maximum aber nicht mehr im Spiel.
 - Exklusives Vollbild (Modus 4) wird nicht angeboten, nur randloses Vollbild.

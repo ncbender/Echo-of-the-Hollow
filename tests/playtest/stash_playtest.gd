@@ -1,16 +1,16 @@
 extends SceneTree
 ## Haven stash in a real window (NOT headless):
 ##   godot --path . -s res://tests/playtest/stash_playtest.gd
-## For 720p, 1080p and 4K at 100 / 150 / 200 % UI scale: open the stash at the
+## For 720p, 1080p and 4K at 100 / 125 / 150 % UI scale: open the stash at the
 ## ruined Old Storehouse, check the layout, then with the real mouse (OS cursor
 ## + input events): hover tooltip, right click store and take, drag & drop to
 ## the stash and back, "Deposit All Materials", "Sort", category tabs. After
 ## every step: no item duplicated or lost. Screenshots and log: tests/output/stash/.
 
 const OUTPUT := "res://tests/output/stash"
-const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1280, 720), 1.5], [Vector2i(1280, 720), 2.0],
-	[Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(1920, 1080), 2.0],
-	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5], [Vector2i(3840, 2160), 2.0]]
+const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1280, 720), 1.5], [Vector2i(1280, 720), 1.25],
+	[Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(1920, 1080), 1.25],
+	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5], [Vector2i(3840, 2160), 1.25]]
 
 var session: SessionState
 var map: GameMap

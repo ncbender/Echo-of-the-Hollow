@@ -73,17 +73,17 @@ func _scale_pass(resolution: Vector2i) -> void:
 		map.hud.toggle_inventory()
 		await _frames(4)
 		_check_layout(tag + " inventory")
-		if is_equal_approx(scale, 2.0) or is_equal_approx(scale, 0.8):
+		if is_equal_approx(scale, UserSettings.MAX_UI_SCALE) or is_equal_approx(scale, UserSettings.UI_SCALES[0]):
 			await _shot(tag, "inventory")
 		map.hud.toggle_options()
 		await _frames(4)
 		_check_layout(tag + " options")
-		if is_equal_approx(scale, 2.0):
+		if is_equal_approx(scale, UserSettings.MAX_UI_SCALE):
 			await _shot(tag, "options")
 		map.hud.close_windows()
 		await _frames(2)
 		_check_layout(tag + " HUD")
-		if is_equal_approx(scale, 2.0):
+		if is_equal_approx(scale, UserSettings.MAX_UI_SCALE):
 			await _shot(tag, "hud")
 		if is_equal_approx(scale, 1.0) or is_equal_approx(scale, 1.5):
 			await _open_build_panel(tag)
