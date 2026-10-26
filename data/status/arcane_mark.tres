@@ -13,3 +13,4 @@ stack_rule = 1
 damage_type = &"arcane"
 color = Color(0.72, 0.5, 1, 1)
 marker = 1
+consume_sound = &"arcane_detonate"

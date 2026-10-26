@@ -158,9 +158,12 @@ func _impact_fx(hurtbox: Hurtbox, hit: HitData) -> void:
 	var fx := skill.fx
 	if fx != null and fx.impact_style >= 0:
 		CombatFx.spawn(world, hurtbox.global_position, fx.impact_style, fx.impact_color, fx.impact_radius, 0.3, direction)
+	CombatAudio.play(player(), fx.impact_sound if fx != null and fx.impact_sound != &"" else &"hit_light", hurtbox.global_position)
 	for tag in hit.tags:
 		if String(tag).begins_with("consumed_"):
 			var status: StatusEffectDefinition = runtime.character.database.statuses.get(StringName(String(tag).trim_prefix("consumed_")))
 			var tint := status.color if status != null else Color.WHITE
+			if status != null:
+				CombatAudio.play(player(), status.consume_sound, hurtbox.global_position)
 			CombatFx.spawn(world, hurtbox.global_position, CombatFx.Style.STAR, tint, 22.0, 0.4)
 			CombatFx.spawn(world, hurtbox.global_position, CombatFx.Style.RING, tint, 26.0, 0.35)

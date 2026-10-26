@@ -20,11 +20,15 @@ const DEFAULT_WINDOW_MODE := WindowMode.WINDOWED
 ## Default windowed size: this share of the usable screen, 16:9.
 const WINDOW_SCREEN_SHARE := 0.8
 const SECTION := "display"
+const AUDIO_SECTION := "audio"
+const DEFAULT_SFX_VOLUME := 0.8
 
 ## Where save() writes; empty = in-memory only (tests, scripted playtests).
 var path: String = ""
 var ui_scale: float = DEFAULT_UI_SCALE
 var window_mode: WindowMode = DEFAULT_WINDOW_MODE
+## Combat/effects volume 0..1 (CombatAudio, "SFX" bus).
+var sfx_volume: float = DEFAULT_SFX_VOLUME
 
 
 ## Loads `file_path`; missing or invalid entries fall back to the defaults.
@@ -40,6 +44,9 @@ static func load_from(file_path: String) -> UserSettings:
 	var mode: Variant = config.get_value(SECTION, "window_mode", DEFAULT_WINDOW_MODE)
 	if mode is int and mode in WindowMode.values():
 		settings.window_mode = mode
+	var volume: Variant = config.get_value(AUDIO_SECTION, "sfx_volume", DEFAULT_SFX_VOLUME)
+	if volume is float or volume is int:
+		settings.sfx_volume = clampf(float(volume), 0.0, 1.0)
 	return settings
 
 
@@ -64,6 +71,7 @@ func save() -> Error:
 	var config := ConfigFile.new()
 	config.set_value(SECTION, "ui_scale", ui_scale)
 	config.set_value(SECTION, "window_mode", window_mode)
+	config.set_value(AUDIO_SECTION, "sfx_volume", sfx_volume)
 	return config.save(path)
 
 
@@ -77,6 +85,13 @@ func set_ui_scale(value: float) -> bool:
 	return true
 
 
+func set_sfx_volume(value: float) -> void:
+	value = clampf(value, 0.0, 1.0)
+	if not is_equal_approx(value, sfx_volume):
+		sfx_volume = value
+		changed.emit()
+
+
 func set_window_mode(mode: WindowMode) -> void:
 	if mode != window_mode:
 		window_mode = mode
@@ -88,15 +103,18 @@ func toggle_fullscreen() -> void:
 
 
 func reset_to_defaults() -> void:
-	if is_equal_approx(ui_scale, DEFAULT_UI_SCALE) and window_mode == DEFAULT_WINDOW_MODE:
+	if is_equal_approx(ui_scale, DEFAULT_UI_SCALE) and window_mode == DEFAULT_WINDOW_MODE \
+			and is_equal_approx(sfx_volume, DEFAULT_SFX_VOLUME):
 		return
 	ui_scale = DEFAULT_UI_SCALE
 	window_mode = DEFAULT_WINDOW_MODE
+	sfx_volume = DEFAULT_SFX_VOLUME
 	changed.emit()
 
 
 func apply_to(window: Window) -> void:
 	window.content_scale_factor = ui_scale
+	CombatAudio.set_volume(sfx_volume)
 	var fullscreen := window_mode == WindowMode.FULLSCREEN
 	if fullscreen and window.mode != Window.MODE_FULLSCREEN:
 		window.mode = Window.MODE_FULLSCREEN

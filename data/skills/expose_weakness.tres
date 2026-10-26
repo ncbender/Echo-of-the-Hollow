@@ -34,6 +34,8 @@ cast_radius = 0.0
 impact_style = 7
 impact_color = Color(1, 0.8, 0.4, 1)
 impact_radius = 10.0
+cast_sound = &"shadow_skill"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("5_g7tpg")

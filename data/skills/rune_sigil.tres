@@ -56,6 +56,8 @@ cast_color = Color(0.72, 0.5, 1, 1)
 impact_style = 7
 impact_color = Color(0.72, 0.5, 1, 1)
 impact_radius = 8.0
+cast_sound = &"arcane_cast"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("7_ybn3s")

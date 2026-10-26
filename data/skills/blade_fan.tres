@@ -31,6 +31,8 @@ cast_radius = 0.0
 impact_style = 2
 impact_color = Color(0.85, 0.85, 0.95, 1)
 impact_radius = 8.0
+cast_sound = &"shadow_skill"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("5_q5g1w")

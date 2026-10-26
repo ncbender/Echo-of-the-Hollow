@@ -37,6 +37,8 @@ enum StackRule {
 ## Rune = orbiting glyphs per stack (marks), Reticle = target brackets (weak
 ## points), Drops = bleeding, Frost = cold tint + crystals, Cloud = smoke puffs.
 @export_enum("Pip", "Rune", "Reticle", "Drops", "Frost", "Cloud") var marker: int = 0
+## Sound cue when a skill consumes this status (CombatAudio; empty = none).
+@export var consume_sound: StringName
 
 
 func validate() -> PackedStringArray:

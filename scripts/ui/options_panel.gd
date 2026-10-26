@@ -1,6 +1,6 @@
 class_name OptionsPanel
 extends UiWindow
-## Display options (key O): UI scale, window mode, reset to defaults.
+## Options (key O): UI scale, window mode, effects volume, reset to defaults.
 ## Edits the session's UserSettings; SessionState applies and saves them.
 
 var settings: UserSettings
@@ -9,6 +9,8 @@ var _scale_buttons: Dictionary = {}   # float -> Button
 var _windowed: Button
 var _fullscreen: Button
 var _info: Label
+var _volume: HSlider
+var _volume_label: Label
 
 
 func _ready() -> void:
@@ -35,6 +37,19 @@ func _ready() -> void:
 	modes.add_child(_windowed)
 	modes.add_child(_fullscreen)
 	body.add_child(modes)
+	body.add_child(UiTheme.label("Effects volume"))
+	var volume_row := HBoxContainer.new()
+	_volume = HSlider.new()
+	_volume.name = "EffectsVolume"
+	_volume.min_value = 0.0
+	_volume.max_value = 100.0
+	_volume.step = 5.0
+	_volume.custom_minimum_size = Vector2(320, 24)
+	_volume.value_changed.connect(func(value: float) -> void: settings.set_sfx_volume(value / 100.0))
+	volume_row.add_child(_volume)
+	_volume_label = UiTheme.label("", UiTheme.COLOR_DIM)
+	volume_row.add_child(_volume_label)
+	body.add_child(volume_row)
 	var reset := Button.new()
 	reset.text = "Reset to defaults"
 	reset.pressed.connect(_on_reset)
@@ -61,6 +76,8 @@ func refresh() -> void:
 		(_scale_buttons[value] as Button).set_pressed_no_signal(is_equal_approx(value, settings.ui_scale))
 	_windowed.set_pressed_no_signal(settings.window_mode == UserSettings.WindowMode.WINDOWED)
 	_fullscreen.set_pressed_no_signal(settings.window_mode == UserSettings.WindowMode.FULLSCREEN)
+	_volume.set_value_no_signal(settings.sfx_volume * 100.0)
+	_volume_label.text = "%d %%" % roundi(settings.sfx_volume * 100.0)
 	var window := get_window()
 	_info.text = "Window %d x %d px  -  UI canvas %d x %d  -  design 1920 x 1080\nSettings are stored per installation (%s), not in save games." % [
 		window.size.x, window.size.y, get_viewport_rect().size.x, get_viewport_rect().size.y,

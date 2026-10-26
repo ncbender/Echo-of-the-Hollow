@@ -36,6 +36,8 @@ cast_radius = 20.0
 impact_radius = 0.0
 aura = true
 aura_color = Color(0.75, 0.8, 1, 1)
+cast_sound = &"arcane_cast"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("4_ltygv")

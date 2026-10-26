@@ -33,6 +33,8 @@ cast_color = Color(1, 0.8, 0.4, 1)
 cast_radius = 10.0
 impact_style = 4
 impact_color = Color(1, 0.8, 0.4, 1)
+cast_sound = &"arcane_cast"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("5_crkv2")

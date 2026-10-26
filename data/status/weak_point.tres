@@ -10,3 +10,4 @@ description = "An exposed weak point: precise attacks deal more damage, Executio
 duration = 5.0
 color = Color(1, 0.85, 0.35, 1)
 marker = 2
+consume_sound = &"execution"

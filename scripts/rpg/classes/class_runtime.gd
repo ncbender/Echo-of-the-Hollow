@@ -161,6 +161,8 @@ func try_cast(slot: int) -> bool:
 			cast.damage_scale *= empowered[tag]
 			empowered.erase(tag)
 	var fx := skill.fx
+	if fx != null:
+		CombatAudio.play(player, fx.cast_sound)
 	if fx != null and fx.cast_style >= 0:
 		CombatFx.spawn(CombatFx.world_of(player), player.global_position + player.aim_direction * 6.0, fx.cast_style,
 				fx.cast_color, fx.cast_radius, 0.35, player.aim_direction)

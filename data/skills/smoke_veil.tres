@@ -55,6 +55,8 @@ cast_radius = 40.0
 impact_radius = 0.0
 aura = true
 aura_color = Color(0.55, 0.55, 0.62, 1)
+cast_sound = &"shadow_skill"
+impact_sound = &"hit_light"
 
 [resource]
 script = ExtResource("7_koif0")

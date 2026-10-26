@@ -31,6 +31,8 @@ cast_radius = 34.0
 impact_style = 2
 impact_color = Color(0.95, 0.3, 0.2, 1)
 impact_radius = 10.0
+cast_sound = &"warrior_skill"
+impact_sound = &"hit_heavy"
 
 [resource]
 script = ExtResource("5_bdxhn")

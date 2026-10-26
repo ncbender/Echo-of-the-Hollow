@@ -11,6 +11,7 @@ const COLOR_UNBLOCKABLE := Color(0.95, 0.35, 1.0)
 
 @onready var enemy: Enemy = get_parent()
 @onready var fx: HitReactionFx = $"../HitReactionFx"
+var _warned_attack: int = -1
 
 
 func _ready() -> void:
@@ -20,6 +21,7 @@ func _ready() -> void:
 
 
 func _on_poise_broken() -> void:
+	CombatAudio.play(enemy, &"poise_break")
 	var world := CombatFx.world_of(enemy)
 	CombatFx.spawn(world, enemy.global_position + Vector2(0, -4), CombatFx.Style.STAR, COLOR_STAGGER, 20.0, 0.4)
 	CombatFx.spawn(world, enemy.global_position, CombatFx.Style.RING, COLOR_STAGGER, 24.0, 0.35)
@@ -33,6 +35,12 @@ func _on_parried() -> void:
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+	# Unblockable attacks also sound different (once per attack, at telegraph start).
+	var combat := enemy.combat
+	if combat.state == CombatComponent.State.ATTACKING and combat.current_attack.is_unblockable() \
+			and combat.attack_instance != _warned_attack:
+		_warned_attack = combat.attack_instance
+		CombatAudio.play(enemy, &"unblockable_warn")
 
 
 func _draw() -> void:
