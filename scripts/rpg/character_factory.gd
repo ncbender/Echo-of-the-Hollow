@@ -14,4 +14,14 @@ static func create_new(database: GameDatabase) -> Character:
 		var unlocked := character.classes.unlocked_class_ids()
 		if not unlocked.is_empty():
 			character.classes.set_active(unlocked[0])
+	equip_starting_gear(character)
 	return character
+
+
+## Equips equippable starting items into still-empty slots of the active loadout.
+static func equip_starting_gear(character: Character) -> void:
+	for item in character.inventory.items():
+		var slot := character.equipment.auto_slot(item)
+		if slot >= 0 and character.equipment.get_item(slot) == null \
+				and character.equipment.can_equip(item.instance_id, slot) == "":
+			character.equipment.equip(item.instance_id, slot)

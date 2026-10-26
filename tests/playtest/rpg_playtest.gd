@@ -60,7 +60,7 @@ func _class_station_flow() -> void:
 	_click_button(hud.class_panel, "Activate")
 	await _ticks(2)
 	_check(session.character.classes.active_class_id == &"warrior", "warrior active")
-	_check(is_equal_approx(player.health.max_health, 120.0), "warrior health applied to player")
+	_check(is_equal_approx(player.health.max_health, session.character.get_stat(Stats.MAX_HEALTH)) and player.health.max_health > 120.0, "warrior health (class + inherited gear) applied to player")
 	await _shot("r02_warrior_active")
 	await _press(&"interact")
 	_check(not hud.class_panel.visible, "panel closed with G")
@@ -78,6 +78,34 @@ func _pickup_and_inventory_flow() -> void:
 	await _press(&"ui_inventory")
 	_check(hud.inventory_panel.visible, "inventory opened with I")
 	await _shot("r03_inventory")
+	await _equipment_flow()
+
+
+func _equipment_flow() -> void:
+	var character := session.character
+	var panel := hud.inventory_panel
+	var shield := _instance_of(&"oak_shield")
+	panel._select(shield)
+	_click_button(panel, "Equip")
+	_check(character.equipment.get_item(EquipSlot.Slot.OFF_HAND) != null, "warrior equipped the shield via UI")
+	var armor_with_shield := character.get_stat(Stats.ARMOR)
+	panel._select(_instance_of(&"steel_greatsword"))
+	_click_button(panel, "Equip")
+	await _ticks(3)
+	_check(character.equipment.get_item(EquipSlot.Slot.OFF_HAND) == null, "greatsword displaced the shield")
+	_check(character.inventory.has(shield), "shield still in the inventory")
+	_check(player.combat.weapon.id == &"two_handed_sword", "combat weapon is now the greatsword")
+	_check(character.get_stat(Stats.ARMOR) < armor_with_shield, "shield armor removed")
+	await _shot("r04_equipment")
+	await _press(&"ui_inventory")
+	_check(not panel.visible, "inventory closed with I")
+
+
+func _instance_of(item_id: StringName) -> String:
+	for item in session.character.inventory.items():
+		if item.definition_id == item_id:
+			return item.instance_id
+	return ""
 
 
 # --- helpers ---------------------------------------------------------------
@@ -109,7 +137,7 @@ func _press(action: StringName) -> void:
 
 func _click_button(container: Node, text: String) -> void:
 	for button in container.find_children("*", "Button", true, false):
-		if (button as Button).text == text and not (button as Button).disabled:
+		if (button as Button).text == text and not (button as Button).disabled and not button.is_queued_for_deletion():
 			(button as Button).pressed.emit()
 			_log("clicked '%s'" % text)
 			return

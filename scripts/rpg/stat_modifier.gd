@@ -18,7 +18,11 @@ static func make(stat_id: StringName, flat_value: float, percent_value: float = 
 func describe() -> String:
 	var parts: PackedStringArray = []
 	if flat != 0.0:
-		parts.append("%+g %s" % [flat, Stats.display_name(stat)])
+		parts.append("%s%s %s" % ["+" if flat > 0.0 else "", _number(flat), Stats.display_name(stat)])
 	if percent != 0.0:
-		parts.append("%+g%% %s" % [percent, Stats.display_name(stat)])
+		parts.append("%s%s%% %s" % ["+" if percent > 0.0 else "", _number(percent), Stats.display_name(stat)])
 	return ", ".join(parts)
+
+
+static func _number(value: float) -> String:
+	return str(roundi(value)) if is_equal_approx(value, roundf(value)) else "%.1f" % value

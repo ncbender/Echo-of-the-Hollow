@@ -18,6 +18,8 @@ var rewards: CombatRewardTracker
 var stat_modifier := CharacterStatModifier.new()
 ## Runtime pool of the active class's resource (null if the class has none).
 var resource_pool: ClassResourcePool
+## Weapon family waiting to be applied (combat must be idle to switch).
+var _pending_weapon: WeaponFamily
 
 var _connections: Array[Array] = []   # [Signal, Callable]
 
@@ -38,9 +40,12 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(character.classes.class_unlocked, _on_class_unlocked)
 	_track(player.combat.hit_landed, _on_player_hit_landed)
 	_track(player.hurtbox.hit_received, _on_player_hit_taken)
+	_track(character.equipment.changed, sync_weapon)
+	player.weapon_slot_handler = quick_equip_weapon
 	refresh_unlocks()
 	apply_stats()
 	_rebuild_resource_pool()
+	sync_weapon()
 
 
 func unbind() -> void:
@@ -54,6 +59,7 @@ func unbind() -> void:
 		rewards = null
 	if player != null and is_instance_valid(player):
 		player.combat.modifiers.erase(stat_modifier)
+		player.weapon_slot_handler = Callable()
 
 
 func is_bound() -> bool:
@@ -76,6 +82,32 @@ func apply_stats() -> void:
 	player.incoming_damage_multiplier = Stats.ARMOR_CONSTANT / (Stats.ARMOR_CONSTANT + armor)
 
 
+## The combat weapon follows the active main-hand item (fallback: rules).
+func sync_weapon() -> void:
+	var family_id := character.equipment.main_hand_family()
+	if family_id == &"":
+		family_id = character.database.rules.fallback_weapon_family
+	_pending_weapon = character.database.weapons.get(family_id)
+	_apply_pending_weapon()
+
+
+## Keys 1/2: equip the first inventory weapon of the sword / greatsword family
+## into the main hand of the active loadout.
+func quick_equip_weapon(slot: int) -> void:
+	var families: Array[StringName] = [&"one_handed_sword", &"two_handed_sword"]
+	if slot < 0 or slot >= families.size():
+		return
+	for item in character.inventory.items():
+		var definition := character.database.get_item(item.definition_id)
+		if definition.is_weapon() and definition.weapon_family_id == families[slot]:
+			if character.equipment.is_equipped(item.instance_id):
+				return
+			var error := character.equipment.equip(item.instance_id, EquipSlot.Slot.MAIN_HAND)
+			message.emit(error if error != "" else "Equipped %s" % definition.display_name)
+			return
+	message.emit("No weapon of that family in the inventory")
+
+
 func current_family_id() -> StringName:
 	return player.combat.weapon.id if player.combat.weapon != null else &""
 
@@ -85,8 +117,17 @@ func debug_add_mastery_xp(amount: int) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _pending_weapon != null:
+		_apply_pending_weapon()
 	if resource_pool != null:
 		resource_pool.step(delta)
+
+
+func _apply_pending_weapon() -> void:
+	if _pending_weapon == null:
+		return
+	if player.combat.weapon == _pending_weapon or player.set_weapon_family(_pending_weapon):
+		_pending_weapon = null
 
 
 func _rebuild_resource_pool() -> void:

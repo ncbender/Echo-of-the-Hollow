@@ -12,6 +12,9 @@ var character: Character
 func before_each() -> void:
 	db = GameDatabase.get_default()
 	character = CharacterFactory.create_new(db)
+	# Class stat tests use a character without gear (starting gear adds stats).
+	for slot: int in EquipSlot.Slot.values():
+		character.equipment.unequip(slot)
 
 
 func _bind() -> PlayerProgressionBridge:

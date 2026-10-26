@@ -22,6 +22,8 @@ extends Resource
 @export var character_base_stats: Array[StatModifier] = [StatModifier.make(Stats.MAX_HEALTH, 100.0)]
 ## Class that a new character starts with (the prologue later replaces this choice).
 @export var starting_class_id: StringName = &"basic_adventurer"
+## Combat weapon family used while no weapon is equipped (placeholder until unarmed combat exists).
+@export var fallback_weapon_family: StringName = &"one_handed_sword"
 
 @export_group("Inventory")
 @export var inventory_capacity: int = 40
