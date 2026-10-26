@@ -127,6 +127,16 @@ func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
 	if tag == "1080p_100":
 		var character := session.character
 		var rank := character.builds.get_build().rank(&"war_b_temper")
+		# Close the open tooltip first (it may lie over the button and take the click):
+		# move away, then back - the click follows before a new tooltip appears.
+		for spot: Vector2 in [Vector2(4, 4), at]:
+			Input.warp_mouse(spot)
+			var away := InputEventMouseMotion.new()
+			away.position = spot
+			away.global_position = spot
+			away.relative = Vector2(1, 0)
+			Input.parse_input_event(away)
+			await _frames(3)
 		for pressed: bool in [true, false]:
 			var click := InputEventMouseButton.new()
 			click.button_index = MOUSE_BUTTON_LEFT

@@ -56,6 +56,10 @@ func refresh() -> void:
 	_stats.text = "HP %d  Armor %d\nDmg %+d%%  Crit %d%%  Poise %+d%%" % [
 		roundi(stats[Stats.MAX_HEALTH]), roundi(stats[Stats.ARMOR]), roundi(stats[Stats.PHYSICAL_DAMAGE]),
 		roundi(stats[Stats.CRIT_CHANCE]), roundi(stats[Stats.POISE_DAMAGE])]
+	var guard := bridge.player.defense.profile() if bridge.player != null and bridge.player.defense != null else null
+	if guard != null:
+		_stats.text += "\nShift: %s (block -%d%%)%s" % [guard.display_name, roundi(guard.block_reduction * 100.0),
+			"  COUNTER!" if bridge.player.defense.counter_left > 0.0 else ""]
 
 
 func _fill(color: Color) -> StyleBoxFlat:
