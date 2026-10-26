@@ -23,6 +23,9 @@ var _group := ButtonGroup.new()
 func _init() -> void:
 	add_theme_constant_override(&"separation", 4)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# fixed width (room for the protruding active register): the column never
+	# changes size, so no register moves when another one becomes active
+	custom_minimum_size.x = WIDTH + ACTIVE_EXTRA
 
 
 func add_tab(id: String, text: String, tooltip: String = "") -> Button:

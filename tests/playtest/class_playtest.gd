@@ -15,8 +15,9 @@ extends SceneTree
 ## Screenshots and log: tests/output/classes/.
 
 const OUTPUT := "res://tests/output/classes"
-const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(2560, 1440), 1.0],
-	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5]]
+const PASSES: Array = [[Vector2i(1280, 720), 1.0], [Vector2i(1280, 720), 1.5], [Vector2i(1280, 720), 2.0], [Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5],
+	[Vector2i(1920, 1080), 2.0], [Vector2i(2560, 1440), 1.0],
+	[Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5], [Vector2i(3840, 2160), 2.0]]
 
 var session: SessionState
 var map: GameMap
@@ -88,6 +89,7 @@ func _ui_pass(resolution: Vector2i, scale: float) -> void:
 		if page_name == "Presets":
 			var activate := panel.find_children("Activate", "Button", true, false)
 			_check(not activate.is_empty() and activate[0].text.contains("free"), "%s preset costs shown" % tag)
+	await _tab_stability(tag, panel)   # after the page checks: its clicks and keys move the OS cursor
 	map.hud.close_windows()
 	map.hud.class_choice_panel.open(character, null)
 	await _frames(4)
@@ -144,6 +146,48 @@ func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
 	_check(character.builds.get_build().rank(&"war_b_temper") == mini(rank + 1, 3), "%s switching pages changed no talent" % tag)
 	Input.warp_mouse(Vector2(4, 4))
 	await _frames(2)
+
+
+## Book Tabs Stability Fix 1.3: two rounds over all five registers - first by
+## real mouse clicks, then by real keys (Down + Enter from register to register) -
+## and after every switch the registers and the window frame must be exactly
+## where they were; everything inside the viewport.
+func _tab_stability(tag: String, panel: ClassStationPanel) -> void:
+	var tabs := panel.find_child("BookTabs", true, false) as BookTabs
+	panel.show_page("Classes")
+	await _frames(4)
+	var reference := _tab_rects(panel, tabs)
+	var moved: PackedStringArray = []
+	for id: String in ClassStationPanel.PAGES:   # round 1: mouse
+		await _click(root.get_final_transform() * tabs.tab_button(id).get_global_rect().get_center(), MOUSE_BUTTON_LEFT)
+		await _frames(3)
+		_check(panel.page == id, "%s mouse opens %s" % [tag, id])
+		if _tab_rects(panel, tabs) != reference:
+			moved.append("mouse %s" % id)
+	Input.warp_mouse(Vector2(4, 4))
+	tabs.tab_button("Classes").grab_focus()   # round 2: keyboard from the first register
+	await _key(KEY_ENTER)
+	for index in ClassStationPanel.PAGES.size():
+		if index > 0:
+			await _key(KEY_DOWN)
+			await _key(KEY_ENTER)
+		var id: String = ClassStationPanel.PAGES[index]
+		_check(panel.page == id, "%s keyboard opens %s" % [tag, id])
+		if _tab_rects(panel, tabs) != reference:
+			moved.append("keys %s" % id)
+	_check(moved.is_empty(), "%s registers and frame never move (%s)" % [tag, ", ".join(moved)])
+	var view := panel.get_viewport_rect().grow(1.0)
+	_check(view.encloses(panel.get_global_rect()) and view.encloses(tabs.get_global_rect()), "%s frame and registers inside the viewport" % tag)
+	await _shot(tag, "book_tabs_%s" % panel.page.to_lower())
+
+
+## Window frame plus each register's vertical place and page-side edge.
+func _tab_rects(panel: ClassStationPanel, tabs: BookTabs) -> Array:
+	var result: Array = [panel.get_global_rect(), tabs.get_global_rect()]
+	for id: String in ClassStationPanel.PAGES:
+		var rect := tabs.tab_button(id).get_global_rect()
+		result.append(Vector2(rect.end.x, rect.position.y))
+	return result
 
 
 func _bring_into_view(panel: ClassStationPanel, button: Control) -> Vector2:

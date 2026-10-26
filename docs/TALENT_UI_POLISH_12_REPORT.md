@@ -148,3 +148,29 @@ Branch `dev/talent-ui-polish-12` (Basis `13cbaad`, Ende von `dev/ui-ux-polish-11
 | `96f6730` | A: BookTabs und UiWindow-Seitenregister |
 | `70b6570` | B–E: Kopf, Status, Talentseite, TalentTooltip, Layout, Tests |
 | (dieser Commit) | G: Doku, Screenshots, Bericht |
+
+---
+
+## Phase A2 – Book Tabs Stability Fix 1.3
+
+**Ursache des Springens:** Zwei Effekte wirkten zusammen.
+- **Das Klassenfenster passte sich dem Inhalt jeder Seite an.** `UiWindow.fit()` nimmt die bevorzugte Größe des Inhalts und zentriert das Fenster. Die Register hängen mit festem Versatz am linken Fensterrand und wanderten deshalb mit. Gemessen bei 1080p/100 % vor dem Fix: Classes → Talents, das Fenster wächst von 1196×625 auf 1763×1040, die Register springen um 284 px nach links und 207 px nach oben.
+- **Die Registerspalte war bei der ersten Platzierung 10 px schmaler.** Das herausragende aktive Register verbreiterte sie erst danach.
+
+**Fix:**
+- `ClassStationPanel.preferred_body_size` liefert für alle fünf Seiten denselben Rahmen: den vollen verfügbaren Platz abzüglich Register und Rand. Das Fenster ändert Größe und Lage beim Seitenwechsel nicht mehr. Kleinere Seiten stehen oben links in diesem Rahmen; größere scrollen innen (z. B. Classes bei 200 % waagerecht).
+- `BookTabs` hat eine feste Breite (Register plus Überstand). Das aktive Register ragt nur optisch nach links heraus, ohne Layout zu verschieben.
+- **Bei der Prüfung gefunden:** Bei 200 % setzte das Lernen eines Talents die Scrollposition des Baumbereichs auf 0 zurück, der Knoten sprang unter der Maus weg. Die Scrollposition bleibt jetzt beim Neuaufbau nach dem Lernen erhalten; ein Seitenwechsel beginnt oben.
+- Unverändert: Talente, Klassenwechselregeln, Save-Daten. Die Talentseite bei 1920×1080/100 % zeigt weiter alle drei Bäume mit allen sieben Tiers ohne Scrollen (Abnahmetest grün, zusätzlich im Stabilitätstest geprüft).
+
+**Tests:**
+
+| Test | Ergebnis |
+|---|---|
+| `class_ui::test_book_tabs_never_move_when_switching_pages`: alle fünf Seiten zweimal (Klick und Tastatur Enter) bei 100/150/200 %; Fenster-Rect, Spalten-Rect sowie Lage und Seitenkante jedes Registers exakt gleich; Rahmen und Register im Viewport; danach Talentseite komplett ohne Scrollen | grün. Mit zurückgenommenem Fix schlägt er genau mit dem beschriebenen Sprung fehl (gegengeprüft) |
+| `class_ui::test_learning_keeps_the_scrolled_tree_view_at_200_percent` | grün |
+| `class_playtest.gd`, echtes Fenster, 720p, 1080p und 4K × 100/150/200 % plus 1440p/100 %: zwei Runden über alle Register, erst echte Mausklicks, dann echte Tastenereignisse (Pfeil runter + Enter), Koordinatenvergleich nach jedem Wechsel | 400 Prüfungen, 0 Fehler, keine übersprungene Prüfung |
+| UI-Galerie Klassenseiten 720p/1080p/4K × 100/150/200 % | 243 Prüfungen, 0 Fehler |
+| Volle Suite / Startprüfung | 463 bestanden, 0 fehlgeschlagen / OK |
+
+**Bekannt:** Auf kleinen Seiten (Presets, Quests) bleibt bei 1080p/100 % unten Leerfläche, weil der Rahmen absichtlich fest ist. Bei 200 % scrollt die Klassenseite waagerecht innerhalb des Rahmens.

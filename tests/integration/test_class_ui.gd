@@ -305,3 +305,82 @@ func test_learning_by_mouse_keeps_layout_and_tooltip_and_survives_save_load() ->
 	check(restored != null and restored.builds.get_build(&"warrior").rank(&"war_b_temper") == 1, "talent rank survives save/load")
 	check_eq(restored.builds.get_build(&"warrior").talents, character.builds.get_build(&"warrior").talents, "whole build identical after load")
 	DirAccess.remove_absolute(path)
+
+
+## Book Tabs Stability Fix 1.3: the registers, the window frame and the gaps
+## never move while all five pages are cycled (twice, by click and by keyboard),
+## at 100 / 150 / 200 % UI scale; the frame stays inside the viewport.
+func _tab_snapshot(tabs: BookTabs) -> Dictionary:
+	var shot := {"window": panel.get_global_rect(), "column": tabs.get_global_rect()}
+	for id: String in ClassStationPanel.PAGES:
+		var button := tabs.tab_button(id)
+		# vertical place and the page-side (right) edge; the active one may only stick out to the left
+		shot[id] = Vector2(button.get_global_rect().end.x, button.get_global_rect().position.y)
+	return shot
+
+
+func test_book_tabs_never_move_when_switching_pages() -> void:
+	var station := await _at_station()
+	for scale: float in [1.0, 1.5, 2.0]:
+		session.settings.set_ui_scale(scale)
+		map.hud.open_class_panel(station)
+		panel.show_page("Classes")
+		for i in 4:
+			await get_tree().process_frame
+		var tabs := panel.find_child("BookTabs", true, false) as BookTabs
+		var first := _tab_snapshot(tabs)
+		var view := panel.get_viewport_rect().grow(1.0)
+		for round_index in 2:
+			for id: String in ClassStationPanel.PAGES:
+				if round_index == 0:
+					(tabs.tab_button(id) as Button).pressed.emit()   # mouse click path
+				else:
+					tabs.tab_button(id).grab_focus()   # keyboard: focus + Enter
+					var enter := InputEventKey.new()
+					enter.keycode = KEY_ENTER
+					enter.physical_keycode = KEY_ENTER
+					enter.pressed = true
+					get_viewport().push_input(enter)
+					enter = enter.duplicate()
+					enter.pressed = false
+					get_viewport().push_input(enter)
+				for i in 3:
+					await get_tree().process_frame
+				check_eq(panel.page, id, "%d %%: %s opened" % [roundi(scale * 100), id])
+				var now := _tab_snapshot(tabs)
+				for key: Variant in first:
+					check(now[key] == first[key], "%d %% %s: %s unchanged (%s -> %s)" % [roundi(scale * 100), id, key, first[key], now[key]])
+				check(view.encloses(panel.get_global_rect()) and view.encloses(tabs.get_global_rect()), "%d %% %s: frame and registers inside the viewport" % [roundi(scale * 100), id])
+		map.hud.close_windows()
+	session.settings.set_ui_scale(1.0)
+	# the talent page still shows everything at 1920x1080 / 100 %
+	map.hud.open_class_panel(station)
+	panel.show_page("Talents")
+	for i in 4:
+		await get_tree().process_frame
+	var scroll := panel.find_child("TreeScroll", true, false) as ScrollContainer
+	check(not scroll.get_v_scroll_bar().visible and not scroll.get_h_scroll_bar().visible and not panel.talent_layout.compact, "talents still complete without scrolling at 100 %")
+
+
+func test_learning_keeps_the_scrolled_tree_view_at_200_percent() -> void:
+	session.settings.set_ui_scale(2.0)
+	map.hud.toggle_character()
+	for i in 4:
+		await get_tree().process_frame
+	var scroll := panel.find_child("TreeScroll", true, false) as ScrollContainer
+	scroll.scroll_vertical = 60
+	await get_tree().process_frame
+	var before := scroll.scroll_vertical
+	check(before > 0, "the tree area scrolls at 200 %")
+	panel.tree_view(&"war_berserker").button_for(&"war_b_temper").pressed.emit()
+	for i in 4:
+		await get_tree().process_frame
+	scroll = panel.find_child("TreeScroll", true, false) as ScrollContainer
+	check_eq(character.builds.get_build().rank(&"war_b_temper"), 1, "learned")
+	check_eq(scroll.scroll_vertical, before, "same scroll position after learning (the node stays under the mouse)")
+	panel.show_page("Skills")
+	panel.show_page("Talents")
+	for i in 3:
+		await get_tree().process_frame
+	check_eq((panel.find_child("TreeScroll", true, false) as ScrollContainer).scroll_vertical, 0, "a page switch starts at the top")
+	session.settings.set_ui_scale(1.0)

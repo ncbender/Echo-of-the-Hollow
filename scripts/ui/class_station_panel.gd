@@ -30,6 +30,8 @@ var _auto_focusing: bool = false
 var _tree_room: Vector2
 ## Node whose tooltip was open before a rebuild (shown again afterwards).
 var _keep_tooltip: StringName
+## Scroll position of the tree area kept over a rebuild (-1, -1 = none).
+var _keep_scroll := Vector2i(-1, -1)
 
 var _tabs: BookTabs
 var _summary: HFlowContainer
@@ -96,6 +98,7 @@ func _process(_delta: float) -> void:
 
 func show_page(name: String) -> void:
 	_keep_tooltip = &""   # a tooltip only returns after learning, never after switching pages
+	_keep_scroll = Vector2i(-1, -1)   # a new page starts at the top
 	page = name
 	_tabs.select(name)
 	rebuild()
@@ -105,6 +108,8 @@ func show_page(name: String) -> void:
 func rebuild() -> void:
 	if character == null:
 		return
+	if _tree_scroll != null and is_instance_valid(_tree_scroll):
+		_keep_scroll = Vector2i(_tree_scroll.scroll_horizontal, _tree_scroll.scroll_vertical)
 	if _keep_tooltip == &"" and talent_tooltip.visible:
 		_keep_tooltip = talent_tooltip.node_id   # before the old nodes leave (their exit hides it)
 	_refresh_summary()
@@ -545,6 +550,8 @@ func layout_trees() -> void:
 	var bar := 14.0
 	_tree_scroll.custom_minimum_size = Vector2(minf(content.x + (bar if scroll_y else 0.0), room.x), minf(content.y + (bar if scroll_x else 0.0), maxf(room.y, 160.0)))
 	queue_fit()
+	if _keep_scroll != Vector2i(-1, -1):
+		_restore_tree_scroll.call_deferred()   # after learning: same view as before (200 %)
 	# nodes may have moved: keep / bring back the tooltip of the node under the mouse
 	if talent_tooltip.visible:
 		talent_tooltip._place.call_deferred()
@@ -822,17 +829,12 @@ func _quest_row(quest: ClassQuestDefinition) -> Control:
 	return card
 
 
-## Flow rows (talent trees, class cards) as wide as all their children side by
-## side; the window shrinks and stacks them only when the canvas is narrower.
+## One fixed frame for all five pages (Book Tabs Stability Fix 1.3): the window
+## always takes the whole room the canvas offers (minus the registers), so it
+## never resizes or moves when the page changes and the registers stay put.
+## Smaller pages sit inside it; taller ones scroll inside the body.
 func preferred_body_size() -> Vector2:
-	var wanted := body.get_combined_minimum_size()
-	for flow: HFlowContainer in _content.find_children("*", "HFlowContainer", false, false):
-		var width := 0.0
-		for child: Control in flow.get_children():
-			width += child.get_combined_minimum_size().x
-		width += flow.get_theme_constant(&"h_separation") * maxi(0, flow.get_child_count() - 1)
-		wanted.x = maxf(wanted.x, width)
-	return wanted
+	return (max_window_size() - _chrome_size()).max(Vector2.ZERO)
 
 
 func _relayout_trees() -> void:
@@ -854,3 +856,13 @@ func _place_status() -> void:
 	_status.size = Vector2(maxf(0.0, close.global_position.x - global_position.x - padding * 2.0), close.size.y)
 	_status.global_position = Vector2(global_position.x + padding, close.global_position.y)
 	_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+
+func _restore_tree_scroll() -> void:
+	if _tree_scroll == null or not is_instance_valid(_tree_scroll) or _keep_scroll == Vector2i(-1, -1):
+		return
+	_tree_scroll.scroll_horizontal = _keep_scroll.x
+	_tree_scroll.scroll_vertical = _keep_scroll.y
+	_keep_scroll = Vector2i(-1, -1)
+	if talent_tooltip.visible:
+		talent_tooltip._place.call_deferred()
