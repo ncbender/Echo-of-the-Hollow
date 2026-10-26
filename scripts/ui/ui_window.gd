@@ -23,6 +23,10 @@ var _title_rule: HSeparator
 var _scroll: ScrollContainer
 var _close: Button
 var _fit_queued: bool = false
+## Optional page registers outside the left edge (BookTabs); see set_side_tabs.
+var side_tabs: BookTabs
+## Distance of the first register from the window top (below the title).
+const SIDE_TABS_TOP := 72.0
 
 
 func _init() -> void:
@@ -115,7 +119,10 @@ func preferred_body_size() -> Vector2:
 
 ## Largest size the window may take (visible canvas minus margins).
 func max_window_size() -> Vector2:
-	return get_viewport_rect().size - Vector2.ONE * (2.0 * UiTheme.SCREEN_MARGIN)
+	var limit := get_viewport_rect().size - Vector2.ONE * (2.0 * UiTheme.SCREEN_MARGIN)
+	if side_tabs != null:
+		limit.x -= side_tabs.reserved_width()   # the registers stay on screen too
+	return limit
 
 
 func queue_fit() -> void:
@@ -141,7 +148,9 @@ func fit() -> void:
 	_scroll.custom_minimum_size = scroll_size.max(min_body).floor()
 	reset_size()
 	size = size.min(limit)
-	position = ((get_viewport_rect().size - size) * 0.5).floor()
+	var reserved := side_tabs.reserved_width() if side_tabs != null else 0.0
+	position = Vector2((get_viewport_rect().size.x - size.x + reserved) * 0.5, (get_viewport_rect().size.y - size.y) * 0.5).floor()
+	_place_side_tabs()
 
 
 func _fit() -> void:
@@ -171,3 +180,19 @@ func _draw() -> void:
 		draw_line(corner, corner + Vector2(length * sx, 0), color, 2.0)
 		draw_line(corner, corner + Vector2(0, length * sy), color, 2.0)
 		draw_rect(Rect2(corner + Vector2(3 * sx - 1.5, 3 * sy - 1.5), Vector2(3, 3)), Color(UiTheme.BRONZE, 0.7))
+
+
+## Puts `tabs` outside the left edge of the window (book registers). They are a
+## top-level child: not laid out by the panel, but shown/hidden with it.
+func set_side_tabs(tabs: BookTabs) -> void:
+	side_tabs = tabs
+	tabs.top_level = true
+	add_child(tabs)
+	queue_fit()
+
+
+func _place_side_tabs() -> void:
+	if side_tabs == null:
+		return
+	side_tabs.reset_size()
+	side_tabs.global_position = global_position + Vector2(-side_tabs.size.x + BookTabs.OVERLAP, SIDE_TABS_TOP)
