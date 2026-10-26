@@ -11,7 +11,7 @@ Design und Regeln: `docs/PROFESSIONS.md`.
 | `cd464a1` | B – UI Scaling Standard 1.1 (75/100/125/150 %, 200 % entfernt, alte Werte → 150 %) |
 | `e3239ca` | C–E – Datenmodell, `ProfessionService`, Save v7, Sammeln, Daten, Service-Tests |
 | `c815c8f` | F–H – Artisan Quarter, Werkbänke, Sammelknoten, Berufefenster, UI-Tests, Galerie |
-| (Doku-Commit nach diesem Bericht) | J–K – Dokumentation, Bericht |
+| `3bdad7f` | J–K – Dokumentation, Bericht |
 
 ## A – Bestandsaufnahme (genutzt statt neu gebaut)
 - **Items:** `Inventory.count`, `remove_quantity`, `room_for`, `add_item`. Ergebnisse sind normale Iteminstanzen;
