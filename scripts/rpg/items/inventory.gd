@@ -256,3 +256,10 @@ func from_array(data: Array, warnings: PackedStringArray, orphans: Array) -> voi
 func _insert(item: ItemInstance) -> void:
 	_items.append(item)
 	_by_id[item.instance_id] = item
+
+
+## Reorders the items (presentation, e.g. "Sort" in the stash). Instances,
+## ids and quantities are untouched.
+func sort_items(compare: Callable) -> void:
+	_items.sort_custom(compare)
+	changed.emit()

@@ -16,6 +16,7 @@ static func _steps() -> Dictionary:
 		2: _v2_to_v3,
 		3: _v3_to_v4,
 		4: _v4_to_v5,
+		5: _v5_to_v6,
 	}
 
 
@@ -165,4 +166,14 @@ static func _v4_to_v5(data: Dictionary) -> Dictionary:
 	elif not quests.has("the_whispering_stone"):
 		quests["the_whispering_stone"] = {"state": "active", "step": 0, "progress": {}}
 	data["quests"] = quests
+	return data
+
+
+## v6 (Inventory & Haven Stash 1.0): the Haven stash - an empty one for every
+## older save. Inventory, loadouts, quests, classes and talents stay untouched.
+static func _v5_to_v6(data: Dictionary) -> Dictionary:
+	if not data.get("stash") is Dictionary:
+		data["stash"] = {"items": []}
+	elif not (data["stash"] as Dictionary).get("items") is Array:
+		data["stash"]["items"] = []
 	return data

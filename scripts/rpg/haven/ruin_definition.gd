@@ -22,6 +22,8 @@ extends Resource
 @export var completion_dialogue: DialogueDefinition
 ## Footprint of the ruin graphics (world px).
 @export var footprint: Vector2 = Vector2(60, 40)
+## The Haven stash is used here - already while ruined (StashService).
+@export var stash_access: bool = false
 
 
 func restored_flag() -> StringName:

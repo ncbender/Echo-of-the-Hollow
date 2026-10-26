@@ -50,6 +50,13 @@ extends Resource
 
 @export_group("Inventory")
 @export var inventory_capacity: int = 40
+## Haven stash (StashService, docs/STASH.md): slots of the Equipment Chest and the
+## Collection Vault; the Material Vault has no slot limit. A restored stash ruin
+## (Old Storehouse) adds the bonus - capacity only grows, nothing is ever pushed out.
+@export var stash_equipment_slots: int = 60
+@export var stash_collection_slots: int = 40
+@export var stash_restored_equipment_bonus: int = 60
+@export var stash_restored_collection_bonus: int = 40
 ## Items every new character starts with (ids from data/items).
 @export var starting_items: Array[ItemCost] = []
 

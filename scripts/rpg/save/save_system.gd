@@ -17,7 +17,7 @@ extends RefCounted
 ## intact; load() falls back to the .bak automatically. Nothing else is deleted.
 
 const FORMAT := "echoes_of_the_hollow_save"
-const VERSION := 5
+const VERSION := 6
 const TEMP_SUFFIX := ".tmp"
 const BACKUP_SUFFIX := ".bak"
 

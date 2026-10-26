@@ -13,6 +13,8 @@ var database: GameDatabase
 var mastery: WeaponMastery
 var classes: CharacterClasses
 var inventory: Inventory
+## Haven stash: the second owning container (StashService, docs/STASH.md).
+var stash: Inventory
 var equipment: CharacterEquipment
 var world: WorldState
 ## Talents, skill slots, mods and presets per class (docs/TALENT_SYSTEM.md).
@@ -40,6 +42,7 @@ func _init(db: GameDatabase, character_id: String = "") -> void:
 	mastery = WeaponMastery.new(db)
 	classes = CharacterClasses.new(db)
 	inventory = Inventory.new(db, db.rules.inventory_capacity)
+	stash = Inventory.new(db, StashService.CONTAINER_CAPACITY)
 	equipment = CharacterEquipment.new(db, inventory, classes)
 	world = WorldState.new()
 	builds = ClassBuilds.new(db, classes)
@@ -139,6 +142,7 @@ func to_dict() -> Dictionary:
 		"classes": classes.to_dict(),
 		"mastery": mastery.to_dict(),
 		"inventory": inventory.to_array(),
+		"stash": {"items": stash.to_array()},
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
 		"class_builds": builds.to_dict(),
@@ -163,6 +167,7 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 	var orphans := []
 	var items: Variant = data.get("inventory", [])
 	character.inventory.from_array(items if items is Array else [], warnings, orphans)
+	character._load_stash(_dict(data, "stash"), warnings, orphans)
 	var previous: Variant = data.get("orphaned_items", [])
 	if previous is Array:
 		orphans.append_array(previous)
@@ -244,3 +249,18 @@ func _on_class_unlocked(class_id: StringName) -> void:
 
 func _on_build_changed(_class_id: StringName) -> void:
 	invalidate_stats()
+
+
+## Stash items from a save. An instance id that is already in the bag (a
+## damaged save) is not loaded twice: the stash copy is kept as an orphan.
+func _load_stash(data: Dictionary, warnings: PackedStringArray, orphans: Array) -> void:
+	var entries: Variant = data.get("items", [])
+	var unique: Array = []
+	for entry: Variant in entries if entries is Array else []:
+		var instance_id := str((entry as Dictionary).get("id", "")) if entry is Dictionary else ""
+		if instance_id != "" and inventory.has(instance_id):
+			warnings.append("stash item %s is also in the bag; kept the bag copy, the other as orphan" % instance_id)
+			orphans.append(entry)
+		else:
+			unique.append(entry)
+	stash.from_array(unique, warnings, orphans)

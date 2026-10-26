@@ -122,7 +122,9 @@ static func validate(character: Character, class_id: StringName, preset: Diction
 		for slot_key: String in equipment:
 			var instance_id := str(equipment[slot_key])
 			var slot := EquipSlot.from_key(slot_key)
-			if not character.inventory.has(instance_id):
+			if character.stash.has(instance_id):
+				errors.append("Item for %s is in the Haven stash - take it out to use this preset." % EquipSlot.display_name(slot) if slot >= 0 else "Item is in the Haven stash.")
+			elif not character.inventory.has(instance_id):
 				errors.append("Missing item for %s (it is no longer in the inventory)." % EquipSlot.display_name(slot) if slot >= 0 else "Missing item.")
 			elif slot < 0 or character.equipment.can_equip(instance_id, slot, class_id) != "":
 				errors.append("Item in %s cannot be equipped." % slot_key)

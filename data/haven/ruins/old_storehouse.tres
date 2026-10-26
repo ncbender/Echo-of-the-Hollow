@@ -28,3 +28,4 @@ condition = SubResource("C_after_smithy")
 costs = Array[ExtResource("2_cost")]([SubResource("Cost_timber"), SubResource("Cost_stone")])
 building_id = &"storage"
 footprint = Vector2(60, 40)
+stash_access = true

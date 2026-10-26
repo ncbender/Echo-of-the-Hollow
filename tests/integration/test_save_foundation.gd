@@ -213,7 +213,7 @@ func test_migration_v4_to_v5() -> void:
 	var warnings: PackedStringArray = []
 	var character := Character.from_dict(data, session.database, warnings)
 	check(character.world.restoration.has(&"old_storehouse"), "restoration restored into the world state")
-	check_eq(SaveSystem.VERSION, 5, "save version 5")
+	check(SaveSystem.VERSION >= 5, "save version 5 or later (v6: Haven stash)")
 
 
 func test_save_indicator_states() -> void:
