@@ -136,6 +136,16 @@ func _await_map() -> void:
 func _check_layout(label: String) -> void:
 	var controls: Array[Node] = map.hud.find_children("*", "Control", true, false)
 	_check_list(controls, label)
+	# HUD elements never cover each other
+	var hud := map.hud
+	var parts: Array[Control] = [hud.player_frame, hud.skill_bar, hud.objectives, hud.target_frame, hud.loot_feed, hud.save_indicator]
+	var overlaps: PackedStringArray = []
+	for a in parts.size():
+		for b in range(a + 1, parts.size()):
+			if parts[a].is_visible_in_tree() and parts[b].is_visible_in_tree() \
+					and parts[a].get_global_rect().grow(-1.0).intersects(parts[b].get_global_rect().grow(-1.0)):
+				overlaps.append("%s %s x %s %s" % [parts[a].name, parts[a].get_global_rect(), parts[b].name, parts[b].get_global_rect()])
+	_check(overlaps.is_empty(), "%s %s HUD without overlaps (%s)" % [tag, label, "; ".join(overlaps)])
 
 
 func _check_controls(node: Node, label: String) -> void:

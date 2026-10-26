@@ -154,7 +154,7 @@ func _haven() -> void:
 	await _press(&"interact")
 	await _shot("p09_smithy_ruin")
 	_click_button(map.hud.restoration_panel, "Restore")
-	await _ticks(2)
+	await _ticks(14)   # the new dialogue ignores presses for 0.18 s
 	_check(map.hud.dialogue_panel.current_text() == "This place isn't dead. Just buried under years of neglect.", "Mara: This place isn't dead ...")
 	for i in 3:
 		await _press(&"interact")

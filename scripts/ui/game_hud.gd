@@ -51,6 +51,7 @@ var _prompt_box: HBoxContainer
 var _prompt_key: Label
 var _prompt: Label
 var _windows: Array[UiWindow] = []
+var _bottom: VBoxContainer
 
 
 func _ready() -> void:
@@ -72,6 +73,7 @@ func _ready() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(top)
 	target_frame = TargetFrame.new()
+	target_frame.name = "TargetFrame"
 	target_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	top.add_child(target_frame)
 	hint_panel = PanelContainer.new()
@@ -86,6 +88,7 @@ func _ready() -> void:
 
 	# top right: quest tracker
 	objectives = ObjectivePanel.new()
+	objectives.name = "QuestTracker"
 	objectives.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	objectives.offset_left = -UiTheme.HUD_COLUMN_WIDTH - margin
 	objectives.offset_right = -margin
@@ -95,6 +98,7 @@ func _ready() -> void:
 
 	# bottom left: player frame
 	player_frame = PlayerFrame.new()
+	player_frame.name = "PlayerFrame"
 	player_frame.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	player_frame.offset_left = margin
 	player_frame.offset_bottom = -margin
@@ -103,6 +107,7 @@ func _ready() -> void:
 
 	# bottom centre: charge, prompt, skills, messages
 	var bottom := VBoxContainer.new()
+	_bottom = bottom
 	bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bottom.offset_left = -UiTheme.FEED_WIDTH * 0.5
 	bottom.offset_right = UiTheme.FEED_WIDTH * 0.5
@@ -128,23 +133,27 @@ func _ready() -> void:
 	_prompt_box.add_child(_prompt)
 	bottom.add_child(_prompt_box)
 	skill_bar = SkillBar.new()
+	skill_bar.name = "SkillBar"
+	skill_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER   # four slots wide, not the whole column
 	bottom.add_child(skill_bar)
 
 	# bottom right: loot feed above the save indicator
 	loot_feed = LootFeed.new()
+	loot_feed.name = "LootFeed"
 	loot_feed.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	loot_feed.offset_left = -380
 	loot_feed.offset_right = -margin
-	loot_feed.offset_bottom = -margin - 60
+	loot_feed.offset_bottom = -margin - 160   # above the skill bar and the save indicator
 	loot_feed.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	loot_feed.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_root.add_child(loot_feed)
 	save_indicator = SaveIndicator.new()
+	save_indicator.name = "SaveIndicator"
 	save_indicator.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	save_indicator.offset_left = -260
-	save_indicator.offset_top = -64
+	save_indicator.offset_top = -margin - 150
 	save_indicator.offset_right = -margin
-	save_indicator.offset_bottom = -margin
+	save_indicator.offset_bottom = -margin - 102   # above the skill bar height (the centre column may move right)
 	save_indicator.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	save_indicator.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_root.add_child(save_indicator)
@@ -390,6 +399,7 @@ func _exit_tree() -> void:
 
 
 func _process(delta: float) -> void:
+	_layout_bottom()
 	var target := Interactable.find_active(get_tree())
 	var prompt := target.prompt if target != null and not is_window_open() else ""
 	_prompt.text = prompt
@@ -451,3 +461,22 @@ func _open_options_from_pause() -> void:
 	pause_menu.hide()
 	if settings != null:
 		options_panel.open(settings)
+
+
+## On narrow canvases (high UI scale) the centre column moves right just enough
+## not to overlap the player frame; if the skill bar does not fit beside it at
+## all, the column stays centred above the frame. Never wider than the canvas.
+func _layout_bottom() -> void:
+	var canvas := _root.size.x
+	var margin := float(UiTheme.SCREEN_MARGIN)
+	var frame_right := margin + player_frame.size.x + UiTheme.GAP * 2
+	var skills_half := skill_bar.get_combined_minimum_size().x * 0.5
+	var shift := maxf(0.0, frame_right + skills_half - canvas * 0.5)
+	var lift := 0.0
+	if canvas * 0.5 + shift + skills_half > canvas - margin:
+		shift = 0.0
+		lift = player_frame.size.y + UiTheme.GAP
+	var half := minf(UiTheme.FEED_WIDTH, canvas - margin * 2.0 - shift * 2.0) * 0.5
+	_bottom.offset_left = -half + shift
+	_bottom.offset_right = half + shift
+	_bottom.offset_bottom = -margin - lift

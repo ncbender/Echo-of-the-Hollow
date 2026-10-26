@@ -66,7 +66,9 @@ func _process(delta: float) -> void:
 	visible = true
 	var config := shown.config
 	var is_boss := config.rank == 2
-	custom_minimum_size.x = BOSS_WIDTH if is_boss else WIDTH
+	# never wider than the room between the side columns (quest tracker)
+	var room := get_viewport_rect().size.x - 2.0 * (UiTheme.HUD_COLUMN_WIDTH + UiTheme.SCREEN_MARGIN * 2)
+	custom_minimum_size.x = minf(BOSS_WIDTH if is_boss else WIDTH, room)
 	_name.text = config.display_name
 	if is_boss:
 		_name.add_theme_font_override(&"font", UiTheme.display_font())
