@@ -11,6 +11,8 @@ extends HBoxContainer
 const GAP := 10.0
 ## Equipped items compared at most (two rings, main + off hand).
 const MAX_COMPARE := 2
+## Text width of the compact three-column card (small canvases).
+const COMPACT_WIDTH := 270.0
 
 var character: Character
 var item: ItemInstance
@@ -66,7 +68,7 @@ func compared_items() -> Array[ItemInstance]:
 	return result
 
 
-func _card(target: ItemInstance, header: String) -> PanelContainer:
+func _card(target: ItemInstance, header: String, compact: bool = false, width: float = UiTheme.TOOLTIP_MAX_WIDTH - 24) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = &"WindowPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -78,43 +80,49 @@ func _card(target: ItemInstance, header: String) -> PanelContainer:
 		var caption := UiTheme.styled(header, &"CaptionLabel")
 		caption.add_theme_color_override(&"font_color", UiTheme.RESONANCE)
 		box.add_child(caption)
-	ItemDescriber.build(box, character, target, UiTheme.TOOLTIP_MAX_WIDTH - 24)
+	ItemDescriber.build(box, character, target, width, true, compact)
 	for node in panel.find_children("*", "Control", true, false):
 		(node as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return panel
 
 
-## Moves the second half of a card's lines (from the section heading nearest to
-## the middle) into a second column - same order, read left then right.
-func _split_columns(card: PanelContainer) -> void:
+## Moves a card's lines into `count` columns of similar height - same order,
+## read left to right; a section heading always stays with its first line.
+func _split_columns(card: PanelContainer, count: int = 2) -> void:
 	var box := card.get_child(0) as VBoxContainer
-	if box == null or box.get_child_count() < 4:
+	if box == null or box.get_child_count() < count * 2:
 		return
+	var separation := float(box.get_theme_constant(&"separation"))
 	var total := box.get_combined_minimum_size().y
-	var split := -1
+	var starts: Array[int] = []
 	var running := 0.0
-	var best := INF
 	for index in box.get_child_count():
-		var child := box.get_child(index) as Control
-		if child is HBoxContainer and index > 2 and absf(running - total * 0.5) < best:   # a section heading
-			best = absf(running - total * 0.5)
-			split = index
-		running += child.get_combined_minimum_size().y + box.get_theme_constant(&"separation")
-	if split < 0:
+		var target := total * (starts.size() + 1) / count
+		if starts.size() < count - 1 and index > 2 and running >= target:
+			var start := index - 1 if box.get_child(index - 1) is HBoxContainer else index   # keep headings with their line
+			if starts.is_empty() or start > starts[starts.size() - 1]:
+				starts.append(start)
+		running += (box.get_child(index) as Control).get_combined_minimum_size().y + separation
+	if starts.is_empty():
 		return
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override(&"separation", 18)
 	columns.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var second := VBoxContainer.new()
-	second.add_theme_constant_override(&"separation", 3)
-	second.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for child in box.get_children().slice(split):
-		box.remove_child(child)
-		second.add_child(child)
+	var children := box.get_children()
 	card.remove_child(box)
 	columns.add_child(box)
-	columns.add_child(second)
+	for part in starts.size():
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override(&"separation", 3)
+		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var end := starts[part + 1] if part + 1 < starts.size() else children.size()
+		for child: Node in children.slice(starts[part], end):
+			box.remove_child(child)
+			column.add_child(child)
+		columns.add_child(column)
 	card.add_child(columns)
+
+
 
 
 ## Beside the cell: right if it fits, else left if it fits, else the wider side;
@@ -139,6 +147,15 @@ func _place() -> void:
 		want = get_combined_minimum_size()
 	if want.y > view.y - margin * 2.0 and get_child_count() == 1:
 		_split_columns(get_child(0) as PanelContainer)
+		reset_size()
+		want = get_combined_minimum_size()
+	if want.y > view.y - margin * 2.0 and get_child_count() == 1:
+		# still too tall (200 %): leave out the dimmed lines; the details card has all
+		var full := get_child(0)
+		remove_child(full)
+		full.queue_free()
+		add_child(_card(item, "Click the item for all details", true, COMPACT_WIDTH))
+		_split_columns(get_child(0) as PanelContainer, 3)
 		reset_size()
 		want = get_combined_minimum_size()
 	size = want

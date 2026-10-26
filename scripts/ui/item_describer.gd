@@ -198,8 +198,12 @@ static func text(character: Character, item: ItemInstance) -> String:
 
 
 ## Builds the description as controls into `box` (details column, tooltips).
-static func build(box: Container, character: Character, item: ItemInstance, width: float, compare: bool = true) -> void:
+## `compact` leaves out the dimmed lines (empty slots, flavour text) - used by
+## tooltips that would not fit on a small canvas.
+static func build(box: Container, character: Character, item: ItemInstance, width: float, compare: bool = true, compact: bool = false) -> void:
 	for line in lines(character, item, compare):
+		if compact and line.style == "dim":
+			continue
 		match line.style:
 			"title":
 				var title := UiTheme.styled(line.text, &"HeaderLabel")

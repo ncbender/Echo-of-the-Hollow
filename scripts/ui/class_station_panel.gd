@@ -157,7 +157,7 @@ func _station_button(text: String, action: Callable, enabled: bool = true, reaso
 
 ## Compact cards (emblem, name, status, level, two short lines) on the left; the
 ## selected card's details (resource, playstyle, trees, requirements, Activate)
-## on the right. Prepared classes (Guardian, Soulbinder) are listed as Locked.
+## on the right. Prepared classes (Guardian, Soulbinder) are not listed yet.
 func _build_classes() -> void:
 	var intro := UiTheme.styled("Mastery, inventory, materials and Haven are shared. Each class keeps its own level, talents, skills, presets and loadout.", &"SmallLabel")
 	intro.add_theme_color_override(&"font_color", UiTheme.TEXT_SECONDARY)
@@ -181,7 +181,7 @@ func _build_classes() -> void:
 	_content.add_child(row)
 
 
-## Active first, then unlocked, then locked; prepared classes last.
+## Active first, then unlocked, then locked (only playable classes).
 func class_order() -> Array:
 	var classes := character.classes
 	var rank := func(d: ClassDefinition) -> int:
@@ -190,7 +190,8 @@ func class_order() -> Array:
 		if not d.playable:
 			return 3
 		return 1 if classes.is_unlocked(d.id) else 2
-	var definitions: Array = character.database.classes.values()
+	# prepared classes (Guardian, Soulbinder) stay hidden until they are playable
+	var definitions: Array = character.database.classes.values().filter(func(d: ClassDefinition) -> bool: return d.playable)
 	definitions.sort_custom(func(a: ClassDefinition, b: ClassDefinition) -> bool:
 		return rank.call(a) < rank.call(b) if rank.call(a) != rank.call(b) else a.display_name < b.display_name)
 	return definitions

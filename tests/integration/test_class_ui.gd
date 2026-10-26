@@ -130,8 +130,8 @@ func test_compact_class_cards_and_details() -> void:
 	check_eq(status.call("warrior"), "ACTIVE", "active class card")
 	check_eq(status.call("basic_adventurer"), "UNLOCKED", "unlocked class card")
 	check_eq(status.call("arcanist"), "LOCKED", "locked class card")
-	check_eq(status.call("guardian"), "LOCKED", "prepared class is never shown as playable")
-	check_eq(status.call("soulbinder"), "LOCKED", "prepared class is never shown as playable")
+	check_eq(status.call("guardian"), "missing", "prepared class (not playable) is not listed")
+	check_eq(status.call("soulbinder"), "missing", "prepared class (not playable) is not listed")
 	var details := panel.find_child("ClassDetails", true, false)
 	check(details != null and _labels(details).contains("Rage (max"), "details show the class resource from data")
 	check(_labels(details).contains("Berserker"), "details list the talent trees")
@@ -139,9 +139,7 @@ func test_compact_class_cards_and_details() -> void:
 	await get_tree().process_frame
 	details = panel.find_child("ClassDetails", true, false)
 	check(_labels(details).contains("Complete the prologue first."), "requirement from the class quest data: %s" % _labels(details))
-	(panel.find_child("Class_guardian", true, false) as Button).pressed.emit()
-	await get_tree().process_frame
-	check(_labels(panel.find_child("ClassDetails", true, false)).contains("Not playable in this version."), "prepared class says so")
+	check(panel.requirements(session.database.get_class_def(&"guardian")).has("Not playable in this version."), "a prepared class would name why it is locked")
 	(panel.find_child("Class_basic_adventurer", true, false) as Button).pressed.emit()
 	await get_tree().process_frame
 	var activate := _button(panel, "Activate_basic_adventurer")
