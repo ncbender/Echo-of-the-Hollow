@@ -17,6 +17,9 @@ var heavy_held: bool = false
 var weapon_slot: int = -1
 ## Active skill slot (Q/E/R/F = 0..3) pressed this tick, -1 = none.
 var ability_slot: int = -1
+## Shift (defensive): pressed this tick (edge) and currently held (level).
+var defend_pressed: bool = false
+var defend_held: bool = false
 
 
 ## Clears one-shot flags after the frame was consumed; level state (move, aim, held) stays.
@@ -27,3 +30,4 @@ func clear_edges() -> void:
 	dash_pressed = false
 	weapon_slot = -1
 	ability_slot = -1
+	defend_pressed = false

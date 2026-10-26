@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
 [ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
 [ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
+[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="4_defense"]
 
 [sub_resource type="Resource" id="Charge_greatsword"]
 script = ExtResource("3_charge")
@@ -179,6 +180,7 @@ id = &"two_handed_sword"
 display_name = "Two-Handed Sword"
 display_color = Color(0.72, 0.84, 1, 1)
 visual_blade_length = 22.0
+defense_profile = ExtResource("4_defense")
 root_light = &"greatsword_light_1"
 root_heavy = &"greatsword_heavy"
 attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_l4"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])

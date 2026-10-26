@@ -32,6 +32,8 @@ status_resistances = Dictionary[StringName, float]({
 &"bleeding": 0.5
 })
 max_slow = 0.25
+parry_poise_multiplier = 0.3
+parry_interrupts = false
 mastery_xp_reward = 20
 class_xp_reward = 30
 drops = Array[ExtResource("2_cost")]([SubResource("Drop_essence"), SubResource("Drop_ore"), SubResource("Drop_gold")])

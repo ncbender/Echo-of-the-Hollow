@@ -60,6 +60,7 @@ lunge_distance = 8.0
 dash_cancel_phases = 7
 charge_profile = SubResource("Charge_none")
 effect_tags = Array[StringName]([&"enemy", &"heavy"])
+defense_flags = 7
 
 [resource]
 script = ExtResource("1_family")

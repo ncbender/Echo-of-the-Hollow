@@ -55,17 +55,24 @@ var _respawn_left: float = 0.0
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var health: HealthComponent = $HealthComponent
 @onready var reaction: HitReactionComponent = $HitReactionComponent
+## Block & parry on Shift (created in _ready; profile from weapon or shield).
+var defense: DefenseComponent
 
 
 func _ready() -> void:
 	_dash_buffer = InputBuffer.new(input_buffer_time)
 	_ability_buffer = InputBuffer.new(input_buffer_time)
+	defense = DefenseComponent.new()
+	defense.name = "DefenseComponent"
+	add_child(defense)
+	combat.modifiers.append(defense.counter_modifier)
 	knockback.deceleration = knockback_decay
 	combat.input_buffer_time = input_buffer_time
 	combat.buffer.window = input_buffer_time
 	add_to_group(&"player")
 	_spawn_position = global_position
 	hurtbox.invulnerability_check = func() -> bool: return dash.is_invulnerable() or health.is_dead()
+	hurtbox.hit_filter = _filter_incoming_hit
 	hurtbox.hit_received.connect(_on_hit_received)
 	health.died.connect(_on_died)
 	if not weapons.is_empty():
@@ -98,6 +105,7 @@ func set_weapon_family(family: WeaponFamily) -> bool:
 		return false
 	if not combat.set_weapon(family):
 		return false
+	defense.weapon_profile = family.defense_profile
 	weapon_equipped.emit(family)
 	return true
 
@@ -137,11 +145,15 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		_dash_buffer.clear()
 		combat.cancel(&"dash")
 		skill_lock_left = 0.0   # a dash ends the cast lock (the skill already happened)
+		defense.cancel()        # and any block/parry (no iFrame overlap, no stacking)
 		_start_dash()
+
+	if defense.step(delta, frame.defend_pressed, frame.defend_held, can_start_defense()):
+		combat.cancel(&"defend")   # same cancel rule as a dash (see can_start_defense)
 
 	_step_abilities(frame, delta)
 	combat.step(delta, frame, aim_direction, dash.is_dashing() or reaction.blocks_actions() \
-			or skill_lock_left > 0.0 or is_in_skill_motion())
+			or skill_lock_left > 0.0 or is_in_skill_motion() or defense.blocks_actions())
 
 	if dash.is_dashing():
 		velocity = dash.get_velocity()
@@ -163,6 +175,7 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		var multiplier := combat.get_move_multiplier()
 		if skill_lock_left > 0.0:
 			multiplier = minf(multiplier, skill_move_multiplier)
+		multiplier = minf(multiplier, defense.move_multiplier())
 		_locomotion_velocity = movement.compute_velocity(_locomotion_velocity, move_input, multiplier, delta)
 		velocity = _locomotion_velocity + combat.take_lunge_velocity(delta)
 	velocity += knockback.step(delta)
@@ -178,6 +191,8 @@ func _step_frozen(frame: InputFrame, delta: float) -> void:
 	combat.record_inputs(frame)
 	if frame.dash_pressed:
 		_dash_buffer.push(DASH_BUFFER_ACTION)
+	if frame.defend_pressed:
+		defense.step(0.0, true, frame.defend_held, false)   # keep the press buffered
 	if frame.ability_slot >= 0:
 		_ability_buffer.push(StringName(str(frame.ability_slot)))
 	velocity = Vector2.ZERO
@@ -201,7 +216,8 @@ func _step_abilities(frame: InputFrame, delta: float) -> void:
 ## cancel rules), outside dashes, skill motions, cast locks and hit lockouts.
 func can_start_skill() -> bool:
 	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
-			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel()
+			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel() \
+			and not defense.blocks_actions()
 
 
 ## Starts a skill action: cancels the running attack/charge (like a dash cancel)
@@ -253,11 +269,14 @@ func _on_hit_received(hit: HitData) -> void:
 	if type >= HitReaction.Type.INTERRUPT:
 		skill_lock_left = 0.0
 		stop_skill_motion()
+		if defense.is_defending():
+			defense.cancel()
 	knockback.start(hit.knockback * reaction.knockback_multiplier(type))
 
 
 func _on_died() -> void:
 	combat.cancel(&"death")
+	defense.cancel()
 	stop_skill_motion()
 	skill_lock_left = 0.0
 	_respawn_left = respawn_delay
@@ -272,3 +291,16 @@ func _step_down(delta: float) -> void:
 		hitstop_left = 0.0
 		health.reset()
 		respawned.emit()
+
+
+## Block/parry may start whenever a dash could cancel the current action (so it
+## never adds a cancel the combo system did not allow), outside dashes, skill
+## movements, cast locks and hit lockouts.
+func can_start_defense() -> bool:
+	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
+			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel()
+
+
+## Hurtbox.hit_filter: block/parry resolve the hit before damage, numbers and reactions.
+func _filter_incoming_hit(hit: HitData) -> void:
+	defense.resolve(hit, global_position, aim_direction)

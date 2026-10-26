@@ -5,6 +5,9 @@ const COLOR_BODY := Color("b5524a")
 const COLOR_TELEGRAPH := Color(1.0, 0.45, 0.2)
 const COLOR_TELEGRAPH_HEAVY := Color(1.0, 0.15, 0.15)
 const COLOR_STAGGER := Color("9fc8ff")
+## Unblockable attacks (AttackDefinition.defense_flags = 0): own colour PLUS shape
+## cues (zigzag outline, "!!" marker) so they never rely on colour alone.
+const COLOR_UNBLOCKABLE := Color(0.95, 0.35, 1.0)
 
 @onready var enemy: Enemy = get_parent()
 @onready var fx: HitReactionFx = $"../HitReactionFx"
@@ -63,6 +66,9 @@ func _draw() -> void:
 func _draw_telegraph(combat: CombatComponent) -> void:
 	var attack := combat.current_attack
 	var color := COLOR_TELEGRAPH if attack.input_type == AttackDefinition.InputType.LIGHT else COLOR_TELEGRAPH_HEAVY
+	if attack.is_unblockable():
+		_draw_unblockable(combat)
+		return
 	var progress := combat.phase_progress()
 	var reach := combat.get_reach(attack, 0)
 	var half := deg_to_rad(attack.arc_degrees) * 0.5
@@ -76,3 +82,22 @@ func _draw_telegraph(combat: CombatComponent) -> void:
 	draw_colored_polygon(fill, Color(color, 0.35))
 	outline.append(Vector2.ZERO)
 	draw_polyline(outline, Color(color, 0.8), 1.0 if color == COLOR_TELEGRAPH else 2.0)
+
+
+func _draw_unblockable(combat: CombatComponent) -> void:
+	var attack := combat.current_attack
+	var progress := combat.phase_progress()
+	var reach := combat.get_reach(attack, 0)
+	var half := deg_to_rad(attack.arc_degrees) * 0.5
+	var angle := combat.attack_direction.angle()
+	var fill := PackedVector2Array([Vector2.ZERO])
+	var zigzag := PackedVector2Array([Vector2.ZERO])
+	for i in 17:
+		var a := angle - half + 2.0 * half * i / 16.0
+		fill.append(Vector2.from_angle(a) * reach * progress)
+		zigzag.append(Vector2.from_angle(a) * reach * (1.0 if i % 2 == 0 else 0.86))
+	zigzag.append(Vector2.ZERO)
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.03)
+	draw_colored_polygon(fill, Color(COLOR_UNBLOCKABLE, 0.3))
+	draw_polyline(zigzag, Color(COLOR_UNBLOCKABLE, 0.6 + 0.4 * pulse), 2.0)
+	WorldText.draw(self, Vector2(-6, -30), "!!", 11, Color(1.0, 0.9, 1.0), 3, Color(0.35, 0.0, 0.4))

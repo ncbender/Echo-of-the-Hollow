@@ -6,6 +6,8 @@ extends CharacterBody2D
 ## The telegraph is the (long) startup phase of the enemy's attack definition.
 
 signal defeated(enemy: Enemy)
+## A player parried one of this enemy's attacks (feedback).
+signal parried
 
 enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
 
@@ -136,6 +138,16 @@ func _move(to_target: Vector2, delta: float) -> void:
 func _on_hit_received(hit: HitData) -> void:
 	knockback.start(hit.knockback * config.knockback_taken())
 	health.apply_hit(hit)
+
+
+## Called by the defender (DefenseComponent) after a successful parry.
+func on_parried() -> void:
+	if state == State.DEAD:
+		return
+	parried.emit()
+	if config.parry_interrupts:
+		combat.cancel(&"parried")   # the swing is over; pending hits are discarded
+		_cooldown = maxf(_cooldown, config.parry_daze)
 
 
 func _on_poise_broken() -> void:

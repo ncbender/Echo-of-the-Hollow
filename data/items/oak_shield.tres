@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
 [ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
+[ext_resource type="Resource" path="res://data/combat/defense/shield_guard.tres" id="3_defense"]
 
 [sub_resource type="Resource" id="Mod_1"]
 script = ExtResource("2_mod")
@@ -11,6 +12,7 @@ percent = 0
 
 [resource]
 script = ExtResource("1_item")
+defense_profile = ExtResource("3_defense")
 id = &"oak_shield"
 display_name = "Oak Shield"
 description = "A sturdy wooden shield."

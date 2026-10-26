@@ -11,6 +11,9 @@ signal hit_received(hit: HitData)
 
 ## Optional callable returning true while the entity cannot be hit (e.g. dash iFrames).
 var invulnerability_check: Callable
+## Optional callable(hit) run on an accepted hit BEFORE anyone hears of it
+## (defense: block/parry change damage, knockback and reaction first).
+var hit_filter: Callable
 
 
 func get_entity() -> Node:
@@ -26,6 +29,8 @@ func receive_hit(hit: HitData) -> bool:
 	if is_invulnerable():
 		return false
 	hit.target = get_entity()
+	if hit_filter.is_valid():
+		hit_filter.call(hit)
 	hit_received.emit(hit)
 	return true
 

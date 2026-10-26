@@ -25,6 +25,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_pending.dash_pressed = true
 	elif event.is_action_pressed(&"weapon_slot_1"):
 		_pending.weapon_slot = 0
+	elif event.is_action_pressed(&"defensive"):
+		_pending.defend_pressed = true
 	elif event.is_action_pressed(&"weapon_slot_2"):
 		_pending.weapon_slot = 1
 	else:
@@ -46,5 +48,7 @@ func poll(character: Node2D) -> InputFrame:
 	frame.dash_pressed = _pending.dash_pressed
 	frame.weapon_slot = _pending.weapon_slot
 	frame.ability_slot = _pending.ability_slot
+	frame.defend_pressed = _pending.defend_pressed
+	frame.defend_held = Input.is_action_pressed(&"defensive")
 	_pending.clear_edges()
 	return frame

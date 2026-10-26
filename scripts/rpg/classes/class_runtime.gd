@@ -236,7 +236,9 @@ func on_hit_dispatched(hit: HitData) -> void:
 		gain(definition.gain_per_kill)
 
 
-func on_hit_taken(_hit: HitData) -> void:
+func on_hit_taken(hit: HitData) -> void:
+	if &"parried" in hit.tags:
+		return   # a parried hit is no hit taken (no pressure loss, no rage)
 	pressure = 0
 	if pool != null:
 		gain(pool.definition.gain_per_hit_taken)

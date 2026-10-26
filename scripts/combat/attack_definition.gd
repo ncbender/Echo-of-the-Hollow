@@ -9,6 +9,10 @@ enum InputType { LIGHT, HEAVY }
 const CANCEL_STARTUP := 1
 const CANCEL_ACTIVE := 2
 const CANCEL_RECOVERY := 4
+## Bit flags for defense_flags.
+const DEFENSE_BLOCKABLE := 1
+const DEFENSE_PARRYABLE := 2
+const DEFENSE_GUARD_BREAK := 4
 
 @export var id: StringName
 @export var display_name: String
@@ -75,6 +79,12 @@ const CANCEL_RECOVERY := 4
 ## Free-form tags forwarded with every hit (for future talents, uniques, VFX/SFX).
 @export var effect_tags: Array[StringName] = []
 
+@export_group("Defense")
+## How the target may defend against this attack (Block & Parry, Shift).
+## Neither Blockable nor Parryable = UNBLOCKABLE (telegraphed differently).
+## Guard Breaking: a block fails against it (parry or dash instead).
+@export_flags("Blockable", "Parryable", "Guard Breaking") var defense_flags: int = 3
+
 
 func get_follow_up_id(input: InputType) -> StringName:
 	return next_light if input == InputType.LIGHT else next_heavy
@@ -82,3 +92,7 @@ func get_follow_up_id(input: InputType) -> StringName:
 
 func total_duration() -> float:
 	return startup + active + recovery
+
+
+func is_unblockable() -> bool:
+	return defense_flags & (DEFENSE_BLOCKABLE | DEFENSE_PARRYABLE) == 0

@@ -13,6 +13,10 @@ extends Resource
 @export var display_color: Color = Color("e8e3d0")
 @export var visual_blade_length: float = 14.0
 
+@export_group("Defense")
+## Block/parry behaviour on Shift while this family is wielded (null = no defense).
+@export var defense_profile: DefenseProfile
+
 var _by_id: Dictionary = {}
 
 

@@ -22,6 +22,15 @@ extends Resource
 ## Seconds the corpse stays before it is removed.
 @export var despawn_delay: float = 0.8
 
+@export_group("Parry")
+## Scales the poise damage of a player's successful parry against this enemy.
+@export var parry_poise_multiplier: float = 1.0
+## A successful parry interrupts this enemy's attack and dazes it briefly.
+## Bosses: false - parries never lock a boss down (poise still applies, scaled).
+@export var parry_interrupts: bool = true
+## Extra pause before the next attack after being parried.
+@export var parry_daze: float = 0.5
+
 @export_group("Statuses")
 ## Status id -> resistance 0..1 (1 = immune), e.g. {&"bleeding": 0.5}. Shortens the
 ## duration and weakens the power of statuses applied to this enemy.

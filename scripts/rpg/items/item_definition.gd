@@ -37,6 +37,11 @@ const RARITY_COLORS := {
 ## Prepared, not enforced yet.
 @export var required_class_level: int = 0
 
+@export_group("Defense")
+## Shields: block/parry profile used on Shift while equipped in the off hand
+## (overrides the weapon's profile).
+@export var defense_profile: DefenseProfile
+
 @export_group("Crafting")
 ## Crafting capabilities (null = not craftable). See docs/CRAFTING_DESIGN.md.
 @export var crafting: CraftingProfile

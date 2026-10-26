@@ -134,6 +134,9 @@ func _uninstall_modifiers() -> void:
 
 ## The combat weapon follows the active main-hand item (fallback: rules).
 func sync_weapon() -> void:
+	var off_hand := character.equipment.get_item(EquipSlot.Slot.OFF_HAND)
+	var off_def := character.database.get_item(off_hand.definition_id) if off_hand != null else null
+	player.defense.shield_profile = off_def.defense_profile if off_def != null else null
 	var family_id := character.equipment.main_hand_family()
 	if family_id == &"":
 		family_id = character.database.rules.fallback_weapon_family
