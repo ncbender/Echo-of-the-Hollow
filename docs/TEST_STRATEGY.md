@@ -26,7 +26,9 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 `crafting_save`, `affix_pool`, `crafting_stats`, `crafting_ops`, `essences`, `sockets_quality`,
 `evolution`, `crafting_loop` (E2E). Class Foundation 0.2: `attack_speed`, `status_effects`, `talents`, `skills`, `warrior`,
 `arcanist`, `shadowrunner`, `prologue` (Trials, Wahl, Klassenquests, Migration v3→v4, Prolog-Map), `presets`,
-`class_ui` (Klassenstation-Fenster bedient die echten Dienste). Class Combat Polish 0.3: `class_combat_polish`
+`class_ui` (Klassenstation-Fenster bedient die echten Dienste). Combat Defense & Feedback 0.4: `defense`
+(Block/Parry), `combat_feedback` (VFX-Daten, Aufräumen, Marker, BREAK/PARRY), `combat_audio` (Cues, Drossel,
+Block vs. Parry, Lautstärke-Persistenz, Map-Lebensdauer). Class Combat Polish 0.3: `class_combat_polish`
 (Focus-Regeneration, Focused Strikes, Gap-Closer, Lunge-Deckel).
 
 ## Auswahlregeln
@@ -69,6 +71,9 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 | `player.gd` Skill-Hooks / Skill-Bewegung, `gap_closer_action.gd`, `move_action.gd` | class_combat_polish, skills, shadowrunner, warrior, movement, dash (+ `class_playtest.gd -- --polish`) |
 | Prolog / Quests / Trials, `character_classes.gd` | prologue, classes |
 | `class_station_panel.gd`, `talent_tree_view.gd`, HUD | class_ui, ui_layout (+ `class_playtest.gd`) |
+| `defense_component.gd`, `defense_profile.gd`, `hurtbox.gd` hit_filter, Angriffs-`defense_flags` | defense, hits, enemy, hit_reaction, dash, light_attack, combo (+ `feedback_playtest.gd`) |
+| `combat_fx.gd`, `SkillFxSpec`, Status-Marker, Views | combat_feedback (+ `feedback_playtest.gd`, Screenshots ansehen) |
+| `combat_audio.gd`, `synth_sounds.gd`, Audio-Hooks, `user_settings.gd` (Lautstärke) | combat_audio, settings, ui_layout |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
 | `character.gd`, `player_progression_bridge.gd` | mastery, classes, equipment, item_effects, save |
 | `inventory.gd`, Items | inventory, pickup, equipment, save |
@@ -161,3 +166,18 @@ Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/pla
 - F6 und F9, danach die Prüfung, dass genau die gewählte Klasse freigeschaltet ist
 
 Screenshots liegen in `tests/output/classes/`. Bewegt den echten Mauszeiger.
+
+## Feedback-Playtest (Combat Defense & Feedback 0.4)
+```
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/feedback_playtest.gd
+```
+Spielt in der Arena im Fenster:
+- VFX aller drei Klassen
+- Parry und Block gegen einen echt angreifenden Grunt
+- den Unblockable-Telegraph (Warden-Slam)
+- Arcane-Runen, Detonation und Chill
+- Weak Point, Execution, Bleeding und Poise Break
+- sechs Gegner mit gemessener Frame-Zeit
+- das Aufräumen der Effekte und einen Szenenwechsel
+
+Protokolliert die abgespielten Audio-Cues. Screenshots liegen in `tests/output/feedback/`.

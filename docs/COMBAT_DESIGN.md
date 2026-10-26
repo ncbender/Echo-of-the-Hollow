@@ -12,7 +12,7 @@ Konflikte unter „Offene Designfragen“.
 | Linksklick | genau ein Light Attack pro physischem Klick (kein Auto-Repeat beim Halten) |
 | Rechtsklick halten / loslassen | Heavy aufladen / ausführen |
 | Space | Dash in Blickrichtung (zur Maus, WASD egal) |
-| Shift | später: defensiver Aktionsslot (gebunden, ohne Funktion) |
+| Shift | Block & Parry (seit 0.4): drücken = Parry-Fenster, halten = Block, loslassen = Ende |
 | Q/E/R/F | aktive Klassenfähigkeiten (Class Foundation 0.2, `SKILL_SYSTEM.md`) |
 | C | Klassen-/Talentfenster (Talente lernen überall, Rest an der Klassenstation) |
 | 1 / 2 | Waffenfamilie wechseln (Prototyp) |
@@ -254,3 +254,74 @@ Neu (Details in `SKILL_SYSTEM.md`):
 - ~~Shadowstep als freier 80-px-Schritt~~ → Class Combat Polish 0.3: zielgebundener Gap-Closer (Playtest-Feedback:
   freie Skill-Dashes neben den zwei Universal-Dashes störten). Blade Rush ebenso; Shadow Strike/Piercing Lunge
   sind kurze Angriffs-Lunges (≤ 40 px). Prüfen: Reichweiten 130/110 px und Kegel 70°/50° im Gefecht.
+
+## Block & Parry (Combat Defense & Feedback 0.4)
+Drei taktische Antworten auf einen Angriff:
+- **Dash:** Ausweichen mit iFrames (unverändert).
+- **Block:** verlässlich, aber nur teilweise Schutz.
+- **Parry:** kurzes Fenster mit Belohnung.
+
+Alles ist datengetrieben (`DefenseProfile`, `data/combat/defense/`) und läuft im `DefenseComponent`
+am Player.
+
+**Ablauf auf Shift:**
+- **Drücken** öffnet das Parry-Fenster.
+- Weiter **halten** wird danach zum Block, sofern das Profil blocken kann.
+- **Loslassen** löst eine Recovery aus. Nach einem Parry-Fenster ohne Treffer ist das der Whiff,
+  nach einem Block die Block-Recovery.
+- Halten öffnet nie ein neues Parry-Fenster. Ein neuer Parry braucht einen neuen Druck und den
+  Anti-Spam-Cooldown (gerechnet ab dem letzten Druck).
+- **Start** nur dort, wo ein Dash-Cancel erlaubt wäre: Light-Angriffe immer, Heavy-Aufladung immer,
+  Heavy-Angriffe nur in ihren Dash-Cancel-Phasen. Also kein neuer Angriffscancel, und Combo-Timings
+  bleiben unverändert (getestet).
+- **Während Verteidigung:** keine Angriffe und Skills, Bewegung verlangsamt.
+- **Beenden:** Dash, unterbrechende Trefferreaktion (INTERRUPT+) und Tod beenden die Verteidigung
+  sofort. Die Dash-iFrames bleiben unverändert und werden nie mit Block/Parry gestapelt.
+- **Treffer** werden vor dem Schaden aufgelöst (`Hurtbox.hit_filter`). Ein Treffer, der schon gelandet
+  ist, kann nicht nachträglich pariert werden.
+
+| Profil | Waffe | Parry-Fenster | Parry-Bogen | Anti-Spam | Whiff-Recovery | Block | Block-Bogen | Bewegung | Block-Recovery | Parry-Haltung | Counter |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Sword Guard | Einhandschwert | 150 ms | 120° | 550 ms | 300 ms | −45 %, Knockback ×0,5 | 120° | ×0,5 | 150 ms | 30 | 1 s, ×1,5 |
+| Heavy Guard | Zweihandschwert | 130 ms | 110° | 650 ms | 400 ms | −25 %, Knockback ×0,6 | 100° | ×0,4 | 250 ms | 45 | 1 s, ×1,6 |
+| Shield Guard | Oak Shield (Nebenhand, überschreibt die Waffe) | 120 ms | 140° | 600 ms | 300 ms | −65 %, Knockback ×0,35 | 160° | ×0,6 | 100 ms | 20 | 0,8 s, ×1,3 |
+
+**Parry:**
+- Der Treffer macht keinen Schaden, keinen Knockback und löst keine Reaktion aus.
+- Der Angreifer erhält Haltungsschaden (× `EnemyConfig.parry_poise_multiplier`).
+- Normale Gegner werden unterbrochen und 0,5 s „benommen“ (`parry_interrupts`, `parry_daze`).
+- Counter-Fenster: Der nächste eigene Waffentreffer macht mehr Schaden (Tag `counter`, HUD „COUNTER!“).
+- Die Verteidigung endet sofort, man kann direkt kontern.
+
+**Block:**
+- Schaden und Knockback werden reduziert, die Reaktion höchstens FLINCH.
+- Der Angreifer erhält 4–6 Haltung.
+- Gegen **Guard Breaking** scheitert der Block: voller Treffer, Reaktion, Recovery und
+  „GUARD BREAK“-Anzeige.
+
+**Richtung:** Nur Angriffe aus dem Frontbogen um die Blickrichtung (Maus) zählen; von hinten wirkt
+nichts.
+
+**Angriffs-Regeln** (`AttackDefinition.defense_flags`: Blockable, Parryable, Guard Breaking):
+| Angriff | Blockbar | Parierbar | Guard Breaking |
+|---|---|---|---|
+| Grunt Swipe | ja | ja | – |
+| Grunt Slam | ja | ja | **ja** (Block bricht, Parry oder Dash nötig) |
+| Grove Warden Swipe (`grove_warden_attacks.tres`) | ja | **nein** | – |
+| Grove Warden Crushing Slam | **nein** | **nein** (UNBLOCKABLE) | – |
+
+**Unblockable-Telegraph:** eigene Farbe (Magenta), Zickzack-Kontur statt glatter Kante und „!!“ über
+dem Gegner, also nicht nur farbcodiert; dazu ein eigener Warnton.
+
+**Bosse:**
+- Grove Warden: `parry_interrupts = false` und 0,3× Parry-Haltung. Parries unterbrechen ihn nie.
+- Ein Haltungsbruch ist möglich, ein Dauer-Lock nicht.
+- Die Werte und Timings seiner Angriffe sind identisch zu vorher; nur die Verteidigungs-Flags sind neu.
+
+**Keine Stamina:** Block wird über begrenzte Reduktion, Verlangsamung, Recovery, Guard Break und
+Unblockables balanciert (kein Ressourcen-Umbau).
+
+### Vorschläge für den Feel-Test (0.4, NICHT umgesetzt)
+- Parry-Fenster 120–150 ms gegen den Grunt-Swipe-Telegraph (450 ms): zu leicht oder zu schwer?
+- Ist Sword-Block (−45 %) neben Dash attraktiv genug, und ist Heavy Guard (−25 %) zu schwach?
+- Sollte der Grunt-Slam parierbar bleiben (aktuell ja) oder nur ausweichbar sein?

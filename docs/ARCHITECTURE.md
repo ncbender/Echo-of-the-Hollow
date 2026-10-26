@@ -188,3 +188,26 @@ und Pickups überwachen nur `player`.
 - `ItemEffect.hit_sources` filtert pro Effekt, welche Treffer ihn erreichen.
 - Eine Trial schaltet die Klasse über die Getter-Eigenschaft `active_class_id` um. Alle Systeme
   sehen dadurch automatisch die Trial-Klasse, `to_dict` schreibt aber immer die echte Klasse.
+
+## Verteidigung, Feedback, Audio (Combat Defense & Feedback 0.4)
+- **`DefenseComponent`** (Combat-Schicht, vom Player in `_ready` erzeugt) plus **`DefenseProfile`** (Daten):
+  - Das Profil kommt von `WeaponFamily.defense_profile`; ein Schild überschreibt es
+    (`ItemDefinition.defense_profile`, von der Bridge gesetzt).
+  - `Hurtbox.hit_filter` löst Block/Parry auf, **bevor** Schaden, Zahlen, Reaktion oder Ressourcen
+    den Treffer sehen.
+  - `AttackDefinition.defense_flags` legt Blockable, Parryable und Guard Breaking fest.
+  - Gegner reagieren über `Enemy.on_parried` und `EnemyConfig.parry_*`.
+  - Der Counter ist ein `AttackModifier` (`DefenseComponent.CounterModifier`), nur für direkte
+    Waffentreffer.
+- **`CombatFx`** (`scripts/fx/`): prozedurale Einmal-Effekte.
+  - Die Spiellogik ruft nur `CombatFx.spawn(...)`.
+  - Daten: `SkillFxSpec` und `StatusEffectDefinition.marker`.
+  - Feedback des Combat-Layers (Player, EnemyView) hängt an vorhandenen Signalen: `parried`,
+    `blocked`, `guard_broken`, `poise_broken`.
+- **`CombatAudio`** (`scripts/audio/`):
+  - ein Node pro Map, erzeugt von `GameMap`, freigegeben mit der Map
+  - aufgerufen über `CombatAudio.play(near, cue)`
+  - Stimmen-Pool, Drossel, Bus „SFX“
+  - Lautstärke aus `UserSettings.sfx_volume`
+- **`SynthSounds`:** Platzhalter-Klänge zur Laufzeit; echte Dateien über `CombatAudio.files`.
+- **Kein zweites Autoload:** Audio ist an die Map gebunden, Effekte an den Szenenbaum.

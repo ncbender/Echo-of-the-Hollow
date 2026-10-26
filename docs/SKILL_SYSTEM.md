@@ -123,3 +123,35 @@ Geprüft und **unverändert**:
 - Arcanist: keine Bewegungsskills.
 - Warrior: Furious Strike, Warbreaker, Whirlwind (rotiert am Ort), Battle Cry, Blood Frenzy, Unbound Fury.
 - Shadowrunner: Expose Weakness, Execution, Blade Fan, Smoke Veil, Death Mark.
+
+## Feedback: VFX, Audio, Lesbarkeit (Combat Defense & Feedback 0.4) ✅
+- `SkillDefinition.fx` (`SkillFxSpec`) beschreibt pro Skill:
+  - einen Cast-Effekt am Spieler und einen Treffer-Effekt am Ziel (nur bei akzeptierten Treffern)
+  - eine Aura, solange der Buff läuft
+  - Cast- und Treffer-Sound
+- Effekte sind `CombatFx`-Knoten: prozedural, mit fester Lebensdauer, räumen sich selbst ab. Eine
+  Aura endet mit dem Buff, dem Klassenwechsel oder dem Tod.
+- Sie verändern nie Hitboxen oder Schaden.
+
+| Klasse | Stil | Beispiele |
+|---|---|---|
+| Warrior | warm (rot/orange/gold), Wucht | Battle-Cry-, Blood-Frenzy- und Unbound-Fury-Aura, Blade-Rush-Kreuzschlag, Warbreaker-Funken, Sichelhiebe |
+| Arcanist | blau/violett, sauber | Glyphen beim Wirken, Stern-Treffer, Splitter-Projektile (Frostbind, Astral Lance), Detonations-Stern + Ring |
+| Shadowrunner | dunkel-violett, präzise | Nachbilder entlang Shadowstep/Blade Rush, violette Hiebe, karmesinroter Execution-Kreuzschlag, Messer-Projektile (Blade Fan) |
+
+- **Talent-Effekte:** Worldbreaker, Aftershock und Thousand Cuts mit Ring + Funken. Ruptures
+  (Blood Oath) mit Stern.
+- **Projektile:** Formen Orb, Splitter, Messer (`ProjectileAction.shape`).
+- **Status-Marker nach Form** (`StatusEffectDefinition.marker`):
+  - Arcane Mark: eine kreisende Rune pro Stack
+  - Weak Point / Death Mark: Fadenkreuz-Klammern
+  - Bleeding: Tropfen
+  - Chill: kühle Tönung + Kristalle + Ring
+  - Smoked: Rauch
+
+  Dazu die Punkt-Zeile über dem Lebensbalken. Marker verschwinden bei Verbrauch, Ablauf (Blinken in
+  den letzten 0,4 s) und Tod.
+- **Verbrauch einer Markierung:** Stern + Ring in der Status-Farbe und `consume_sound`
+  (`arcane_detonate`, `execution`).
+- **Poise Break:** Stern, Ring, „BREAK“ und Sound. Normale Treffer zeigen nur Aufblitzen und Zahl.
+- **Audio:** `CombatAudio` mit Synth-Platzhaltern, siehe `COMBAT_DEFENSE_FEEDBACK_04_REPORT.md`.

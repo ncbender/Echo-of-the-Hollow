@@ -44,6 +44,9 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
   (Quelle/Tiefe in `HitData`). Skills nutzen Player-Hooks (`ability_handler`, `begin_skill`,
   `start_skill_motion`) - nie den Dash. Freie Skill-Bewegung nur als kurze Angriffs-Lunge (`MoveAction`, ≤ 40 px);
   längere Bewegung nur zielgebunden (`GapCloserAction`, Prüfung vor Kosten). Trials sind temporär.
+  Block/Parry nur über `DefenseComponent` + `DefenseProfile` (Auflösung in `Hurtbox.hit_filter`, Angriffs-
+  `defense_flags`). Visuelles Feedback nur über `CombatFx`/`SkillFxSpec`, Sounds nur über `CombatAudio.play` (keine
+  Gameplay-Logik in Effekten).
   Spielerseitige Texte Englisch; neue UI-Chrome-Texte über `localization/ui.csv` (`tr("UI_...")`).
 - Neue Maps erben von `GameMap`, brauchen `Player`, `GameHud`, `SpawnPoint` "default" und eine `MapDefinition`.
   Übergänge nur über `SessionState.travel()`. Weltzustand nur in `WorldState`.

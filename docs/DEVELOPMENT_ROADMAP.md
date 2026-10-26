@@ -31,16 +31,22 @@
 | UI Foundation 0.1 | 1920×1080-Design, 4K, UI-Skalierung, Theme, responsive Fenster | `UI_FOUNDATION_01_REPORT.md` |
 | Crafting Foundation 0.1 | Resonanzschmieden A–G: Material, Affixe, Operationen, Essenzen, Sockel, Qualität, Evolution, Forge-UI | `CRAFTING_FOUNDATION_01_REPORT.md` |
 | Class Foundation 0.2 | Attack Speed, Bleeding/Chill, gemeinsamer Trefferstrom; Talent-Engine (7 Tiers), Skills Q/E/R/F mit Form-/Resonance-Mods; Warrior, Arcanist, Shadowrunner; Prolog mit Trials und Klassenwahl; Klassenquests; Presets; Klassenstation-UI; Save v4 | `CLASS_FOUNDATION_02_REPORT.md` |
+| Class Combat Polish 0.3 | Focus passiv, zielgebundene Gap-Closer, Skill-Lunges gedeckelt | `CLASS_COMBAT_POLISH_03_REPORT.md` |
+| Combat Defense & Feedback 0.4 | Focus 6/s, Block & Parry (Shift, Profile, Unblockable/Guard Break), Skill-VFX, Synth-Combat-Audio, Status-/Poise-Lesbarkeit | `COMBAT_DEFENSE_FEEDBACK_04_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von
   Monstern, Balance nach menschlichem Playtest, VFX/SFX für Entladung und Resonanz, Respec-Regeln.
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen
   koppeln, Sound-Hooks, Feintuning mit menschlichem Playtest.
-- **Class Foundation 0.3:** menschlicher Playtest + Balance der drei Klassen, Skill-VFX/SFX, Shift-Slot
-  (Block/Parry pro Klasse), restliche Skills (8 pro Klasse), Guardian (Eide) und Soulbinder (Echos),
-  echte Questgebiete/NPCs, Mod-Quellen aus Bossen und Erkundung, Forge-UI-Überarbeitung.
-- **0.4 Gegner-Grundlagen:** mehrere Gegnertypen, Gruppen-KI, Elite-Modifikatoren.
+- **Klassen/Combat danach:**
+  - menschlicher Playtest von Block/Parry und des Skill-Feedbacks
+  - echte Audio- und VFX-Assets statt der Synth- und Prozedural-Platzhalter
+  - Parry-Talente, restliche Skills (8 pro Klasse)
+  - Guardian (Eide) und Soulbinder (Echos)
+  - Questgebiete/NPCs, Mod-Quellen aus Bossen und Erkundung, Forge-UI-Überarbeitung
+- **Gegner-Grundlagen:** mehrere Gegnertypen, Gruppen-KI, Elite-Modifikatoren, mehr
+  parier-/blockbare Angriffsmuster.
 - **0.5 Progression-Hooks:** Waffenbeherrschung (schaltet Combo-Knoten frei), erste Unique-Modifier
   über `AttackModifier`.
 - Später: NPCs, Dungeons, Bosse (Map-Übergänge, Heimatbasis und Crafting-Grundlage existieren).
