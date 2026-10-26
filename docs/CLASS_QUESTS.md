@@ -2,6 +2,18 @@
 
 Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · ⬜ offen
 
+> **Seit Prologue & Haven Slice 0.1:**
+> - Die Trials heißen jetzt **Echos**: Echo of the Warrior, Echo of the Arcanist und Echo of the
+>   Shadowrunner, jeweils mit Zitat.
+> - Sie stehen am **Whispering Stone**; der Story-Prolog ist in `PROLOGUE_AND_HAVEN.md` beschrieben.
+> - Die Ziele wurden neu gesetzt, ebenso die Gegnervarianten pro Echo (`enemy_configs`) und die
+>   Wahltexte (`choice_text`).
+> - Fallen alle Gegner vor den Zielen, erscheint eine neue Welle. Tod beendet das Echo.
+> - Nach der Wahl folgt ein Meilenstein-Save; Erfolg wird erst nach dem Schreiben angezeigt.
+> - Die Prologue Grounds bleiben als Entwicklerzugang (Tor in der Proving Arena).
+> - Guardian und Soulbinder sind in der UI ausgeblendet.
+> - Der Rest dieses Dokuments beschreibt die Regeln, die weiter gelten.
+
 ## Prolog ✅ (technisch spielbare Testsequenz, keine Storykampagne)
 1. Neuer Charakter: **Basic Adventurer** in der Heimatbasis. Das Tor **„Prologue“** (G, nahe dem
    Startpunkt) führt zu den *Prologue Grounds*.

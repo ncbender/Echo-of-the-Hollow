@@ -2,16 +2,45 @@
 
 Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · ⬜ offen
 
-## Dateien ✅
-- Spieler-Slot: `user://saves/slot_1.save.json` (Windows:
-  `%APPDATA%\Godot\app_userdata\Echoes of the Hollow\saves\`). **F6** speichern, **F9** laden.
-- Tests/Playtests nutzen ausschließlich `user://test_saves/…` und überschreiben den Spieler-Slot nie.
+## Dateien & Slots ✅ (Save Foundation 1.1)
+- **5 manuelle Slots**: `user://saves/slot_1 … slot_5.save.json` (Slot 1 = bisheriger Spieler-Slot, F6/F9).
+- **3 rotierende Autosaves**: `user://saves/autosave_1 … autosave_3.save.json`; geschrieben wird in den
+  ungültigen bzw. ältesten (`SaveSlots.next_auto_slot`), manuelle Slots werden nie berührt.
+- Windows: `%APPDATA%\Godot\app_userdata\Echoes of the Hollow\saves\`.
+- Tests/Playtests nutzen ausschließlich `user://test_saves/…`; gescriptete Läufe (Main Loop = Skript)
+  setzen `save_path` automatisch auf `user://test_saves/scripted/slot_1.save.json`, damit auch Autosaves
+  und Meilenstein-Saves nie Spielerdateien erreichen.
+- UI: Titelbildschirm (Continue = neuester gültiger Save, New Game mit Bestätigung, Load Game, Options,
+  Quit) und Pausemenü (Esc: Resume, Save Game in 5 Slots, Load Game inkl. Autosaves, Options, Quit to Title).
+  Slotinfo: Ort · Klasse/Level · Spielzeit · Datum. Beschädigte Dateien werden markiert und nie geladen.
 
-## Format (Version 4) ✅
+## Schreib-Koordinator (`SaveCoordinator`, Kind des Autoloads) ✅
+- Anfragen: `request_manual(slot)`, `request_autosave(reason)` und `request_critical(reason)` (über
+  `SessionState.request_critical_save`).
+- Höchstens eine Schreiboperation pro Frame. Der Snapshot entsteht synchron im selben Frame.
+- Mehrere offene Auto- und Meilenstein-Anfragen werden zu **einem** Schreibvorgang zusammengefasst.
+- **Periodischer Autosave** alle 300 s **aktiver** Spielzeit. Gezählt wird nur ungepausiert, nur auf einer
+  bereiten Map und nicht während einer Reise. Option „Periodic Autosave“, Standard an.
+- **Meilenstein-Saves (kritisch)** bei jedem abgeschlossenen Story-Schritt (dazu gehört die Ankunft in
+  Haven), bei Restaurierung, Klassenwahl und Wegstein.
+  - Sie werden **nie** durch die Option oder einen Cooldown unterdrückt.
+  - Ein fehlgeschlagener Meilenstein-Save wird nach 5 s wiederholt.
+- HUD-Anzeige unten rechts:
+  - „Saving…“ während des Schreibens
+  - „Progress saved“ erst **nach** erfolgreichem Schreiben
+  - „Save failed“ immer sichtbar, auch wenn „Show Save Indicator“ aus ist
+- Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
+- Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
+
+## Format (Version 5) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 4, "saved_at": 1761460000,
-  "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>" }
+{ "format": "echoes_of_the_hollow_save", "version": 5, "saved_at": 1761460000, "order": 1761460000123,
+  "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
+  "meta": { "location": "Haven", "class": "Warrior", "level": 3, "play_time": 812,
+            "kind": "manual|autosave|milestone", "reason": "..." } }
 ```
+`order` ist eine streng steigende Millisekunden-Ordnung (neuester Save = Continue). `meta` dient nur der
+Slotanzeige; die Prüfsumme deckt den Payload ab.
 Die Nutzdaten werden als **exakter JSON-Text** gespeichert, damit die SHA-256-Prüfsumme genau die
 Bytes abdeckt, die geparst werden (erneutes Serialisieren von JSON ist nicht stabil: `1` → `1.0`).
 
@@ -24,10 +53,11 @@ Payload (nur Quelldaten):
 | `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, material, affixes, essences, sockets, evolution, progress, rev) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
-| `world` | Map-ID, Spawnpunkt-ID, Flags, Gebäude |
+| `world` | Map-ID, Spawnpunkt-ID, Flags (inkl. Story-Flags `prologue.*`, `haven.*`, Zähler `count.<event>`), Gebäude, `waystones` (v5), `restoration` Ruine → ruined/restored/revitalized (v5) |
+| `play_time` | aktive Spielzeit in Sekunden (v5) |
 | `class_builds` | pro freigeschalteter Klasse: Talentränge, 4 Skill-Slots, Mods je Skill, Sonder-Freischaltungen, Respec-Zähler, 5 Presets (v4) |
 | `prologue` | Stufe (not_started/in_progress/completed), abgeschlossene Trials, gewählte Klasse (v4) |
-| `quests` | Klassenquests: Zustand + Zielfortschritt (v4) |
+| `quests` | Klassen- und Storyquests: Zustand, `step` (v5), Zielfortschritt des aktuellen Schritts |
 
 **Nicht gespeichert (rekonstruiert):** Stats, aktuelle HP, Klassenressource, Cooldowns, Buffs, aktive
 Effekte/Modifier, Combat-Waffe, Combo-Freischaltungen, Statuseffekte auf Gegnern, **laufende Prolog-Trials**
@@ -56,7 +86,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 4.
+Aktuell: Version 5.
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
@@ -66,6 +96,20 @@ Aktuell: Version 4.
   Stand bereits eine Prolog-Klasse freigeschaltet (Debug-Freischaltung vor 0.2), gilt der Prolog als
   abgeschlossen mit dieser Klasse; sonst „not_started“. Nichts Freigeschaltetes wird wieder gesperrt; Items,
   Crafting-Zustand und Loadouts bleiben unverändert. Talentpunkte ergeben sich aus dem vorhandenen Level.
+- 4→5 (Prologue & Haven Slice 0.1):
+  - Neu: `play_time` = 0 und `world.waystones` = ["haven"].
+  - Plot-Gebäude werden zu restaurierten Ruinen: smithy → old_smithy, storage → old_storehouse,
+    training_ground → fallen_barracks. Sie verlassen die Plotliste, damit der Lagerbonus nicht doppelt
+    zählt. Je restaurierter Ruine wird `haven.<ruin>.restored` gesetzt.
+  - Die Old Smithy gilt immer als restauriert: Ein v4-Charakter lebt bereits in Haven, also sind Straßen-
+    und Haven-Teil des Prologs abgeschlossen (Flags, Quests, Zähler).
+  - Mit getroffener Klassenwahl ist der ganze Prolog fertig, der Whispering-Stone-Wegstein ist aktiv und
+    die Hauptquest „The First Signs“ läuft.
+  - Ohne Klassenwahl geht es bei „The Whispering Stone“ weiter. Bereits absolvierte Trials zählen als
+    gegangene Echos.
+  - Items, Klassen, Builds und Loadouts bleiben unverändert.
+  - Geprüft wurde auch der echte v2-Spielstand des Nutzers, und zwar als Kopie unter `test_saves`: Er lädt
+    ohne Warnungen.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.
@@ -76,4 +120,4 @@ JSON-Zahlentypen werden normalisiert, damit gespeicherte Werte bitgleich zurück
 Unbekannte Essenz-, Einlage- und Affix-IDs bleiben erhalten und werden beim Effektaufbau ignoriert.
 
 ## Offen
-⬜ Mehrere Slots/Slot-Auswahl-UI, ⬜ Autosave, ⬜ exakte Position statt Spawnpunkt.
+✅ Mehrere Slots und Autosave (1.1) · ⬜ exakte Position statt Spawnpunkt · ⬜ Slots umbenennen/löschen im Menü.

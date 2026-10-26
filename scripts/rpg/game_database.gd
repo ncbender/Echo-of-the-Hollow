@@ -65,7 +65,7 @@ var talent_trees: Dictionary = {}     # tree id -> TalentTreeDefinition
 var talent_nodes: Dictionary = {}     # node id -> TalentNodeDefinition (indexed from the trees)
 var trials: Dictionary = {}           # trial id -> TrialDefinition
 var quests: Dictionary = {}           # quest id -> ClassQuestDefinition
-# Story (docs/PROLOGUE.md)
+# Story (docs/PROLOGUE_AND_HAVEN.md)
 var story_quests: Dictionary = {}     # quest id -> StoryQuestDefinition (prologue, main quest)
 var npcs: Dictionary = {}             # npc id -> NpcDefinition (dialogues inline)
 var ruins: Dictionary = {}            # ruin id -> RuinDefinition (Haven restoration)

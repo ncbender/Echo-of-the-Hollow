@@ -211,3 +211,26 @@ und Pickups überwachen nur `player`.
   - Lautstärke aus `UserSettings.sfx_volume`
 - **`SynthSounds`:** Platzhalter-Klänge zur Laufzeit; echte Dateien über `CombatAudio.files`.
 - **Kein zweites Autoload:** Audio ist an die Map gebunden, Effekte an den Szenenbaum.
+
+## Story-, Haven- und Save-Schicht (Prologue & Haven Slice 0.1, Details `PROLOGUE_AND_HAVEN.md`, `SAVE_SYSTEM.md`)
+- **Story (RPG-Schicht, zustandslos):**
+  - `StoryService.notify(character, event)` ist der einzige Eingang. Fortschritt steht im `QuestLog`,
+    Flags und Zähler im `WorldState`.
+  - Quelle der Events: Welt-Knoten (`StoryTrigger`, `Encounter`, `StoryPickup`, `DialogueService.finish`),
+    `GameMap` (`enter:<map>`), `PrologueService` (`trial_complete`, `class_chosen`),
+    `RestorationService` und `WaystoneService`.
+- **Bedingungen statt Code:** `StoryCondition` entscheidet über Platzierung von NPCs, Dialoge,
+  Begegnungen, Sperren, Kisten und Wegstein-Erweckung.
+- **Haven:**
+  - `RestorationService` ist atomar und datengetrieben.
+  - `RuinSite` erweitert `BuildPlot`, damit Forge-, Rezept- und Lagerfunktionen unverändert bleiben.
+- **Saves:**
+  - `SaveCoordinator` ist ein Kind des Autoloads (kein zweites Autoload). Alle Schreibvorgänge laufen
+    durch ihn: manuell, periodisch, Meilenstein.
+  - Meilenstein-Saves kommen aus Signalen langlebiger Objekte (`QuestLog.story_progressed`,
+    `WorldState.restoration_changed`), die `SessionState` mit Methoden-Callables verbindet. Dazu kommen
+    gezielte Anfragen (Klassenwahl, Wegstein).
+- **UI:**
+  - Titelbildschirm als Hauptszene. Pausemenü, Dialog-, Restaurierungs- und Wegsteinfenster erben von
+    `UiWindow`.
+  - Hinweis- und Speicheranzeige im HUD.

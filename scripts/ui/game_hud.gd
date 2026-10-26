@@ -329,6 +329,7 @@ func open_pause_menu() -> void:
 	if session == null:
 		return
 	close_windows()
+	hint_panel.visible = false
 	pause_menu.open(session)
 
 

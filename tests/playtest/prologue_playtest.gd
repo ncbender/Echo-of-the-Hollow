@@ -40,11 +40,16 @@ func _run() -> void:
 	await _await_map(&"old_road")
 	var until := _arg("until", "all")
 	await _road()
+	await _save_load_cycle(1, "after the road (Haven arrival)")
 	if until != "road":
 		await _haven()
+		await _save_load_cycle(2, "at the Whispering Stone")
 	if until != "road" and until != "haven":
 		await _stone()
+		await _save_load_cycle(3, "after the class choice")
 		await _return()
+		await _autosave_probe()
+		await _continue_from_title()
 	_log("play time (character clock): %.0f s, wall clock: %.0f s" % [session.character.play_time if session.character else 0.0,
 		(Time.get_ticks_msec() - _started_ms) / 1000.0])
 	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
@@ -261,6 +266,73 @@ func _return() -> void:
 	_check(StoryService.at_step(character, &"the_first_signs", 0), "main quest The Roots Remember: The First Signs")
 	await _ticks(20)
 	await _shot("p19_prologue_complete")
+
+
+## Esc -> Save Game -> slot, then Esc -> Load Game -> the same slot: the story
+## continues exactly where it was (real pause menu, real buttons).
+func _save_load_cycle(slot: int, label: String) -> void:
+	var before := session.character.quests.to_dict()
+	var flags := session.character.world.flags.duplicate()
+	var items := session.character.inventory.to_array()
+	var map_id := map.map_id
+	await _press(&"ui_cancel")
+	var menu := map.hud.pause_menu
+	_check(menu.visible and paused, "%s: Esc pauses" % label)
+	_click_button(menu, "Save Game")
+	await process_frame
+	var row := menu.find_child("Slot%d" % slot, true, false)
+	if row != null:
+		_click_button(row, "Save here")
+	for i in 10:
+		await process_frame
+	_check(SaveSystem.read_info(SaveSlots.manual_path(PROFILE, slot)).valid, "%s: saved to slot %d" % [label, slot])
+	menu.show_page("load")
+	await process_frame
+	row = menu.find_child("Slot%d" % slot, true, false)
+	if row != null:
+		_click_button(row, "Load")
+	await _await_map(map_id)
+	var loaded := session.character
+	var loaded_flags := loaded.world.flags.duplicate()
+	for key: StringName in loaded_flags.keys() + flags.keys():
+		if String(key).begins_with("count.enter:"):   # arriving on the map again is counted (story event)
+			loaded_flags.erase(key)
+			flags.erase(key)
+	var same := [_norm(loaded.quests.to_dict()) == _norm(before), _norm(loaded_flags) == _norm(flags),
+		_norm(loaded.inventory.to_array()) == _norm(items)]
+	_check(not false in same, "%s: loaded state identical (quests, flags, items: %s)" % [label, same])
+	_check(not paused, "%s: game runs again" % label)
+
+
+func _norm(value: Variant) -> String:
+	return JSON.stringify(JSON.parse_string(JSON.stringify(value)), "", true)
+
+
+## The periodic 5-minute autosave: the timer is advanced to just before the
+## interval (only the timer - no debug key); the write must follow.
+func _autosave_probe() -> void:
+	var saves := session.saves
+	var latest_before: int = SaveSlots.latest(PROFILE).get("order", 0)
+	saves.active_time = SaveCoordinator.AUTOSAVE_INTERVAL - 1.0
+	await _ticks(120)
+	var latest := SaveSlots.latest(PROFILE)
+	_check(int(latest.get("order", 0)) > latest_before and latest.get("meta", {}).get("kind") == "autosave",
+		"periodic autosave after 5 minutes of active play")
+	_check(map.hud.save_indicator.text() == "Progress saved" or map.hud.save_indicator.text() == "", "save indicator calm")
+
+
+## Quit to Title, then Continue loads the newest save.
+func _continue_from_title() -> void:
+	await _press(&"ui_cancel")
+	_click_button(map.hud.pause_menu, "Quit to Title")
+	await _ticks(20)
+	var title := current_scene as TitleScreen
+	_check(title != null and not (title.find_child("Continue", true, false) as Button).disabled, "title: Continue available")
+	await _shot("p20_title_continue")
+	if title != null:
+		_click_button(title, "Continue")
+	await _await_map(&"home_base")
+	_check(session.character.world.has_flag(&"prologue.completed"), "Continue: prologue complete, main quest active")
 
 
 ## Scripted fighter for an echo: walks to the nearest enemy (the warrior goes for

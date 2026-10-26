@@ -2,9 +2,11 @@
 
 2D-Pixel-Art-Action-RPG, schräge Top-Down-Perspektive. **Godot 4.7.2, ausschließlich GDScript.**
 Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1
-+ Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog).
++ Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
++ Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
-Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_arena.tscn`.
+Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
+Combat-Testarena: `scenes/arena/test_arena.tscn`.
 
 ## Werkzeuge
 - Godot: `../tools/godot/Godot_v4.7.2-stable_win64_console.exe` (oder `$env:GODOT`)
@@ -12,6 +14,7 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
 - Tests gezielt: `./tools/run_tests.ps1 -Suite dash,combo` (Suite = `tests/**/test_<name>.gd`)
 - Playtests (Fenster): `-s res://tests/playtest/visual_playtest.gd` (Combat), `rpg_playtest.gd` (RPG),
   `loop_playtest.gd` (Gameplay-Loop), `ui_playtest.gd` (Auflösungen/UI-Skalierung),
+  `prologue_playtest.gd` (kompletter Prolog ab Titel, `--fixed-fps 60`),
   `crafting_playtest.gd` (Forge), `class_playtest.gd` (Klassen-UI; `-- --prologue`: Prolog mit allen drei Klassen)
 - Neue `class_name`-Skripte brauchen vorher `--import` (macht `run_tests.ps1` automatisch).
 
@@ -50,6 +53,12 @@ Hauptszene: `scenes/maps/home_base.tscn`; Combat-Testarena: `scenes/arena/test_a
   Spielerseitige Texte Englisch; neue UI-Chrome-Texte über `localization/ui.csv` (`tr("UI_...")`).
 - Neue Maps erben von `GameMap`, brauchen `Player`, `GameHud`, `SpawnPoint` "default" und eine `MapDefinition`.
   Übergänge nur über `SessionState.travel()`. Weltzustand nur in `WorldState`.
+- Story: Fortschritt nur über `StoryService.notify(event)`; Quests, Dialoge, NPCs, Ruinen, Wegsteine sind
+  Daten (`data/story`, `data/npcs`, `data/haven/ruins`, `data/world/waystones`); Platzierung/Sichtbarkeit
+  über `StoryCondition`, nie über questspezifischen Code. Haven hat feste Ruinen (`RestorationService`,
+  atomar), keine freien Bauplätze. Design: `docs/PROLOGUE_AND_HAVEN.md`.
+- Saves nur über `SaveCoordinator` (manuell/periodisch/Meilenstein); Meilensteine nie unterdrücken,
+  Erfolg erst nach erfolgreichem Schreiben anzeigen. Tod/Respawn speichert nie.
 
 ## Tests (selektiv, siehe `docs/TEST_STRATEGY.md`)
 - Nur Suites des geänderten Systems + direkte Abhängigkeiten. Grüne, unveränderte Suites nicht wiederholen.

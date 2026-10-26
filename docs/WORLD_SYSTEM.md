@@ -10,9 +10,15 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 
 | Map-ID | Szene | Inhalt | Ausgänge |
 |---|---|---|---|
-| `home_base` | `scenes/maps/home_base.tscn` | **Startmap**, Klassenstation, 3 Bauplätze | Ost → Wald, Nord → Arena |
-| `whisper_forest` | `scenes/maps/whisper_forest.tscn` | 3 Grunts (respawnen), Test-Boss „Grove Warden“ (persistent), 10 Ressourcenknoten | West → Basis |
-| `test_arena` | `scenes/arena/test_arena.tscn` | Combat-Testarena (unverändert spielbar, direkt startbar) | West → Basis |
+| `old_road` | `scenes/maps/old_road.tscn` | **New-Game-Start** (Prolog-Teil 1, Mara, Wagen) | Nord → Haven |
+| `home_base` | `scenes/maps/home_base.tscn` | **Haven**: sechs Ruinen, Klassenstation, Wegstein, Mara, Edrin; keine Gegner | Süd → Old Road, Nord → Whispering Stone (nach Edrin), Ost → Wald, West → Arena |
+| `whispering_stone` | `scenes/maps/whispering_stone.tscn` | Echos, Klassenwahl, Wegstein, Memory Fragment | Süd → Haven |
+| `whisper_forest` | `scenes/maps/whisper_forest.tscn` | 3 Grunts (respawnen), Test-Boss „Grove Warden“ (persistent), 10 Ressourcenknoten | West → Haven |
+| `test_arena` | `scenes/arena/test_arena.tscn` | Combat-Testarena (unverändert spielbar, direkt startbar), Entwickler-Tor zu den Prologue Grounds | West → Haven |
+| `prologue` | `scenes/maps/prologue.tscn` | Prologue Grounds (Entwicklerzugang, alte Trial-Testsequenz) | → Haven |
+
+Hauptszene ist der Titelbildschirm (`scenes/ui/title_screen.tscn`). Prolog, Haven und Wegsteine:
+`PROLOGUE_AND_HAVEN.md`.
 
 - **Spawnpunkte:** `SpawnPoint`-Nodes mit `spawn_id` (pro Map eindeutig, `default` Pflicht).
 - **Übergänge:** `MapTransition`-Areas in sichtbaren Wanddurchgängen (Portal-Markierung + Zielname).
@@ -35,9 +41,12 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 | platzierte Pickups | Flag `pickup_taken.<persistent_id>` | kein erneutes Erscheinen (Anti-Duplikation) |
 | Gebäude | `WorldState.buildings[plot] = building` | gespeichert |
 
-## Basisbau ✅
+## Basisbau ✅ (Regeln; in Haven seit Slice 0.1 durch feste Ruinen ersetzt)
+> Haven hat **keine freien Bauplätze** mehr: Die sechs Ruinen (`RuinSite`, `RestorationService`,
+> `PROLOGUE_AND_HAVEN.md`) nutzen die Gebäudedefinitionen unten für ihre Funktion. `BaseBuilder` und die
+> Plotdaten bleiben als Regelwerk (Tests `base`) erhalten; v4-Plotgebäude werden zu Ruinen migriert.
 - `BuildingPlotDefinition` (`data/base/plots/`): ID, Map, erlaubte Gebäude (leer = alle), Größe.
-  In der Basis: `plot_west`, `plot_east`, `plot_north` (`BuildPlot`-Interactables, **G**).
+  (Früher in der Basis: `plot_west`, `plot_east`, `plot_north`.)
 - `BuildingDefinition` (`data/base/buildings/`): Kosten, Voraussetzungs-Flag, Einmaligkeit, Szene,
   Lagerbonus, Rezepte.
 

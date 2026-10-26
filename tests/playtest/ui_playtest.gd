@@ -33,7 +33,7 @@ func _run() -> void:
 	for resolution in RESOLUTIONS:
 		await _resolution_pass(resolution)
 	if not "--quick" in OS.get_cmdline_user_args():
-		for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(3840, 2160)]:
+		for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(3840, 2160)]:
 			await _scale_pass(resolution)
 		await _fullscreen_pass()
 	_log("RESULT: %s (%d checks, %d failed)" % ["OK" if failures == 0 else "FAILED", checks, failures])
@@ -56,6 +56,7 @@ func _resolution_pass(resolution: Vector2i) -> void:
 	await _open_inventory(tag)
 	await _open_class_panel(tag)
 	await _open_build_panel(tag)
+	await _open_story_windows(tag)
 	await _open_options(tag, true)
 	await _load_map(&"test_arena", "res://scenes/arena/test_arena.tscn")
 	await _combat(tag)
@@ -84,6 +85,11 @@ func _scale_pass(resolution: Vector2i) -> void:
 		_check_layout(tag + " HUD")
 		if is_equal_approx(scale, 2.0):
 			await _shot(tag, "hud")
+		if is_equal_approx(scale, 1.0) or is_equal_approx(scale, 1.5):
+			await _open_build_panel(tag)
+			await _open_story_windows(tag)
+			await _title_check(tag)
+			await _load_map(&"home_base", "res://scenes/maps/home_base.tscn")
 	session.settings.reset_to_defaults()
 	await _frames(4)
 	_check(is_equal_approx(root.content_scale_factor, 1.0), "reset to defaults -> UI scale 100 %")
@@ -186,14 +192,71 @@ func _open_class_panel(tag: String) -> void:
 
 
 func _open_build_panel(tag: String) -> void:
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
+	var plot := map.get_node("Ruins/OldSmithy") as RuinSite
 	await _teleport(plot.global_position + Vector2(0, 26))
-	map.hud.open_build_panel(plot)
+	map.hud.open_restoration(plot)
 	await _frames(4)
-	_check(map.hud.build_panel.visible, tag + " build panel opens")
-	_check_layout(tag + " build panel")
-	await _shot(tag, "05_build_panel")
+	_check(map.hud.restoration_panel.visible, tag + " restoration window opens")
+	_check_layout(tag + " restoration window")
+	await _shot(tag, "05_restoration")
 	map.hud.close_windows()
+
+
+## Prologue & Haven windows: dialogue, tutorial hint, pause menu (save + load
+## pages), waystone travel, class choice, restoration.
+func _open_story_windows(tag: String) -> void:
+	var lines: Array[Dictionary] = [{"name": "Mara Veyne", "text": "There's a place north of here. Haven. Not much to look at, but it's got walls, a forge, and people who still give a damn.", "color": UiTheme.COLOR_ACCENT}]
+	map.hud.open_lines(lines)
+	map.hud.show_hint("Hold RMB to charge a heavy attack. Release to strike.")
+	await _frames(4)
+	_check_layout(tag + " dialogue + hint")
+	await _shot(tag, "07_dialogue_hint")
+	map.hud.close_windows()
+	map.hud.open_pause_menu()
+	await _frames(4)
+	_check_layout(tag + " pause menu")
+	await _shot(tag, "08_pause")
+	map.hud.pause_menu.show_page("save")
+	await _frames(4)
+	_check_layout(tag + " pause / save slots")
+	map.hud.pause_menu.show_page("load")
+	await _frames(4)
+	_check_layout(tag + " pause / load slots")
+	await _shot(tag, "09_load_slots")
+	map.hud.pause_menu.hide()
+	await _frames(2)
+	var waystone := map.get_node("Waystone") as Waystone
+	await _teleport(waystone.global_position + Vector2(0, 20))
+	map.hud.open_waystones(waystone)
+	await _frames(4)
+	_check_layout(tag + " waystones")
+	await _shot(tag, "10_waystones")
+	map.hud.close_windows()
+	map.hud.class_choice_panel.open(session.character, null)
+	await _frames(4)
+	_check_layout(tag + " class choice")
+	await _shot(tag, "11_class_choice")
+	map.hud.close_windows()
+	await _frames(2)
+
+
+## Title screen (main menu) at the current window size and UI scale.
+func _title_check(tag: String) -> void:
+	change_scene_to_file(SessionState.TITLE_SCENE)
+	await _frames(8)
+	var view := root.get_visible_rect()
+	var problems: PackedStringArray = []
+	for node in current_scene.find_children("*", "Control", true, false):
+		var control := node as Control
+		if not control.is_visible_in_tree():
+			continue
+		if not view.grow(1.0).encloses(control.get_global_rect()):
+			problems.append("%s off screen" % control.name)
+		var minimum := control.get_combined_minimum_size()
+		if control.size.x + 0.5 < minimum.x or control.size.y + 0.5 < minimum.y:
+			problems.append("%s squeezed" % control.name)
+	_check(problems.is_empty(), "%s title screen layout (%s)" % [tag, "; ".join(problems.slice(0, 4))])
+	await _shot(tag, "00_title")
 
 
 func _open_options(tag: String, via_key: bool) -> void:

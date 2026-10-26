@@ -29,7 +29,18 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 `class_ui` (Klassenstation-Fenster bedient die echten Dienste). Combat Defense & Feedback 0.4: `defense`
 (Block/Parry), `combat_feedback` (VFX-Daten, Aufräumen, Marker, BREAK/PARRY), `combat_audio` (Cues, Drossel,
 Block vs. Parry, Lautstärke-Persistenz, Map-Lebensdauer). Class Combat Polish 0.3: `class_combat_polish`
-(Focus-Regeneration, Focused Strikes, Gap-Closer, Lunge-Deckel).
+(Focus-Regeneration, Focused Strikes, Gap-Closer, Lunge-Deckel). Prologue & Haven Slice 0.1:
+`save_foundation` (Slots, Rotation, Queue, periodisch/pausiert, Meilensteine, Fehler, Backup, Migration
+v4→v5, Anzeige, Pausemenü), `story` (Questkette, Events, Flags, Save/Load in jedem Schritt, Trials
+temporär), `old_road` (echte Map: Trigger, Hinweise, Varianten, Mara, Kisten, Eskorte, Save/Load mitten im
+Wagen, Straße bleibt offen), `haven` (Ruinen, atomare Restaurierung, Dialoge, Nordtor, sicher, Migration),
+`shrine` (Echos, Wellen, Tod/Abbruch, Wahl erst nach Save, Save-Fehler, Wegsteine, Rückkehr, kein
+Guardian/Soulbinder).
+
+**Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
+`-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte
+Interact-/Esc-Events (keine F-Tasten), drei Save/Load-Zyklen über das Pausemenü, Autosave-Timer, Quit to
+Title → Continue. Log und Screenshots: `tests/output/prologue_playtest_log.txt`, `p*.png`.
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.

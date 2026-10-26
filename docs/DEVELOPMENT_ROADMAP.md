@@ -33,6 +33,7 @@
 | Class Foundation 0.2 | Attack Speed, Bleeding/Chill, gemeinsamer Trefferstrom; Talent-Engine (7 Tiers), Skills Q/E/R/F mit Form-/Resonance-Mods; Warrior, Arcanist, Shadowrunner; Prolog mit Trials und Klassenwahl; Klassenquests; Presets; Klassenstation-UI; Save v4 | `CLASS_FOUNDATION_02_REPORT.md` |
 | Class Combat Polish 0.3 | Focus passiv, zielgebundene Gap-Closer, Skill-Lunges gedeckelt | `CLASS_COMBAT_POLISH_03_REPORT.md` |
 | Combat Defense & Feedback 0.4 | Focus 6/s, Block & Parry (Shift, Profile, Unblockable/Guard Break), Skill-VFX, Synth-Combat-Audio, Status-/Poise-Lesbarkeit | `COMBAT_DEFENSE_FEEDBACK_04_REPORT.md` |
+| Prologue & Haven Slice 0.1 | Save Foundation 1.1 (Slots, Autosave, Meilensteine, Titel/Pause), Story-Quests, Old Road + Mara, Haven mit Ruinen-Restaurierung, Whispering Stone mit Echos und Klassenwahl, Wegsteine, Save v5 | `PROLOGUE_HAVEN_VERTICAL_SLICE_01_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von

@@ -1,6 +1,6 @@
 class_name RuinDefinition
 extends Resource
-## A ruin of Haven (docs/HAVEN.md). Restoring it is a fixed, data-driven step -
+## A ruin of Haven (docs/PROLOGUE_AND_HAVEN.md). Restoring it is a fixed, data-driven step -
 ## there are no free build plots. Stages: ruined -> restored -> revitalized
 ## (revitalizing is prepared in the data but not offered in this slice).
 ## A restored ruin provides the functions of `building_id` (forge, storage,
