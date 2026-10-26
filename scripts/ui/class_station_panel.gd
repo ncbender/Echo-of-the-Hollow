@@ -10,13 +10,14 @@ extends UiWindow
 const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests"]
 const FORM := SkillModDefinition.Slot.FORM
 const RESONANCE := SkillModDefinition.Slot.RESONANCE
+const CONTENT_WIDTH := 900
 
 var character: Character
 var station: ClassStation
 var page: String = "Classes"
 
-var _tabs: HBoxContainer
-var _summary: Label
+var _tabs: UiTabs
+var _summary: HBoxContainer
 var _content: VBoxContainer
 var _status: Label
 var _trees: Array[TalentTreeView] = []
@@ -25,18 +26,15 @@ var _trees: Array[TalentTreeView] = []
 func _ready() -> void:
 	set_title(tr("UI_CLASS_STATION"))
 	set_close_text(tr("UI_CLOSE_CLASS"))
-	_tabs = HBoxContainer.new()
-	body.add_child(_tabs)
+	_tabs = UiTabs.new()
 	for name in PAGES:
-		var tab := Button.new()
-		tab.name = "Tab%s" % name
-		tab.text = tr("UI_PAGE_%s" % name.to_upper())   # stable localization keys
-		tab.toggle_mode = true
-		tab.pressed.connect(show_page.bind(name))
-		_tabs.add_child(tab)
-	_summary = UiTheme.label("", UiTheme.COLOR_ACCENT)
+		_tabs.add_tab(name, tr("UI_PAGE_%s" % name.to_upper()))   # stable localization keys
+	_tabs.tab_selected.connect(show_page)
+	body.add_child(_tabs)
+	_summary = HBoxContainer.new()
+	_summary.add_theme_constant_override(&"separation", UiTheme.GAP * 2)
 	body.add_child(_summary)
-	_status = UiTheme.wrapped("", UiTheme.COLOR_WARN, 900)
+	_status = UiTheme.wrapped("", UiTheme.WARNING, CONTENT_WIDTH)
 	body.add_child(_status)
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override(&"separation", UiTheme.GAP)
@@ -64,8 +62,7 @@ func _process(_delta: float) -> void:
 
 func show_page(name: String) -> void:
 	page = name
-	for tab: Button in _tabs.get_children():
-		tab.button_pressed = tab.name == "Tab%s" % name
+	_tabs.select(name)
 	rebuild()
 
 
@@ -92,84 +89,124 @@ func rebuild() -> void:
 	queue_fit()
 
 
+## Header: active class, level bar, resource, free talent points (chips).
 func _refresh_summary() -> void:
+	for child in _summary.get_children():
+		_summary.remove_child(child)
+		child.queue_free()
 	var classes := character.classes
 	var class_id := classes.active_class_id
 	var definition := classes.get_active_definition()
-	var text := "%s  -  Level %d (%d / %d XP)" % [definition.display_name, classes.get_level(class_id),
-		classes.get_xp(class_id), classes.xp_to_next(class_id)]
+	var name_box := VBoxContainer.new()
+	name_box.add_theme_constant_override(&"separation", 2)
+	name_box.add_child(UiTheme.heading(definition.display_name))
+	var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.BRONZE)
+	bar.custom_minimum_size.x = 220
+	bar.max_value = maxi(1, classes.xp_to_next(class_id))
+	bar.value = classes.get_xp(class_id)
+	name_box.add_child(bar)
+	_summary.add_child(name_box)
+	_summary.add_child(_chip("Level %d" % classes.get_level(class_id), "%d / %d XP" % [classes.get_xp(class_id), classes.xp_to_next(class_id)]))
 	if definition.resource != null:
-		text += "  -  Resource: %s" % definition.resource.display_name
+		_summary.add_child(_chip(definition.resource.display_name, "class resource"))
 	if not definition.talent_tree_ids.is_empty():
-		text += "  -  Talent points: %d free of %d" % [TalentService.points_available(character, class_id), TalentService.points_total(character, class_id)]
+		_summary.add_child(_chip("%d free" % TalentService.points_available(character, class_id), "of %d talent points" % TalentService.points_total(character, class_id)))
 	if classes.in_trial():
-		text += "  -  CLASS TRIAL (temporary)"
-	_summary.text = text
+		_summary.add_child(_chip("Class trial", "temporary"))
+	_summary.add_child(_chip("At a class station" if at_station() else "Away from a station", "changes allowed" if at_station() else "learning talents only"))
+
+
+func _chip(value: String, caption: String) -> Control:
+	var panel := UiTheme.card(&"InsetPanel")
+	var box := panel.get_node("Box") as VBoxContainer
+	box.add_theme_constant_override(&"separation", 0)
+	box.add_child(UiTheme.styled(value, &"SubheadingLabel"))
+	box.add_child(UiTheme.styled(caption, &"CaptionLabel"))
+	return panel
 
 
 func _say(error: String, success: String) -> void:
 	_status.text = error if error != "" else success
+	_status.add_theme_color_override(&"font_color", UiTheme.DANGER if error != "" else UiTheme.SUCCESS)
 	_status.visible = _status.text != ""
 	rebuild()
 
 
-func _station_button(text: String, action: Callable, enabled: bool = true, reason: String = "") -> Button:
-	var button := Button.new()
-	button.text = text
+func _station_button(text: String, action: Callable, enabled: bool = true, reason: String = "", variation: StringName = &"") -> Button:
+	var button := UiTheme.button(text, variation, action)
 	button.disabled = not enabled or not at_station()
 	button.tooltip_text = reason if reason != "" else ("" if at_station() else tr("UI_ONLY_AT_STATION"))
-	button.pressed.connect(action)
 	return button
 
 
 # --- Classes --------------------------------------------------------------------
 
 func _build_classes() -> void:
-	_content.add_child(UiTheme.wrapped("Weapon mastery, inventory, crafting materials and the home base are shared by all classes. Each class has its own level, talents, skills, presets and equipment loadout.", UiTheme.COLOR_DIM, 900))
+	_content.add_child(UiTheme.wrapped("Weapon mastery, inventory, crafting materials and Haven are shared by all classes. Each class has its own level, talents, skills, presets and equipment loadout.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 	# prepared classes (Guardian, Soulbinder) stay hidden until they are playable
 	var definitions: Array = character.database.classes.values().filter(func(d: ClassDefinition) -> bool: return d.playable)
 	definitions.sort_custom(func(a: ClassDefinition, b: ClassDefinition) -> bool: return a.display_name < b.display_name)
+	var grid := HFlowContainer.new()
+	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP * 2)
+	grid.add_theme_constant_override(&"v_separation", UiTheme.GAP * 2)
 	for definition: ClassDefinition in definitions:
-		_content.add_child(_class_row(definition))
+		grid.add_child(_class_card(definition))
+	_content.add_child(grid)
 
 
-func _class_row(definition: ClassDefinition) -> Control:
+func _class_card(definition: ClassDefinition) -> Control:
 	var classes := character.classes
-	var row := HBoxContainer.new()
 	var unlocked := classes.is_unlocked(definition.id)
 	var active := classes.active_class_id == definition.id
-	var info := "%s   Lv %d  (%d / %d XP)" % [definition.display_name, classes.get_level(definition.id),
-		classes.get_xp(definition.id), classes.xp_to_next(definition.id)] if unlocked \
-		else "%s   - %s" % [definition.display_name, _unlock_text(definition)]
-	var label := UiTheme.label(info, UiTheme.COLOR_ACCENT if active else (UiTheme.COLOR_TEXT if unlocked else UiTheme.COLOR_DIM))
-	label.custom_minimum_size = Vector2(620, 0)
-	label.tooltip_text = definition.description
-	label.mouse_filter = Control.MOUSE_FILTER_PASS
-	row.add_child(label)
+	var card := UiTheme.card(&"SelectedCardPanel" if active else &"CardPanel")
+	card.name = "Class_%s" % definition.id
+	card.custom_minimum_size = Vector2(430, 0)
+	var box := card.get_node("Box") as VBoxContainer
+	var top := HBoxContainer.new()
+	var title := UiTheme.heading(definition.display_name)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not unlocked:
+		title.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
+	top.add_child(title)
+	var badge := UiTheme.styled("ACTIVE" if active else ("UNLOCKED" if unlocked else "LOCKED"), &"CaptionLabel")
+	badge.add_theme_color_override(&"font_color", UiTheme.RESONANCE if active else (UiTheme.SUCCESS if unlocked else UiTheme.TEXT_MUTED))
+	top.add_child(badge)
+	box.add_child(top)
+	box.add_child(UiTheme.wrapped(definition.description, UiTheme.TEXT_SECONDARY if unlocked else UiTheme.TEXT_MUTED, 400))
+	if definition.resource != null:
+		box.add_child(UiTheme.styled("Resource: %s" % definition.resource.display_name, &"SmallLabel"))
+	if unlocked:
+		box.add_child(UiTheme.styled("Level %d  ·  %d / %d XP" % [classes.get_level(definition.id), classes.get_xp(definition.id), classes.xp_to_next(definition.id)], &"SmallLabel"))
+	else:
+		var reason := UiTheme.wrapped(_unlock_text(definition), UiTheme.WARNING, 400)
+		reason.theme_type_variation = &"SmallLabel"
+		box.add_child(reason)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_END
 	if active:
-		var current := Button.new()
-		current.text = "Active"
+		var current := UiTheme.button("Active")
+		current.name = "Active_%s" % definition.id
 		current.disabled = true
 		row.add_child(current)
 	elif unlocked:
 		var button := _station_button("Activate", func() -> void:
-			_say(character.switch_class(definition.id, at_station()), "Now playing as %s." % definition.display_name))
+			_say(character.switch_class(definition.id, at_station()), "Now playing as %s." % definition.display_name), true, "", &"PrimaryButton")
 		button.name = "Activate_%s" % definition.id
 		row.add_child(button)
 	else:
-		var locked := Button.new()
-		locked.text = "Locked"
+		var locked := UiTheme.button("Locked")
 		locked.disabled = true
 		row.add_child(locked)
-	return row
+	box.add_child(row)
+	return card
 
 
 func _unlock_text(definition: ClassDefinition) -> String:
 	if not definition.playable:
-		return "coming later (class quest prepared)"
+		return "Coming later."
 	if definition.id in character.database.rules.prologue_class_ids and not character.prologue.is_completed():
-		return "try it in the prologue, then choose one starting class"
-	return "locked: complete its class quest (Quests page)"
+		return "Walk its echo at the Whispering Stone, then choose one path."
+	return "Locked: complete its class quest (Quests page)."
 
 
 # --- Talents ----------------------------------------------------------------------
@@ -178,18 +215,32 @@ func _build_talents() -> void:
 	var class_id := character.classes.active_class_id
 	var trees := TalentService.trees_of(character.database, class_id)
 	if trees.is_empty():
-		_content.add_child(UiTheme.wrapped("This class has no talent trees.", UiTheme.COLOR_DIM, 900))
+		_content.add_child(UiTheme.wrapped("This class has no talent trees.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 		return
 	var rules := character.database.rules.talent_rules()
-	var info := "One talent point per class level from level %d (51 at level 60). Trees can be mixed freely; a tier opens when enough points are invested in the LOWER tiers of the same tree. A capstone (tier 7) needs 30 points in its tree. [A] active skill, [T] transformation." % rules.first_point_level
-	_content.add_child(UiTheme.wrapped(info, UiTheme.COLOR_DIM, 900))
+	var info := "One talent point per class level from level %d. Trees can be mixed freely; a tier opens when enough points are invested in the LOWER tiers of the same tree. A capstone (tier 7) needs 30 points in its tree. [A] active skill, [T] transformation." % rules.first_point_level
+	_content.add_child(UiTheme.wrapped(info, UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override(&"separation", UiTheme.GAP * 3)
+	for entry: Array in [["Learned", UiTheme.BRONZE], ["Available", UiTheme.RESONANCE], ["Locked", UiTheme.TEXT_MUTED]]:
+		var legend := HBoxContainer.new()
+		var swatch := ColorRect.new()
+		swatch.color = entry[1]
+		swatch.custom_minimum_size = Vector2(14, 14)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		legend.add_child(swatch)
+		legend.add_child(UiTheme.styled(entry[0], &"SmallLabel"))
+		top.add_child(legend)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(spacer)
 	var cost := TalentService.respec_cost(character, class_id)
 	var respec_error := TalentService.can_respec(character, class_id, at_station())
 	var respec := _station_button("Reset talents (%s)" % ("free" if cost == 0 else "%d gold" % cost), func() -> void:
-		_say(TalentService.respec(character, class_id, at_station()), "Talents reset."), respec_error == "", respec_error)
+		_say(TalentService.respec(character, class_id, at_station()), "Talents reset."), respec_error == "", respec_error, &"DangerButton")
 	respec.name = "Respec"
-	respec.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_content.add_child(respec)
+	top.add_child(respec)
+	_content.add_child(top)
 	var row := HFlowContainer.new()
 	row.add_theme_constant_override(&"h_separation", UiTheme.GAP * 4)
 	_content.add_child(row)
@@ -220,59 +271,85 @@ func _build_skills() -> void:
 	var class_id := character.classes.active_class_id
 	var build := character.builds.get_build(class_id)
 	var available := SkillBook.available_skills(character, class_id)
-	_content.add_child(UiTheme.heading(tr("UI_SKILL_SLOTS")))
+	var runtime := ClassRuntime.new()
+	runtime.character = character
+	var resource := character.classes.get_active_definition().resource
+	_content.add_child(UiTheme.section(tr("UI_SKILL_SLOTS")))
+	var slots := HFlowContainer.new()
+	slots.add_theme_constant_override(&"h_separation", UiTheme.GAP * 2)
 	for index in build.slots.size():
-		var row := HBoxContainer.new()
-		row.add_child(UiTheme.label("[%s]" % SkillBar.KEYS[index], UiTheme.COLOR_ACCENT))
+		var card := UiTheme.card(&"CardPanel")
+		card.custom_minimum_size = Vector2(210, 0)
+		var box := card.get_node("Box") as VBoxContainer
+		var head := HBoxContainer.new()
+		head.add_child(UiTheme.key_chip(SkillBar.KEYS[index]))
+		var skill: SkillDefinition = character.database.skills.get(build.slots[index])
+		var title := UiTheme.label(skill.display_name if skill != null else "Empty", skill.color.lightened(0.3) if skill != null else UiTheme.TEXT_MUTED)
+		head.add_child(title)
+		box.add_child(head)
+		if skill != null:
+			var params := runtime.params_for(skill)
+			box.add_child(UiTheme.styled("%s  ·  %s" % ["%d %s" % [roundi(params.cost), resource.display_name if resource != null else ""] if params.cost > 0.0 else "No cost",
+				"%.1f s cooldown" % params.cooldown if params.cooldown > 0.0 else "no cooldown"], &"SmallLabel"))
 		var choice := OptionButton.new()
 		choice.name = "Slot%d" % index
-		choice.custom_minimum_size = Vector2(260, 0)
 		choice.add_item("(empty)")
 		choice.set_item_metadata(0, &"")
-		for skill in available:
-			choice.add_item(skill.display_name)
-			choice.set_item_metadata(choice.item_count - 1, skill.id)
-			if build.slots[index] == skill.id:
+		for candidate in available:
+			choice.add_item(candidate.display_name)
+			choice.set_item_metadata(choice.item_count - 1, candidate.id)
+			if build.slots[index] == candidate.id:
 				choice.select(choice.item_count - 1)
 		choice.disabled = not at_station()
 		choice.tooltip_text = "" if at_station() else tr("UI_ONLY_AT_STATION")
 		choice.item_selected.connect(func(item: int) -> void:
 			_say(SkillBook.assign_slot(character, class_id, index, choice.get_item_metadata(item), at_station()), "Skill slots updated."))
-		row.add_child(choice)
-		_content.add_child(row)
-	_content.add_child(UiTheme.heading(tr("UI_SKILLS_AND_MODS")))
+		box.add_child(choice)
+		slots.add_child(card)
+	_content.add_child(slots)
+	_content.add_child(UiTheme.section(tr("UI_SKILLS_AND_MODS")))
 	var skills: Array = character.database.skills.values().filter(func(s: SkillDefinition) -> bool: return s.class_id == class_id)
 	skills.sort_custom(func(a: SkillDefinition, b: SkillDefinition) -> bool:
 		return a.unlock_level < b.unlock_level if a.unlock_level != b.unlock_level else a.display_name < b.display_name)
 	if skills.is_empty():
-		_content.add_child(UiTheme.wrapped("This class has no skills yet.", UiTheme.COLOR_DIM, 900))
+		_content.add_child(UiTheme.wrapped("This class has no skills yet.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 	for skill: SkillDefinition in skills:
-		_content.add_child(_skill_row(class_id, skill))
+		_content.add_child(_skill_row(class_id, skill, runtime))
 
 
-func _skill_row(class_id: StringName, skill: SkillDefinition) -> Control:
-	var row := HBoxContainer.new()
+func _skill_row(class_id: StringName, skill: SkillDefinition, runtime: ClassRuntime) -> Control:
 	var available := SkillBook.is_skill_available(character, class_id, skill.id)
-	var runtime := ClassRuntime.new()
-	runtime.character = character
 	var params := runtime.params_for(skill)
 	var resource := character.classes.get_active_definition().resource
-	var label := UiTheme.label("%s%s" % [skill.display_name, "" if available else "  (%s)" % SkillBook.unlock_text(character, skill)],
-			skill.color.lightened(0.3) if available else UiTheme.COLOR_DIM)
-	label.custom_minimum_size = Vector2(300, 0)
-	label.mouse_filter = Control.MOUSE_FILTER_PASS
-	label.tooltip_text = SkillText.skill(skill, params, resource.display_name if resource != null else "")
-	row.add_child(label)
+	var card := UiTheme.card(&"InsetPanel" if available else &"InsetPanel")
+	card.name = "Skill_%s" % skill.id
+	var box := card.get_node("Box") as VBoxContainer
+	var head := HBoxContainer.new()
+	var name_label := UiTheme.label(skill.display_name, skill.color.lightened(0.3) if available else UiTheme.TEXT_MUTED)
+	name_label.custom_minimum_size = Vector2(260, 0)
+	name_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	name_label.tooltip_text = SkillText.skill(skill, params, resource.display_name if resource != null else "")
+	head.add_child(name_label)
+	var meta := UiTheme.styled(("%s  ·  %s" % ["%d %s" % [roundi(params.cost), resource.display_name if resource != null else ""] if params.cost > 0.0 else "No cost",
+		"%.1f s" % params.cooldown if params.cooldown > 0.0 else "no cooldown"]) if available else "Locked: %s" % SkillBook.unlock_text(character, skill), &"SmallLabel")
+	if not available:
+		meta.add_theme_color_override(&"font_color", UiTheme.WARNING)
+	meta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(meta)
 	if available and skill.allows_mods:
-		row.add_child(_mod_choice(class_id, skill, FORM))
-		row.add_child(_mod_choice(class_id, skill, RESONANCE))
-	return row
+		head.add_child(_mod_choice(class_id, skill, FORM))
+		head.add_child(_mod_choice(class_id, skill, RESONANCE))
+	box.add_child(head)
+	var description := UiTheme.wrapped(skill.description, UiTheme.TEXT_SECONDARY if available else UiTheme.TEXT_MUTED, CONTENT_WIDTH - 40)
+	description.theme_type_variation = &"SmallLabel"
+	box.add_child(description)
+	return card
 
 
 func _mod_choice(class_id: StringName, skill: SkillDefinition, slot: SkillModDefinition.Slot) -> Control:
 	var choice := OptionButton.new()
 	choice.name = "%s_%s" % [skill.id, "form" if slot == FORM else "resonance"]
-	choice.custom_minimum_size = Vector2(250, 0)
+	choice.custom_minimum_size = Vector2(230, 0)
 	choice.add_item("%s: none" % ("Form" if slot == FORM else "Resonance"))
 	choice.set_item_metadata(0, &"")
 	var current := character.builds.get_build(class_id).mod_of(skill.id, slot)
@@ -297,95 +374,127 @@ func _mod_choice(class_id: StringName, skill: SkillDefinition, slot: SkillModDef
 
 func _build_presets() -> void:
 	var class_id := character.classes.active_class_id
-	_content.add_child(UiTheme.wrapped("A preset stores talents, skill slots, modifications and this class's equipment references (never items themselves). Saving and renaming are free; activating is free at a class station unless the talents differ (then the normal reset cost applies).", UiTheme.COLOR_DIM, 900))
+	_content.add_child(UiTheme.wrapped("A preset stores talents, skill slots, modifications and this class's equipment references - never the items themselves. Saving and renaming are free; activating is free at a class station unless the talents differ (then the normal reset cost applies).", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 	if not character.classes.is_unlocked(class_id):
-		_content.add_child(UiTheme.wrapped("Presets need an unlocked class (not available during a trial).", UiTheme.COLOR_WARN, 900))
+		_content.add_child(UiTheme.wrapped("Presets need an unlocked class (not available during a trial).", UiTheme.WARNING, CONTENT_WIDTH))
 		return
 	for index in PresetService.slot_count(character):
-		_content.add_child(_preset_row(class_id, index))
+		_content.add_child(_preset_card(class_id, index))
 
 
-func _preset_row(class_id: StringName, index: int) -> Control:
+func _preset_card(class_id: StringName, index: int) -> Control:
 	var preset := PresetService.get_preset(character, class_id, index)
+	var card := UiTheme.card(&"CardPanel" if not preset.is_empty() else &"InsetPanel")
+	var box := card.get_node("Box") as VBoxContainer
 	var row := HBoxContainer.new()
 	row.name = "Preset%d" % index
+	row.add_child(UiTheme.styled("%d" % (index + 1), &"SubheadingLabel"))
 	var name_edit := LineEdit.new()
 	name_edit.name = "Name"
 	name_edit.custom_minimum_size = Vector2(220, 0)
 	name_edit.placeholder_text = "Preset %d" % (index + 1)
 	name_edit.text = str(preset.get("name", ""))
 	row.add_child(name_edit)
-	var save := Button.new()
-	save.name = "Save"
-	save.text = "Save current"
-	save.pressed.connect(func() -> void:
+	var save := UiTheme.button("Save current" if preset.is_empty() else "Overwrite with current", &"", func() -> void:
 		_say(PresetService.save_preset(character, class_id, index, name_edit.text), "Preset saved."))
+	save.name = "Save"
 	row.add_child(save)
+	box.add_child(row)
 	if preset.is_empty():
-		row.add_child(UiTheme.label("empty", UiTheme.COLOR_DIM))
-		return row
-	var rename := Button.new()
-	rename.text = "Rename"
-	rename.pressed.connect(func() -> void:
+		box.add_child(UiTheme.styled("Empty slot", &"CaptionLabel"))
+		return card
+	var rename := UiTheme.button("Rename", &"", func() -> void:
 		_say(PresetService.rename_preset(character, class_id, index, name_edit.text), "Preset renamed."))
 	row.add_child(rename)
 	var errors := PresetService.validate(character, class_id, preset)
 	var cost := PresetService.activation_cost(character, class_id, preset)
 	var activate := _station_button("Activate (%s)" % ("free" if cost == 0 else "%d gold" % cost), func() -> void:
-		_say(PresetService.activate(character, class_id, index, at_station()), "Preset activated."), errors.is_empty(), "\n".join(errors))
+		_say(PresetService.activate(character, class_id, index, at_station()), "Preset activated."), errors.is_empty(), "\n".join(errors), &"PrimaryButton")
 	activate.name = "Activate"
 	row.add_child(activate)
-	var delete := Button.new()
-	delete.text = "Delete"
-	delete.pressed.connect(func() -> void:
-		_say(PresetService.delete_preset(character, class_id, index), "Preset deleted."))
+	var delete := UiTheme.button("Delete", &"DangerButton", func() -> void: _ask_delete(class_id, index, str(preset.get("name", ""))))
+	delete.name = "Delete"
 	row.add_child(delete)
-	if not errors.is_empty():
-		row.add_child(UiTheme.label(errors[0], UiTheme.COLOR_ERROR))
-	return row
+	# summary: talents, skills, equipment references (missing items flagged)
+	var talents: Dictionary = preset.get("talents", {}) if preset.get("talents") is Dictionary else {}
+	var points := 0
+	for rank: Variant in talents.values():
+		points += int(rank)
+	var skills: PackedStringArray = []
+	for skill_id: Variant in preset.get("slots", []):
+		var skill: SkillDefinition = character.database.skills.get(StringName(str(skill_id)))
+		skills.append(skill.display_name if skill != null else "-")
+	var equipment: Dictionary = preset.get("equipment", {}) if preset.get("equipment") is Dictionary else {}
+	box.add_child(UiTheme.styled("%d talent points  ·  Skills: %s  ·  %d equipment references" % [points, ", ".join(skills), equipment.size()], &"SmallLabel"))
+	for error in errors:
+		var line := UiTheme.wrapped("! " + error, UiTheme.DANGER, CONTENT_WIDTH - 40)
+		line.theme_type_variation = &"SmallLabel"
+		box.add_child(line)
+	return card
+
+
+func _ask_delete(class_id: StringName, index: int, preset_name: String) -> void:
+	var hud := get_parent()
+	while hud != null and not hud is GameHud:
+		hud = hud.get_parent()
+	var action := func() -> void: _say(PresetService.delete_preset(character, class_id, index), "Preset deleted.")
+	if hud == null:
+		action.call()
+		return
+	(hud as GameHud).confirm_dialog.ask("Delete preset?", "\"%s\" will be deleted. Items, talents and skills you have now are not affected." % (preset_name if preset_name != "" else "Preset %d" % (index + 1)), "Delete", action, true)
 
 
 # --- Quests -----------------------------------------------------------------------
 
 func _build_quests() -> void:
-	_content.add_child(UiTheme.wrapped("Classes you did not choose in the prologue - and later classes - are unlocked by their class quests. Take and turn them in at a class station.", UiTheme.COLOR_DIM, 900))
+	_content.add_child(UiTheme.wrapped("Classes you did not choose at the Whispering Stone are unlocked by their class quests. Take and turn them in at a class station.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 	for quest in QuestService.quests_for(character).filter(func(q: ClassQuestDefinition) -> bool: return q.available):
 		_content.add_child(_quest_row(quest))
 
 
 func _quest_row(quest: ClassQuestDefinition) -> Control:
+	var card := UiTheme.card(&"CardPanel")
 	var box := VBoxContainer.new()
 	box.name = "Quest_%s" % quest.id
+	(card.get_node("Box") as VBoxContainer).add_child(box)
 	var state := character.quests.state(quest.id)
-	var title := "%s  (%s)" % [quest.display_name, {"active": "active", "completed": "completed"}.get(state, "not taken")]
-	box.add_child(UiTheme.label(title, UiTheme.COLOR_ACCENT if state == "active" else UiTheme.COLOR_TEXT))
-	box.add_child(UiTheme.wrapped(quest.description, UiTheme.COLOR_DIM, 900))
-	var lines: PackedStringArray = []
+	var head := HBoxContainer.new()
+	var title := UiTheme.styled(quest.display_name, &"SubheadingLabel")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var badge := UiTheme.styled({"active": "ACTIVE", "completed": "COMPLETED"}.get(state, "NOT TAKEN"), &"CaptionLabel")
+	badge.add_theme_color_override(&"font_color", UiTheme.RESONANCE if state == "active" else (UiTheme.SUCCESS if state == "completed" else UiTheme.TEXT_MUTED))
+	head.add_child(badge)
+	box.add_child(head)
+	box.add_child(UiTheme.wrapped(quest.description, UiTheme.TEXT_SECONDARY, CONTENT_WIDTH - 40))
 	for index in quest.objectives.size():
-		lines.append(ObjectiveRules.text(quest.objectives[index], character.quests.progress(quest.id, index)))
+		box.add_child(UiTheme.styled("·  " + ObjectiveRules.text(quest.objectives[index], character.quests.progress(quest.id, index)), &"SmallLabel"))
 	for cost in quest.deliveries:
 		var item := character.database.get_item(cost.item_id)
-		lines.append("Deliver %d x %s (you have %d)" % [cost.quantity, item.display_name if item else String(cost.item_id), character.inventory.count(cost.item_id)])
-	box.add_child(UiTheme.wrapped("\n".join(lines), UiTheme.COLOR_TEXT, 900))
+		var have := character.inventory.count(cost.item_id)
+		var line := UiTheme.styled("·  Deliver %d x %s (you have %d)" % [cost.quantity, item.display_name if item else String(cost.item_id), have], &"SmallLabel")
+		line.add_theme_color_override(&"font_color", UiTheme.SUCCESS if have >= cost.quantity else UiTheme.TEXT_SECONDARY)
+		box.add_child(line)
 	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_END
 	if state == "":
 		var error := QuestService.can_start(character, quest.id)
 		var start := _station_button("Take quest", func() -> void:
-			_say(QuestService.start(character, quest.id), "Quest taken: %s." % quest.display_name), error == "", error)
+			_say(QuestService.start(character, quest.id), "Quest taken: %s." % quest.display_name), error == "", error, &"PrimaryButton")
 		start.name = "Start"
 		row.add_child(start)
 	elif state == "active":
 		var error := QuestService.can_turn_in(character, quest.id, at_station())
 		var turn_in := _station_button("Turn in", func() -> void:
-			_say(QuestService.turn_in(character, quest.id, at_station()), "Quest complete - class unlocked!"), error == "", error)
+			_say(QuestService.turn_in(character, quest.id, at_station()), "Quest complete - class unlocked!"), error == "", error, &"PrimaryButton")
 		turn_in.name = "TurnIn"
 		row.add_child(turn_in)
 	box.add_child(row)
-	return box
+	return card
 
 
-## Flow rows (talent trees) as wide as all their children side by side; the
-## window shrinks and stacks them only when the canvas is narrower.
+## Flow rows (talent trees, class cards) as wide as all their children side by
+## side; the window shrinks and stacks them only when the canvas is narrower.
 func preferred_body_size() -> Vector2:
 	var wanted := body.get_combined_minimum_size()
 	for flow: HFlowContainer in _content.find_children("*", "HFlowContainer", false, false):

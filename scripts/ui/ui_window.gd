@@ -91,12 +91,21 @@ func _focus_first() -> void:
 	var focused := get_viewport().gui_get_focus_owner()
 	if focused != null and is_ancestor_of(focused):
 		return
+	var first_tab: BaseButton = null
 	for node in body.find_children("*", "BaseButton", true, false):
 		var button := node as BaseButton
-		if button.is_visible_in_tree() and not button.disabled and button.focus_mode != Control.FOCUS_NONE:
-			button.grab_focus()
-			return
-	_close.grab_focus()
+		if not button.is_visible_in_tree() or button.disabled or button.focus_mode == Control.FOCUS_NONE:
+			continue
+		if button.theme_type_variation == &"TabButton":
+			if first_tab == null and button.button_pressed:
+				first_tab = button   # the selected tab, if nothing else takes focus
+			continue
+		button.grab_focus()
+		return
+	if first_tab != null:
+		first_tab.grab_focus()
+	else:
+		_close.grab_focus()
 
 
 ## Preferred size of the body content; subclasses with flow layouts override it.

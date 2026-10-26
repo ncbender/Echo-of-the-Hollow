@@ -6,7 +6,7 @@ extends Control
 
 signal learn_requested(node_id: StringName)
 
-const CELL := Vector2(196, 48)
+const CELL := Vector2(200, 52)
 const GAP := Vector2(14, 14)
 const GUTTER := 64.0
 const HEADER := 58.0
@@ -69,24 +69,59 @@ func refresh() -> void:
 		var rank := build.rank(node.id)
 		var error := TalentService.can_learn(character, class_id, node.id)
 		var marker: String = {TalentNodeDefinition.Kind.ACTIVE: " [A]", TalentNodeDefinition.Kind.TRANSFORMATIVE: " [T]"}.get(node.kind, "")
-		button.text = "%s%s\n%d / %d" % [node.display_name, marker, rank, node.max_rank]
-		var color := UiTheme.COLOR_TEXT
-		if rank >= node.max_rank:
-			color = tree.color.lightened(0.35)
-		elif rank > 0:
-			color = UiTheme.COLOR_ACCENT
-		elif error != "":
-			color = UiTheme.COLOR_DIM
+		var state := state_of(rank, node.max_rank, error)
+		button.text = "%s%s\n%d / %d  ·  %s" % [node.display_name, marker, rank, node.max_rank, state]
+		var color := UiTheme.TEXT_PRIMARY
+		var border := UiTheme.BRONZE_DARK
+		var fill := UiTheme.PANEL_INSET
+		match state:
+			"Learned", "Maxed":
+				color = UiTheme.PARCHMENT
+				border = UiTheme.BRONZE
+				fill = Color(UiTheme.BRONZE_DARK, 0.55)
+			"Available":
+				color = UiTheme.TEXT_PRIMARY
+				border = UiTheme.RESONANCE_DIM
+			_:
+				color = UiTheme.TEXT_MUTED
 		button.add_theme_color_override(&"font_color", color)
 		button.add_theme_color_override(&"font_hover_color", color.lightened(0.2))
-		button.modulate = Color.WHITE if rank > 0 or error == "" else Color(1, 1, 1, 0.6)
+		button.add_theme_stylebox_override(&"normal", _node_style(fill, border))
+		button.add_theme_stylebox_override(&"hover", _node_style(fill.lightened(0.08), border.lightened(0.2)))
+		button.modulate = Color.WHITE
 		button.tooltip_text = _tooltip(node, rank, error)
 	queue_redraw()
 
 
+## "Maxed" / "Learned" / "Available" / "Locked" - the node state in words.
+static func state_of(rank: int, max_rank: int, error: String) -> String:
+	if rank >= max_rank:
+		return "Maxed"
+	if rank > 0:
+		return "Learned"
+	return "Available" if error == "" else "Locked"
+
+
+static var _styles: Dictionary = {}
+
+
+static func _node_style(fill: Color, border: Color) -> StyleBoxFlat:
+	var key := [fill, border]
+	if not _styles.has(key):
+		var box := StyleBoxFlat.new()
+		box.bg_color = fill
+		box.border_color = border
+		box.set_border_width_all(2)
+		box.set_corner_radius_all(UiTheme.CORNER)
+		box.set_content_margin_all(4)
+		_styles[key] = box
+	return _styles[key]
+
+
 func _tooltip(node: TalentNodeDefinition, rank: int, error: String) -> String:
 	var rules := character.database.rules.talent_rules()
-	var lines: PackedStringArray = ["%s (%s, tier %d)" % [node.display_name, node.kind_name(), node.tier], node.describe(rank)]
+	var state := state_of(rank, node.max_rank, error)
+	var lines: PackedStringArray = ["%s (%s, tier %d)  -  %s" % [node.display_name, node.kind_name(), node.tier, state], node.describe(rank)]
 	lines.append("Rank %d / %d" % [rank, node.max_rank])
 	if node.tier > 1:
 		lines.append("Requires %d points in lower tiers of %s." % [rules.tier_requirement(node.tier), tree.display_name])
@@ -107,7 +142,7 @@ func _draw() -> void:
 		return
 	for tier in range(1, 8):
 		var y := _row_y(tier) - GAP.y * 0.5
-		draw_line(Vector2(0, y), Vector2(size.x, y), Color(UiTheme.COLOR_BORDER, 0.5), 1.0)
+		draw_line(Vector2(0, y), Vector2(size.x, y), Color(UiTheme.BRONZE_DARK, 0.45), 1.0)
 	var build := character.builds.get_build(class_id)
 	for node in tree.nodes:
 		var to: Button = _buttons.get(node.id)
@@ -117,7 +152,7 @@ func _draw() -> void:
 				continue
 			var active := build.rank(prerequisite) > 0
 			draw_line(from.position + Vector2(CELL.x * 0.5, CELL.y), to.position + Vector2(CELL.x * 0.5, 0),
-					UiTheme.COLOR_ACCENT if active else Color(UiTheme.COLOR_DIM, 0.6), 2.0)
+					UiTheme.BRONZE if active else Color(UiTheme.TEXT_MUTED, 0.5), 2.0)
 
 
 class TalentButton:
