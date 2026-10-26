@@ -15,6 +15,8 @@ var _revive_left: float = 0.0
 
 
 func _ready() -> void:
+	# Training targets give reduced, capped XP and no kill rewards.
+	add_to_group(&"training_target")
 	hurtbox.hit_received.connect(_on_hit_received)
 	hurtbox.invulnerability_check = health.is_dead
 	health.died.connect(_on_died)

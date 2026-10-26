@@ -77,6 +77,11 @@ func physics_step(delta: float) -> void:
 
 
 ## Local hitstop (see HitstopController). Overlapping requests never add up.
+## Rewards for the progression system (CombatRewardTracker), granted once per enemy.
+func get_kill_reward() -> Dictionary:
+	return {"mastery_xp": config.mastery_xp_reward, "class_xp": config.class_xp_reward}
+
+
 func apply_hitstop(duration: float) -> void:
 	hitstop_left = maxf(hitstop_left, duration)
 

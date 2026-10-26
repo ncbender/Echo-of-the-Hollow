@@ -1,19 +1,26 @@
 extends Node2D
-## Test arena glue: connects game-feel systems and debug hotkeys.
-## Contains no combat rules.
+## Test arena glue: connects game-feel systems, the RPG session and debug hotkeys.
+## Contains no combat or progression rules.
 
-const MASTERY_REQUIREMENT := &"mastery.one_handed_sword.1"
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const SPAWN_AREA := Rect2(-300, -180, 600, 360)
+const DEBUG_MASTERY_XP := 100
+
+var bridge: PlayerProgressionBridge
 
 @onready var player: Player = $Player
 @onready var hitstop: HitstopController = $HitstopController
 @onready var enemies: Node2D = $Enemies
+@onready var hud: GameHud = $GameHud
 
 
 func _ready() -> void:
 	hitstop.camera = player.get_node("Camera2D")
 	hitstop.watch(player.combat)
+	var session := SessionState.find(get_tree())
+	if session != null:
+		bridge = session.bind_player(player)
+		hud.setup(bridge)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -21,11 +28,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		DebugView.show_hitboxes = not DebugView.show_hitboxes
 	elif event.is_action_pressed(&"debug_spawn_enemy"):
 		spawn_enemy(_spawn_point())
-	elif event.is_action_pressed(&"debug_toggle_mastery"):
-		var unlocked := player.combat.combo.unlocks.has(MASTERY_REQUIREMENT)
-		player.combat.set_unlocked(MASTERY_REQUIREMENT, not unlocked)
+	elif event.is_action_pressed(&"debug_add_mastery_xp") and bridge != null:
+		bridge.debug_add_mastery_xp(DEBUG_MASTERY_XP)
+		hud.notify("+%d mastery XP (debug)" % DEBUG_MASTERY_XP)
 	elif event.is_action_pressed(&"debug_reset_arena"):
-		Engine.time_scale = 1.0
 		get_tree().reload_current_scene()
 
 

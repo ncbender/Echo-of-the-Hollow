@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/dummy/training_dummy.tscn" id="4_dummy"]
 [ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_overlay"]
 [ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
 
 [node name="TestArena" type="Node2D"]
 y_sort_enabled = true
@@ -78,3 +79,6 @@ script = ExtResource("6_hitstop")
 
 [node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_overlay")]
 player = NodePath("../Player")
+
+[node name="GameHud" type="CanvasLayer" parent="."]
+script = ExtResource("7_hud")

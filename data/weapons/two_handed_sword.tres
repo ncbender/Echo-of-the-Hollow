@@ -77,6 +77,7 @@ reach = 50.0
 arc_degrees = 180.0
 move_multiplier = 0.7
 lunge_distance = 16.0
+next_light = &"greatsword_light_4_mastery"
 dash_cancel_phases = 7
 effect_tags = Array[StringName]([&"finisher"])
 
@@ -149,6 +150,29 @@ dash_cancel_phases = 5
 charge_profile = SubResource("Charge_greatsword")
 effect_tags = Array[StringName]([&"heavy", &"finisher"])
 
+[sub_resource type="Resource" id="Attack_l4"]
+script = ExtResource("2_attack")
+id = &"greatsword_light_4_mastery"
+display_name = "Cleaving Echo (Mastery)"
+weapon_family_id = &"two_handed_sword"
+input_type = 0
+startup = 0.2
+active = 0.14
+recovery = 0.55
+chain_delay = 0.15
+combo_window = 0.25
+damage = 40.0
+poise_damage = 40.0
+knockback = 120.0
+hitstop = 0.07
+reach = 54.0
+arc_degrees = 180.0
+move_multiplier = 0.7
+lunge_distance = 20.0
+dash_cancel_phases = 7
+unlock_requirement = &"mastery.two_handed_sword.1"
+effect_tags = Array[StringName]([&"finisher", &"mastery"])
+
 [resource]
 script = ExtResource("1_family")
 id = &"two_handed_sword"
@@ -157,4 +181,4 @@ display_color = Color(0.72, 0.84, 1, 1)
 visual_blade_length = 22.0
 root_light = &"greatsword_light_1"
 root_heavy = &"greatsword_heavy"
-attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])
+attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_l4"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])

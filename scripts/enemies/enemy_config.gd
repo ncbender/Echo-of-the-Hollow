@@ -21,3 +21,9 @@ extends Resource
 @export var knockback_decay: float = 1000.0
 ## Seconds the corpse stays before it is removed.
 @export var despawn_delay: float = 0.8
+
+@export_group("Rewards")
+## Weapon mastery XP for the killing blow's weapon family.
+@export var mastery_xp_reward: int = 20
+## Class XP for the active class.
+@export var class_xp_reward: int = 30

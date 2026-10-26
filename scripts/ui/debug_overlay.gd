@@ -6,7 +6,6 @@ const STATE_NAMES := ["IDLE", "CHARGING", "ATTACKING"]
 const PHASE_NAMES := ["-", "STARTUP", "ACTIVE", "RECOVERY"]
 
 @export var player: Player
-@export var mastery_requirement: StringName = &"mastery.one_handed_sword.1"
 
 @onready var _status: Label = $Status
 @onready var _help: Label = $Help
@@ -60,6 +59,9 @@ func _lines() -> PackedStringArray:
 
 	var hitbox_active := combat.hitbox != null and combat.hitbox.is_active()
 	lines.append("Hitbox   %s" % ("ACTIVE" if hitbox_active else "off"))
-	lines.append("Mastery  %s" % ("unlocked" if combat.combo.unlocks.has(mastery_requirement) else "locked"))
+	var unlocks: PackedStringArray = []
+	for requirement: StringName in combat.combo.unlocks:
+		unlocks.append(String(requirement).get_slice(".", 1))
+	lines.append("Unlocks  %s" % (", ".join(unlocks) if not unlocks.is_empty() else "-"))
 	lines.append("FPS      %d" % Engine.get_frames_per_second())
 	return lines
