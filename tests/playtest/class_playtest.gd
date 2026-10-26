@@ -412,11 +412,11 @@ func _polish() -> void:
 		frame.light_pressed = i % 15 == 0
 		await physics_frame
 	_check(absf(pool.value - regen_start - 6.0) < 0.6, "in combat: +6 focus per second, nothing from hits (%.1f)" % (pool.value - regen_start))
-	# Space dash unchanged
+	# Space dash: no WASD -> towards the aim
 	frame.aim_direction = Vector2.LEFT
 	frame.dash_pressed = true
 	await physics_frame
-	_check(player.dash.is_dashing() and player.dash.direction == Vector2.LEFT, "Space dash unchanged (towards the aim)")
+	_check(player.dash.is_dashing() and player.dash.direction == Vector2.LEFT, "Space dash without WASD goes towards the aim")
 	for i in 40:
 		await physics_frame
 	# Warrior Blade Rush

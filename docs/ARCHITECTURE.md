@@ -25,7 +25,7 @@ Player.physics_step:          ▼
   2. DashComponent.step()        – Dauer, iFrames, sequentielle Regeneration
   3. Dash-Buffer (120 ms) → wenn dash.can_dash() && combat.can_dash_cancel():
         combat.cancel("dash")  → Hitbox aus, Combo-Reset, Buffer leer
-        dash.try_start(aim_direction)   – immer Blickrichtung (letzte gültige Maus-Richtung)
+        dash.try_start(DashComponent.direction_for(move, aim)) – WASD-Richtung, sonst Blickrichtung
   4. CombatComponent.step(delta, frame, aim, blocked = dashing)
         Buffer → Charge/Attack starten, Phasen fortschalten, Treffer scannen
   5. Velocity = Dash ODER (Movement × combat.get_move_multiplier() + combat.take_lunge_velocity())

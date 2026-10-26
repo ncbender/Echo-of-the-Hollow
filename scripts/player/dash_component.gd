@@ -34,6 +34,17 @@ func can_dash() -> bool:
 	return charges > 0 and not _dashing
 
 
+## Movement input shorter than this counts as "no WASD".
+const MOVE_DEADZONE := 0.1
+
+
+## Dash direction (docs/COMBAT_DESIGN.md, UI/UX Polish 1.1): with WASD movement
+## input the normalized movement direction (also when the mouse points
+## elsewhere); without it the current facing towards the mouse.
+static func direction_for(move: Vector2, aim: Vector2) -> Vector2:
+	return move.normalized() if move.length() > MOVE_DEADZONE else aim
+
+
 ## Starts a dash in `dash_direction` (normalized by the caller). Returns false when not allowed.
 func try_start(dash_direction: Vector2) -> bool:
 	if not can_dash() or dash_direction == Vector2.ZERO:

@@ -155,7 +155,7 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		combat.cancel(&"dash")
 		skill_lock_left = 0.0   # a dash ends the cast lock (the skill already happened)
 		defense.cancel()        # and any block/parry (no iFrame overlap, no stacking)
-		_start_dash()
+		_start_dash(frame.move)
 
 	if defense.step(delta, frame.defend_pressed, frame.defend_held, can_start_defense()):
 		combat.cancel(&"defend")   # same cancel rule as a dash (see can_start_defense)
@@ -263,8 +263,10 @@ func is_in_skill_motion() -> bool:
 ## i.e. towards the mouse; WASD is ignored. aim_direction is the last valid aim, so
 ## a cursor on top of the character keeps the previous facing. DashComponent keeps
 ## the direction fixed for the whole dash.
-func _start_dash() -> void:
-	dash.try_start(aim_direction)
+## Dash direction rule (docs/COMBAT_DESIGN.md): WASD movement first, else the
+## facing towards the mouse - see DashComponent.direction_for.
+func _start_dash(move: Vector2) -> void:
+	dash.try_start(DashComponent.direction_for(move, aim_direction))
 
 
 ## Hits deal damage and knockback; the attack's reaction type decides whether the

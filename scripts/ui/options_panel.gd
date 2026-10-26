@@ -10,7 +10,7 @@ const WIDTH := 640
 ## Action -> label, in the order shown on the Controls page.
 const CONTROLS := [
 	[&"move_up", "Move up"], [&"move_down", "Move down"], [&"move_left", "Move left"], [&"move_right", "Move right"],
-	[&"attack_light", "Light attack"], [&"attack_heavy", "Heavy attack (hold to charge)"], [&"dash", "Dash (towards the cursor)"],
+	[&"attack_light", "Light attack"], [&"attack_heavy", "Heavy attack (hold to charge)"], [&"dash", "Dash (movement direction; standing still: towards the cursor)"],
 	[&"defensive", "Block / parry"], [&"ability_1", "Skill 1"], [&"ability_2", "Skill 2"], [&"ability_3", "Skill 3"],
 	[&"ability_4", "Skill 4"], [&"weapon_slot_1", "Weapon 1"], [&"weapon_slot_2", "Weapon 2"], [&"interact", "Interact / talk / continue"],
 	[&"ui_inventory", "Inventory"], [&"ui_character", "Character, talents and skills"], [&"ui_journal", "Journal"],

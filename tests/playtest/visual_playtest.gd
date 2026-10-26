@@ -84,9 +84,10 @@ func _combat_sequence() -> void:
 	await _shot("05_lh_thrust_active")
 	await _until_idle(dummy_a)
 
-	# 4) Dash away: the dash follows the facing (mouse), WASD is ignored (Combat Polish 0.2).
-	f.aim_direction = (player.global_position - dummy_a.global_position).normalized()
-	f.move = Vector2.DOWN
+	# 4) Dash away: WASD (away from the dummy) decides the dash direction (UI/UX Polish 1.1).
+	var away := (player.global_position - dummy_a.global_position).normalized()
+	f.aim_direction = -away   # still facing the dummy
+	f.move = away
 	f.dash_pressed = true
 	await _ticks(4)
 	f.move = Vector2.ZERO
@@ -204,12 +205,12 @@ func _polish_sequence() -> void:
 	await _until_idle(enemy)
 	await _ticks_aim(enemy, 30)
 	_log_knockback(enemy, "greatsword heavy")
-	# 5) dash: WASD left, mouse right -> dash right
+	# 5) dash: WASD left, mouse right -> dash left (WASD has priority, UI/UX Polish 1.1)
 	f.move = Vector2.LEFT
 	f.aim_direction = Vector2.RIGHT
 	f.dash_pressed = true
 	await _ticks(4)
-	await _shot("p05_dash_wasd_left_mouse_right")
+	await _shot("p05_dash_wasd_left_mouse_right_goes_left")
 	f.move = Vector2.ZERO
 	await _ticks(30)
 	# 6) normal fight against the active grunt with the greatsword, then the sword

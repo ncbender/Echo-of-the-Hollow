@@ -72,7 +72,7 @@ func test_iframes_cover_first_180ms_only() -> void:
 	check(not dash.is_dashing(), "dash over at 300 ms")
 
 
-# --- Dash direction = facing (mouse aim), Combat Polish 0.2 -------------------
+# --- Dash direction: WASD first, else facing (mouse), UI/UX Polish 1.1 --------
 
 func _dash_with(move: Vector2, aim: Vector2) -> InputFrame:
 	spawn_player()
@@ -82,18 +82,32 @@ func _dash_with(move: Vector2, aim: Vector2) -> InputFrame:
 	return f
 
 
-func test_dash_ignores_wasd_left_aim_right() -> void:
-	await _dash_with(Vector2.LEFT, Vector2.RIGHT)
-	check(player.dash.is_dashing(), "dash started")
-	check_eq(player.dash.direction, Vector2.RIGHT, "dash follows the aim, not WASD")
-	check_eq(player.dash.charges, 1, "one charge spent")
+func test_dash_follows_wasd_in_all_four_directions() -> void:
+	for move: Vector2 in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		var f := await _dash_with(move, Vector2(0.6, 0.8))   # mouse somewhere else
+		check(player.dash.is_dashing(), "dash started (%s)" % move)
+		check_eq(player.dash.direction, move, "dash follows WASD %s" % move)
+		check_eq(player.dash.charges, 1, "one charge spent (%s)" % move)
+		await tick(f, seconds_to_ticks(0.3) - 1)
+		check_near(player.global_position.dot(move), player.dash.config.distance, 1.0, "full, unchanged distance %s" % move)
+		player.queue_free()
+		await wait_physics(1)
 
 
-func test_dash_ignores_wasd_down_aim_up() -> void:
+func test_dash_follows_wasd_diagonals_normalized() -> void:
+	for move: Vector2 in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
+		await _dash_with(move, Vector2.RIGHT)
+		check_near(player.dash.direction.length(), 1.0, 0.0001, "normalized %s" % move)
+		check_near(player.dash.direction.angle_to(move), 0.0, 0.0001, "diagonal %s" % move)
+		player.queue_free()
+		await wait_physics(1)
+
+
+func test_wasd_beats_a_different_mouse_direction() -> void:
 	var f := await _dash_with(Vector2.DOWN, Vector2.UP)
-	check_eq(player.dash.direction, Vector2.UP, "dash up")
+	check_eq(player.dash.direction, Vector2.DOWN, "WASD down wins over the mouse up")
 	await tick(f, seconds_to_ticks(0.3) - 1)
-	check(player.global_position.y < -player.dash.config.distance + 5.0, "moved up the full distance despite holding down (y=%.1f)" % player.global_position.y)
+	check(player.global_position.y > player.dash.config.distance - 5.0, "moved down the full distance (y=%.1f)" % player.global_position.y)
 
 
 func test_dash_without_move_input_goes_to_aim() -> void:
@@ -102,6 +116,15 @@ func test_dash_without_move_input_goes_to_aim() -> void:
 	check_eq(player.dash.direction, Vector2.LEFT, "dash left")
 	check_near(player.global_position.x, -player.dash.config.distance, 1.0, "covers the unchanged dash distance")
 	check_near(player.global_position.y, 0.0, 0.01, "straight line")
+
+
+func test_direction_rule_in_isolation() -> void:
+	check_eq(DashComponent.direction_for(Vector2(0, -1), Vector2.RIGHT), Vector2(0, -1), "WASD first")
+	check_eq(DashComponent.direction_for(Vector2.ZERO, Vector2.RIGHT), Vector2.RIGHT, "no WASD -> facing")
+	check_eq(DashComponent.direction_for(Vector2(0.05, 0), Vector2.UP), Vector2.UP, "tiny stick noise counts as no movement")
+	check_near(DashComponent.direction_for(Vector2(2, 2), Vector2.UP).length(), 1.0, 0.0001, "normalized")
+	check_eq(DashConfig.new().max_charges, 2, "charges unchanged")
+
 
 
 func test_dash_direction_is_normalized_for_diagonal_aim() -> void:
@@ -124,7 +147,7 @@ func test_invalid_aim_uses_last_valid_facing() -> void:
 	spawn_player()
 	await wait_physics(1)
 	await tick(frame(Vector2.ZERO, Vector2.UP))   # last valid facing: up
-	var f := frame(Vector2.RIGHT, Vector2.ZERO)   # cursor on the character -> no aim
+	var f := frame(Vector2.ZERO, Vector2.ZERO)   # no WASD, cursor on the character -> no aim
 	f.aim_direction = Vector2.ZERO
 	await tick(dash_press(f))
 	check(player.dash.is_dashing(), "dash still possible")
@@ -177,7 +200,7 @@ func test_dash_into_wall_stops_at_the_wall() -> void:
 	spawn_player()
 	add_wall(Vector2(60, 0), Vector2(16, 120))   # face at x = 52
 	await wait_physics(2)
-	var f := frame(Vector2.LEFT, Vector2.RIGHT)
+	var f := frame(Vector2.RIGHT, Vector2.LEFT)   # WASD towards the wall, mouse away
 	await tick(dash_press(f), seconds_to_ticks(0.3))
 	check(player.global_position.x < 52.0, "stopped in front of the wall (x=%.1f)" % player.global_position.x)
 	check(player.global_position.x > 30.0, "dash went towards the wall")

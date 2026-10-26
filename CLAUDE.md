@@ -28,7 +28,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   für einzelne Waffen, Angriffe, Items oder Klassen.
 - Definitionen (Resources) ≠ Laufzeitinstanzen (`Character`, `ItemInstance`, …) ≠ Spielstand (Dict/JSON).
 - Knockback ist eine Distanz in px und läuft nur über `KnockbackMotion` (eine Skalierung beim Empfänger).
-  Dash geht immer in Blickrichtung (Maus), nie nach WASD.
+  Dash: mit WASD in Bewegungsrichtung, ohne WASD in Blickrichtung (Maus) - nur über `DashComponent.direction_for`.
 - Combat ↔ RPG nur über `PlayerProgressionBridge`; Items wirken über `AttackModifier`, nie über
   geänderte `AttackDefinition`-Daten oder eigene Schadenslogik.
 - Items existieren nur im `Inventory`; Loadouts referenzieren Instanz-IDs (Shared-Item-Policy).

@@ -11,7 +11,7 @@ Konflikte unter „Offene Designfragen“.
 | Maus | Ziel- und Angriffsrichtung |
 | Linksklick | genau ein Light Attack pro physischem Klick (kein Auto-Repeat beim Halten) |
 | Rechtsklick halten / loslassen | Heavy aufladen / ausführen |
-| Space | Dash in Blickrichtung (zur Maus, WASD egal) |
+| Space | Dash in WASD-Richtung; ohne WASD in Blickrichtung (zur Maus) |
 | Shift | Block & Parry (seit 0.4): drücken = Parry-Fenster, halten = Block, loslassen = Ende |
 | Q/E/R/F | aktive Klassenfähigkeiten (Class Foundation 0.2, `SKILL_SYSTEM.md`) |
 | C | Klassen-/Talentfenster (Talente lernen überall, Rest an der Klassenstation) |
@@ -29,7 +29,9 @@ Kein Sprint.
 ## Dash (`data/player/dash_config.tres`)
 - 2 Ladungen, 300 ms Bewegung, 180 ms iFrames (ab Dash-Beginn), 2,5 s Regeneration pro Ladung,
   sequentiell (immer nur eine Ladung lädt).
-- **Richtung = Blickrichtung (Maus), unabhängig von WASD** (verbindlich seit Combat Polish 0.2).
+- **Richtung (verbindlich seit UI/UX Polish 1.1):** mit WASD-Eingabe die normalisierte Bewegungsrichtung
+  (auch wenn die Maus woanders hinzeigt, WASD hat Vorrang); ohne WASD die Blickrichtung zur Maus
+  (`DashComponent.direction_for`, Totzone 0,1). Ersetzt die Regel „immer zur Maus“ aus Combat Polish 0.2.
   Ermittelt beim Dash-Start, normalisiert, während des ganzen Dashs konstant; Mausbewegung und WASD
   ändern sie nicht. Liegt der Mauszeiger näher als 4 px an der Figur (`PlayerInput.AIM_DEADZONE`),
   gilt die zuletzt gültige Blickrichtung.
