@@ -169,7 +169,11 @@ func _haven() -> void:
 	await _walk_to(Vector2(-200, 100))
 	await _walk_to(store.global_position + Vector2(0, 30))
 	await _press(&"interact")
+	_check(map.hud.stash_panel.visible, "the ruined Old Storehouse already opens the Haven stash")
+	await _shot("p10b_stash_ruined")
 	var capacity := character.inventory.capacity
+	_click_button(map.hud.stash_panel, "Restore the Storehouse")
+	await _ticks(2)
 	if _click_button(map.hud.restoration_panel, "Restore"):
 		_check(character.inventory.capacity == capacity + 10, "Old Storehouse: +10 inventory slots")
 	map.hud.close_windows()

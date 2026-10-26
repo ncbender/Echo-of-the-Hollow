@@ -4,7 +4,8 @@ extends BuildPlot
 ## the restoration window. Restored: the building of the ruin's definition
 ## appears (BuildPlot shows it) and works as before - the Old Smithy opens the
 ## Resonance Forge and its recipes, the Old Storehouse adds inventory slots,
-## the Fallen Barracks bring back the training yard.
+## the Fallen Barracks bring back the training yard. A ruin with stash access
+## (Old Storehouse) opens the Haven stash in every stage.
 
 @export var ruin_id: StringName
 
@@ -57,6 +58,10 @@ func _on_restoration_changed(changed: StringName, _stage: StringName) -> void:
 
 
 func interact(hud: GameHud) -> void:
+	var definition := ruin()
+	if definition != null and definition.stash_access:
+		hud.open_stash(self)   # the stash works in every stage; restoring is offered there
+		return
 	if not is_restored():
 		hud.open_restoration(self)
 	elif built_building() != null:

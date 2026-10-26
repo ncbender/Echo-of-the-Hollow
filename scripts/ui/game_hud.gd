@@ -30,6 +30,7 @@ var pause_menu: PauseMenu
 var save_indicator: SaveIndicator
 var dialogue_panel: DialoguePanel
 var restoration_panel: RestorationPanel
+var stash_panel: StashPanel
 var waystone_panel: WaystonePanel
 var journal_panel: JournalPanel
 var world_map_panel: WorldMapPanel
@@ -175,6 +176,8 @@ func _ready() -> void:
 	dialogue_panel = _add_window(DialoguePanel.new()) as DialoguePanel
 	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
 	restoration_panel.hud = self
+	stash_panel = _add_window(StashPanel.new()) as StashPanel
+	stash_panel.hud = self
 	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
 	journal_panel = _add_window(JournalPanel.new()) as JournalPanel
 	world_map_panel = _add_window(WorldMapPanel.new()) as WorldMapPanel
@@ -292,6 +295,14 @@ func open_waystones(waystone: Waystone) -> void:
 
 
 ## A ruin of Haven: costs and the Restore button (or "unavailable for now").
+## The Haven stash at a ruin with stash access (also while it is ruined).
+func open_stash(site: RuinSite) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	stash_panel.open(bridge.character, site)
+
+
 func open_restoration(site: RuinSite) -> void:
 	if bridge == null:
 		return

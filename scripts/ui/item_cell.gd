@@ -19,6 +19,9 @@ var equip_slot: int = -1
 var drop_handler: Callable
 ## Callable(cell: ItemCell) -> void; right mouse button. Set by the window.
 var right_click_handler: Callable
+## Owning container of the shown item (null = the bag; the stash window sets
+## Character.stash for its cells).
+var container: Inventory
 
 var _icon: ItemIcon
 
@@ -53,7 +56,9 @@ func setup(target_character: Character, item: ItemInstance, slot: int = -1) -> I
 
 
 func item() -> ItemInstance:
-	return character.inventory.find(instance_id) if character != null and instance_id != "" else null
+	if character == null or instance_id == "":
+		return null
+	return (container if container != null else character.inventory).find(instance_id)
 
 
 func _on_hover(entered: bool) -> void:
@@ -75,7 +80,7 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	var preview := ItemIcon.new().setup(character.database.get_item(current.definition_id), current.quantity)
 	preview.custom_minimum_size = ItemIcon.SIZE
 	set_drag_preview(preview)
-	return {"instance_id": instance_id, "from_slot": equip_slot}
+	return {"instance_id": instance_id, "from_slot": equip_slot, "from_stash": container != null and container == character.stash}
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:

@@ -5,7 +5,7 @@ extends RefCounted
 
 const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "inventory_tooltip", "character", "classes", "classes_locked", "talents", "talents_full", "talents_locked", "talents_arcanist", "talents_shadowrunner", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
-	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "pause", "save", "load", "options", "confirm"]
+	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored", "pause", "save", "load", "options", "confirm"]
 
 
 static func open(gallery: Object, screen: String) -> String:
@@ -141,6 +141,29 @@ static func open(gallery: Object, screen: String) -> String:
 			hud.journal_panel.show_page("Haven")
 		"map":
 			hud.toggle_map()
+		"stash", "stash_materials":
+			var store := map.get_node("Ruins/OldStorehouse") as RuinSite
+			await _stand_at(gallery, store)
+			_fill_stash(character)
+			hud.open_stash(store)
+			await gallery.frames(3)
+			if screen == "stash_materials":
+				hud.stash_panel.select_category(StashService.MATERIALS)
+			else:
+				var cells := hud.stash_panel.find_children("Stash_*", "ItemCell", true, false)
+				if not cells.is_empty():
+					hud.stash_panel._on_cell_hovered(cells[cells.size() - 1] as ItemCell)   # tooltip with comparison
+		"stash_restored":
+			var other := CharacterFactory.create_new(character.database)
+			GameMap.give_debug_items(other)
+			other.world.set_restoration(&"old_storehouse", &"restored")
+			other.refresh_inventory_capacity()
+			_fill_stash(other)
+			var store := map.get_node("Ruins/OldStorehouse") as RuinSite
+			await _stand_at(gallery, store)
+			hud.close_windows()
+			hud.stash_panel.open(other, store)
+			hud.stash_panel.select_category(StashService.COLLECTION)
 		"pause":
 			hud.open_pause_menu()
 		"save":
@@ -216,3 +239,16 @@ static func _hover_talent(panel: ClassStationPanel, tree_index: int, tier: int, 
 		if node.tier == tier and (node.column == column or view.tree.nodes.filter(func(n: TalentNodeDefinition) -> bool: return n.tier == tier).size() == 1):
 			panel._on_talent_hovered(node.id, view)
 			return
+
+
+## A few things in the stash (through StashService, as the player would):
+## spare weapons, a unique, a set piece and materials. Forge items stay in the bag.
+static func _fill_stash(character: Character) -> void:
+	if not character.stash.items().is_empty():
+		return
+	for item in character.inventory.items():
+		if item.definition_id in [&"militia_sword", &"iron_greatsword", &"crushing_oath", &"warden_helm", &"leather_cap"] \
+				and not character.equipment.is_referenced(item.instance_id):
+			StashService.deposit(character, item.instance_id)
+	character.inventory.add_item(&"iron_ore", 20)
+	StashService.deposit_all_materials(character)
