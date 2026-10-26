@@ -13,6 +13,10 @@ var buildings: Dictionary = {}
 ## Persistent per-map state: map id -> {key -> bool/int/float/String}
 ## (resource node timers, visit counters ...). Normal enemies are NOT stored.
 var map_states: Dictionary = {}
+## Activated waystones (fast travel targets; Haven is always active). Save v5.
+var waystones: Array[StringName] = [&"haven"]
+## Haven ruins: ruin id -> stage ("ruined" | "restored" | "revitalized"). Save v5.
+var restoration: Dictionary = {}
 
 
 func set_flag(flag: StringName, value: Variant = true) -> void:
@@ -56,7 +60,12 @@ func to_dict() -> Dictionary:
 	var saved_maps := {}
 	for map: StringName in map_states:
 		saved_maps[String(map)] = (map_states[map] as Dictionary).duplicate()
-	return {"map": String(map_id), "spawn": String(spawn_id), "flags": saved_flags, "buildings": saved_buildings, "map_states": saved_maps}
+	var saved_restoration := {}
+	for ruin: StringName in restoration:
+		saved_restoration[String(ruin)] = String(restoration[ruin])
+	return {"map": String(map_id), "spawn": String(spawn_id), "flags": saved_flags, "buildings": saved_buildings,
+		"map_states": saved_maps, "waystones": waystones.map(func(id: StringName) -> String: return String(id)),
+		"restoration": saved_restoration}
 
 
 func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
@@ -79,6 +88,18 @@ func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
 	if saved_buildings is Dictionary:
 		for plot: String in saved_buildings:
 			buildings[StringName(plot)] = StringName(str(saved_buildings[plot]))
+	waystones = ClassBuild._names(data.get("waystones", ["haven"]))
+	if not &"haven" in waystones:
+		waystones.push_front(&"haven")
+	restoration.clear()
+	var saved_restoration: Variant = data.get("restoration", {})
+	if saved_restoration is Dictionary:
+		for ruin: String in saved_restoration:
+			var stage := str(saved_restoration[ruin])
+			if stage in ["ruined", "restored", "revitalized"]:
+				restoration[StringName(ruin)] = StringName(stage)
+			else:
+				warnings.append("ruin %s: unknown stage %s ignored" % [ruin, stage])
 	map_states.clear()
 	var saved_maps: Variant = data.get("map_states", {})
 	if saved_maps is Dictionary:

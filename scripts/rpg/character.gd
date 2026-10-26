@@ -24,6 +24,8 @@ var quests := QuestLog.new()
 ## Raw saved items that could not be restored (e.g. definition removed from the
 ## data). Kept and written back on save so no player property is ever deleted.
 var orphaned_items: Array = []
+## Active play time in seconds (saved, shown in save slots).
+var play_time: float = 0.0
 
 ## Runtime stat sources (skill buffs, class states): key -> Array[StatModifier].
 ## Never saved; the class runtime re-creates them.
@@ -132,6 +134,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id,
 		"name": display_name,
+		"play_time": snappedf(play_time, 0.1),
 		"classes": classes.to_dict(),
 		"mastery": mastery.to_dict(),
 		"inventory": inventory.to_array(),
@@ -149,6 +152,7 @@ func to_dict() -> Dictionary:
 static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedStringArray) -> Character:
 	var character := Character.new(db, str(data.get("id", "")))
 	character.display_name = str(data.get("name", "Wanderer"))
+	character.play_time = maxf(0.0, float(data.get("play_time", 0.0)))
 	character.classes.from_dict(_dict(data, "classes"), warnings)
 	if character.classes.active_class_id == &"":
 		warnings.append("no usable class in save; starting class restored")

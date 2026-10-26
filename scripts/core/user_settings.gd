@@ -22,6 +22,7 @@ const WINDOW_SCREEN_SHARE := 0.8
 const SECTION := "display"
 const AUDIO_SECTION := "audio"
 const DEFAULT_SFX_VOLUME := 0.8
+const GAMEPLAY_SECTION := "gameplay"
 
 ## Where save() writes; empty = in-memory only (tests, scripted playtests).
 var path: String = ""
@@ -29,6 +30,10 @@ var ui_scale: float = DEFAULT_UI_SCALE
 var window_mode: WindowMode = DEFAULT_WINDOW_MODE
 ## Combat/effects volume 0..1 (CombatAudio, "SFX" bus).
 var sfx_volume: float = DEFAULT_SFX_VOLUME
+## Autosave every 5 minutes of active play (milestones are always saved).
+var periodic_autosave: bool = true
+## HUD hint "Saving... / Progress saved / Save failed".
+var show_save_indicator: bool = true
 
 
 ## Loads `file_path`; missing or invalid entries fall back to the defaults.
@@ -47,6 +52,8 @@ static func load_from(file_path: String) -> UserSettings:
 	var volume: Variant = config.get_value(AUDIO_SECTION, "sfx_volume", DEFAULT_SFX_VOLUME)
 	if volume is float or volume is int:
 		settings.sfx_volume = clampf(float(volume), 0.0, 1.0)
+	settings.periodic_autosave = bool(config.get_value(GAMEPLAY_SECTION, "periodic_autosave", true))
+	settings.show_save_indicator = bool(config.get_value(GAMEPLAY_SECTION, "show_save_indicator", true))
 	return settings
 
 
@@ -72,6 +79,8 @@ func save() -> Error:
 	config.set_value(SECTION, "ui_scale", ui_scale)
 	config.set_value(SECTION, "window_mode", window_mode)
 	config.set_value(AUDIO_SECTION, "sfx_volume", sfx_volume)
+	config.set_value(GAMEPLAY_SECTION, "periodic_autosave", periodic_autosave)
+	config.set_value(GAMEPLAY_SECTION, "show_save_indicator", show_save_indicator)
 	return config.save(path)
 
 
@@ -89,6 +98,18 @@ func set_sfx_volume(value: float) -> void:
 	value = clampf(value, 0.0, 1.0)
 	if not is_equal_approx(value, sfx_volume):
 		sfx_volume = value
+		changed.emit()
+
+
+func set_periodic_autosave(enabled: bool) -> void:
+	if enabled != periodic_autosave:
+		periodic_autosave = enabled
+		changed.emit()
+
+
+func set_show_save_indicator(enabled: bool) -> void:
+	if enabled != show_save_indicator:
+		show_save_indicator = enabled
 		changed.emit()
 
 

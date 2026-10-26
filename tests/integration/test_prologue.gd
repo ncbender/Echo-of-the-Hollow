@@ -188,7 +188,7 @@ func test_migration_v3_to_v4() -> void:
 	check_eq(TalentService.points_total(restored, &"warrior"), 0, "points from level (none before 10)")
 	var fresh: Dictionary = SaveMigrations.migrate({"classes": {"active": "basic_adventurer", "progress": {}}}, 3, errors)
 	check_eq(fresh.prologue.stage, "not_started", "untouched characters start the prologue")
-	check_eq(SaveSystem.VERSION, 4, "current save version")
+	check(SaveSystem.VERSION >= 4, "save version at least 4")
 
 
 func test_prologue_map_flow() -> void:

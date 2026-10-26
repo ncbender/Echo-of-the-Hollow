@@ -15,6 +15,8 @@ var crafting_panel: CraftingPanel
 var skill_bar: SkillBar
 var objectives: ObjectivePanel
 var class_choice_panel: ClassChoicePanel
+var pause_menu: PauseMenu
+var save_indicator: SaveIndicator
 ## Player display preferences (from GameSession); null when running without one.
 var settings: UserSettings
 
@@ -72,6 +74,18 @@ func _ready() -> void:
 	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
 	crafting_panel = _add_window(CraftingPanel.new()) as CraftingPanel
 	class_choice_panel = _add_window(ClassChoicePanel.new()) as ClassChoicePanel
+	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
+	pause_menu.options_requested.connect(_open_options_from_pause)
+	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
+	save_indicator = SaveIndicator.new()
+	save_indicator.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	save_indicator.offset_left = -260
+	save_indicator.offset_top = -64
+	save_indicator.offset_right = -UiTheme.SCREEN_MARGIN
+	save_indicator.offset_bottom = -UiTheme.SCREEN_MARGIN
+	save_indicator.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	save_indicator.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(save_indicator)
 	crafting_panel.recipes_requested.connect(open_build_panel)
 	var session := SessionState.find(get_tree())
 	if session != null:
@@ -203,6 +217,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_options()
 		get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed(&"ui_cancel") and is_window_open():
-		close_windows()
+	if event.is_action_pressed(&"ui_cancel"):
+		if is_window_open():
+			close_windows()
+		else:
+			open_pause_menu()
 		get_viewport().set_input_as_handled()
+
+
+## Esc with no other window: pause menu (save, load, options, title).
+func open_pause_menu() -> void:
+	var session := SessionState.find(get_tree())
+	if session == null:
+		return
+	close_windows()
+	pause_menu.open(session)
+
+
+func _open_options_from_pause() -> void:
+	pause_menu.hide()
+	if settings != null:
+		options_panel.open(settings)

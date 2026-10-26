@@ -1,6 +1,7 @@
 class_name OptionsPanel
 extends UiWindow
-## Options (key O): UI scale, window mode, effects volume, reset to defaults.
+## Options (key O): UI scale, window mode, effects volume, autosave and save
+## indicator, reset to defaults.
 ## Edits the session's UserSettings; SessionState applies and saves them.
 
 var settings: UserSettings
@@ -11,6 +12,8 @@ var _fullscreen: Button
 var _info: Label
 var _volume: HSlider
 var _volume_label: Label
+var _autosave: CheckButton
+var _indicator: CheckButton
 
 
 func _ready() -> void:
@@ -50,6 +53,20 @@ func _ready() -> void:
 	_volume_label = UiTheme.label("", UiTheme.COLOR_DIM)
 	volume_row.add_child(_volume_label)
 	body.add_child(volume_row)
+	body.add_child(UiTheme.label("Saving"))
+	_autosave = CheckButton.new()
+	_autosave.name = "PeriodicAutosave"
+	_autosave.text = "Periodic Autosave"
+	_autosave.toggled.connect(func(on: bool) -> void: settings.set_periodic_autosave(on))
+	body.add_child(_autosave)
+	var autosave_info := UiTheme.wrapped("Automatically saves every 5 minutes. Important progression milestones are always saved.", UiTheme.COLOR_DIM)
+	autosave_info.theme_type_variation = &"SmallLabel"
+	body.add_child(autosave_info)
+	_indicator = CheckButton.new()
+	_indicator.name = "ShowSaveIndicator"
+	_indicator.text = "Show Save Indicator"
+	_indicator.toggled.connect(func(on: bool) -> void: settings.set_show_save_indicator(on))
+	body.add_child(_indicator)
 	var reset := Button.new()
 	reset.text = "Reset to defaults"
 	reset.pressed.connect(_on_reset)
@@ -78,6 +95,8 @@ func refresh() -> void:
 	_fullscreen.set_pressed_no_signal(settings.window_mode == UserSettings.WindowMode.FULLSCREEN)
 	_volume.set_value_no_signal(settings.sfx_volume * 100.0)
 	_volume_label.text = "%d %%" % roundi(settings.sfx_volume * 100.0)
+	_autosave.set_pressed_no_signal(settings.periodic_autosave)
+	_indicator.set_pressed_no_signal(settings.show_save_indicator)
 	var window := get_window()
 	_info.text = "Window %d x %d px  -  UI canvas %d x %d  -  design 1920 x 1080\nSettings are stored per installation (%s), not in save games." % [
 		window.size.x, window.size.y, get_viewport_rect().size.x, get_viewport_rect().size.y,

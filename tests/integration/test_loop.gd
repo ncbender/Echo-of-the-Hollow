@@ -51,7 +51,7 @@ func _teleport(map: GameMap, at: Vector2) -> void:
 func test_full_loop() -> void:
 	var character := session.character
 	# 1. start in the home base (main scene)
-	check_eq(ProjectSettings.get_setting("application/run/main_scene"), "res://scenes/maps/home_base.tscn", "main scene is the base")
+	check_eq(ProjectSettings.get_setting("application/run/main_scene"), "res://scenes/ui/title_screen.tscn", "main scene is the title screen")
 	get_tree().change_scene_to_file("res://scenes/maps/home_base.tscn")
 	var home := await _await_map(&"home_base")
 	if home == null:

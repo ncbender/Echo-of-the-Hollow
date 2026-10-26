@@ -15,6 +15,7 @@ static func _steps() -> Dictionary:
 		1: _v1_to_v2,
 		2: _v2_to_v3,
 		3: _v3_to_v4,
+		4: _v4_to_v5,
 	}
 
 
@@ -100,4 +101,54 @@ static func _v3_to_v4(data: Dictionary) -> Dictionary:
 				chosen = class_id
 				break
 		data["prologue"] = {"stage": "completed" if chosen != "" else "not_started", "completed_trials": [], "chosen_class": chosen}
+	return data
+
+
+## v5 (Prologue & Haven Vertical Slice 0.1): play time, activated waystones,
+## Haven ruin restoration and the story prologue quests.
+##  * plot buildings become restored ruins (smithy -> Old Smithy, storage -> Old
+##    Storehouse, training ground -> Fallen Barracks); the buildings entry stays
+##  * a v4 character already lives in Haven, so the road part of the prologue is
+##    complete and the Old Smithy counts as rekindled (forge access as before);
+##    with a finished class choice the whole prologue is complete and the main
+##    quest starts, otherwise the story continues at "The Whispering Stone"
+##  * nothing is taken away: items, classes, builds and loadouts stay untouched
+static func _v4_to_v5(data: Dictionary) -> Dictionary:
+	if not data.has("play_time"):
+		data["play_time"] = 0.0
+	var world: Dictionary = data.get("world", {}) if data.get("world") is Dictionary else {}
+	if not world.get("waystones") is Array:
+		world["waystones"] = ["haven"]
+	var restoration: Dictionary = world.get("restoration", {}) if world.get("restoration") is Dictionary else {}
+	var plot_buildings: Dictionary = world.get("buildings", {}) if world.get("buildings") is Dictionary else {}
+	var ruin_of := {"smithy": "old_smithy", "storage": "old_storehouse", "training_ground": "fallen_barracks"}
+	for building: Variant in plot_buildings.values():
+		if ruin_of.has(str(building)):
+			restoration[ruin_of[str(building)]] = "restored"
+	restoration["old_smithy"] = "restored"
+	world["restoration"] = restoration
+	var flags: Dictionary = world.get("flags", {}) if world.get("flags") is Dictionary else {}
+	for flag: String in ["prologue.started", "prologue.mara_rescued", "prologue.supplies_recovered",
+			"prologue.haven_discovered", "prologue.smithy_restored"]:
+		flags[flag] = true
+	world["flags"] = flags
+	data["world"] = world
+	var quests: Dictionary = data.get("quests", {}) if data.get("quests") is Dictionary else {}
+	var prologue: Dictionary = data.get("prologue", {}) if data.get("prologue") is Dictionary else {}
+	var finished := str(prologue.get("stage", "")) == "completed"
+	var done := {"state": "completed", "step": 0, "progress": {}}
+	for quest_id: String in ["a_road_forgotten", "the_broken_cart", "shelter_among_the_trees"]:
+		if not quests.has(quest_id):
+			quests[quest_id] = done.duplicate(true)
+	if finished:
+		for quest_id: String in ["the_whispering_stone", "the_first_binding"]:
+			if not quests.has(quest_id):
+				quests[quest_id] = done.duplicate(true)
+		for flag: String in ["prologue.shrine_reached", "prologue.first_class_selected", "prologue.completed"]:
+			flags[flag] = true
+		if not quests.has("the_first_signs"):
+			quests["the_first_signs"] = {"state": "active", "step": 0, "progress": {}}
+	elif not quests.has("the_whispering_stone"):
+		quests["the_whispering_stone"] = {"state": "active", "step": 0, "progress": {}}
+	data["quests"] = quests
 	return data

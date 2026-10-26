@@ -1,7 +1,8 @@
 class_name QuestLog
 extends RefCounted
 ## Class quest progress of a character (saved under "quests"):
-## quest id -> {"state": "active" | "completed", "progress": {objective index: amount}}.
+## quest id -> {"state": "active" | "completed", "step": index of the current step
+## (story quests; class quests have one step), "progress": {objective index: amount}}.
 ## Rules live in QuestService; this only stores data.
 
 signal changed
@@ -11,6 +12,10 @@ var entries: Dictionary = {}
 
 func state(quest_id: StringName) -> String:
 	return entries.get(quest_id, {}).get("state", "")
+
+
+func step(quest_id: StringName) -> int:
+	return int(entries.get(quest_id, {}).get("step", 0))
 
 
 func progress(quest_id: StringName, index: int) -> float:
@@ -32,7 +37,7 @@ func to_dict() -> Dictionary:
 		var progress_data := {}
 		for index: int in entry.get("progress", {}):
 			progress_data[str(index)] = entry.progress[index]
-		data[String(quest_id)] = {"state": entry.state, "progress": progress_data}
+		data[String(quest_id)] = {"state": entry.state, "step": int(entry.get("step", 0)), "progress": progress_data}
 	return data
 
 
@@ -48,4 +53,4 @@ func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
 		if raw is Dictionary:
 			for index_key: String in raw:
 				progress_data[int(index_key)] = maxf(0.0, float(raw[index_key]))
-		entries[StringName(key)] = {"state": str(entry.state), "progress": progress_data}
+		entries[StringName(key)] = {"state": str(entry.state), "step": maxi(0, int(entry.get("step", 0))), "progress": progress_data}

@@ -11,6 +11,9 @@ signal character_changed(character: Character)
 signal message(text: String)
 
 const DEFAULT_SAVE_PATH := "user://saves/slot_1.save.json"
+## Scripted runs (tests, playtests) never write to the player's saves, not even
+## autosaves or milestone saves triggered by gameplay.
+const SCRIPTED_SAVE_PATH := "user://test_saves/scripted/slot_1.save.json"
 
 var database: GameDatabase
 var character: Character
@@ -19,6 +22,8 @@ var save_path: String = DEFAULT_SAVE_PATH
 var last_load: SaveSystem.LoadResult
 ## Player preferences (UI scale, window mode); not part of any save slot.
 var settings: UserSettings
+## All writes: manual slots, rotating autosaves, milestone saves (SaveCoordinator).
+var saves: SaveCoordinator
 
 var _pending_spawn: StringName = &""
 var _traveling: bool = false
@@ -31,6 +36,10 @@ var _messages: PackedStringArray = []
 func _ready() -> void:
 	database = GameDatabase.get_default()
 	_init_settings()
+	saves = SaveCoordinator.new(self)
+	saves.name = "SaveCoordinator"
+	add_child(saves)
+	saves.periodic_enabled = settings.periodic_autosave
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	add_child(layer)
@@ -46,6 +55,8 @@ func _ready() -> void:
 ## a script) get in-memory defaults and never touch the player's settings file.
 func _init_settings() -> void:
 	var scripted := Engine.get_main_loop().get_script() != null
+	if scripted:
+		save_path = SCRIPTED_SAVE_PATH
 	settings = UserSettings.new() if scripted else UserSettings.load_from(UserSettings.DEFAULT_PATH)
 	settings.changed.connect(_on_settings_changed)
 	settings.apply_to(get_window())
@@ -55,6 +66,8 @@ func _init_settings() -> void:
 
 
 func _on_settings_changed() -> void:
+	if saves != null:
+		saves.periodic_enabled = settings.periodic_autosave
 	settings.apply_to(get_window())
 	if settings.path != "":
 		settings.save()
@@ -64,6 +77,26 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"toggle_fullscreen"):
 		settings.toggle_fullscreen()
 		get_viewport().set_input_as_handled()
+
+
+const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
+
+
+## New journey: a fresh Basic Adventurer at the start of the prologue.
+func new_game() -> void:
+	get_tree().paused = false
+	if saves != null:
+		saves.reset()
+	set_character(CharacterFactory.create_new(database))
+	travel(character.world.map_id, character.world.spawn_id)
+
+
+func go_to_title() -> void:
+	get_tree().paused = false
+	if saves != null:
+		saves.reset()
+	_traveling = false
+	get_tree().change_scene_to_file(TITLE_SCENE)
 
 
 func get_character() -> Character:
@@ -92,13 +125,22 @@ func save_game() -> Error:
 	return SaveSystem.save_to(get_character(), save_path)
 
 
+## Milestone save (arrival, quest completion, class choice, waystone,
+## restoration ...): always written, even with periodic autosave off.
+func request_critical_save(reason: String) -> int:
+	return saves.request_critical(reason) if saves != null else -1
+
+
 ## Loads `save_path`. On success the character is replaced and its saved map is
 ## (re)loaded at the saved spawn point. Returns the detailed result.
-func load_game() -> SaveSystem.LoadResult:
-	last_load = SaveSystem.load_from(save_path, database)
+## Loads `path` (default: the session's manual slot 1).
+func load_game(path: String = "") -> SaveSystem.LoadResult:
+	last_load = SaveSystem.load_from(path if path != "" else save_path, database)
 	if not last_load.ok():
 		message.emit("LOAD FAILED: %s" % "; ".join(last_load.errors))
 		return last_load
+	if saves != null:
+		saves.reset()
 	set_character(last_load.character)
 	_messages.append("Loaded save (%s)%s" % [last_load.source, " with %d warnings" % last_load.warnings.size() if not last_load.warnings.is_empty() else ""])
 	travel(character.world.map_id, character.world.spawn_id)
