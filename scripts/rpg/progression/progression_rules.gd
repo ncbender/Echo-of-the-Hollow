@@ -17,6 +17,12 @@ extends Resource
 ## Total mastery XP one training target instance can give per session.
 @export var training_xp_cap_per_target: int = 60
 
+@export_group("Character")
+## Stats every character has regardless of class and gear.
+@export var character_base_stats: Array[StatModifier] = [StatModifier.make(Stats.MAX_HEALTH, 100.0)]
+## Class that a new character starts with (the prologue later replaces this choice).
+@export var starting_class_id: StringName = &"basic_adventurer"
+
 @export_group("Class XP")
 ## Class XP for an accepted hit on a non-training target.
 @export var class_xp_per_hit: int = 1

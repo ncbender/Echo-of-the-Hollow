@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ClassDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/classes/class_definition.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
+
+[sub_resource type="Resource" id="Mod_hp_level"]
+script = ExtResource("2_mod")
+stat = &"max_health"
+flat = 2.0
+
+[resource]
+script = ExtResource("1_class")
+id = &"basic_adventurer"
+display_name = "Basic Adventurer"
+description = "Starting class. Uses any weapon, no shields. Neutral stats."
+max_level = 10
+xp_base = 120
+xp_growth = 1.2
+stats_per_level = Array[ExtResource("2_mod")]([SubResource("Mod_hp_level")])
+can_dual_wield = true
+can_use_shields = false
+starts_unlocked = true
+unlock_condition = &"start"

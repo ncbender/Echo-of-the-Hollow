@@ -13,7 +13,7 @@ var _techniques: Label
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(150, 0)
+	custom_minimum_size = Vector2(172, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override(&"separation", 1)
 	add_child(box)

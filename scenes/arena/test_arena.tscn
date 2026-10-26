@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_overlay"]
 [ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/world/class_station.tscn" id="8_station"]
 
 [node name="TestArena" type="Node2D"]
 y_sort_enabled = true
@@ -66,6 +67,9 @@ position = Vector2(96, -24)
 
 [node name="DummyC" parent="Dummies" instance=ExtResource("4_dummy")]
 position = Vector2(-90, 10)
+
+[node name="ClassStation" parent="." instance=ExtResource("8_station")]
+position = Vector2(-40, -110)
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true

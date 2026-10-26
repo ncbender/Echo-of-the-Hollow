@@ -32,6 +32,18 @@ func reset() -> void:
 	health_changed.emit(health, max_health)
 
 
+## Changes max health (class/gear stats) keeping the current health ratio.
+func set_max_health(value: float) -> void:
+	value = maxf(1.0, value)
+	if is_equal_approx(value, max_health):
+		return
+	var ratio := health / max_health if max_health > 0.0 else 1.0
+	max_health = value
+	if not is_dead():
+		health = clampf(max_health * ratio, 1.0, max_health)
+	health_changed.emit(health, max_health)
+
+
 func is_dead() -> bool:
 	return health <= 0.0
 

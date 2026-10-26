@@ -1,0 +1,125 @@
+extends SceneTree
+## Scripted RPG integration playtest in the real arena (NOT headless).
+## Drives the player via feed_input() and the UI via real InputEventActions and
+## button presses; saves screenshots + log to tests/output/. Run:
+##   godot --path . --fixed-fps 60 -s res://tests/playtest/rpg_playtest.gd
+
+const ARENA := "res://scenes/arena/test_arena.tscn"
+const OUTPUT := "res://tests/output"
+
+var arena: Node2D
+var player: Player
+var hud: GameHud
+var session: SessionState
+var f := InputFrame.new()
+var log_lines: PackedStringArray = []
+var failures: int = 0
+
+
+func _initialize() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT))
+	session = SessionState.find(self)
+	session.set_character(CharacterFactory.create_new(session.database))
+	await _load_arena()
+	await _class_station_flow()
+	_log("RESULT: %s (%d failed checks)" % ["OK" if failures == 0 else "FAILED", failures])
+	var file := FileAccess.open(OUTPUT.path_join("rpg_playtest_log.txt"), FileAccess.WRITE)
+	file.store_string("\n".join(log_lines))
+	file.close()
+	quit(0 if failures == 0 else 1)
+
+
+func _load_arena() -> void:
+	if arena != null:
+		arena.queue_free()
+		await process_frame
+	arena = load(ARENA).instantiate()
+	root.add_child(arena)
+	current_scene = arena
+	player = arena.get_node("Player")
+	hud = arena.get_node("GameHud")
+	player.feed_input(f)
+	await _ticks(5)
+
+
+func _class_station_flow() -> void:
+	var station: Node2D = arena.get_node("ClassStation")
+	await _walk_to(station.global_position)
+	_check(Interactable.find_active(self) == station, "standing in class station")
+	await _press(&"interact")
+	_check(hud.class_panel.visible, "class panel opened with G")
+	await _shot("r01_class_panel")
+	_click_button(hud.class_panel, "Unlock (debug)")
+	await _ticks(2)
+	_check(session.character.classes.is_unlocked(&"warrior"), "warrior unlocked via panel")
+	_click_button(hud.class_panel, "Activate")
+	await _ticks(2)
+	_check(session.character.classes.active_class_id == &"warrior", "warrior active")
+	_check(is_equal_approx(player.health.max_health, 120.0), "warrior health applied to player")
+	await _shot("r02_warrior_active")
+	await _press(&"interact")
+	_check(not hud.class_panel.visible, "panel closed with G")
+
+
+# --- helpers ---------------------------------------------------------------
+
+func _walk_to(target: Vector2, limit: int = 300) -> void:
+	for i in limit:
+		var to := target - player.global_position
+		if to.length() < 6.0:
+			break
+		f.move = to.normalized()
+		f.aim_direction = to.normalized()
+		await physics_frame
+	f.move = Vector2.ZERO
+	await _ticks(3)
+
+
+func _press(action: StringName) -> void:
+	var event := InputEventAction.new()
+	event.action = action
+	event.pressed = true
+	Input.parse_input_event(event)
+	await process_frame
+	var release := InputEventAction.new()
+	release.action = action
+	release.pressed = false
+	Input.parse_input_event(release)
+	await _ticks(2)
+
+
+func _click_button(container: Node, text: String) -> void:
+	for button in container.find_children("*", "Button", true, false):
+		if (button as Button).text == text and not (button as Button).disabled:
+			(button as Button).pressed.emit()
+			_log("clicked '%s'" % text)
+			return
+	_check(false, "button '%s' found" % text)
+
+
+func _ticks(count: int) -> void:
+	for i in count:
+		await physics_frame
+
+
+func _shot(label: String) -> void:
+	await RenderingServer.frame_post_draw
+	var path := OUTPUT.path_join("%s.png" % label)
+	root.get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
+	_log("screenshot %s" % path.get_file())
+
+
+func _check(condition: bool, text: String) -> void:
+	if not condition:
+		failures += 1
+	_log("%s %s" % ["CHECK OK  " if condition else "CHECK FAIL", text])
+
+
+func _log(text: String) -> void:
+	var line := "[%5d] %s" % [Engine.get_physics_frames(), text]
+	log_lines.append(line)
+	print(line)

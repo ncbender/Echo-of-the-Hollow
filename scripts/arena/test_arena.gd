@@ -5,6 +5,7 @@ extends Node2D
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const SPAWN_AREA := Rect2(-300, -180, 600, 360)
 const DEBUG_MASTERY_XP := 100
+const DEBUG_CLASS_XP := 100
 
 var bridge: PlayerProgressionBridge
 
@@ -31,6 +32,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"debug_add_mastery_xp") and bridge != null:
 		bridge.debug_add_mastery_xp(DEBUG_MASTERY_XP)
 		hud.notify("+%d mastery XP (debug)" % DEBUG_MASTERY_XP)
+	elif event.is_action_pressed(&"debug_add_class_xp") and bridge != null:
+		bridge.character.add_class_xp(DEBUG_CLASS_XP)
+		hud.notify("+%d class XP (debug)" % DEBUG_CLASS_XP)
+	elif event.is_action_pressed(&"interact"):
+		if hud.is_window_open():
+			hud.close_windows()
+		else:
+			var target := Interactable.find_active(get_tree())
+			if target != null:
+				target.interact(hud)
 	elif event.is_action_pressed(&"debug_reset_arena"):
 		get_tree().reload_current_scene()
 
