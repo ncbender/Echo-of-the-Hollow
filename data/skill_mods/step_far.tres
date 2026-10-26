@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_ut7uc"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_1xen0"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_dlcig"]
+
+[resource]
+script = ExtResource("3_dlcig")
+id = &"step_far"
+display_name = "Far Step"
+description = "Shadowstep travels 50% further."
+skill_ids = Array[StringName]([&"shadowstep"])
+unlock_level = 7
+range_multiplier = 1.5

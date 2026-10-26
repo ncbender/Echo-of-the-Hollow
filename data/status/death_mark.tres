@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="StatusEffectDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/status_effect_definition.gd" id="1_0hdt4"]
+
+[resource]
+script = ExtResource("1_0hdt4")
+id = &"death_mark"
+display_name = "Death Mark"
+description = "Marked for death by an assassin."
+duration = 8.0
+color = Color(0.9, 0.2, 0.3, 1)

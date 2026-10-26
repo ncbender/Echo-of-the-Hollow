@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_s3qnf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_7pokd"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_28ncd"]
+
+[resource]
+script = ExtResource("3_28ncd")
+id = &"execution_wide"
+display_name = "Wide Execution"
+description = "Execution covers 30% more area."
+skill_ids = Array[StringName]([&"execution"])
+unlock_level = 11
+radius_multiplier = 1.3

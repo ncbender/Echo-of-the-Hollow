@@ -1,0 +1,292 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_yjqwe"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_lmw4q"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_34iqq"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_bpfhj"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_yhhx2"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_7mwa0"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_ehb1v"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_8ukxn"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_gcn75"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_bgnb3"]
+
+[sub_resource type="Resource" id="Resource_f6mvt"]
+script = ExtResource("4_bpfhj")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_scnwa"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_precision"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Precision"
+description = "+2% critical hit chance per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_f6mvt")])
+
+[sub_resource type="Resource" id="Resource_tr7ou"]
+script = ExtResource("5_yhhx2")
+sources = 3
+target_status = &"weak_point"
+
+[sub_resource type="Resource" id="Resource_gfhrv"]
+script = ExtResource("6_7mwa0")
+condition = SubResource("Resource_tr7ou")
+damage_percent = 5.0
+effect_id = &"sr_keen_eye"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_m7ls7"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_eye"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Keen Eye"
+description = "+5% damage per rank against Weak Points."
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_gfhrv")])
+
+[sub_resource type="Resource" id="Resource_livcj"]
+script = ExtResource("4_bpfhj")
+stat = &"crit_damage"
+flat = 8.0
+
+[sub_resource type="Resource" id="Resource_kdimm"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_cold"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Cold Blood"
+description = "+8% critical damage per rank."
+tier = 2
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_livcj")])
+
+[sub_resource type="Resource" id="Resource_o1u2i"]
+script = ExtResource("3_34iqq")
+id = &"sr_marked_for_death"
+display_name = "Sr Marked For Death"
+skill_ids = Array[StringName]([&"expose_weakness"])
+radius_multiplier = 1.4
+
+[sub_resource type="Resource" id="Resource_3ttyl"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_marked"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Marked for Death"
+description = "Expose Weakness covers 40% more area."
+kind = 2
+tier = 2
+column = 1
+skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_o1u2i")])
+
+[sub_resource type="Resource" id="Resource_djp1m"]
+script = ExtResource("5_yhhx2")
+sources = 3
+target_status = &"weak_point"
+
+[sub_resource type="Resource" id="Resource_oaixv"]
+script = ExtResource("9_gcn75")
+condition = SubResource("Resource_djp1m")
+resource_gain = 2.0
+effect_id = &"sr_opportunist"
+hit_sources = 3
+
+[sub_resource type="Resource" id="Resource_p3nsy"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_opportunist"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Opportunist"
+description = "Hits on Weak Points restore 2 focus per rank."
+tier = 3
+max_rank = 5
+effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_oaixv")])
+
+[sub_resource type="Resource" id="Resource_qtiul"]
+script = ExtResource("3_34iqq")
+id = &"sr_guillotine"
+display_name = "Sr Guillotine"
+skill_ids = Array[StringName]([&"execution"])
+damage_multiplier = 1.25
+
+[sub_resource type="Resource" id="Resource_lp0b0"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_guillotine"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Guillotine"
+description = "Execution deals 25% more damage."
+kind = 2
+tier = 3
+column = 1
+skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_qtiul")])
+
+[sub_resource type="Resource" id="Resource_2fcqr"]
+script = ExtResource("4_bpfhj")
+stat = &"physical_damage"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_vn3vp"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_lethality"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Lethality"
+description = "+3% physical damage per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_2fcqr")])
+
+[sub_resource type="Resource" id="Resource_hcgn7"]
+script = ExtResource("5_yhhx2")
+sources = 11
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_d62a6"]
+script = ExtResource("9_gcn75")
+condition = SubResource("Resource_hcgn7")
+cooldown_reduction = 1.5
+cooldown_skill = &"execution"
+effect_id = &"sr_swift_kill"
+hit_sources = 11
+
+[sub_resource type="Resource" id="Resource_wbsun"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_swift"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Swift Kill"
+description = "Kills reduce Execution's cooldown by 1.5 s per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_d62a6")])
+
+[sub_resource type="Resource" id="Resource_4axxa"]
+script = ExtResource("4_bpfhj")
+stat = &"skill_damage"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_mf45h"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_ruthless"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Ruthless"
+description = "+5% skill damage per rank."
+tier = 5
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_4axxa")])
+
+[sub_resource type="Resource" id="Resource_ilqub"]
+script = ExtResource("3_34iqq")
+id = &"sr_exposing_strike"
+display_name = "Sr Exposing Strike"
+skill_ids = Array[StringName]([&"shadow_strike"])
+damage_multiplier = 1.3
+bonus_status = &"weak_point"
+bonus_multiplier = 1.5
+
+[sub_resource type="Resource" id="Resource_pcgd1"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_exposing"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Exposing Strike"
+description = "Shadow Strike deals 30% more damage and 50% more against Weak Points."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_ilqub")])
+
+[sub_resource type="Resource" id="Resource_bdh03"]
+script = ExtResource("4_bpfhj")
+stat = &"max_resource"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_50yji"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_focus"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Assassin's Focus"
+description = "+6 maximum focus per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_bdh03")])
+
+[sub_resource type="Resource" id="Resource_btwqs"]
+script = ExtResource("5_yhhx2")
+sources = 3
+requires_crit = true
+
+[sub_resource type="Resource" id="Resource_b1fi5"]
+script = ExtResource("9_gcn75")
+condition = SubResource("Resource_btwqs")
+resource_gain = 3.0
+effect_id = &"sr_killing_edge"
+hit_sources = 3
+
+[sub_resource type="Resource" id="Resource_ubnff"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_edge"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Killing Edge"
+description = "Critical hits restore 3 focus per rank."
+tier = 6
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_b1fi5")])
+
+[sub_resource type="Resource" id="Resource_od2cj"]
+script = ExtResource("5_yhhx2")
+sources = 3
+target_status = &"death_mark"
+
+[sub_resource type="Resource" id="Resource_284po"]
+script = ExtResource("6_7mwa0")
+condition = SubResource("Resource_od2cj")
+damage_percent = 60.0
+effect_id = &"sr_death_mark_bonus"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_skpuu"]
+script = ExtResource("5_yhhx2")
+sources = 11
+target_status = &"death_mark"
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_i86pr"]
+script = ExtResource("9_gcn75")
+condition = SubResource("Resource_skpuu")
+resource_gain = 30.0
+cooldown_reduction = 4.0
+effect_id = &"sr_death_mark_kill"
+hit_sources = 11
+
+[sub_resource type="Resource" id="Resource_w5pcr"]
+script = ExtResource("1_yjqwe")
+id = &"sr_as_deathmark"
+class_id = &"shadowrunner"
+tree_id = &"sr_assassin"
+display_name = "Death Mark"
+description = "Capstone - unlocks Death Mark. Your hits on death-marked targets deal 60% more damage, and killing one resets 4 s of all cooldowns and restores 30 focus."
+kind = 1
+tier = 7
+effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_284po"), SubResource("Resource_i86pr")])
+unlocks_skill = &"death_mark"
+
+[resource]
+script = ExtResource("10_bgnb3")
+id = &"sr_assassin"
+class_id = &"shadowrunner"
+display_name = "Assassin"
+description = "Weak points, criticals and executions. Capstone: Death Mark."
+color = Color(0.9, 0.3, 0.35, 1)
+nodes = Array[ExtResource("1_yjqwe")]([SubResource("Resource_scnwa"), SubResource("Resource_m7ls7"), SubResource("Resource_kdimm"), SubResource("Resource_3ttyl"), SubResource("Resource_p3nsy"), SubResource("Resource_lp0b0"), SubResource("Resource_vn3vp"), SubResource("Resource_wbsun"), SubResource("Resource_mf45h"), SubResource("Resource_pcgd1"), SubResource("Resource_50yji"), SubResource("Resource_ubnff"), SubResource("Resource_w5pcr")])

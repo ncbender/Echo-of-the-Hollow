@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_wvxy5"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_uoe4u"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_8t3wa"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/move_action.gd" id="4_hcgsp"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_y5phj"]
+
+[sub_resource type="Resource" id="Resource_f4fmk"]
+script = ExtResource("3_8t3wa")
+status_id = &"weak_point"
+
+[sub_resource type="Resource" id="Resource_uvod6"]
+script = ExtResource("2_uoe4u")
+damage = 16.0
+poise_damage = 10.0
+statuses = Array[ExtResource("3_8t3wa")]([SubResource("Resource_f4fmk")])
+
+[sub_resource type="Resource" id="Resource_ax3o7"]
+script = ExtResource("4_hcgsp")
+distance = 50.0
+duration = 0.1
+hit = SubResource("Resource_uvod6")
+trail_color = Color(0.62, 0.5, 0.9, 1)
+
+[resource]
+script = ExtResource("5_y5phj")
+id = &"shadow_strike"
+class_id = &"shadowrunner"
+display_name = "Shadow Strike"
+description = "Dart forward and strike, exposing a Weak Point on every target you pass."
+color = Color(0.62, 0.5, 0.9, 1)
+tags = Array[StringName]([&"melee", &"movement", &"shadow"])
+resource_cost = 15.0
+cooldown = 3.0
+cast_lock = 0.15
+cast_move_multiplier = 1.0
+actions = Array[ExtResource("1_wvxy5")]([SubResource("Resource_ax3o7")])

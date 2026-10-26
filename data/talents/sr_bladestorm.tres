@@ -1,0 +1,263 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_clk1v"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_ebvwv"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_g1gdp"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_f0ysi"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_1at1p"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_lucpk"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_mkbga"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_m1bwc"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_sh4xy"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="10_7sbjj"]
+
+[sub_resource type="Resource" id="Resource_0y5nw"]
+script = ExtResource("4_f0ysi")
+stat = &"attack_speed"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_pruw7"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_hands"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Quick Hands"
+description = "+2% attack speed per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_0y5nw")])
+
+[sub_resource type="Resource" id="Resource_nfxm8"]
+script = ExtResource("5_1at1p")
+sources = 3
+min_pressure = 3
+
+[sub_resource type="Resource" id="Resource_8l03g"]
+script = ExtResource("6_lucpk")
+condition = SubResource("Resource_nfxm8")
+damage_percent = 4.0
+effect_id = &"sr_flurry"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_7juee"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_flurry"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Flurry"
+description = "+4% damage per rank while Combat Pressure has at least 3 stacks."
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_8l03g")])
+
+[sub_resource type="Resource" id="Resource_cihsy"]
+script = ExtResource("4_f0ysi")
+stat = &"resource_gain"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_3msqv"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_dance"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Dancing Blades"
+description = "+5% focus gain per rank."
+tier = 2
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_cihsy")])
+
+[sub_resource type="Resource" id="Resource_xcibj"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_fan"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Blade Fan"
+description = "Unlocks the active skill Blade Fan."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"blade_fan"
+
+[sub_resource type="Resource" id="Resource_mdp3a"]
+script = ExtResource("4_f0ysi")
+stat = &"bleed_chance"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_s0uk3"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_serrated"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Serrated Knives"
+description = "+3% bleed chance per rank."
+tier = 3
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_mdp3a")])
+
+[sub_resource type="Resource" id="Resource_y6l6n"]
+script = ExtResource("3_g1gdp")
+id = &"sr_fan_of_knives"
+display_name = "Sr Fan Of Knives"
+skill_ids = Array[StringName]([&"blade_fan"])
+extra_projectiles = 2
+
+[sub_resource type="Resource" id="Resource_7recm"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_knives"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Fan of Knives"
+description = "Blade Fan throws 2 more knives."
+kind = 2
+tier = 3
+column = 1
+prerequisites = Array[StringName]([&"sr_bs_fan"])
+skill_mods = Array[ExtResource("3_g1gdp")]([SubResource("Resource_y6l6n")])
+
+[sub_resource type="Resource" id="Resource_5dadv"]
+script = ExtResource("4_f0ysi")
+stat = &"physical_damage"
+flat = 3.0
+
+[sub_resource type="Resource" id="Resource_qtoia"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_tempo"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Tempo"
+description = "+3% physical damage per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_5dadv")])
+
+[sub_resource type="Resource" id="Resource_ju3sl"]
+script = ExtResource("5_1at1p")
+required_tags = Array[StringName]([&"finisher"])
+
+[sub_resource type="Resource" id="Resource_73xcn"]
+script = ExtResource("9_sh4xy")
+condition = SubResource("Resource_ju3sl")
+once_per_swing = true
+cooldown_reduction = 1.0
+cooldown_skill = &"blade_fan"
+effect_id = &"sr_rhythm"
+
+[sub_resource type="Resource" id="Resource_gfhs4"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_rhythm"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Riposte Rhythm"
+description = "Finishers reduce Blade Fan's cooldown by 1 s per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_73xcn")])
+
+[sub_resource type="Resource" id="Resource_trlpq"]
+script = ExtResource("4_f0ysi")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_4xgsi"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_whirling"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Whirling Steel"
+description = "+2% critical hit chance per rank."
+tier = 5
+max_rank = 3
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_trlpq")])
+
+[sub_resource type="Resource" id="Resource_qfqln"]
+script = ExtResource("3_g1gdp")
+id = &"sr_piercing_blades"
+display_name = "Sr Piercing Blades"
+skill_ids = Array[StringName]([&"blade_fan"])
+extra_pierce = 2
+
+[sub_resource type="Resource" id="Resource_uxsvt"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_returning"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Piercing Blades"
+description = "Blade Fan knives pierce 2 targets."
+kind = 2
+tier = 5
+column = 1
+prerequisites = Array[StringName]([&"sr_bs_fan"])
+skill_mods = Array[ExtResource("3_g1gdp")]([SubResource("Resource_qfqln")])
+
+[sub_resource type="Resource" id="Resource_h2vgl"]
+script = ExtResource("4_f0ysi")
+stat = &"attack_speed"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_1vbss"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_endless"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Endless Flurry"
+description = "+2% attack speed per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_h2vgl")])
+
+[sub_resource type="Resource" id="Resource_sdilh"]
+script = ExtResource("4_f0ysi")
+stat = &"bleed_damage"
+flat = 10.0
+
+[sub_resource type="Resource" id="Resource_5kwrn"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_bloodied"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Bloodied Steel"
+description = "+10% bleed damage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_sdilh")])
+
+[sub_resource type="Resource" id="Resource_jtlyr"]
+script = ExtResource("7_mkbga")
+status_id = &"bleeding"
+
+[sub_resource type="Resource" id="Resource_0onlu"]
+script = ExtResource("5_1at1p")
+required_tags = Array[StringName]([&"finisher"])
+
+[sub_resource type="Resource" id="Resource_dpqj6"]
+script = ExtResource("9_sh4xy")
+condition = SubResource("Resource_0onlu")
+once_per_swing = true
+burst_radius = 50.0
+burst_damage_ratio = 0.5
+burst_poise = 4.0
+burst_knockback = 4.0
+burst_statuses = Array[ExtResource("7_mkbga")]([SubResource("Resource_jtlyr")])
+fx_color = Color(0.85, 0.85, 0.9, 1)
+effect_id = &"sr_thousand_cuts"
+
+[sub_resource type="Resource" id="Resource_nqcwf"]
+script = ExtResource("1_clk1v")
+id = &"sr_bs_thousand"
+class_id = &"shadowrunner"
+tree_id = &"sr_bladestorm"
+display_name = "Thousand Cuts"
+description = "Capstone - light finishers release a ring of blades: 50% of the hit's damage to all other enemies within 50 px, applying Bleeding."
+kind = 2
+tier = 7
+effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_dpqj6")])
+
+[resource]
+script = ExtResource("10_7sbjj")
+id = &"sr_bladestorm"
+class_id = &"shadowrunner"
+display_name = "Bladestorm"
+description = "Fast chains, knives and bleeding steel. Capstone: Thousand Cuts."
+color = Color(0.85, 0.85, 0.9, 1)
+nodes = Array[ExtResource("1_clk1v")]([SubResource("Resource_pruw7"), SubResource("Resource_7juee"), SubResource("Resource_3msqv"), SubResource("Resource_xcibj"), SubResource("Resource_s0uk3"), SubResource("Resource_7recm"), SubResource("Resource_qtoia"), SubResource("Resource_gfhs4"), SubResource("Resource_4xgsi"), SubResource("Resource_uxsvt"), SubResource("Resource_1vbss"), SubResource("Resource_5kwrn"), SubResource("Resource_nqcwf")])

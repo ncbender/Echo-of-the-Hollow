@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StatusEffectDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/status_effect_definition.gd" id="1_x313r"]
+
+[resource]
+script = ExtResource("1_x313r")
+id = &"smoked"
+display_name = "Smoked"
+description = "Blinded by smoke: moves 30% slower."
+duration = 1.0
+slow_per_stack = 0.3
+max_slow = 0.3
+color = Color(0.55, 0.55, 0.62, 1)

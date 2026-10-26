@@ -1,0 +1,310 @@
+[gd_resource type="Resource" script_class="TalentTreeDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_node_definition.gd" id="1_6hwvm"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="2_axpo8"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_qoylg"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_w47ow"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_condition.gd" id="5_mr78x"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/conditional_hit_bonus_effect.gd" id="6_yrtng"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="7_2f1l0"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="8_61jm6"]
+[ext_resource type="Script" path="res://scripts/rpg/effects/hit_trigger_effect.gd" id="9_5s81h"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="10_5ippm"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="11_uc16h"]
+[ext_resource type="Script" path="res://scripts/rpg/talents/talent_tree_definition.gd" id="12_l35hv"]
+
+[sub_resource type="Resource" id="Resource_5o6d5"]
+script = ExtResource("4_w47ow")
+stat = &"skill_damage"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_hpo30"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_affinity"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Shadow Affinity"
+description = "+4% skill damage per rank."
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_5o6d5")])
+
+[sub_resource type="Resource" id="Resource_46btl"]
+script = ExtResource("4_w47ow")
+stat = &"cooldown_reduction"
+flat = 4.0
+
+[sub_resource type="Resource" id="Resource_as6mj"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_feet"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Light Feet"
+description = "+4% cooldown reduction per rank."
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_46btl")])
+
+[sub_resource type="Resource" id="Resource_1ljdd"]
+script = ExtResource("5_mr78x")
+sources = 3
+recent_cast = &"shadowstep"
+recent_seconds = 3.0
+
+[sub_resource type="Resource" id="Resource_e2lk1"]
+script = ExtResource("6_yrtng")
+condition = SubResource("Resource_1ljdd")
+damage_percent = 6.0
+effect_id = &"sr_ambush"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_dl652"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_ambush"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Ambush"
+description = "+6% damage per rank within 3 s after Shadowstep."
+tier = 2
+max_rank = 3
+effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_e2lk1")])
+
+[sub_resource type="Resource" id="Resource_qmxhe"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_smoke"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Smoke Veil"
+description = "Unlocks the active skill Smoke Veil."
+kind = 1
+tier = 2
+column = 1
+unlocks_skill = &"smoke_veil"
+
+[sub_resource type="Resource" id="Resource_qr3pw"]
+script = ExtResource("4_w47ow")
+stat = &"armor"
+flat = 5.0
+
+[sub_resource type="Resource" id="Resource_jo881"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_stalker"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Nightstalker"
+description = "+5 armor per rank."
+tier = 3
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_qr3pw")])
+
+[sub_resource type="Resource" id="Resource_p7ewb"]
+script = ExtResource("7_2f1l0")
+status_id = &"chill"
+
+[sub_resource type="Resource" id="Resource_ig8dh"]
+script = ExtResource("3_qoylg")
+id = &"sr_choking_smoke"
+display_name = "Sr Choking Smoke"
+skill_ids = Array[StringName]([&"smoke_veil"])
+add_statuses = Array[ExtResource("7_2f1l0")]([SubResource("Resource_p7ewb")])
+
+[sub_resource type="Resource" id="Resource_mrihc"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_choking"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Choking Smoke"
+description = "Smoke Veil also chills enemies inside."
+kind = 2
+tier = 3
+column = 1
+prerequisites = Array[StringName]([&"sr_nh_smoke"])
+skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_ig8dh")])
+
+[sub_resource type="Resource" id="Resource_8btp4"]
+script = ExtResource("4_w47ow")
+stat = &"crit_chance"
+flat = 2.0
+
+[sub_resource type="Resource" id="Resource_5mfb5"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_unseen"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Unseen"
+description = "+2% critical hit chance per rank."
+tier = 4
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_8btp4")])
+
+[sub_resource type="Resource" id="Resource_2dpnp"]
+script = ExtResource("5_mr78x")
+sources = 11
+requires_kill = true
+
+[sub_resource type="Resource" id="Resource_gqwb4"]
+script = ExtResource("9_5s81h")
+condition = SubResource("Resource_2dpnp")
+cooldown_reduction = 1.0
+cooldown_skill = &"shadowstep"
+effect_id = &"sr_vanish"
+hit_sources = 11
+
+[sub_resource type="Resource" id="Resource_8b55l"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_vanish"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Vanish"
+description = "Kills reduce Shadowstep's cooldown by 1 s per rank."
+tier = 4
+max_rank = 3
+column = 1
+effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_gqwb4")])
+
+[sub_resource type="Resource" id="Resource_u8d0b"]
+script = ExtResource("5_mr78x")
+sources = 3
+target_status = &"smoked"
+
+[sub_resource type="Resource" id="Resource_6riwd"]
+script = ExtResource("6_yrtng")
+condition = SubResource("Resource_u8d0b")
+damage_percent = 6.0
+effect_id = &"sr_dusk_blade"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_bnsjg"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_dusk"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Dusk Blade"
+description = "+6% damage per rank against Smoked targets."
+tier = 5
+max_rank = 3
+effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_6riwd")])
+
+[sub_resource type="Resource" id="Resource_y5gov"]
+script = ExtResource("7_2f1l0")
+status_id = &"weak_point"
+
+[sub_resource type="Resource" id="Resource_w2mtv"]
+script = ExtResource("10_5ippm")
+damage = 14.0
+knockback = 4.0
+statuses = Array[ExtResource("7_2f1l0")]([SubResource("Resource_y5gov")])
+
+[sub_resource type="Resource" id="Resource_gywb1"]
+script = ExtResource("11_uc16h")
+radius = 26.0
+arc_degrees = 360.0
+hit = SubResource("Resource_w2mtv")
+fx_color = Color(0.62, 0.5, 0.9, 1)
+
+[sub_resource type="Resource" id="Resource_3gt20"]
+script = ExtResource("3_qoylg")
+id = &"sr_phantom_step"
+display_name = "Sr Phantom Step"
+skill_ids = Array[StringName]([&"shadowstep"])
+extra_actions = Array[ExtResource("8_61jm6")]([SubResource("Resource_gywb1")])
+
+[sub_resource type="Resource" id="Resource_n1771"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_phantom"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Phantom Step"
+description = "Shadowstep ends with a strike around you that exposes Weak Points."
+kind = 2
+tier = 5
+column = 1
+skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_3gt20")])
+
+[sub_resource type="Resource" id="Resource_gnifq"]
+script = ExtResource("4_w47ow")
+stat = &"max_resource"
+flat = 6.0
+
+[sub_resource type="Resource" id="Resource_rkdws"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_patient"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Patient Hunter"
+description = "+6 maximum focus per rank."
+tier = 6
+max_rank = 5
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_gnifq")])
+
+[sub_resource type="Resource" id="Resource_a8r4g"]
+script = ExtResource("4_w47ow")
+stat = &"crit_damage"
+flat = 8.0
+
+[sub_resource type="Resource" id="Resource_4jhg1"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_deep"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Deep Shadows"
+description = "+8% critical damage per rank."
+tier = 6
+max_rank = 3
+column = 1
+stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_a8r4g")])
+
+[sub_resource type="Resource" id="Resource_su0wk"]
+script = ExtResource("5_mr78x")
+sources = 3
+recent_cast = &"shadowstep"
+recent_seconds = 3.0
+
+[sub_resource type="Resource" id="Resource_xji35"]
+script = ExtResource("6_yrtng")
+condition = SubResource("Resource_su0wk")
+damage_percent = 25.0
+effect_id = &"sr_nightfall_bonus"
+hit_sources = 0
+
+[sub_resource type="Resource" id="Resource_q653h"]
+script = ExtResource("5_mr78x")
+recent_cast = &"shadowstep"
+recent_seconds = 3.0
+
+[sub_resource type="Resource" id="Resource_dq3rt"]
+script = ExtResource("7_2f1l0")
+status_id = &"weak_point"
+
+[sub_resource type="Resource" id="Resource_4v5j1"]
+script = ExtResource("9_5s81h")
+condition = SubResource("Resource_q653h")
+statuses = Array[ExtResource("7_2f1l0")]([SubResource("Resource_dq3rt")])
+effect_id = &"sr_nightfall_expose"
+
+[sub_resource type="Resource" id="Resource_6f6kg"]
+script = ExtResource("3_qoylg")
+id = &"sr_nightfall_smoke"
+display_name = "Sr Nightfall Smoke"
+skill_ids = Array[StringName]([&"smoke_veil"])
+radius_multiplier = 1.4
+
+[sub_resource type="Resource" id="Resource_xryls"]
+script = ExtResource("1_6hwvm")
+id = &"sr_nh_nightfall"
+class_id = &"shadowrunner"
+tree_id = &"sr_nighthunter"
+display_name = "Nightfall"
+description = "Capstone - Smoke Veil covers 40% more area; for 3 s after Shadowstep your hits deal 25% more damage and expose Weak Points."
+kind = 2
+tier = 7
+effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_xji35"), SubResource("Resource_4v5j1")])
+skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_6f6kg")])
+
+[resource]
+script = ExtResource("12_l35hv")
+id = &"sr_nighthunter"
+class_id = &"shadowrunner"
+display_name = "Night Hunter"
+description = "Smoke, shadowsteps and ambushes. Capstone: Nightfall."
+color = Color(0.55, 0.55, 0.62, 1)
+nodes = Array[ExtResource("1_6hwvm")]([SubResource("Resource_hpo30"), SubResource("Resource_as6mj"), SubResource("Resource_dl652"), SubResource("Resource_qmxhe"), SubResource("Resource_jo881"), SubResource("Resource_mrihc"), SubResource("Resource_5mfb5"), SubResource("Resource_8b55l"), SubResource("Resource_bnsjg"), SubResource("Resource_n1771"), SubResource("Resource_rkdws"), SubResource("Resource_4jhg1"), SubResource("Resource_xryls")])

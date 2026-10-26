@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_rja0x"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_p331d"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_w26aq"]
+
+[resource]
+script = ExtResource("3_w26aq")
+id = &"execution_focus"
+display_name = "Focus Return"
+description = "Each target hit by Execution refunds 15 focus."
+slot = 1
+skill_ids = Array[StringName]([&"execution"])
+unlock_level = 9
+resource_on_hit = 15.0

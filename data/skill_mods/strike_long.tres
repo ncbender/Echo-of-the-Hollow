@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_0n33t"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_yfugf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_8l30r"]
+
+[resource]
+script = ExtResource("3_8l30r")
+id = &"strike_long"
+display_name = "Long Strike"
+description = "Shadow Strike travels 50% further."
+skill_ids = Array[StringName]([&"shadow_strike"])
+unlock_level = 6
+range_multiplier = 1.5

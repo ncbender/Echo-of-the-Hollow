@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_4cly3"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_vfegy"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_wo24i"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/area_strike_action.gd" id="4_nqofd"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_s60xc"]
+
+[sub_resource type="Resource" id="Resource_3hq0u"]
+script = ExtResource("2_vfegy")
+damage = 26.0
+poise_damage = 30.0
+knockback = 12.0
+hitstop = 0.06
+consume_status = &"weak_point"
+consume_damage_per_stack = 40.0
+
+[sub_resource type="Resource" id="Resource_fxgjr"]
+script = ExtResource("4_nqofd")
+radius = 38.0
+arc_degrees = 70.0
+forward_offset = 6.0
+hit = SubResource("Resource_3hq0u")
+fx_color = Color(0.95, 0.35, 0.4, 1)
+
+[resource]
+script = ExtResource("5_s60xc")
+id = &"execution"
+class_id = &"shadowrunner"
+display_name = "Execution"
+description = "A precise finishing blow. Consumes a Weak Point for +40 damage."
+color = Color(0.95, 0.35, 0.4, 1)
+tags = Array[StringName]([&"melee", &"finisher"])
+resource_cost = 40.0
+cooldown = 10.0
+unlock_level = 8
+cast_lock = 0.3
+cast_move_multiplier = 0.4
+actions = Array[ExtResource("1_4cly3")]([SubResource("Resource_fxgjr")])

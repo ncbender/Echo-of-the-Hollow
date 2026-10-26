@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_1hxxf"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/move_action.gd" id="2_4e4wo"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/buff_action.gd" id="3_uc1av"]
+[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="4_oavs8"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_s3obu"]
+
+[sub_resource type="Resource" id="Resource_2cpwf"]
+script = ExtResource("2_4e4wo")
+distance = 80.0
+duration = 0.12
+trail_color = Color(0.62, 0.5, 0.9, 1)
+
+[sub_resource type="Resource" id="Resource_yph6u"]
+script = ExtResource("4_oavs8")
+stat = &"crit_chance"
+flat = 15.0
+
+[sub_resource type="Resource" id="Resource_dnosf"]
+script = ExtResource("3_uc1av")
+key = &"shadowstep"
+duration = 3.0
+stat_modifiers = Array[ExtResource("4_oavs8")]([SubResource("Resource_yph6u")])
+fx_color = Color(0.62, 0.5, 0.9, 1)
+
+[resource]
+script = ExtResource("5_s3obu")
+id = &"shadowstep"
+class_id = &"shadowrunner"
+display_name = "Shadowstep"
+description = "Step through the shadows towards the cursor (a skill, not your dash: no dash charge, no invulnerability). For 3 s afterwards your critical hit chance is 15% higher."
+color = Color(0.62, 0.5, 0.9, 1)
+tags = Array[StringName]([&"movement", &"shadow"])
+resource_cost = 10.0
+cooldown = 6.0
+unlock_level = 5
+cast_lock = 0.12
+cast_move_multiplier = 1.0
+actions = Array[ExtResource("1_1hxxf")]([SubResource("Resource_2cpwf"), SubResource("Resource_dnosf")])

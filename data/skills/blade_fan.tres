@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SkillDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="1_062h8"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_hit_spec.gd" id="2_oxfly"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="3_6amcw"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/actions/projectile_action.gd" id="4_n8v4n"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_definition.gd" id="5_q5g1w"]
+
+[sub_resource type="Resource" id="Resource_nl02v"]
+script = ExtResource("2_oxfly")
+damage = 9.0
+poise_damage = 4.0
+knockback = 3.0
+
+[sub_resource type="Resource" id="Resource_vu6a4"]
+script = ExtResource("4_n8v4n")
+count = 5
+spread_degrees = 50.0
+speed = 320.0
+max_distance = 110.0
+radius = 3.0
+hit = SubResource("Resource_nl02v")
+color = Color(0.85, 0.85, 0.9, 1)
+
+[resource]
+script = ExtResource("5_q5g1w")
+id = &"blade_fan"
+class_id = &"shadowrunner"
+display_name = "Blade Fan"
+description = "Throw a fan of five knives."
+color = Color(0.85, 0.85, 0.9, 1)
+tags = Array[StringName]([&"projectile", &"ranged"])
+resource_cost = 20.0
+cooldown = 5.0
+unlock_level = 0
+cast_lock = 0.2
+cast_move_multiplier = 0.7
+actions = Array[ExtResource("1_062h8")]([SubResource("Resource_vu6a4")])

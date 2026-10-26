@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillModDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_status_spec.gd" id="1_3wmws"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_action.gd" id="2_nffin"]
+[ext_resource type="Script" path="res://scripts/rpg/skills/skill_mod_definition.gd" id="3_4151d"]
+
+[sub_resource type="Resource" id="Resource_vp1h5"]
+script = ExtResource("1_3wmws")
+status_id = &"bleeding"
+
+[resource]
+script = ExtResource("3_4151d")
+id = &"strike_venom"
+display_name = "Venom Edge"
+description = "Shadow Strike applies Bleeding."
+slot = 1
+skill_ids = Array[StringName]([&"shadow_strike"])
+unlock_level = 4
+add_statuses = Array[ExtResource("1_3wmws")]([SubResource("Resource_vp1h5")])

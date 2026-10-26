@@ -40,6 +40,7 @@ var _dash_buffer: InputBuffer
 var _ability_buffer: InputBuffer
 var _motion_velocity: Vector2 = Vector2.ZERO
 var _motion_left: float = 0.0
+var _motion_distance_left: float = 0.0
 var knockback := KnockbackMotion.new()
 var _spawn_position: Vector2
 var _respawn_left: float = 0.0
@@ -144,8 +145,11 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		# Leave the dash at running speed instead of ramping up from zero.
 		_locomotion_velocity = movement.full_speed_velocity(dash.direction)
 	elif is_in_skill_motion():
-		_motion_left -= delta
-		velocity = _motion_velocity
+		# Exact distance like the attack lunge: never more than the skill asked for.
+		var travel := minf(_motion_velocity.length() * delta, _motion_distance_left)
+		_motion_distance_left -= travel
+		_motion_left = 0.0 if _motion_distance_left <= 0.001 else maxf(_motion_left - delta, 0.0001)
+		velocity = _motion_velocity.normalized() * travel / delta if delta > 0.0 else Vector2.ZERO
 		_locomotion_velocity = Vector2.ZERO
 	else:
 		var move_input := Vector2.ZERO if reaction.blocks_movement() else frame.move
@@ -204,10 +208,12 @@ func begin_skill(lock: float, move_multiplier: float) -> void:
 func start_skill_motion(motion_velocity: Vector2, duration: float) -> void:
 	_motion_velocity = motion_velocity
 	_motion_left = duration
+	_motion_distance_left = motion_velocity.length() * duration
 
 
 func stop_skill_motion() -> void:
 	_motion_left = 0.0
+	_motion_distance_left = 0.0
 
 
 func is_in_skill_motion() -> bool:
