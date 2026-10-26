@@ -1,6 +1,11 @@
 extends CanvasLayer
 ## Debug HUD: action state, combo path, charge tier, dash charges, weapon family,
-## hit window. Read-only view of the player's components.
+## hit window, debug key list. Read-only view of the player's components.
+## Developer tool, separate from the game HUD: hidden by default, F12 toggles it
+## (the choice lasts for the session).
+
+## Shown on every map once toggled on (F12).
+static var shown: bool = false
 
 const STATE_NAMES := ["IDLE", "CHARGING", "ATTACKING"]
 const PHASE_NAMES := ["-", "STARTUP", "ACTIVE", "RECOVERY"]
@@ -13,7 +18,21 @@ var _last_target: Enemy
 @onready var _help: Label = $Help
 
 
+func _ready() -> void:
+	visible = shown
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key != null and key.pressed and not key.echo and key.physical_keycode == KEY_F12:
+		shown = not shown
+		visible = shown
+		get_viewport().set_input_as_handled()
+
+
 func _process(_delta: float) -> void:
+	if not visible:
+		return
 	if player == null or not is_instance_valid(player):
 		_status.text = "no player"
 		return

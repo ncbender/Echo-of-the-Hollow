@@ -19,6 +19,9 @@ quantity = 25
 
 [resource]
 script = ExtResource("1_cfg")
+id = &"grove_warden"
+display_name = "Grove Warden"
+rank = 2
 move_speed = 70.0
 aggro_range = 260.0
 attack_range = 28.0

@@ -16,8 +16,12 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(UiTheme.HUD_COLUMN_WIDTH, 0)
 	var box := VBoxContainer.new()
 	add_child(box)
-	_title = UiTheme.label("", UiTheme.COLOR_ACCENT)
-	_lines = UiTheme.label("", UiTheme.COLOR_TEXT)
+	theme_type_variation = &"HudPanel"
+	_title = UiTheme.styled("", &"SubheadingLabel")
+	_title.add_theme_color_override(&"font_color", UiTheme.BRONZE)
+	_title.add_theme_font_override(&"font", UiTheme.display_font())
+	_lines = UiTheme.label("", UiTheme.TEXT_PRIMARY)
+	_lines.add_theme_constant_override(&"line_spacing", 3)
 	_lines.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lines.add_theme_font_size_override(&"font_size", UiTheme.FONT_SMALL)
 	box.add_child(_title)

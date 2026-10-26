@@ -43,7 +43,7 @@ func try_pick_up(player: Node) -> bool:
 	_taken = true
 	if persistent_id != &"":
 		bridge.character.world.set_flag(flag_name())
-	bridge.message.emit("Picked up %s x%d" % [_name(), quantity])
+	bridge.item_received.emit(item_id, quantity)   # HUD loot feed (icon, rarity, amount)
 	picked_up.emit(item_id, quantity)
 	queue_free()
 	return true

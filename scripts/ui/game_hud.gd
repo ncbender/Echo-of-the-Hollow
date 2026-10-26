@@ -1,12 +1,23 @@
 class_name GameHud
 extends CanvasLayer
-## Container for the prototype RPG UI. Pure presentation: reads the Character
-## through the PlayerProgressionBridge and calls its public methods.
+## In-game UI. Pure presentation: reads the Character through the
+## PlayerProgressionBridge and calls its public methods.
+##
+## Layout (design px, anchored, every resolution and UI scale):
+##   top centre     enemy / boss frame, tutorial hint below it
+##   top right      quest tracker
+##   bottom left    player frame (health, resource, dash, defense, buffs)
+##   bottom centre  heavy charge, context prompt, skill bar, messages
+##   bottom right   loot feed, save indicator
+## The middle of the screen stays free for the fight and its telegraphs.
 
 var bridge: PlayerProgressionBridge
 var toasts: ToastFeed
-var mastery_panel: MasteryPanel
-var class_info: ClassInfoPanel
+var player_frame: PlayerFrame
+var target_frame: TargetFrame
+var charge_meter: ChargeMeter
+var loot_feed: LootFeed
+var death_overlay: DeathOverlay
 var class_panel: ClassStationPanel
 var inventory_panel: InventoryPanel
 var build_panel: BuildPanel
@@ -34,6 +45,8 @@ const HINT_STALE_MS := 6000
 var settings: UserSettings
 
 var _root: Control
+var _prompt_box: HBoxContainer
+var _prompt_key: Label
 var _prompt: Label
 var _windows: Array[UiWindow] = []
 
@@ -45,42 +58,97 @@ func _ready() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.theme = UiTheme.get_theme()
 	add_child(_root)
-
-	# Anchored layout in design px (UiTheme): adapts to every window size and UI scale.
 	var margin := UiTheme.SCREEN_MARGIN
-	var right := VBoxContainer.new()
-	right.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	right.offset_left = -UiTheme.HUD_COLUMN_WIDTH - margin
-	right.offset_right = -margin
-	right.offset_top = margin
-	right.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(right)
-	class_info = ClassInfoPanel.new()
-	right.add_child(class_info)
-	mastery_panel = MasteryPanel.new()
-	right.add_child(mastery_panel)
-	objectives = ObjectivePanel.new()
-	right.add_child(objectives)
 
+	# top centre: enemy / boss frame, hint below
+	var top := VBoxContainer.new()
+	top.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	top.offset_top = margin
+	top.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	top.alignment = BoxContainer.ALIGNMENT_BEGIN
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(top)
+	target_frame = TargetFrame.new()
+	target_frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	top.add_child(target_frame)
+	hint_panel = PanelContainer.new()
+	hint_panel.theme_type_variation = &"HudPanel"
+	hint_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_panel.visible = false
+	_hint_label = UiTheme.wrapped("", UiTheme.PARCHMENT, 640)
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint_panel.add_child(_hint_label)
+	top.add_child(hint_panel)
+
+	# top right: quest tracker
+	objectives = ObjectivePanel.new()
+	objectives.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	objectives.offset_left = -UiTheme.HUD_COLUMN_WIDTH - margin
+	objectives.offset_right = -margin
+	objectives.offset_top = margin
+	objectives.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(objectives)
+
+	# bottom left: player frame
+	player_frame = PlayerFrame.new()
+	player_frame.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	player_frame.offset_left = margin
+	player_frame.offset_bottom = -margin
+	player_frame.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(player_frame)
+
+	# bottom centre: charge, prompt, skills, messages
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bottom.offset_left = -UiTheme.FEED_WIDTH * 0.5
 	bottom.offset_right = UiTheme.FEED_WIDTH * 0.5
-	bottom.offset_bottom = -UiTheme.SCREEN_MARGIN * 6
+	bottom.offset_bottom = -margin
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bottom.alignment = BoxContainer.ALIGNMENT_END
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(bottom)
-	skill_bar = SkillBar.new()
-	bottom.add_child(skill_bar)
-	_prompt = UiTheme.label("", UiTheme.COLOR_PROMPT)
-	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt.add_theme_font_size_override(&"font_size", UiTheme.FONT_HEADING)
-	_prompt.add_theme_constant_override(&"outline_size", 6)
-	bottom.add_child(_prompt)
 	toasts = ToastFeed.new()
 	bottom.add_child(toasts)
+	charge_meter = ChargeMeter.new()
+	charge_meter.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	bottom.add_child(charge_meter)
+	_prompt_box = HBoxContainer.new()
+	_prompt_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_prompt_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var chip := UiTheme.key_chip("G")
+	_prompt_key = chip.get_child(0) as Label
+	_prompt_box.add_child(chip)
+	_prompt = UiTheme.label("", UiTheme.PARCHMENT)
+	_prompt.add_theme_font_size_override(&"font_size", UiTheme.FONT_SUBHEADING)
+	_prompt.add_theme_constant_override(&"outline_size", 6)
+	_prompt_box.add_child(_prompt)
+	bottom.add_child(_prompt_box)
+	skill_bar = SkillBar.new()
+	bottom.add_child(skill_bar)
 
+	# bottom right: loot feed above the save indicator
+	loot_feed = LootFeed.new()
+	loot_feed.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	loot_feed.offset_left = -380
+	loot_feed.offset_right = -margin
+	loot_feed.offset_bottom = -margin - 60
+	loot_feed.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	loot_feed.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(loot_feed)
+	save_indicator = SaveIndicator.new()
+	save_indicator.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	save_indicator.offset_left = -260
+	save_indicator.offset_top = -64
+	save_indicator.offset_right = -margin
+	save_indicator.offset_bottom = -margin
+	save_indicator.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	save_indicator.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(save_indicator)
+	death_overlay = DeathOverlay.new()
+	_root.add_child(death_overlay)
+
+	# windows (on top of the HUD)
 	class_panel = _add_window(ClassStationPanel.new()) as ClassStationPanel
 	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
 	build_panel = _add_window(BuildPanel.new()) as BuildPanel
@@ -91,29 +159,10 @@ func _ready() -> void:
 	restoration_panel = _add_window(RestorationPanel.new()) as RestorationPanel
 	restoration_panel.hud = self
 	waystone_panel = _add_window(WaystonePanel.new()) as WaystonePanel
-	confirm_dialog = _add_window(UiConfirmDialog.new()) as UiConfirmDialog
-	hint_panel = PanelContainer.new()
-	hint_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	hint_panel.offset_top = UiTheme.SCREEN_MARGIN * 3
-	hint_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	hint_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hint_panel.visible = false
-	_hint_label = UiTheme.wrapped("", UiTheme.COLOR_PROMPT, 640)
-	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint_panel.add_child(_hint_label)
-	_root.add_child(hint_panel)
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
-	save_indicator = SaveIndicator.new()
-	save_indicator.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	save_indicator.offset_left = -260
-	save_indicator.offset_top = -64
-	save_indicator.offset_right = -UiTheme.SCREEN_MARGIN
-	save_indicator.offset_bottom = -UiTheme.SCREEN_MARGIN
-	save_indicator.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	save_indicator.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_root.add_child(save_indicator)
+	confirm_dialog = _add_window(UiConfirmDialog.new()) as UiConfirmDialog
 	crafting_panel.recipes_requested.connect(open_build_panel)
 	var session := SessionState.find(get_tree())
 	if session != null:
@@ -124,11 +173,17 @@ func _ready() -> void:
 
 func setup(progression_bridge: PlayerProgressionBridge) -> void:
 	bridge = progression_bridge
-	mastery_panel.bridge = bridge
-	class_info.bridge = bridge
 	skill_bar.bridge = bridge
 	objectives.bridge = bridge
-	bridge.message.connect(toasts.push.bind(UiTheme.COLOR_ACCENT))
+	player_frame.bridge = bridge
+	target_frame.bridge = bridge
+	charge_meter.bridge = bridge
+	loot_feed.bridge = bridge
+	death_overlay.bridge = bridge
+	bridge.message.connect(toasts.push.bind(UiTheme.RESONANCE))
+	bridge.item_received.connect(loot_feed.push)
+	if bridge.player != null and not bridge.player.combat.hit_landed.is_connected(target_frame.on_player_hit):
+		bridge.player.combat.hit_landed.connect(target_frame.on_player_hit)
 
 
 ## Contextual tutorial hint, top centre, fades after `seconds`. A hint arriving
@@ -144,9 +199,6 @@ func show_hint(text: String, seconds: float = 8.0) -> void:
 	_hint_left = seconds
 	hint_panel.modulate.a = 1.0
 	hint_panel.visible = true
-	hint_panel.reset_size()
-	hint_panel.offset_left = -hint_panel.size.x * 0.5
-	hint_panel.offset_right = hint_panel.size.x * 0.5
 
 
 func current_hint() -> String:
@@ -161,6 +213,11 @@ func has_hint(text: String) -> bool:
 		if queued.contains(text):
 			return true
 	return false
+
+
+## Current interaction prompt ("" when nothing is in reach).
+func prompt_text() -> String:
+	return _prompt.text if _prompt_box.visible else ""
 
 
 func open_dialogue(dialogue: DialogueDefinition, on_done: Callable = Callable()) -> void:
@@ -199,7 +256,7 @@ func open_class_panel(station: ClassStation) -> void:
 	class_panel.open(bridge.character, station, "Classes")
 
 
-## One-time prologue class choice (Altar of Choice).
+## The one-time choice of the first class (the Whispering Stone).
 func open_class_choice(station: ClassChoiceStation) -> void:
 	if bridge == null:
 		return
@@ -286,11 +343,15 @@ func _refit_windows() -> void:
 func _exit_tree() -> void:
 	if settings != null and settings.changed.is_connected(_refit_windows):
 		settings.changed.disconnect(_refit_windows)
+	if bridge != null and is_instance_valid(bridge.player) and bridge.player.combat.hit_landed.is_connected(target_frame.on_player_hit):
+		bridge.player.combat.hit_landed.disconnect(target_frame.on_player_hit)
 
 
 func _process(delta: float) -> void:
 	var target := Interactable.find_active(get_tree())
-	_prompt.text = "[G] %s" % target.prompt if target != null and not is_window_open() else ""
+	var prompt := target.prompt if target != null and not is_window_open() else ""
+	_prompt.text = prompt
+	_prompt_box.visible = prompt != ""
 	if hint_panel.visible:
 		_hint_left -= delta
 		hint_panel.modulate.a = clampf(_hint_left / 0.6, 0.0, 1.0)

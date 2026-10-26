@@ -16,6 +16,7 @@ quantity = 4
 script = ExtResource("1_cfg")
 id = &"hardened_husk"
 display_name = "Hardened Husk"
+rank = 1
 body_color = Color(0.36, 0.3, 0.2, 1)
 body_radius = 10.0
 max_health = 160.0

@@ -12,6 +12,8 @@ extends Node
 ## unbind(), so reloading a scene never leaves duplicate registrations behind.
 
 signal message(text: String)
+## An item went into the character's inventory from the world (loot feed).
+signal item_received(item_id: StringName, quantity: int)
 
 var player: Player
 var character: Character

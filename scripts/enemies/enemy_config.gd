@@ -7,6 +7,8 @@ extends Resource
 ## Stable variant id (trial objectives: "break the guard of a hardened_husk").
 @export var id: StringName = &"hollow_grunt"
 @export var display_name: String = "Hollow Grunt"
+## Presentation only (HUD target frame and boss bar): Normal, Elite, Boss.
+@export_enum("Normal", "Elite", "Boss") var rank: int = 0
 @export var body_color: Color = Color("b5524a")
 @export var body_radius: float = 8.0
 ## Overrides of the scene's HealthComponent (0 = keep the scene value).

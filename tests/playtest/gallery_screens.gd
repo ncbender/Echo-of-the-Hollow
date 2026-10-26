@@ -3,7 +3,7 @@ extends RefCounted
 ## The screens of the UI gallery (tests/playtest/ui_gallery.gd) and how to open
 ## each one with real data. Returns the screen label, or "" when skipped.
 
-const ALL := ["title", "hud", "inventory", "character", "classes", "talents", "skills", "presets", "forge_imprint",
+const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory", "character", "classes", "talents", "skills", "presets", "forge_imprint",
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "pause", "save", "load", "options", "confirm"]
 
@@ -15,7 +15,33 @@ static func open(gallery: Object, screen: String) -> String:
 	match screen:
 		"hud":
 			hud.show_hint("Hold RMB to charge a heavy attack. Release to strike.")
-			hud.notify("Picked up Iron Ore x2")
+			hud.notify("Quest complete: The Broken Cart")
+		"hud_combat", "hud_boss", "hud_death":
+			var player := map.player
+			player.global_position = Vector2(0, 60)
+			var configs: Array = [load("res://data/enemies/hardened_husk.tres"), load("res://data/enemies/rootbound_husk.tres"), load("res://data/enemies/hollowfang_wolf.tres")]
+			if screen == "hud_boss":
+				configs = [load("res://data/enemies/grove_warden_config.tres")]
+			var spawned: Array[Enemy] = []
+			for index in configs.size():
+				spawned.append(map.spawn_enemy(player.global_position + Vector2(-70 + 70 * index, -70), configs[index]))
+			await gallery.frames(3)
+			var hit := HitData.new()
+			hit.damage = 40.0
+			hit.poise_damage = 25.0
+			spawned[0].hurtbox.receive_hit(hit)
+			var shown := HitData.new()
+			shown.target = spawned[0]
+			hud.target_frame.on_player_hit(shown)
+			map.bridge.class_runtime.apply_status(spawned[0], &"bleeding")
+			map.bridge.class_runtime.add_buff(&"buff:battle_cry", 8.0, [] as Array[StatModifier])
+			hud.loot_feed.push(&"storm_ore", 2)
+			hud.loot_feed.push(&"stormcaller_fang", 1)
+			player.health.apply_hit(_damage(120.0))
+			if screen == "hud_death":
+				player.health.apply_hit(_damage(9999.0))
+			for enemy in spawned:
+				enemy.set_physics_process(false)   # frozen for a stable screenshot
 		"inventory":
 			hud.toggle_inventory()
 			var crafted := character.inventory.items().filter(func(i: ItemInstance) -> bool: return i.definition_id == &"stormcaller_fang")
@@ -103,3 +129,9 @@ static func _stand_at(gallery: Object, node: Node2D) -> void:
 	map.player.global_position = node.global_position + Vector2(0, 20)
 	map.player.reset_physics_interpolation()
 	await gallery.frames(6)
+
+
+static func _damage(amount: float) -> HitData:
+	var hit := HitData.new()
+	hit.damage = amount
+	return hit

@@ -119,6 +119,11 @@ func apply_hitstop(duration: float) -> void:
 	hitstop_left = maxf(hitstop_left, duration)
 
 
+## Seconds until a downed player rises again (HUD death overlay).
+func respawn_time_left() -> float:
+	return _respawn_left if health.is_dead() else 0.0
+
+
 func set_spawn_position(position_: Vector2) -> void:
 	_spawn_position = position_
 
