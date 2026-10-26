@@ -13,6 +13,7 @@ extends RefCounted
 static func _steps() -> Dictionary:
 	return {
 		1: _v1_to_v2,
+		2: _v2_to_v3,
 	}
 
 
@@ -37,3 +38,41 @@ static func _v1_to_v2(data: Dictionary) -> Dictionary:
 		world["map_states"] = {}
 	data["world"] = world
 	return data
+
+
+## v3 (Crafting Foundation 0.1): items carry crafting state. Existing items get
+## valid defaults (item level 1, quality 0, no material); nothing is rolled.
+## The prepared v2 field "essence" (never written by the game) becomes the
+## "essences" list; unrecognised content is kept in "progress".
+static func _v2_to_v3(data: Dictionary) -> Dictionary:
+	for key: String in ["inventory", "orphaned_items"]:
+		var items: Variant = data.get(key, [])
+		if not items is Array:
+			continue
+		for entry: Variant in items:
+			if entry is Dictionary:
+				_upgrade_item_v3(entry)
+	return data
+
+
+static func _upgrade_item_v3(item: Dictionary) -> void:
+	if not item.has("ilvl"):
+		item["ilvl"] = 1
+	if not item.has("quality"):
+		item["quality"] = 0
+	var legacy: Variant = item.get("essence")
+	if legacy != null:
+		item.erase("essence")
+		if legacy is Dictionary and legacy.get("slots") is Array:
+			item["essences"] = legacy["slots"]
+		elif legacy is Dictionary and not legacy.is_empty():
+			var progress: Dictionary = item.get("progress", {}) if item.get("progress") is Dictionary else {}
+			progress["legacy_essence"] = legacy
+			item["progress"] = progress
+	if item.get("evolution") is Dictionary and not item["evolution"].is_empty() and not item["evolution"].has("stage"):
+		item["evolution"]["stage"] = 1
+	var affixes: Variant = item.get("affixes")
+	if affixes is Array:
+		for affix: Variant in affixes:
+			if affix is Dictionary and not affix.has("affix"):
+				affix["legacy"] = true   # plain stat roll from before crafting; applied, not reforgeable

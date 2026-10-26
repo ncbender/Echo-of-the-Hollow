@@ -86,6 +86,8 @@ func add_item(item_id: StringName, amount: int = 1) -> Array[ItemInstance]:
 	while left > 0:
 		var stack := mini(left, definition.max_stack)
 		var item := ItemInstance.create(item_id, stack)
+		if definition.crafting != null:
+			item.item_level = definition.crafting.base_item_level
 		_insert(item)
 		touched.append(item)
 		left -= stack
@@ -229,6 +231,8 @@ func from_array(data: Array, warnings: PackedStringArray, orphans: Array) -> voi
 		if error != "":
 			warnings.append("item not restored (%s): %s" % [error, JSON.stringify(entry)])
 			orphans.append(entry)
+		else:
+			ItemStats.sanitize(item, _db, warnings)   # crafting state vs. current data
 	changed.emit()
 
 

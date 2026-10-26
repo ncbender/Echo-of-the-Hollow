@@ -15,6 +15,14 @@ const DIRS := {
 	&"buildings": "res://data/base/buildings",
 	&"plots": "res://data/base/plots",
 	&"resource_nodes": "res://data/world/resource_nodes",
+	&"materials": "res://data/crafting/materials",
+	&"affixes": "res://data/crafting/affixes",
+	&"essences": "res://data/crafting/essences",
+	&"resonances": "res://data/crafting/resonances",
+	&"socketables": "res://data/crafting/socketables",
+	&"currencies": "res://data/crafting/currencies",
+	&"operations": "res://data/crafting/operations",
+	&"evolutions": "res://data/crafting/evolutions",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -30,6 +38,15 @@ var maps: Dictionary = {}             # map id -> MapDefinition
 var buildings: Dictionary = {}        # building id -> BuildingDefinition
 var plots: Dictionary = {}            # plot id -> BuildingPlotDefinition
 var resource_nodes: Dictionary = {}   # node definition id -> ResourceNodeDefinition
+# Crafting (docs/CRAFTING_DESIGN.md)
+var materials: Dictionary = {}        # material id -> MaterialDefinition
+var affixes: Dictionary = {}          # affix id -> AffixDefinition
+var essences: Dictionary = {}         # essence id -> EssenceDefinition
+var resonances: Dictionary = {}       # resonance id -> EssenceResonanceDefinition
+var socketables: Dictionary = {}      # socketable id -> SocketableDefinition
+var currencies: Dictionary = {}       # currency id -> CraftingCurrencyDefinition
+var operations: Dictionary = {}       # operation id -> CraftingOperationDefinition
+var evolutions: Dictionary = {}       # evolution id -> EvolutionDefinition
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -76,6 +93,22 @@ func register(resource: Resource) -> bool:
 		table = plots; key = resource.id
 	elif resource is ResourceNodeDefinition:
 		table = resource_nodes; key = resource.id
+	elif resource is MaterialDefinition:
+		table = materials; key = resource.id
+	elif resource is AffixDefinition:
+		table = affixes; key = resource.id
+	elif resource is EssenceDefinition:
+		table = essences; key = resource.id
+	elif resource is EssenceResonanceDefinition:
+		table = resonances; key = resource.id
+	elif resource is SocketableDefinition:
+		table = socketables; key = resource.id
+	elif resource is CraftingCurrencyDefinition:
+		table = currencies; key = resource.id
+	elif resource is CraftingOperationDefinition:
+		table = operations; key = resource.id
+	elif resource is EvolutionDefinition:
+		table = evolutions; key = resource.id
 	else:
 		load_errors.append("unsupported resource %s" % resource.resource_path)
 		return false
@@ -152,6 +185,58 @@ func validate() -> PackedStringArray:
 		for building_id in plot.allowed_building_ids:
 			if not buildings.has(building_id):
 				errors.append("plot %s allows unknown building %s" % [plot.id, building_id])
+	errors.append_array(_validate_crafting())
+	return errors
+
+
+func get_operation(operation_id: StringName) -> CraftingOperationDefinition:
+	return operations.get(operation_id)
+
+
+## Crafting cross-references: every referenced item/definition must exist.
+func _validate_crafting() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	for material: MaterialDefinition in materials.values():
+		if not items.has(material.item_id):
+			errors.append("material %s uses unknown item %s" % [material.id, material.item_id])
+		for essence_id in material.essence_affinity:
+			if not essences.has(essence_id):
+				errors.append("material %s: unknown essence affinity %s" % [material.id, essence_id])
+	for affix: AffixDefinition in affixes.values():
+		errors.append_array(affix.validate())
+	for essence: EssenceDefinition in essences.values():
+		if not items.has(essence.item_id) or essence.effect == null:
+			errors.append("essence %s needs an existing item and an effect" % essence.id)
+	for resonance: EssenceResonanceDefinition in resonances.values():
+		if not essences.has(resonance.essence_a) or not essences.has(resonance.essence_b) or resonance.effect == null:
+			errors.append("resonance %s needs two known essences and an effect" % resonance.id)
+	for socketable: SocketableDefinition in socketables.values():
+		if not items.has(socketable.item_id):
+			errors.append("socketable %s uses unknown item %s" % [socketable.id, socketable.item_id])
+	for currency: CraftingCurrencyDefinition in currencies.values():
+		if not items.has(currency.item_id):
+			errors.append("currency %s uses unknown item %s" % [currency.id, currency.item_id])
+	for operation: CraftingOperationDefinition in operations.values():
+		if not operation.id in CraftingOps.ALL:
+			errors.append("unknown crafting operation %s" % operation.id)
+		for cost in operation.costs + operation.focus_costs:
+			if not items.has(cost.item_id):
+				errors.append("operation %s costs unknown item %s" % [operation.id, cost.item_id])
+	for evolution: EvolutionDefinition in evolutions.values():
+		errors.append_array(evolution.validate())
+		for stage in evolution.stages:
+			for cost in stage.costs:
+				if not items.has(cost.item_id):
+					errors.append("evolution %s costs unknown item %s" % [evolution.id, cost.item_id])
+	for item: ItemDefinition in items.values():
+		var profile := item.crafting
+		if profile == null:
+			continue
+		for material_id in profile.allowed_materials:
+			if not materials.has(material_id):
+				errors.append("item %s allows unknown material %s" % [item.id, material_id])
+		if profile.evolution_id != &"" and not evolutions.has(profile.evolution_id):
+			errors.append("item %s evolves with unknown evolution %s" % [item.id, profile.evolution_id])
 	return errors
 
 

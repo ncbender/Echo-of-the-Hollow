@@ -164,8 +164,8 @@ func _stat_sources() -> Array:
 	for item in equipment.equipped_items():
 		var definition := database.get_item(item.definition_id)
 		if definition != null:
-			sources.append(definition.base_stats)
-			sources.append(item.affix_modifiers())
+			# base stats (quality), affixes, material imprint, sockets, evolution
+			sources.append(ItemStats.modifiers(item, definition, database))
 	for bonus in active_set_bonuses():
 		sources.append(bonus.stat_modifiers)
 	return sources

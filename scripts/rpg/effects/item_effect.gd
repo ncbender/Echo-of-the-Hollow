@@ -17,6 +17,12 @@ func get_attack_modifiers() -> Array[AttackModifier]:
 	return []
 
 
+## Variant for modifiers that need runtime state (marks, power): receives the
+## runner and this source's key. Defaults to get_attack_modifiers().
+func get_attack_modifiers_for(_runner: ItemEffectRunner, _source_key: String) -> Array[AttackModifier]:
+	return get_attack_modifiers()
+
+
 ## `source_key` identifies the owning item/set
 ## so runtime state of two sources never mixes.
 func on_hit_landed(_hit: HitData, _runner: ItemEffectRunner, _source_key: String) -> void:

@@ -27,8 +27,9 @@ func rebuild(character: Character) -> void:
 		var definition := character.database.get_item(item.definition_id)
 		if definition == null:
 			continue
-		for index in definition.effects.size():
-			_add(definition.effects[index], "%s#%d" % [item.instance_id, index])
+		# definition effects + essences, resonances, runes, evolution (ItemStats)
+		for entry in ItemStats.effects(item, definition, character.database):
+			_add(entry.effect, entry.key, entry.power)
 	var counts := character.equipped_set_counts()
 	for set_id: StringName in counts:
 		var set_def: SetDefinition = character.database.sets.get(set_id)
@@ -72,6 +73,11 @@ func source_state(key: String) -> Dictionary:
 	return state[key]
 
 
+## Strength of a source (1.0, or more for essences attuned to the item material).
+func power(key: String) -> float:
+	return float(source_state(key).get("power", 1.0))
+
+
 ## Hurtboxes of other teams within `radius` of `position` (for area effects).
 func query_hurtboxes(position: Vector2, radius: float) -> Array[Hurtbox]:
 	var result: Array[Hurtbox] = []
@@ -101,8 +107,9 @@ func spawn_fx(node: Node2D, position: Vector2) -> void:
 	player.get_parent().add_child(node)
 
 
-func _add(effect: ItemEffect, key: String) -> void:
+func _add(effect: ItemEffect, key: String, power: float = 1.0) -> void:
 	if effect == null:
 		return
 	active.append({"effect": effect, "key": key})
-	attack_modifiers.append_array(effect.get_attack_modifiers())
+	source_state(key)["power"] = power
+	attack_modifiers.append_array(effect.get_attack_modifiers_for(self, key))

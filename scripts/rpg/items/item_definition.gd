@@ -37,6 +37,11 @@ const RARITY_COLORS := {
 ## Prepared, not enforced yet.
 @export var required_class_level: int = 0
 
+@export_group("Crafting")
+## Crafting capabilities (null = not craftable). See docs/CRAFTING_DESIGN.md.
+@export var crafting: CraftingProfile
+
+@export_group("")
 @export var tags: Array[StringName] = []
 
 
@@ -69,4 +74,10 @@ func validate() -> PackedStringArray:
 	for effect in effects:
 		if effect == null:
 			errors.append("item %s: null effect" % id)
+	if crafting != null:
+		if not is_equippable():
+			errors.append("item %s: only equippable items can be craftable" % id)
+		for operation in crafting.allowed_operations:
+			if not operation in CraftingOps.ALL:
+				errors.append("item %s: unknown crafting operation %s" % [id, operation])
 	return errors
