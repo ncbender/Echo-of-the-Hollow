@@ -12,7 +12,7 @@ var _pending: StringName
 
 
 func _ready() -> void:
-	set_title("Choose your starting class")
+	set_title(tr("UI_CHOOSE_CLASS_TITLE"))
 	_status = UiTheme.wrapped("", UiTheme.COLOR_DIM, 900)
 	body.add_child(_status)
 	_cards = HFlowContainer.new()
@@ -63,6 +63,7 @@ func rebuild() -> void:
 
 func rebuild_cards() -> void:
 	for child in _cards.get_children():
+		_cards.remove_child(child)
 		child.queue_free()
 	for class_id in PrologueService.prologue_classes(character.database):
 		_cards.add_child(_card(class_id))

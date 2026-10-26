@@ -56,6 +56,10 @@ func test_windows_fit_at_every_ui_scale() -> void:
 	if map == null:
 		return
 	var station := map.get_node("ClassStation") as ClassStation
+	var warrior := session.character
+	warrior.classes.unlock(&"warrior")
+	warrior.classes.set_active(&"warrior")
+	warrior.classes.add_xp(&"warrior", 200000)   # level 60: all talent tiers and skills shown
 	var plot := map.get_node("Plots/PlotWest") as BuildPlot
 	for value in UserSettings.UI_SCALES:
 		session.settings.set_ui_scale(value)
@@ -66,8 +70,14 @@ func test_windows_fit_at_every_ui_scale() -> void:
 		_check_window(map.hud.inventory_panel, tag + " inventory")
 		map.hud.close_windows()
 		map.hud.class_panel.open(session.character, station)
+		for page_name: String in ClassStationPanel.PAGES:
+			map.hud.class_panel.show_page(page_name)
+			await _settle()
+			_check_window(map.hud.class_panel, "%s class station / %s" % [tag, page_name])
+		map.hud.close_windows()
+		map.hud.class_choice_panel.open(session.character, null)
 		await _settle()
-		_check_window(map.hud.class_panel, tag + " class panel")
+		_check_window(map.hud.class_choice_panel, tag + " class choice")
 		map.hud.close_windows()
 		map.hud.build_panel.open(session.character, plot)
 		await _settle()

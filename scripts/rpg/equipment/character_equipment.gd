@@ -277,3 +277,27 @@ func begin_trial(class_id: StringName, source_class_id: StringName) -> void:
 
 func end_trial() -> void:
 	_trial_loadout = null
+
+
+## Replaces the loadout of `class_id` with `slots` (slot key -> instance id, a
+## preset). All references are checked first; nothing changes on an error.
+func apply_loadout(class_id: StringName, slots: Dictionary) -> String:
+	var target := Loadout.new()
+	var warnings: PackedStringArray = []
+	target.from_dict(slots, warnings)
+	if not warnings.is_empty():
+		return warnings[0]
+	for slot: int in target.slots:
+		var error := can_equip(target.slots[slot], slot, class_id)
+		if error != "":
+			return error
+	if _holds_two_hander(target) and target.get_id(EquipSlot.Slot.OFF_HAND) != "":
+		return "A two-handed weapon leaves no room for an off-hand item."
+	var seen := {}
+	for slot: int in target.slots:
+		if seen.has(target.slots[slot]):
+			return "An item is used twice in the preset."
+		seen[target.slots[slot]] = true
+	loadout_for(class_id).slots = target.slots
+	changed.emit()
+	return ""

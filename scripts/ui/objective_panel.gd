@@ -42,9 +42,9 @@ func refresh() -> void:
 			var objective := trial.objectives[index]
 			var value: float = prologue.trial_progress.get(index, 0.0)
 			lines.append(("[x] " if value + 0.0001 >= objective.amount else "[ ] ") + ObjectiveRules.text(objective, value))
-		lines.append("G at the pedestal: leave the trial")
+		lines.append(tr("UI_LEAVE_TRIAL_HINT"))
 	elif show_prologue_hint and not prologue.is_completed():
-		_title.text = "Prologue"
+		_title.text = tr("UI_PROLOGUE")
 		var done := prologue.completed_trials.size()
 		lines.append("Try the three class trials (%d/3 done)." % done)
 		lines.append("Then choose your starting class at the Altar of Choice.")
@@ -55,7 +55,7 @@ func refresh() -> void:
 		if quest == null:
 			continue
 		if _title.text == "":
-			_title.text = "Class quests"
+			_title.text = tr("UI_CLASS_QUESTS")
 		lines.append(quest.display_name + ":")
 		for index in quest.objectives.size():
 			lines.append("  " + ObjectiveRules.text(quest.objectives[index], character.quests.progress(quest_id, index)))

@@ -41,7 +41,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	visible = bridge != null and bridge.is_bound()
+	visible = bridge != null and bridge.is_bound() \
+			and bridge.character.builds.get_build().slots.any(func(id: StringName) -> bool: return id != &"")
 	if visible:
 		refresh()
 

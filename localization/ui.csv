@@ -1,0 +1,17 @@
+keys,en
+UI_CLASS_STATION,Class Station
+UI_CHARACTER_WINDOW,"Character - Class, Talents & Skills"
+UI_CLOSE_CLASS,Close [G / C / Esc]
+UI_PAGE_CLASSES,Classes
+UI_PAGE_TALENTS,Talents
+UI_PAGE_SKILLS,Skills
+UI_PAGE_PRESETS,Presets
+UI_PAGE_QUESTS,Quests
+UI_SKILL_SLOTS,Skill slots
+UI_SKILLS_AND_MODS,Skills and modifications
+UI_ONLY_AT_STATION,Only at a class station.
+UI_AWAY_FROM_STATION,"Viewing away from a class station: you can learn talents; skills, mods, presets, respecs, class changes and quests need a class station."
+UI_CHOOSE_CLASS_TITLE,Choose your starting class
+UI_PROLOGUE,Prologue
+UI_CLASS_QUESTS,Class quests
+UI_LEAVE_TRIAL_HINT,G at the pedestal: leave the trial

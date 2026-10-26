@@ -7,7 +7,7 @@ var bridge: PlayerProgressionBridge
 var toasts: ToastFeed
 var mastery_panel: MasteryPanel
 var class_info: ClassInfoPanel
-var class_panel: ClassPanel
+var class_panel: ClassStationPanel
 var inventory_panel: InventoryPanel
 var build_panel: BuildPanel
 var options_panel: OptionsPanel
@@ -66,7 +66,7 @@ func _ready() -> void:
 	toasts = ToastFeed.new()
 	bottom.add_child(toasts)
 
-	class_panel = _add_window(ClassPanel.new()) as ClassPanel
+	class_panel = _add_window(ClassStationPanel.new()) as ClassStationPanel
 	inventory_panel = _add_window(InventoryPanel.new()) as InventoryPanel
 	build_panel = _add_window(BuildPanel.new()) as BuildPanel
 	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
@@ -109,7 +109,7 @@ func open_class_panel(station: ClassStation) -> void:
 	if bridge == null:
 		return
 	close_windows()
-	class_panel.open(bridge.character, station)
+	class_panel.open(bridge.character, station, "Classes")
 
 
 ## One-time prologue class choice (Altar of Choice).
@@ -125,6 +125,17 @@ func open_build_panel(plot: BuildPlot) -> void:
 		return
 	close_windows()
 	build_panel.open(bridge.character, plot)
+
+
+## C: class, talents and skills away from a class station (learning talents only).
+func toggle_character() -> void:
+	if bridge == null:
+		return
+	if class_panel.visible:
+		class_panel.hide()
+	else:
+		close_windows()
+		class_panel.open(bridge.character, null, "Talents")
 
 
 func toggle_inventory() -> void:
@@ -182,6 +193,10 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_inventory"):
 		toggle_inventory()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed(&"ui_character"):
+		toggle_character()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed(&"ui_options"):
