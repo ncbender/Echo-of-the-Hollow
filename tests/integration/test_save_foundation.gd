@@ -204,7 +204,7 @@ func test_migration_v4_to_v5() -> void:
 	var data: Dictionary = SaveMigrations.migrate(old.duplicate(true), 4, errors)
 	check(errors.is_empty(), "migrates")
 	check_eq(data.world.restoration, {"old_smithy": "restored", "old_storehouse": "restored"}, "plot buildings -> restored ruins")
-	check_eq(data.world.waystones, ["haven"], "Haven waystone active")
+	check_eq(data.world.waystones, ["haven", "whispering_stone"], "Haven active; finished prologue also has the stone")
 	check_eq(data.quests.the_first_signs.state, "active", "finished prologue -> main quest active")
 	check_eq(data.inventory, old.inventory, "items untouched")
 	var unfinished: Dictionary = SaveMigrations.migrate({"world": {}, "prologue": {"stage": "not_started"}}, 4, errors)

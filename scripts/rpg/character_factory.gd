@@ -15,6 +15,7 @@ static func create_new(database: GameDatabase) -> Character:
 		if not unlocked.is_empty():
 			character.classes.set_active(unlocked[0])
 	equip_starting_gear(character)
+	StoryService.begin_prologue(character)
 	return character
 
 

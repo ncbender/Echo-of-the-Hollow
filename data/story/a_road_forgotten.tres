@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_signpost"]
+script = ExtResource("3_obj")
+event_id = &"reach:road_signpost"
+description = "Reach the old signpost"
+
+[sub_resource type="Resource" id="S_signpost"]
+script = ExtResource("2_step")
+description = "Follow the old road north."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_signpost")])
+
+[sub_resource type="Resource" id="O_ambush"]
+script = ExtResource("3_obj")
+event_id = &"encounter:road_ambush"
+description = "Defeat the creatures on the road"
+
+[sub_resource type="Resource" id="S_ambush"]
+script = ExtResource("2_step")
+description = "Deal with the creatures blocking the road."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_ambush")])
+completion_flag = &"prologue.road_cleared"
+
+[sub_resource type="Resource" id="O_cart"]
+script = ExtResource("3_obj")
+event_id = &"reach:cart_site"
+description = "Find the source of the fighting"
+
+[sub_resource type="Resource" id="S_cart"]
+script = ExtResource("2_step")
+description = "Someone is fighting further up the road. Hurry."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_cart")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"a_road_forgotten"
+display_name = "A Road Forgotten"
+chapter = "Prologue"
+description = "You wake on an overgrown forest road far from any town. The only way is north."
+steps = Array[ExtResource("2_step")]([SubResource("S_signpost"), SubResource("S_ambush"), SubResource("S_cart")])
+completion_flag = &"prologue.road_walked"
+next_quest_ids = Array[StringName]([&"the_broken_cart"])

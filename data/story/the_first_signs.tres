@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+
+[sub_resource type="Resource" id="S_stub"]
+script = ExtResource("2_step")
+description = "Something stirs in the Hollowwood. Your journey continues in a future update."
+
+[resource]
+script = ExtResource("1_quest")
+id = &"the_first_signs"
+display_name = "The First Signs"
+chapter = "The Roots Remember"
+description = "Main quest, chapter one. Whatever walks the woods is drawing closer to Haven."
+steps = Array[ExtResource("2_step")]([SubResource("S_stub")])
+open_ended = true

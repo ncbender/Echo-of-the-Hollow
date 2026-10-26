@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_enter"]
+script = ExtResource("3_obj")
+event_id = &"enter:whispering_stone"
+description = "Reach the Whispering Stone"
+
+[sub_resource type="Resource" id="S_enter"]
+script = ExtResource("2_step")
+description = "Follow the northern path to the Whispering Stone."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_enter")])
+completion_flag = &"prologue.shrine_reached"
+
+[sub_resource type="Resource" id="O_echoes"]
+script = ExtResource("3_obj")
+event_id = &"trial_complete"
+amount = 3
+description = "Echoes walked"
+cumulative = true
+
+[sub_resource type="Resource" id="S_echoes"]
+script = ExtResource("2_step")
+description = "Walk the three echoes within the stone, in any order."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_echoes")])
+
+[sub_resource type="Resource" id="O_choice"]
+script = ExtResource("3_obj")
+event_id = &"class_chosen"
+description = "Choose your path"
+
+[sub_resource type="Resource" id="S_choice"]
+script = ExtResource("2_step")
+description = "Choose the path that will take root within you."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_choice")])
+completion_flag = &"prologue.first_class_selected"
+
+[sub_resource type="Resource" id="O_waystone"]
+script = ExtResource("3_obj")
+event_id = &"waystone:whispering_stone"
+description = "Awaken the waystone"
+
+[sub_resource type="Resource" id="S_waystone"]
+script = ExtResource("2_step")
+description = "Awaken the damaged waystone at the Whispering Stone."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_waystone")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"the_whispering_stone"
+display_name = "The Whispering Stone"
+chapter = "Prologue"
+description = "Edrin spoke of an old stone north of Haven that still remembers the paths of those who came before."
+steps = Array[ExtResource("2_step")]([SubResource("S_enter"), SubResource("S_echoes"), SubResource("S_choice"), SubResource("S_waystone")])
+completion_flag = &"prologue.stone_awakened"
+next_quest_ids = Array[StringName]([&"the_first_binding"])

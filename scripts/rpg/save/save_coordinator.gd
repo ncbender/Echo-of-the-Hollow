@@ -114,7 +114,7 @@ func _write(id: int, kind: Kind, path: String, ids: Array) -> void:
 	save_started.emit(kind)
 	var character := session.character
 	var meta := SaveSystem.describe(character)
-	meta["kind"] = ["autosave", "autosave", "manual"][kind]
+	meta["kind"] = ["autosave", "milestone", "manual"][kind]
 	meta["reason"] = ", ".join(_reasons) if kind != Kind.MANUAL else "manual"
 	var error := SaveSystem.write_payload(character.to_dict(), path, meta)
 	var ok := error == OK

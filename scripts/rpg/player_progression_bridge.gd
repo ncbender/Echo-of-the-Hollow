@@ -59,6 +59,7 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(class_runtime.status_consumed, _on_status_consumed)
 	_track(class_runtime.skill_cast, _on_skill_cast)
 	_track(character.prologue.trial_finished, _on_trial_finished)
+	_track(player.health.died, _on_player_died)
 	effects.resource_gainer = class_runtime.gain
 	effects.status_applier = apply_status
 	effects.cooldown_reducer = class_runtime.reduce_cooldown
@@ -292,6 +293,12 @@ func _on_status_consumed(status_id: StringName, stacks: int) -> void:
 
 func _on_skill_cast(skill_id: StringName, _slot: int) -> void:
 	PrologueService.record(character, TrialObjective.Kind.SKILL_CASTS, skill_id, 1.0)
+
+
+## Falling in a trial ends it without a trace; it can be restarted right away.
+func _on_player_died() -> void:
+	if character.classes.in_trial():
+		PrologueService.end_trial(character, false)
 
 
 func _on_trial_finished(trial_id: StringName, completed: bool) -> void:

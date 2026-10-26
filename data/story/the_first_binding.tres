@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_return"]
+script = ExtResource("3_obj")
+event_id = &"enter:home_base"
+description = "Return to Haven"
+
+[sub_resource type="Resource" id="S_return"]
+script = ExtResource("2_step")
+description = "Return to Haven. The waystone can carry you there."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_return")])
+
+[sub_resource type="Resource" id="O_mara"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_return"
+description = "Speak with Mara"
+
+[sub_resource type="Resource" id="S_mara"]
+script = ExtResource("2_step")
+description = "Speak with Mara."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_mara")])
+
+[sub_resource type="Resource" id="O_edrin"]
+script = ExtResource("3_obj")
+event_id = &"talk:edrin_threat"
+description = "Speak with Edrin Vale"
+
+[sub_resource type="Resource" id="S_edrin"]
+script = ExtResource("2_step")
+description = "Speak with Edrin Vale at the north gate."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_edrin")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"the_first_binding"
+display_name = "The First Binding"
+chapter = "Prologue"
+description = "A path has taken root within you. Haven should hear of it."
+steps = Array[ExtResource("2_step")]([SubResource("S_return"), SubResource("S_mara"), SubResource("S_edrin")])
+completion_flag = &"prologue.completed"
+next_quest_ids = Array[StringName]([&"the_first_signs"])

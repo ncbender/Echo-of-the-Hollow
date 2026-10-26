@@ -1,11 +1,13 @@
 class_name QuestLog
 extends RefCounted
-## Class quest progress of a character (saved under "quests"):
+## Class and story quest progress of a character (saved under "quests"):
 ## quest id -> {"state": "active" | "completed", "step": index of the current step
 ## (story quests; class quests have one step), "progress": {objective index: amount}}.
 ## Rules live in QuestService; this only stores data.
 
 signal changed
+## A story quest completed a step (`finished`: the whole quest). Milestone save.
+signal story_progressed(quest_id: StringName, step: int, finished: bool)
 
 var entries: Dictionary = {}
 

@@ -128,14 +128,22 @@ static func _v4_to_v5(data: Dictionary) -> Dictionary:
 	restoration["old_smithy"] = "restored"
 	world["restoration"] = restoration
 	var flags: Dictionary = world.get("flags", {}) if world.get("flags") is Dictionary else {}
-	for flag: String in ["prologue.started", "prologue.mara_rescued", "prologue.supplies_recovered",
-			"prologue.haven_discovered", "prologue.smithy_restored"]:
+	for flag: String in ["prologue.started", "prologue.road_cleared", "prologue.road_walked", "prologue.mara_rescued",
+			"prologue.supplies_recovered", "prologue.cart_defended", "prologue.cart_done", "prologue.haven_discovered",
+			"prologue.smithy_restored", "prologue.haven_settled"]:
 		flags[flag] = true
-	world["flags"] = flags
-	data["world"] = world
 	var quests: Dictionary = data.get("quests", {}) if data.get("quests") is Dictionary else {}
 	var prologue: Dictionary = data.get("prologue", {}) if data.get("prologue") is Dictionary else {}
 	var finished := str(prologue.get("stage", "")) == "completed"
+	# story counters ("count.<event>") that cumulative objectives read
+	flags["count.interact:supply_crate"] = 2
+	var trials: Variant = prologue.get("completed_trials", [])
+	var trials_done: int = (trials as Array).size() if trials is Array else 0
+	flags["count.trial_complete"] = 3 if finished else trials_done
+	if finished and not "whispering_stone" in world.waystones:
+		world.waystones.append("whispering_stone")
+	world["flags"] = flags
+	data["world"] = world
 	var done := {"state": "completed", "step": 0, "progress": {}}
 	for quest_id: String in ["a_road_forgotten", "the_broken_cart", "shelter_among_the_trees"]:
 		if not quests.has(quest_id):
@@ -144,7 +152,8 @@ static func _v4_to_v5(data: Dictionary) -> Dictionary:
 		for quest_id: String in ["the_whispering_stone", "the_first_binding"]:
 			if not quests.has(quest_id):
 				quests[quest_id] = done.duplicate(true)
-		for flag: String in ["prologue.shrine_reached", "prologue.first_class_selected", "prologue.completed"]:
+		for flag: String in ["prologue.shrine_reached", "prologue.first_class_selected", "prologue.stone_awakened",
+				"prologue.completed"]:
 			flags[flag] = true
 		if not quests.has("the_first_signs"):
 			quests["the_first_signs"] = {"state": "active", "step": 0, "progress": {}}

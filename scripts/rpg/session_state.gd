@@ -106,8 +106,20 @@ func get_character() -> Character:
 
 
 func set_character(new_character: Character) -> void:
+	if character != null and character.quests.story_progressed.is_connected(_on_story_progressed):
+		character.quests.story_progressed.disconnect(_on_story_progressed)
 	character = new_character
+	if character != null:
+		character.quests.story_progressed.connect(_on_story_progressed)
 	character_changed.emit(character)
+
+
+## Every completed story step is a milestone: shown and saved (critical save).
+func _on_story_progressed(quest_id: StringName, _step: int, finished: bool) -> void:
+	var quest := StoryService.definition(character, quest_id)
+	if finished and quest != null:
+		message.emit("Quest complete: %s" % quest.display_name)
+	request_critical_save("story %s" % quest_id)
 
 
 ## Connects a freshly spawned Player to the session's character.

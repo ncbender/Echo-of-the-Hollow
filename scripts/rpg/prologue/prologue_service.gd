@@ -59,13 +59,16 @@ static func end_trial(character: Character, completed: bool) -> void:
 		return
 	prologue.active_trial = &""
 	prologue.trial_progress.clear()
-	if completed and not trial_id in prologue.completed_trials:
+	var first_completion := completed and not trial_id in prologue.completed_trials
+	if first_completion:
 		prologue.completed_trials.append(trial_id)
 	character.classes.end_trial()
 	character.builds.end_trial_build()
 	character.equipment.end_trial()
 	prologue.trial_finished.emit(trial_id, completed)
 	prologue.changed.emit()
+	if first_completion:
+		StoryService.notify(character, &"trial_complete")   # after the trial state is gone: safe to save
 
 
 static func objectives_done(character: Character, trial: TrialDefinition) -> bool:
@@ -123,4 +126,5 @@ static func choose_starting_class(character: Character, class_id: StringName) ->
 	prologue.chosen_class = class_id
 	prologue.stage = PrologueState.Stage.COMPLETED
 	prologue.changed.emit()
+	StoryService.notify(character, &"class_chosen")
 	return ""

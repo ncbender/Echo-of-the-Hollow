@@ -61,6 +61,7 @@ func _ready() -> void:
 	_wire_hitstop()
 	_remove_defeated_enemies(character)
 	session.map_ready()
+	StoryService.notify(character, StringName("enter:%s" % map_id))
 
 
 ## Local hitstop for the player and every enemy placed in the map.

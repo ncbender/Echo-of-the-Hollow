@@ -50,6 +50,13 @@ func refresh() -> void:
 		lines.append("Then choose your starting class at the Altar of Choice.")
 	else:
 		_title.text = ""
+	var story := StoryService.tracker_lines(character)
+	if not story.is_empty():
+		if _title.text == "":
+			_title.text = "Journey"
+		elif not lines.is_empty():
+			lines.append("")
+		lines.append_array(story)
 	for quest_id in character.quests.active_ids():
 		var quest: ClassQuestDefinition = character.database.quests.get(quest_id)
 		if quest == null:

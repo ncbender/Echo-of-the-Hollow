@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_enter"]
+script = ExtResource("3_obj")
+event_id = &"enter:home_base"
+description = "Reach Haven"
+
+[sub_resource type="Resource" id="S_enter"]
+script = ExtResource("2_step")
+description = "Follow the road north to Haven."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_enter")])
+completion_flag = &"prologue.haven_discovered"
+
+[sub_resource type="Resource" id="O_welcome"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_welcome"
+description = "Speak with Mara"
+
+[sub_resource type="Resource" id="S_welcome"]
+script = ExtResource("2_step")
+description = "Speak with Mara in Haven."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_welcome")])
+
+[sub_resource type="Resource" id="O_smithy"]
+script = ExtResource("3_obj")
+event_id = &"restore:old_smithy"
+description = "Restore the Old Smithy"
+
+[sub_resource type="Resource" id="S_smithy"]
+script = ExtResource("2_step")
+description = "A Fire Rekindled: restore the Old Smithy with the recovered supplies."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_smithy")])
+completion_flag = &"prologue.smithy_restored"
+
+[sub_resource type="Resource" id="O_edrin"]
+script = ExtResource("3_obj")
+event_id = &"talk:edrin_intro"
+description = "Speak with Edrin Vale"
+
+[sub_resource type="Resource" id="S_edrin"]
+script = ExtResource("2_step")
+description = "Speak with Edrin Vale at the north gate."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_edrin")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"shelter_among_the_trees"
+display_name = "Shelter Among the Trees"
+chapter = "Prologue"
+description = "Mara spoke of a village to the north. Walls, a forge, and people who still care."
+steps = Array[ExtResource("2_step")]([SubResource("S_enter"), SubResource("S_welcome"), SubResource("S_smithy"), SubResource("S_edrin")])
+completion_flag = &"prologue.haven_settled"
+next_quest_ids = Array[StringName]([&"the_whispering_stone"])

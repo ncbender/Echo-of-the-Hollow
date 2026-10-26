@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_attack"]
+script = ExtResource("3_obj")
+event_id = &"encounter:cart_attack"
+description = "Drive off the attackers"
+
+[sub_resource type="Resource" id="S_attack"]
+script = ExtResource("2_step")
+description = "Help the stranger at the broken cart."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_attack")])
+
+[sub_resource type="Resource" id="O_talk"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_cart"
+description = "Talk to the stranger"
+
+[sub_resource type="Resource" id="S_talk"]
+script = ExtResource("2_step")
+description = "Talk to the stranger."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_talk")])
+completion_flag = &"prologue.mara_rescued"
+
+[sub_resource type="Resource" id="O_crates"]
+script = ExtResource("3_obj")
+event_id = &"interact:supply_crate"
+amount = 2
+description = "Supply crates recovered"
+cumulative = true
+
+[sub_resource type="Resource" id="S_crates"]
+script = ExtResource("2_step")
+description = "Recover the supply crates scattered around the cart."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_crates")])
+completion_flag = &"prologue.supplies_recovered"
+
+[sub_resource type="Resource" id="O_wave"]
+script = ExtResource("3_obj")
+event_id = &"encounter:cart_second_wave"
+description = "Survive the second attack"
+
+[sub_resource type="Resource" id="S_wave"]
+script = ExtResource("2_step")
+description = "More of them are coming. Hold the cart."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_wave")])
+completion_flag = &"prologue.cart_defended"
+
+[sub_resource type="Resource" id="O_haven"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_road_end"
+description = "Talk to Mara"
+
+[sub_resource type="Resource" id="S_haven"]
+script = ExtResource("2_step")
+description = "Talk to Mara."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_haven")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"the_broken_cart"
+display_name = "The Broken Cart"
+chapter = "Prologue"
+description = "A supply cart lies broken across the road, and its owner is not giving up without a fight."
+steps = Array[ExtResource("2_step")]([SubResource("S_attack"), SubResource("S_talk"), SubResource("S_crates"), SubResource("S_wave"), SubResource("S_haven")])
+completion_flag = &"prologue.cart_done"
+next_quest_ids = Array[StringName]([&"shelter_among_the_trees"])

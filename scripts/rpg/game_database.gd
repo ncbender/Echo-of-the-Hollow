@@ -29,6 +29,7 @@ const DIRS := {
 	&"talent_trees": "res://data/talents",
 	&"trials": "res://data/trials",
 	&"quests": "res://data/quests",
+	&"story_quests": "res://data/story",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -61,6 +62,8 @@ var talent_trees: Dictionary = {}     # tree id -> TalentTreeDefinition
 var talent_nodes: Dictionary = {}     # node id -> TalentNodeDefinition (indexed from the trees)
 var trials: Dictionary = {}           # trial id -> TrialDefinition
 var quests: Dictionary = {}           # quest id -> ClassQuestDefinition
+# Story (docs/PROLOGUE.md)
+var story_quests: Dictionary = {}     # quest id -> StoryQuestDefinition (prologue, main quest)
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -131,6 +134,8 @@ func register(resource: Resource) -> bool:
 		table = skill_mods; key = resource.id
 	elif resource is TrialDefinition:
 		table = trials; key = resource.id
+	elif resource is StoryQuestDefinition:
+		table = story_quests; key = resource.id
 	elif resource is ClassQuestDefinition:
 		table = quests; key = resource.id
 	elif resource is TalentTreeDefinition:
@@ -223,6 +228,8 @@ func validate() -> PackedStringArray:
 			errors.append("rules reference unknown status %s" % status_id)
 	errors.append_array(_validate_crafting())
 	errors.append_array(_validate_classes())
+	if not story_quests.is_empty():   # test databases may run without story data
+		errors.append_array(StoryService.validate_data(self))
 	return errors
 
 
