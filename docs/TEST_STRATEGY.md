@@ -18,7 +18,8 @@
 
 ## Suites (Name = `test_<name>.gd`)
 `project`, `combat_data`, `combo`, `dash`, `movement`, `light_attack`, `heavy_attack`, `hits`,
-`weapon_switch` (Phase E), `enemy` (Phase F), `input` (Geräte-Eingabe → Flanken).
+`weapon_switch`, `enemy`, `input`; Overnight 2: `collision`, `hit_reaction`, `mastery`, `classes`,
+`inventory`, `pickup`, `equipment`, `item_effects`, `save` (später ggf. `world`, `base`).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -41,6 +42,22 @@
 | Gegner | enemy, hits |
 | `player_input.gd` | input |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
+| `character.gd`, `player_progression_bridge.gd` | mastery, classes, equipment, item_effects, save |
+| `inventory.gd`, Items | inventory, pickup, equipment, save |
+| `character_equipment.gd` | equipment, item_effects, save |
+| `save_system.gd` / Schema (`to_dict`) | save (+ Playtest-Schritt Save/Load) |
+| `game_map.gd`, Arena-Szene | project, enemy, pickup |
+
+**Pflicht:** Änderungen am Persistenzschema → `save`; Änderungen an Ausrüstung → `equipment` (Stats,
+Loadout- und Inventar-Invarianten).
+
+## RPG-Playtest
+```
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/rpg_playtest.gd
+```
+Skriptierter Integrationsablauf mit echten Input-Events und UI-Buttons: Klassenstation → Pickups →
+Inventar/Ausrüstung → Legendary-Effekt → F3 Mastery → F6 Speichern → Zustand ändern → F9 Laden →
+Vergleich. Nutzt `user://test_saves/rpg_playtest.save.json`. Exit-Code 1 bei fehlgeschlagenem Check.
 
 ## Visueller Playtest
 ```

@@ -120,9 +120,45 @@ optionaler Knockback, kurzer Hitstop bei schweren Treffern, Kamera-Shake, Debug-
 ## Offene Designfragen
 - **Heavy-Startup des Zweihänders** ist per Dash abbrechbar (wie beim Schwert). Falls Zweihand-Heavies
   stärker „committen“ sollen, nur `dash_cancel_phases` in den Daten ändern.
-- **Spieler und Gegner überlappen**, weil der Spielerkörper nicht mit Gegnern kollidiert (sonst bleibt
-  man an Gegnern hängen). Für Gruppenkämpfe neu bewerten (Soft-Collision).
+- ~~Spieler und Gegner überlappen~~ → seit Overnight 2 behoben (siehe unten).
+- **Dash durch Gegner?** Aktuell blockieren Gegner auch den Dash (man gleitet an ihnen ab). Ob der Dash
+  Gegner durchqueren soll, ist eine Feel-Entscheidung für den Playtest.
 - Mehrere Klicks innerhalb eines einzelnen Physik-Frames (16 ms) zählen als eine Eingabe. Bei 60 Hz
   praktisch irrelevant; falls nötig, Physik-Tickrate erhöhen.
-- Player-Treffer-Reaktion (Stagger/Hyperarmor) ist im Design nicht definiert; Prototyp: Spieler wird
-  nicht unterbrochen, erhält nur Schaden und Knockback.
+- ~~Player-Treffer-Reaktion~~ → seit Overnight 2 definiert (siehe unten).
+
+## Änderungen Overnight 2 (technisch, Timings unverändert)
+Keine Angriffs-, Bewegungs-, Dash- oder Combo-Werte wurden verändert. Geändert/ergänzt:
+
+1. **Kollision Spieler ↔ Gegner:** Spielerkörper kollidiert jetzt mit Gegnern (Maske Welt + Gegner).
+   `BodyContact.strip_push` entfernt pro Tick die Geschwindigkeitskomponente, die in einen anderen
+   Charakter drücken würde → niemand schiebt niemanden (auch nicht über Godots Penetrations-Recovery),
+   Knockback läuft über `move_and_slide` (keine Sprünge, Wände halten). Gegner untereinander ebenso.
+2. **Lokaler Hitstop:** statt `Engine.time_scale` frieren nur Angreifer und Ziel ein
+   (`apply_hitstop`, Maximum statt Summe, Obergrenze 0,15 s). Eingaben während des Freezes werden
+   weiter gepuffert (ohne zu altern). Gleiche Dauer wie vorher; UI, andere Gegner, Timer laufen weiter.
+3. **Trefferreaktionen des Spielers** (Angriffsattribut `hit_reaction`, Werte = **Testwerte**,
+   `data/player/hit_reaction_config.tres`):
+
+| Typ | Wirkung | Standarddauer |
+|---|---|---|
+| NONE | nur Schaden | – |
+| FLINCH | Schaden + Feedback, keine Unterbrechung | 0,12 s |
+| INTERRUPT | bricht unterbrechbare Aktion ab, danach keine Angriffe (Bewegen erlaubt) | 0,25 s |
+| KNOCKBACK | wie INTERRUPT + ×1,8 Knockback, keine Bewegung/Dash, beendet laufenden Dash | 0,35 s |
+| STUN | keine Bewegung, Angriffe, Dash | 0,6 s |
+
+   - Dash-iFrames verhindern Treffer und damit jede Reaktion.
+   - `uninterruptible_phases` am Angriff (Hyper Armor) reduziert Unterbrechungen zu FLINCH.
+   - `resistance` (Konfig) bzw. `bonus_resistance` (Laufzeit) für spätere Fähigkeiten: Reaktionen bis zu
+     dieser Stufe werden zu FLINCH.
+   - Eine schwächere Reaktion ersetzt nie eine laufende stärkere.
+4. **Grunt:** Wischer = FLINCH; jeder 3. Angriff ist ein **Slam** (0,7 s roter Telegraph, KNOCKBACK).
+   Neuer Gegnerinhalt, damit Reaktionen testbar sind; Spieler-Combat unverändert.
+5. **Neuer gesperrter Knoten** `greatsword_light_4_mastery` (nur über Waffenbeherrschung erreichbar).
+
+## Vorschläge für den Feel-Test (NICHT umgesetzt)
+- Light-Treffer auf Gegner wirken mit ~3 px Knockback evtl. zu weich → `knockback_scale` testen.
+- Reaktionsdauern (v. a. STUN 0,6 s) im Kampf gegen mehrere Grunts prüfen.
+- Dash durch Gegner erlauben? (siehe offene Designfragen)
+- Hitstop-Gefühl jetzt lokal: prüfen, ob schwere Treffer weiterhin „Gewicht“ haben.

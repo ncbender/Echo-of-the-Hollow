@@ -12,8 +12,9 @@
   Resources (`data/`). Der Code enthält keinen einzigen waffen- oder angriffsspezifischen Zweig.
 - **Logik ≠ Darstellung:** `*_view.gd`, `HitReactionFx`, `HitstopController`, `CameraShake`,
   `DebugOverlay` lesen nur Zustand bzw. hören Signale. Spiellogik referenziert sie nie.
-- **Keine Autoloads.** Einziger globaler Zustand: `DebugView.show_hitboxes` (statische Variable,
-  reiner Debug-Schalter).
+- **Genau ein Autoload: `GameSession` (`SessionState`)** – hält den `Character`, damit er Szenenwechsel
+  überlebt. Systeme bekommen Abhängigkeiten explizit übergeben (ohne Autoload testbar). Sonst nur
+  `DebugView.show_hitboxes` (statische Debug-Variable) und der gecachte `GameDatabase.get_default()`.
 
 ## Tick-Ablauf (Player, `_physics_process` → `physics_step(frame, delta)`)
 ```
@@ -78,6 +79,40 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
 | Talent-/Item-Trefferereignisse | Signale `hit_landed(HitData)`, `attack_started`, `attack_finished`, `attack_cancelled`, `charge_tier_changed`. `HitData.attack_instance_id` gruppiert Treffer eines Schwungs. |
 | Defensiver Slot / Skills | Input-Actions `defensive`, `ability_1..4` existieren; neue Aktion = eigene Komponente, die sich wie der Dash über `can_dash_cancel`-artige Abfragen einklinkt. |
 
+## RPG-Schicht (Overnight 2)
+```
+ data/ (Resources)            GameDatabase (Registry, Validierung)
+   weapons, mastery, classes,        │
+   items, sets, world, base          ▼
+                              Character (RefCounted, speicherbar)
+                               ├─ CharacterClasses   (Level/XP je Klasse, aktive Klasse)
+                               ├─ WeaponMastery      (Level/XP je Waffenfamilie, geteilt)
+                               ├─ Inventory          (ItemInstances, einziger Speicherort)
+                               ├─ CharacterEquipment (Loadout je Klasse = Instanz-IDs)
+                               ├─ WorldState         (Map, Spawn, Flags, Gebäude)
+                               └─ get_stats()        (StatResolver, immer neu berechnet)
+                                     ▲  to_dict / from_dict  ▼
+                              SaveSystem (Umschlag, Prüfsumme, .tmp/.bak, Migrationen)
+
+ Szene: GameMap ── bindet ──► Player ◄── PlayerProgressionBridge ──► Character
+                                          ├─ CombatRewardTracker (XP aus hit_landed)
+                                          ├─ CharacterStatModifier (Stats → AttackModifier)
+                                          ├─ ItemEffectRunner (Legendary/Unique/Set, 1 Verbindung)
+                                          ├─ Waffe = Familie der Hauptwaffe
+                                          └─ ClassResourcePool (Wut …)
+```
+- **Einzige Brücke** Combat↔RPG: `PlayerProgressionBridge`. Alle Verbindungen zum langlebigen
+  `Character` werden verfolgt und in `unbind()` getrennt (keine Doppelregistrierung beim Neuladen).
+- Items wirken über den **bestehenden** `AttackModifier`-Hook (neu: `modify_reach`); keine parallele
+  Schadenslogik, Basisdaten (`AttackDefinition`) werden nie verändert.
+- `Character`-Teilsysteme verbinden Signale über Methoden-Callables (keine Lambdas mit `self`), damit
+  keine RefCounted-Zyklen entstehen (Leck in der Startprüfung gefunden und behoben).
+- Neue Combat-Bausteine aus Phase 1: `HitReactionComponent` (+Config), `BodyContact`, lokaler Hitstop
+  (`apply_hitstop` an Player/Enemy).
+- Details: `PROGRESSION_SYSTEM.md`, `CLASS_SYSTEM.md`, `ITEM_SYSTEM.md`, `EQUIPMENT_SYSTEM.md`,
+  `SAVE_SYSTEM.md`.
+
 ## Kollisionslayer
 1 `world` (Wände, Dummies) · 2 `player` · 3 `enemy` · 4 `hurtbox` (nur Abfragen, kein Monitoring).
-Player-Körper kollidiert nur mit `world`; Gegner mit `world`, `player`, `enemy`.
+Player-Körper kollidiert mit `world` + `enemy`; Gegner mit `world`, `player`, `enemy`. Interactables
+und Pickups überwachen nur `player`.

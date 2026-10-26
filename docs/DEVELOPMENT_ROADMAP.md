@@ -10,6 +10,19 @@
 | E (optional) | Zweihandschwert, Waffenwechsel | ✅ abgeschlossen |
 | F (optional) | Einfacher Nahkampfgegner, Telegraph, Tod, Debug-Spawn | ✅ abgeschlossen |
 
+## Overnight 2 – Stabilisierung & RPG-Fundament
+| Phase | Inhalt | Status (Details: `OVERNIGHT_REPORT_02.md`) |
+|---|---|---|
+| 1 | Kollision, lokaler Hitstop, Trefferreaktionen | ✅ |
+| 2 | Waffenbeherrschung | ✅ |
+| 3 | Klassen (Basic Adventurer, Warrior) | ✅ |
+| 4 | Items & Inventar | ✅ |
+| 5 | Equipment & Klassen-Loadouts | ✅ |
+| 6 | Legendary/Unique/Set | ✅ |
+| 7 | Save/Load | ✅ |
+| 8 (optional) | Maps & Regionen | siehe Report |
+| 9 (optional) | Basisbau | siehe Report |
+
 ## Danach (Vorschlag, nicht begonnen)
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen
   koppeln, Sound-Hooks, Feintuning mit menschlichem Playtest.
