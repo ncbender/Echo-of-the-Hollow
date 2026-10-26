@@ -257,4 +257,10 @@ func test_window_fits_every_ui_scale() -> void:
 			check(view.encloses(panel.side_tabs.get_global_rect()), "%s: book registers on screen" % tag)
 			for card: Control in panel.find_children("Prof_*", "Button", true, false):
 				check(card.size.x <= ProfessionsPanel.CARD_WIDTH + 1.0 and card.size.y <= 80.0, "%s: compact card %s (%s)" % [tag, card.name, card.size])
+			if page_name == "Crafting":
+				var craft := panel.find_child("Craft", true, false) as Button
+				check(craft != null and panel.footer.is_ancestor_of(craft), "%s: Craft sits in the fixed footer" % tag)
+				if craft != null:
+					check(rect.encloses(craft.get_global_rect()) and view.encloses(craft.get_global_rect()),
+						"%s: Craft visible without scrolling (%s in %s)" % [tag, craft.get_global_rect(), rect])
 			map.hud.close_windows()

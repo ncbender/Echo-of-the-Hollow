@@ -60,10 +60,8 @@ func _pass(resolution: Vector2i, scale: float) -> void:
 		if map != null and map.is_node_ready() and not session.is_traveling():
 			break
 	await _frames(20)
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
-	BaseBuilder.build(character, plot.definition(), session.database.buildings[&"smithy"])
-	plot.refresh()
-	map.player.global_position = plot.global_position + Vector2(0, 26)
+	var plot := _restored_smithy(character)
+	map.player.global_position = plot.global_position + Vector2(0, 20)
 	await _frames(6)
 	plot.interact(map.hud)
 	panel = map.hud.crafting_panel
@@ -191,11 +189,21 @@ func _hover_first_item(tag: String) -> void:
 	Input.warp_mouse(Vector2(4, 4))
 
 
+## The Resonance Forge lives in the restored Old Smithy (Haven has fixed ruins,
+## no free build plots). Restored through RestorationService; the Haven flag and
+## the two supply crates stand in for the prologue.
+func _restored_smithy(character: Character) -> RuinSite:
+	character.world.set_flag(&"prologue.haven_discovered")
+	character.inventory.add_item(&"supply_crate", 2)
+	var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
+	_check(RestorationService.restore(character, smithy.ruin()) == "", "Old Smithy restored")
+	smithy.refresh()
+	return smithy
+
+
+## The forge's primary action (its text names the operation since the UI redesign).
 func _confirm_button() -> Button:
-	for button: Button in panel.find_children("*", "Button", true, false):
-		if button.text.begins_with("Confirm") or button.text.begins_with("Choose"):
-			return button
-	return null
+	return panel.find_child("Confirm", true, false) as Button
 
 
 func _tooltip(node: Node) -> Window:
@@ -307,10 +315,8 @@ func _loop() -> void:
 	await _await_map(&"home_base")
 	await _press(&"debug_crafting_kit")   # F4
 	_check(character.inventory.count(&"imprint_shard") == 10, "F4 crafting kit received")
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
-	BaseBuilder.build(character, plot.definition(), session.database.buildings[&"smithy"])
-	plot.refresh()
-	map.player.global_position = plot.global_position + Vector2(0, 26)
+	var plot := _restored_smithy(character)
+	map.player.global_position = plot.global_position + Vector2(0, 20)
 	await _frames(8)
 	await _press(&"interact")   # G at the smithy
 	panel = map.hud.crafting_panel

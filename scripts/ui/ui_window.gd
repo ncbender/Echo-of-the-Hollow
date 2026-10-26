@@ -14,6 +14,9 @@ extends PanelContainer
 
 ## Content root for subclasses.
 var body: VBoxContainer
+## Fixed area under the scrolling body for the window's primary action (e.g.
+## Craft): never scrolled away. Hidden until a subclass shows it.
+var footer: VBoxContainer
 ## Give keyboard focus to the first enabled button when the window opens.
 var auto_focus: bool = true
 
@@ -49,6 +52,10 @@ func _init() -> void:
 	body = VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(body)
+	footer = VBoxContainer.new()
+	footer.name = "Footer"
+	footer.visible = false
+	_outer.add_child(footer)
 	_close = Button.new()
 	_close.name = "Close"
 	_close.text = "Close [Esc]"
@@ -56,6 +63,8 @@ func _init() -> void:
 	_close.pressed.connect(hide)
 	_outer.add_child(_close)
 	body.minimum_size_changed.connect(queue_fit)
+	footer.minimum_size_changed.connect(queue_fit)
+	footer.visibility_changed.connect(queue_fit)
 	visibility_changed.connect(queue_fit)
 	visibility_changed.connect(_on_opened)
 
@@ -162,6 +171,8 @@ func _chrome_size() -> Vector2:
 	var padding := get_theme_stylebox(&"panel").get_minimum_size()
 	var gap := float(_outer.get_theme_constant(&"separation"))
 	var rows := _close.get_combined_minimum_size().y + gap
+	if footer.visible:
+		rows += footer.get_combined_minimum_size().y + gap
 	if _title.text != "":
 		rows += _title.get_combined_minimum_size().y + gap
 		rows += _title_rule.get_combined_minimum_size().y + gap

@@ -56,6 +56,10 @@ func _run() -> void:
 	var file := FileAccess.open(OUTPUT.path_join("prologue_playtest_log.txt"), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
 	file.close()
+	if failures > 0:   # keep failed runs: a later green run must not overwrite the evidence (flake hunt)
+		var kept := FileAccess.open(OUTPUT.path_join("prologue_playtest_failed_%d.txt" % Time.get_unix_time_from_system()), FileAccess.WRITE)
+		kept.store_string("\n".join(log_lines))
+		kept.close()
 	quit(0 if failures == 0 else 1)
 
 

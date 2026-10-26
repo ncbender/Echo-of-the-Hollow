@@ -100,16 +100,9 @@ func _gameplay_loop() -> void:
 	await _walk_into_door("ToHomeBase")
 	await _await_map(&"home_base")
 	_check(map.map_id == &"home_base", "6. returned to the base")
-	# 7./8. choose a plot and build with the gathered materials
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
-	await _walk_to(plot.global_position + Vector2(0, 30))
-	await _press(&"interact")
-	_check(map.hud.build_panel.visible, "7. build menu opened at the plot")
-	await _shot("g04_build_menu")
-	_click_button(map.hud.build_panel, "Build")
-	await _ticks(3)
-	_check(plot.built_building() != null, "8. building constructed")
-	await _press(&"interact")
+	# 7./8. restore the Old Smithy at its ruin (Haven has fixed ruins, no free build plots)
+	var smithy := await _restore_smithy("g04_restoration")
+	_check(smithy.built_building() != null, "8. Old Smithy restored, the forge stands")
 	await _shot("g05_smithy_standing")
 	# 9. save and reload
 	var snapshot := character.to_dict()
@@ -120,36 +113,61 @@ func _gameplay_loop() -> void:
 	await _await_map(&"home_base")
 	# 10. everything is still there
 	var loaded := session.character
-	_check(comparable(loaded.to_dict()) == comparable(snapshot), "10. loaded state equals the saved state (except visit counters)")
-	var plot_after := map.get_node("Plots/PlotWest") as BuildPlot
-	_check(plot_after.built_building() != null, "10. smithy still standing after load")
+	var after := comparable(loaded.to_dict())
+	var before := comparable(snapshot)
+	var differing: PackedStringArray = []
+	for key: String in before:
+		if after.get(key) != before[key]:
+			differing.append(key)
+	_check(after == before, "10. loaded state equals the saved state (except visit counters) %s" % ", ".join(differing))
+	var smithy_after := map.get_node("Ruins/OldSmithy") as RuinSite
+	_check(smithy_after.is_restored() and smithy_after.built_building() != null, "10. smithy still restored after load")
 	await _shot("g06_after_load")
 
 
 func _build_check() -> void:
 	var character := session.character
-	var smithy: BuildingDefinition = session.database.buildings[&"smithy"]
-	for cost in smithy.costs:
-		character.inventory.add_item(cost.item_id, cost.quantity)
 	character.inventory.add_item(&"iron_ore", 3)
 	character.inventory.add_item(&"timber", 1)
-	var plot := map.get_node("Plots/PlotWest") as BuildPlot
-	await _walk_to(plot.global_position + Vector2(0, 28))
-	await _press(&"interact")
-	_check(map.hud.build_panel.visible, "build panel opened at the plot")
-	await _shot("l04_build_menu")
-	_click_button(map.hud.build_panel, "Build")
-	await _ticks(3)
-	_check(plot.built_building() != null and plot.built_building().id == &"smithy", "smithy built via UI")
-	_click_button(map.hud.build_panel, "Craft")
-	_check(character.inventory.count(&"iron_sword") == 2, "smithy recipe crafted a second Iron Sword")
-	await _shot("l05_smithy_built")
-	await _press(&"interact")   # closes the build panel
-	await _press(&"interact")   # a built smithy opens the Resonance Forge
+	var smithy := await _restore_smithy("l04_restoration")
+	_check(smithy.built_building() != null and smithy.built_building().id == &"smithy", "smithy restored via UI")
+	await _walk_to(smithy.global_position + Vector2(0, 20))
+	await _press(&"interact")   # a restored smithy opens the Resonance Forge
 	_check(map.hud.crafting_panel.visible, "smithy opens the Resonance Forge")
-	_click_button(map.hud.crafting_panel, "Smithy recipes")
+	map.hud.crafting_panel.select_section("Craft")
 	await _ticks(3)
-	_check(map.hud.build_panel.visible, "forge links back to the smithy recipes")
+	var swords := character.inventory.count(&"iron_sword")
+	var craft := map.hud.crafting_panel.find_child("Craft_forge_iron_sword", true, false) as Button
+	_check(craft != null and not craft.disabled, "smithy recipe ready to craft")
+	if craft != null:
+		craft.pressed.emit()
+	await _ticks(3)
+	_check(character.inventory.count(&"iron_sword") == swords + 1, "smithy recipe crafted an Iron Sword")
+	await _shot("l05_smithy_built")
+	_click_button(map.hud.crafting_panel, "Blacksmithing Workbench")
+	await _ticks(3)
+	_check(map.hud.professions_panel.visible and map.hud.professions_panel.station_id == &"old_smithy", "forge opens the Blacksmithing workbench")
+
+
+## Restores the Old Smithy through its ruin like a player: walk up, G, Restore.
+## The Haven flag and the two supply crates stand in for the prologue.
+func _restore_smithy(shot: String) -> RuinSite:
+	var character := session.character
+	character.world.set_flag(&"prologue.haven_discovered")
+	character.inventory.add_item(&"supply_crate", 2)
+	var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
+	if map.player.global_position.x < -400.0:
+		await _walk_to(Vector2(-360, 0))   # out of the Artisan Quarter through the west passage
+	await _walk_to(smithy.global_position + Vector2(0, 20))
+	await _press(&"interact")
+	_check(map.hud.restoration_panel.visible, "7. restoration window opened at the Old Smithy")
+	await _shot(shot)
+	_click_button(map.hud.restoration_panel, "Restore")
+	await _ticks(3)
+	_check(RestorationService.stage(character, &"old_smithy") == RestorationService.RESTORED, "7. Old Smithy restored with the crates")
+	map.hud.close_windows()
+	await _ticks(3)
+	return smithy
 
 
 # --- helpers ---------------------------------------------------------------
@@ -244,9 +262,14 @@ func _log(text: String) -> void:
 	print(line)
 
 
-## Character data without the per-visit counters that entering a map updates.
+## Character data without the per-visit counters that entering a map updates
+## (map visits, story "count.enter:" flags) and the running play time.
 static func comparable(data: Dictionary) -> Dictionary:
 	var copy := data.duplicate(true)
+	copy.erase("play_time")
 	for map: String in copy.world.map_states:
 		(copy.world.map_states[map] as Dictionary).erase("visits")
+	for flag: String in (copy.world.flags as Dictionary).keys():
+		if flag.begins_with("count.enter:"):
+			(copy.world.flags as Dictionary).erase(flag)
 	return copy

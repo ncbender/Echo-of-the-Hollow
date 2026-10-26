@@ -117,6 +117,8 @@ func rebuild() -> void:
 	var keep_focus := String(focused.name) if focused != null and is_ancestor_of(focused) else ""
 	_clear(_cards)
 	_clear(_detail)
+	_clear(footer)
+	footer.visible = false
 	var kind := ProfessionDefinition.Kind.GATHERING if page == "Gathering" else ProfessionDefinition.Kind.CRAFTING
 	for profession in ProfessionService.professions(character.database, kind):
 		_cards.add_child(_profession_card(profession))
@@ -352,18 +354,25 @@ func _recipe_card(recipe: ProfessionRecipeDefinition) -> Control:
 	craft_button.tooltip_text = error
 	craft_button.custom_minimum_size = Vector2(160, 40)
 	craft_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	# Craft and its feedback sit in the window footer: the recipe list and card
+	# may scroll (150 % UI), the primary action stays visible.
 	var bottom := HBoxContainer.new()
+	bottom.name = "CraftBar"
+	bottom.add_theme_constant_override(&"separation", UiTheme.GAP)
 	var hint := UiTheme.wrapped(error if error != "" and locked == "" else "", UiTheme.TEXT_MUTED, DETAIL_WIDTH - 220)
 	hint.name = "CraftHint"
 	hint.theme_type_variation = &"SmallLabel"
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom.add_child(UiTheme.styled(recipe.display_name, &"SubheadingLabel"))
 	bottom.add_child(hint)
 	bottom.add_child(craft_button)
-	box.add_child(bottom)
-	var result := UiTheme.wrapped(last_message, UiTheme.SUCCESS if last_ok else UiTheme.DANGER, DETAIL_WIDTH - 30)
+	footer.add_child(HSeparator.new())
+	footer.add_child(bottom)
+	var result := UiTheme.wrapped(last_message, UiTheme.SUCCESS if last_ok else UiTheme.DANGER, CARD_WIDTH + DETAIL_WIDTH)
 	result.name = "Result"
 	result.visible = last_message != ""
-	box.add_child(result)
+	footer.add_child(result)
+	footer.visible = true
 	return card
 
 
