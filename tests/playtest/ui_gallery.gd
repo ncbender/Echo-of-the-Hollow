@@ -78,8 +78,8 @@ func _title_screen(screens: Array) -> void:
 ## affixes, a second class, talents, presets, quests, restored ruins.
 func _rich_character() -> Character:
 	var character := CharacterFactory.create_new(session.database)
-	GameMap.give_debug_items(character)
 	GameMap.give_crafting_kit(character)
+	GameMap.give_debug_items(character)
 	for event: StringName in [&"reach:road_signpost", &"encounter:road_ambush", &"reach:cart_site", &"encounter:cart_attack",
 			&"talk:mara_cart", &"interact:supply_crate", &"interact:supply_crate", &"encounter:cart_second_wave",
 			&"talk:mara_road_end", &"enter:home_base", &"talk:mara_welcome"]:
@@ -93,7 +93,27 @@ func _rich_character() -> Character:
 		TalentService.learn(character, &"warrior", node_id)
 	PresetService.save_preset(character, &"warrior", 0, "Rage Bruiser")
 	QuestService.start(character, &"unlock_arcanist")
+	_forge_example(character)
 	return character
+
+
+## A forged blade with several affixes, two essences and a socketed gem - made
+## through the real CraftingService (seeded), nothing written by hand.
+func _forge_example(character: Character) -> void:
+	var blade: ItemInstance = character.inventory.items().filter(func(i: ItemInstance) -> bool: return i.definition_id == &"forged_blade")[0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var steps: Array = [[CraftingOps.IMPRINT, &"material_id", &"storm_ore"], [CraftingOps.AUGMENT, &"", null], [CraftingOps.AUGMENT, &"", null],
+		[CraftingOps.ESSENCE_INSERT, &"essence_id", &"storm_wolf"], [CraftingOps.ESSENCE_INSERT, &"essence_id", &"stone_golem"],
+		[CraftingOps.SOCKET_OPEN, &"", null], [CraftingOps.SOCKET_INSERT, &"socketable_id", &"garnet"], [CraftingOps.QUALITY, &"", null]]
+	for step: Array in steps:
+		var request := CraftingRequest.make(step[0], blade)
+		if step[1] != &"":
+			request.set(step[1], step[2])
+		if step[0] == CraftingOps.SOCKET_INSERT:
+			request.slot_index = 0
+		var result := CraftingService.execute(character, request, rng)
+		_log("forge example %s: %s" % [step[0], result.message if result.ok else result.error])
 
 
 # --- helpers used by GalleryScreens ------------------------------------------------
