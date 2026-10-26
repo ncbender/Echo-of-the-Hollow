@@ -157,6 +157,71 @@ func test_repeated_requests_never_skip_a_stage() -> void:
 	check(RestorationService.advance(character, null, RestorationService.RESTORED).begins_with("Unknown"), "unknown ruin refused")
 
 
+## Restoring draws on the Haven stash like the workstations do: only once the
+## Old Storehouse is restored, bag first, every unit counted once, all or nothing.
+func test_restoring_uses_the_stash_once_the_storehouse_stands() -> void:
+	var lodge: RuinDefinition = db.ruins[&"tanners_lodge"]   # 6 timber, 3 stone, 2 raw hide
+	for cost in lodge.costs:
+		character.stash.add_item(cost.item_id, cost.quantity)
+	# locked: the storehouse is still a ruin - the stash is not counted
+	check(not RestorationService.uses_stash(character), "ruined storehouse: bag only")
+	var bag := character.inventory.to_array()
+	var stash := character.stash.to_array()
+	check(RestorationService.restore(character, lodge).begins_with("Missing: Timber 0/6"), "stash not counted while locked")
+	check(character.inventory.to_array() == bag and character.stash.to_array() == stash, "nothing moved while locked")
+	character.world.set_restoration(&"old_storehouse", RestorationService.RESTORED)
+	check(RestorationService.uses_stash(character), "restored storehouse: the stash is in reach")
+	# stash only, exactly enough
+	var plan: Dictionary = RestorationService.material_plan(character, lodge, RestorationService.RESTORED)
+	check((plan.missing as PackedStringArray).is_empty(), "the plan finds everything in the stash")
+	check(plan.plan.all(func(e: Dictionary) -> bool: return int(e.bag) == 0), "nothing planned from the empty bag")
+	check_eq(RestorationService.restore(character, lodge), "", "restored from the stash alone")
+	for cost in lodge.costs:
+		check_eq(character.stash.count(cost.item_id), 0, "stash: exactly %d %s taken" % [cost.quantity, cost.item_id])
+	# mixed: bag first, then the stash; one short is refused without any change
+	var house: RuinDefinition = db.ruins[&"weavers_house"]   # 6 timber, 3 stone, 4 flax
+	character.inventory.add_item(&"timber", 4)
+	character.stash.add_item(&"timber", 1)   # 5 of 6
+	character.inventory.add_item(&"stone", 3)
+	character.stash.add_item(&"flax_fiber", 4)
+	bag = character.inventory.to_array()
+	stash = character.stash.to_array()
+	check(RestorationService.restore(character, house).begins_with("Missing: Timber 5/6"), "one short across bag and stash")
+	check(character.inventory.to_array() == bag and character.stash.to_array() == stash, "nothing moved when one short")
+	character.stash.add_item(&"timber", 3)   # bag 4 + stash 4 = 8
+	plan = RestorationService.material_plan(character, house, RestorationService.RESTORED)
+	check_eq(plan.plan[0], {"item_id": &"timber", "bag": 4, "stash": 2}, "bag first (4), then the stash (2)")
+	var results: Array[String] = []
+	for i in 3:   # rapid repeats
+		results.append(RestorationService.restore(character, house))
+	check_eq(results.count(""), 1, "one restoration from three requests")
+	check_eq(character.inventory.count(&"timber"), 0, "bag timber used first")
+	check_eq(character.stash.count(&"timber"), 2, "stash timber: only the remainder taken")
+	check_eq(character.inventory.count(&"stone"), 0, "stone from the bag")
+	check_eq(character.stash.count(&"flax_fiber"), 0, "flax from the stash")
+	check(StashService.ownership_errors(character).is_empty(), "ownership consistent: %s" % [StashService.ownership_errors(character)])
+
+
+func test_restoration_window_shows_bag_and_stash() -> void:
+	character.world.set_restoration(&"old_storehouse", RestorationService.RESTORED)
+	character.inventory.add_item(&"timber", 2)
+	character.stash.add_item(&"timber", 5)
+	if await _open_haven() == null:
+		return
+	var site := map.get_node("Ruins/TannersLodge") as RuinSite
+	map.player.global_position = site.global_position + Vector2(0, 20)
+	for i in 4:
+		await get_tree().physics_frame
+	map.hud.open_restoration(site)
+	await _frames()
+	var row := map.hud.restoration_panel.find_child("Cost_timber", true, false)
+	var texts: PackedStringArray = []
+	if row != null:
+		for label: Label in row.find_children("*", "Label", true, false):
+			texts.append(label.text)
+	check(" ".join(texts).contains("have 7 (bag 2, stash 5)"), "timber row shows bag and stash: %s" % [texts])
+
+
 func test_story_condition_gates_the_workshops() -> void:
 	character.world.flags.erase(&"prologue.haven_discovered")
 	for ruin_id: StringName in WORKSHOPS:
