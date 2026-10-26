@@ -103,8 +103,13 @@ func _ui_pass(resolution: Vector2i, scale: float) -> void:
 func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
 	var view := panel.tree_view(&"war_berserker")
 	var button := view.button_for(&"war_b_pace") if tag != "1080p_100" else view.button_for(&"war_b_temper")
-	var scroll := panel.find_children("*", "ScrollContainer", true, false)[0] as ScrollContainer
-	scroll.ensure_control_visible(button)
+	# the window and the tree area scroll separately: bring the node into view in both
+	var parent := button.get_parent()
+	while parent != null and parent != panel.get_parent():
+		if parent is ScrollContainer:
+			(parent as ScrollContainer).ensure_control_visible(button)
+			await _frames(2)
+		parent = parent.get_parent()
 	await _frames(4)
 	var at := root.get_final_transform() * button.get_global_rect().get_center()
 	for attempt in 4:
@@ -147,7 +152,8 @@ func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
 			await _frames(2)
 		_check(character.builds.get_build().rank(&"war_b_temper") == rank + 1, "real mouse click learned a talent rank")
 	Input.warp_mouse(Vector2(4, 4))
-	scroll.scroll_vertical = 0
+	for scroll: ScrollContainer in panel.find_children("*", "ScrollContainer", true, false):
+		scroll.scroll_vertical = 0
 	await _frames(2)
 
 

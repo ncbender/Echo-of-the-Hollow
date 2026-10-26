@@ -13,12 +13,19 @@ const RESONANCE := SkillModDefinition.Slot.RESONANCE
 const CONTENT_WIDTH := 900
 const CLASS_CARD := Vector2(320, 104)
 const CLASS_DETAILS_WIDTH := 480
+const TALENT_DETAILS_HEIGHT := 92
 
 var character: Character
 var station: ClassStation
 var page: String = "Classes"
 ## Class shown in the details area of the Classes page (default: the active one).
 var selected_class: StringName
+## Talent node shown in the details bar of the Talents page.
+var _talent_focus: StringName
+var _talent_title: Label
+var _talent_text: Label
+var _talent_reason: Label
+var _tree_scroll: ScrollContainer
 
 var _tabs: UiTabs
 var _summary: HBoxContainer
@@ -43,6 +50,7 @@ func _ready() -> void:
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override(&"separation", UiTheme.GAP)
 	body.add_child(_content)
+	get_viewport().size_changed.connect(func() -> void: _fit_tree_scroll.call_deferred())
 
 
 func open(target_character: Character, target_station: ClassStation, start_page: String = "") -> void:
@@ -79,6 +87,8 @@ func rebuild() -> void:
 		_content.remove_child(child)   # detach now: rebuilt rows reuse their names
 		child.queue_free()
 	_trees.clear()
+	_tree_scroll = null
+	_talent_title = null
 	match page:
 		"Talents":
 			_build_talents()
@@ -375,19 +385,27 @@ func _build_talents() -> void:
 		_content.add_child(UiTheme.wrapped("This class has no talent trees.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
 		return
 	var rules := character.database.rules.talent_rules()
-	var info := "One talent point per class level from level %d. Trees can be mixed freely; a tier opens when enough points are invested in the LOWER tiers of the same tree. A capstone (tier 7) needs 30 points in its tree. [A] active skill, [T] transformation." % rules.first_point_level
-	_content.add_child(UiTheme.wrapped(info, UiTheme.TEXT_SECONDARY, CONTENT_WIDTH))
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override(&"separation", UiTheme.GAP * 3)
+	var top := HFlowContainer.new()   # legend wraps on narrow canvases
+	top.add_theme_constant_override(&"h_separation", UiTheme.GAP * 3)
 	for entry: Array in [["Learned", UiTheme.BRONZE], ["Available", UiTheme.RESONANCE], ["Locked", UiTheme.TEXT_MUTED]]:
 		var legend := HBoxContainer.new()
-		var swatch := ColorRect.new()
-		swatch.color = entry[1]
-		swatch.custom_minimum_size = Vector2(14, 14)
+		var swatch := Panel.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = UiTheme.PANEL_INSET if entry[0] != "Learned" else UiTheme.BRONZE_DIM
+		style.border_color = entry[1]
+		style.set_border_width_all(2)
+		swatch.add_theme_stylebox_override(&"panel", style)
+		swatch.custom_minimum_size = Vector2(16, 16)
 		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		legend.add_child(swatch)
 		legend.add_child(UiTheme.styled(entry[0], &"SmallLabel"))
 		top.add_child(legend)
+	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.PASSIVE, "Passive"))
+	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.ACTIVE, "Skill"))
+	top.add_child(TalentTreeView.kind_legend(TalentNodeDefinition.Kind.TRANSFORMATIVE, "Transformation"))
+	var rules_text := UiTheme.styled("1 point per level from %d  ·  a tier opens with points in the lower tiers  ·  capstone: %d" % [rules.first_point_level, rules.tier_requirement(7)], &"CaptionLabel")
+	rules_text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(rules_text)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(spacer)
@@ -398,19 +416,90 @@ func _build_talents() -> void:
 	respec.name = "Respec"
 	top.add_child(respec)
 	_content.add_child(top)
-	var row := HFlowContainer.new()
-	row.add_theme_constant_override(&"h_separation", UiTheme.GAP * 4)
-	_content.add_child(row)
+	_content.add_child(_talent_details())
+	# the three trees always side by side; too little room -> this row scrolls
+	_tree_scroll = ScrollContainer.new()
+	_tree_scroll.name = "TreeScroll"
+	_tree_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_tree_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_content.add_child(_tree_scroll)
+	var row := HBoxContainer.new()
+	row.name = "Trees"
+	row.add_theme_constant_override(&"separation", UiTheme.GAP * 4)
+	_tree_scroll.add_child(row)
 	for tree in trees:
 		var view := TalentTreeView.new()
 		view.name = "Tree_%s" % tree.id
 		row.add_child(view)
 		view.setup(character, class_id, tree)
 		view.learn_requested.connect(_learn)
+		view.node_hovered.connect(show_talent)
 		_trees.append(view)
+	if _talent_focus != &"" and character.database.talent_nodes.has(_talent_focus):
+		show_talent(_talent_focus)
+	_fit_tree_scroll.call_deferred()
+
+
+## Fixed-height bar above the trees: the hovered/clicked node in full.
+func _talent_details() -> Control:
+	var panel := UiTheme.card(&"InsetPanel")
+	panel.name = "TalentDetails"
+	panel.custom_minimum_size = Vector2(0, TALENT_DETAILS_HEIGHT)
+	panel.clip_contents = true
+	var box := panel.get_node("Box") as VBoxContainer
+	box.add_theme_constant_override(&"separation", 2)
+	_talent_title = UiTheme.styled("Hover a talent for details. Click to learn a rank.", &"SubheadingLabel")
+	box.add_child(_talent_title)
+	_talent_text = UiTheme.styled("", &"SmallLabel")
+	_talent_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_talent_text.max_lines_visible = 2
+	_talent_text.custom_minimum_size = Vector2(600, 0)
+	box.add_child(_talent_text)
+	_talent_reason = UiTheme.styled("", &"CaptionLabel")
+	box.add_child(_talent_reason)
+	return panel
+
+
+## Shows a node in the details bar (hover, keyboard focus, click).
+func show_talent(node_id: StringName) -> void:
+	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
+	if node == null or _talent_title == null or not is_instance_valid(_talent_title):
+		return
+	_talent_focus = node_id
+	var class_id := character.classes.active_class_id
+	var rank := character.builds.get_build(class_id).rank(node_id)
+	var error := TalentService.can_learn(character, class_id, node_id)
+	var state := TalentTreeView.state_of(rank, node.max_rank, error)
+	_talent_title.text = "%s  ·  %s, tier %d  ·  Rank %d / %d  ·  %s" % [node.display_name, node.kind_name(), node.tier, rank, node.max_rank, state]
+	_talent_text.text = node.describe(maxi(rank, 1))
+	if rank >= node.max_rank:
+		_talent_reason.text = "Fully learned."
+		_talent_reason.add_theme_color_override(&"font_color", UiTheme.BRONZE)
+	elif error == "":
+		_talent_reason.text = "Click to learn a rank."
+		_talent_reason.add_theme_color_override(&"font_color", UiTheme.RESONANCE)
+	else:
+		_talent_reason.text = "Locked: %s" % error
+		_talent_reason.add_theme_color_override(&"font_color", UiTheme.WARNING)
+
+
+## The tree row takes the room the window has left and scrolls inside it, so
+## the header and details bar stay in view.
+func _fit_tree_scroll() -> void:
+	if _tree_scroll == null or not is_instance_valid(_tree_scroll) or not is_inside_tree():
+		return
+	var row := _tree_scroll.get_child(0) as Control
+	var content := row.get_combined_minimum_size()
+	var limit := max_window_size() - _chrome_size() - Vector2(4, 4)
+	var others := body.get_combined_minimum_size().y - _tree_scroll.get_combined_minimum_size().y
+	var bar := _tree_scroll.get_h_scroll_bar().get_combined_minimum_size().y + 4.0
+	var wide := content.x <= limit.x
+	_tree_scroll.custom_minimum_size = Vector2(minf(content.x, limit.x), clampf(limit.y - others, 160.0, content.y + (0.0 if wide else bar)))
+	queue_fit()
 
 
 func _learn(node_id: StringName) -> void:
+	_talent_focus = node_id   # the details bar keeps showing the clicked node
 	var node: TalentNodeDefinition = character.database.talent_nodes.get(node_id)
 	_say(TalentService.learn(character, character.classes.active_class_id, node_id), "Learned %s." % (node.display_name if node else String(node_id)))
 

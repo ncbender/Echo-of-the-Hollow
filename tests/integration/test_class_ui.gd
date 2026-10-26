@@ -163,3 +163,26 @@ func _labels(root: Node) -> String:
 	for label: Label in root.find_children("*", "Label", true, false):
 		texts.append(label.text)
 	return " | ".join(texts)
+
+
+func test_talent_trees_side_by_side_with_tiers() -> void:
+	map.hud.toggle_character()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var trees: Array[TalentTreeView] = panel._trees
+	check_eq(trees.size(), 3, "three trees")
+	check(trees[0].get_parent() == trees[1].get_parent() and trees[0].get_parent() is HBoxContainer, "trees share one row (never stacked)")
+	check(trees[0].position.y == trees[1].position.y and trees[1].position.y == trees[2].position.y, "same top edge")
+	check(trees[0].position.x < trees[1].position.x and trees[1].position.x < trees[2].position.x, "left to right")
+	var view := panel.tree_view(&"war_berserker")
+	var first := view.button_for(&"war_b_seething")
+	var capstone := view.button_for(&"war_b_unbound")
+	check(first.position.y < view.button_for(&"war_b_relentless").position.y and capstone.position.y > first.position.y, "tier 1 at the top, capstone at the bottom")
+	check(view.links().any(func(link: Array) -> bool: return link[0] == &"war_b_whirlwind" and link[2]), "explicit prerequisite drawn as a line")
+	check(view.links().size() > 6, "tier progression lines between the rows")
+	check(capstone.tooltip_text.contains("Requires 30 points") and capstone.tooltip_text.contains("Cannot learn"), "lock reason in the tooltip: %s" % capstone.tooltip_text)
+	capstone.mouse_entered.emit()
+	await get_tree().process_frame
+	var details := panel.find_child("TalentDetails", true, false)
+	check(_labels(details).contains("Unbound Fury") and _labels(details).contains("Locked:"), "hover shows the node in the details bar")
+	check(panel.find_child("TreeScroll", true, false) is ScrollContainer, "the tree row scrolls by itself when space is short")
