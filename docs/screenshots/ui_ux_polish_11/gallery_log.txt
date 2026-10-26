@@ -1,0 +1,1279 @@
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   1080p_100 title layout ()
+screenshot 1080p_100_title.png
+CHECK OK   1080p_100 hud layout ()
+CHECK OK   1080p_100 hud HUD without overlaps ()
+screenshot 1080p_100_hud.png
+CHECK OK   1080p_100 hud_combat layout ()
+CHECK OK   1080p_100 hud_combat HUD without overlaps ()
+screenshot 1080p_100_hud_combat.png
+CHECK OK   1080p_100 hud_boss layout ()
+CHECK OK   1080p_100 hud_boss HUD without overlaps ()
+screenshot 1080p_100_hud_boss.png
+CHECK OK   1080p_100 hud_death layout ()
+CHECK OK   1080p_100 hud_death HUD without overlaps ()
+screenshot 1080p_100_hud_death.png
+CHECK OK   1080p_100 inventory window open
+CHECK OK   1080p_100 inventory layout ()
+CHECK OK   1080p_100 inventory HUD without overlaps ()
+screenshot 1080p_100_inventory.png
+CHECK OK   1080p_100 inventory_tooltip window open
+CHECK OK   1080p_100 inventory_tooltip layout ()
+CHECK OK   1080p_100 inventory_tooltip HUD without overlaps ()
+screenshot 1080p_100_inventory_tooltip.png
+CHECK OK   1080p_100 character window open
+CHECK OK   1080p_100 character layout ()
+CHECK OK   1080p_100 character HUD without overlaps ()
+screenshot 1080p_100_character.png
+CHECK OK   1080p_100 classes window open
+CHECK OK   1080p_100 classes layout ()
+CHECK OK   1080p_100 classes HUD without overlaps ()
+screenshot 1080p_100_classes.png
+CHECK OK   1080p_100 classes_locked window open
+CHECK OK   1080p_100 classes_locked layout ()
+CHECK OK   1080p_100 classes_locked HUD without overlaps ()
+screenshot 1080p_100_classes_locked.png
+CHECK OK   1080p_100 talents window open
+CHECK OK   1080p_100 talents layout ()
+CHECK OK   1080p_100 talents HUD without overlaps ()
+screenshot 1080p_100_talents.png
+CHECK OK   1080p_100 talents_full window open
+CHECK OK   1080p_100 talents_full layout ()
+CHECK OK   1080p_100 talents_full HUD without overlaps ()
+screenshot 1080p_100_talents_full.png
+CHECK OK   1080p_100 skills window open
+CHECK OK   1080p_100 skills layout ()
+CHECK OK   1080p_100 skills HUD without overlaps ()
+screenshot 1080p_100_skills.png
+CHECK OK   1080p_100 presets window open
+CHECK OK   1080p_100 presets layout ()
+CHECK OK   1080p_100 presets HUD without overlaps ()
+screenshot 1080p_100_presets.png
+CHECK OK   1080p_100 forge_imprint window open
+CHECK OK   1080p_100 forge_imprint layout ()
+CHECK OK   1080p_100 forge_imprint HUD without overlaps ()
+screenshot 1080p_100_forge_imprint.png
+CHECK OK   1080p_100 forge_affixes window open
+CHECK OK   1080p_100 forge_affixes layout ()
+CHECK OK   1080p_100 forge_affixes HUD without overlaps ()
+screenshot 1080p_100_forge_affixes.png
+CHECK OK   1080p_100 forge_reforge window open
+CHECK OK   1080p_100 forge_reforge layout ()
+CHECK OK   1080p_100 forge_reforge HUD without overlaps ()
+screenshot 1080p_100_forge_reforge.png
+CHECK OK   1080p_100 forge_essences window open
+CHECK OK   1080p_100 forge_essences layout ()
+CHECK OK   1080p_100 forge_essences HUD without overlaps ()
+screenshot 1080p_100_forge_essences.png
+CHECK OK   1080p_100 forge_sockets window open
+CHECK OK   1080p_100 forge_sockets layout ()
+CHECK OK   1080p_100 forge_sockets HUD without overlaps ()
+screenshot 1080p_100_forge_sockets.png
+CHECK OK   1080p_100 forge_quality window open
+CHECK OK   1080p_100 forge_quality layout ()
+CHECK OK   1080p_100 forge_quality HUD without overlaps ()
+screenshot 1080p_100_forge_quality.png
+CHECK OK   1080p_100 forge_evolution window open
+CHECK OK   1080p_100 forge_evolution layout ()
+CHECK OK   1080p_100 forge_evolution HUD without overlaps ()
+screenshot 1080p_100_forge_evolution.png
+CHECK OK   1080p_100 forge_craft window open
+CHECK OK   1080p_100 forge_craft layout ()
+CHECK OK   1080p_100 forge_craft HUD without overlaps ()
+screenshot 1080p_100_forge_craft.png
+CHECK OK   1080p_100 recipes window open
+CHECK OK   1080p_100 recipes layout ()
+CHECK OK   1080p_100 recipes HUD without overlaps ()
+screenshot 1080p_100_recipes.png
+CHECK OK   1080p_100 restoration window open
+CHECK OK   1080p_100 restoration layout ()
+CHECK OK   1080p_100 restoration HUD without overlaps ()
+screenshot 1080p_100_restoration.png
+CHECK OK   1080p_100 dialogue window open
+CHECK OK   1080p_100 dialogue layout ()
+CHECK OK   1080p_100 dialogue HUD without overlaps ()
+screenshot 1080p_100_dialogue.png
+CHECK OK   1080p_100 choice window open
+CHECK OK   1080p_100 choice layout ()
+CHECK OK   1080p_100 choice HUD without overlaps ()
+screenshot 1080p_100_choice.png
+CHECK OK   1080p_100 waystones window open
+CHECK OK   1080p_100 waystones layout ()
+CHECK OK   1080p_100 waystones HUD without overlaps ()
+screenshot 1080p_100_waystones.png
+CHECK OK   1080p_100 journal window open
+CHECK OK   1080p_100 journal layout ()
+CHECK OK   1080p_100 journal HUD without overlaps ()
+screenshot 1080p_100_journal.png
+CHECK OK   1080p_100 journal_haven window open
+CHECK OK   1080p_100 journal_haven layout ()
+CHECK OK   1080p_100 journal_haven HUD without overlaps ()
+screenshot 1080p_100_journal_haven.png
+CHECK OK   1080p_100 map window open
+CHECK OK   1080p_100 map layout ()
+CHECK OK   1080p_100 map HUD without overlaps ()
+screenshot 1080p_100_map.png
+CHECK OK   1080p_100 pause window open
+CHECK OK   1080p_100 pause layout ()
+CHECK OK   1080p_100 pause HUD without overlaps ()
+screenshot 1080p_100_pause.png
+CHECK OK   1080p_100 save window open
+CHECK OK   1080p_100 save layout ()
+CHECK OK   1080p_100 save HUD without overlaps ()
+screenshot 1080p_100_save.png
+CHECK OK   1080p_100 load window open
+CHECK OK   1080p_100 load layout ()
+CHECK OK   1080p_100 load HUD without overlaps ()
+screenshot 1080p_100_load.png
+CHECK OK   1080p_100 options window open
+CHECK OK   1080p_100 options layout ()
+CHECK OK   1080p_100 options HUD without overlaps ()
+screenshot 1080p_100_options.png
+CHECK OK   1080p_100 confirm window open
+CHECK OK   1080p_100 confirm layout ()
+CHECK OK   1080p_100 confirm HUD without overlaps ()
+screenshot 1080p_100_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   1080p_150 title layout ()
+screenshot 1080p_150_title.png
+CHECK OK   1080p_150 hud layout ()
+CHECK OK   1080p_150 hud HUD without overlaps ()
+screenshot 1080p_150_hud.png
+CHECK OK   1080p_150 hud_combat layout ()
+CHECK OK   1080p_150 hud_combat HUD without overlaps ()
+screenshot 1080p_150_hud_combat.png
+CHECK OK   1080p_150 hud_boss layout ()
+CHECK OK   1080p_150 hud_boss HUD without overlaps ()
+screenshot 1080p_150_hud_boss.png
+CHECK OK   1080p_150 hud_death layout ()
+CHECK OK   1080p_150 hud_death HUD without overlaps ()
+screenshot 1080p_150_hud_death.png
+CHECK OK   1080p_150 inventory window open
+CHECK OK   1080p_150 inventory layout ()
+CHECK OK   1080p_150 inventory HUD without overlaps ()
+screenshot 1080p_150_inventory.png
+CHECK OK   1080p_150 inventory_tooltip window open
+CHECK OK   1080p_150 inventory_tooltip layout ()
+CHECK OK   1080p_150 inventory_tooltip HUD without overlaps ()
+screenshot 1080p_150_inventory_tooltip.png
+CHECK OK   1080p_150 character window open
+CHECK OK   1080p_150 character layout ()
+CHECK OK   1080p_150 character HUD without overlaps ()
+screenshot 1080p_150_character.png
+CHECK OK   1080p_150 classes window open
+CHECK OK   1080p_150 classes layout ()
+CHECK OK   1080p_150 classes HUD without overlaps ()
+screenshot 1080p_150_classes.png
+CHECK OK   1080p_150 classes_locked window open
+CHECK OK   1080p_150 classes_locked layout ()
+CHECK OK   1080p_150 classes_locked HUD without overlaps ()
+screenshot 1080p_150_classes_locked.png
+CHECK OK   1080p_150 talents window open
+CHECK OK   1080p_150 talents layout ()
+CHECK OK   1080p_150 talents HUD without overlaps ()
+screenshot 1080p_150_talents.png
+CHECK OK   1080p_150 talents_full window open
+CHECK OK   1080p_150 talents_full layout ()
+CHECK OK   1080p_150 talents_full HUD without overlaps ()
+screenshot 1080p_150_talents_full.png
+CHECK OK   1080p_150 skills window open
+CHECK OK   1080p_150 skills layout ()
+CHECK OK   1080p_150 skills HUD without overlaps ()
+screenshot 1080p_150_skills.png
+CHECK OK   1080p_150 presets window open
+CHECK OK   1080p_150 presets layout ()
+CHECK OK   1080p_150 presets HUD without overlaps ()
+screenshot 1080p_150_presets.png
+CHECK OK   1080p_150 forge_imprint window open
+CHECK OK   1080p_150 forge_imprint layout ()
+CHECK OK   1080p_150 forge_imprint HUD without overlaps ()
+screenshot 1080p_150_forge_imprint.png
+CHECK OK   1080p_150 forge_affixes window open
+CHECK OK   1080p_150 forge_affixes layout ()
+CHECK OK   1080p_150 forge_affixes HUD without overlaps ()
+screenshot 1080p_150_forge_affixes.png
+CHECK OK   1080p_150 forge_reforge window open
+CHECK OK   1080p_150 forge_reforge layout ()
+CHECK OK   1080p_150 forge_reforge HUD without overlaps ()
+screenshot 1080p_150_forge_reforge.png
+CHECK OK   1080p_150 forge_essences window open
+CHECK OK   1080p_150 forge_essences layout ()
+CHECK OK   1080p_150 forge_essences HUD without overlaps ()
+screenshot 1080p_150_forge_essences.png
+CHECK OK   1080p_150 forge_sockets window open
+CHECK OK   1080p_150 forge_sockets layout ()
+CHECK OK   1080p_150 forge_sockets HUD without overlaps ()
+screenshot 1080p_150_forge_sockets.png
+CHECK OK   1080p_150 forge_quality window open
+CHECK OK   1080p_150 forge_quality layout ()
+CHECK OK   1080p_150 forge_quality HUD without overlaps ()
+screenshot 1080p_150_forge_quality.png
+CHECK OK   1080p_150 forge_evolution window open
+CHECK OK   1080p_150 forge_evolution layout ()
+CHECK OK   1080p_150 forge_evolution HUD without overlaps ()
+screenshot 1080p_150_forge_evolution.png
+CHECK OK   1080p_150 forge_craft window open
+CHECK OK   1080p_150 forge_craft layout ()
+CHECK OK   1080p_150 forge_craft HUD without overlaps ()
+screenshot 1080p_150_forge_craft.png
+CHECK OK   1080p_150 recipes window open
+CHECK OK   1080p_150 recipes layout ()
+CHECK OK   1080p_150 recipes HUD without overlaps ()
+screenshot 1080p_150_recipes.png
+CHECK OK   1080p_150 restoration window open
+CHECK OK   1080p_150 restoration layout ()
+CHECK OK   1080p_150 restoration HUD without overlaps ()
+screenshot 1080p_150_restoration.png
+CHECK OK   1080p_150 dialogue window open
+CHECK OK   1080p_150 dialogue layout ()
+CHECK OK   1080p_150 dialogue HUD without overlaps ()
+screenshot 1080p_150_dialogue.png
+CHECK OK   1080p_150 choice window open
+CHECK OK   1080p_150 choice layout ()
+CHECK OK   1080p_150 choice HUD without overlaps ()
+screenshot 1080p_150_choice.png
+CHECK OK   1080p_150 waystones window open
+CHECK OK   1080p_150 waystones layout ()
+CHECK OK   1080p_150 waystones HUD without overlaps ()
+screenshot 1080p_150_waystones.png
+CHECK OK   1080p_150 journal window open
+CHECK OK   1080p_150 journal layout ()
+CHECK OK   1080p_150 journal HUD without overlaps ()
+screenshot 1080p_150_journal.png
+CHECK OK   1080p_150 journal_haven window open
+CHECK OK   1080p_150 journal_haven layout ()
+CHECK OK   1080p_150 journal_haven HUD without overlaps ()
+screenshot 1080p_150_journal_haven.png
+CHECK OK   1080p_150 map window open
+CHECK OK   1080p_150 map layout ()
+CHECK OK   1080p_150 map HUD without overlaps ()
+screenshot 1080p_150_map.png
+CHECK OK   1080p_150 pause window open
+CHECK OK   1080p_150 pause layout ()
+CHECK OK   1080p_150 pause HUD without overlaps ()
+screenshot 1080p_150_pause.png
+CHECK OK   1080p_150 save window open
+CHECK OK   1080p_150 save layout ()
+CHECK OK   1080p_150 save HUD without overlaps ()
+screenshot 1080p_150_save.png
+CHECK OK   1080p_150 load window open
+CHECK OK   1080p_150 load layout ()
+CHECK OK   1080p_150 load HUD without overlaps ()
+screenshot 1080p_150_load.png
+CHECK OK   1080p_150 options window open
+CHECK OK   1080p_150 options layout ()
+CHECK OK   1080p_150 options HUD without overlaps ()
+screenshot 1080p_150_options.png
+CHECK OK   1080p_150 confirm window open
+CHECK OK   1080p_150 confirm layout ()
+CHECK OK   1080p_150 confirm HUD without overlaps ()
+screenshot 1080p_150_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   1080p_200 title layout ()
+screenshot 1080p_200_title.png
+CHECK OK   1080p_200 hud layout ()
+CHECK OK   1080p_200 hud HUD without overlaps ()
+screenshot 1080p_200_hud.png
+CHECK OK   1080p_200 hud_combat layout ()
+CHECK OK   1080p_200 hud_combat HUD without overlaps ()
+screenshot 1080p_200_hud_combat.png
+CHECK OK   1080p_200 hud_boss layout ()
+CHECK OK   1080p_200 hud_boss HUD without overlaps ()
+screenshot 1080p_200_hud_boss.png
+CHECK OK   1080p_200 hud_death layout ()
+CHECK OK   1080p_200 hud_death HUD without overlaps ()
+screenshot 1080p_200_hud_death.png
+CHECK OK   1080p_200 inventory window open
+CHECK OK   1080p_200 inventory layout ()
+CHECK OK   1080p_200 inventory HUD without overlaps ()
+screenshot 1080p_200_inventory.png
+CHECK OK   1080p_200 inventory_tooltip window open
+CHECK OK   1080p_200 inventory_tooltip layout ()
+CHECK OK   1080p_200 inventory_tooltip HUD without overlaps ()
+screenshot 1080p_200_inventory_tooltip.png
+CHECK OK   1080p_200 character window open
+CHECK OK   1080p_200 character layout ()
+CHECK OK   1080p_200 character HUD without overlaps ()
+screenshot 1080p_200_character.png
+CHECK OK   1080p_200 classes window open
+CHECK OK   1080p_200 classes layout ()
+CHECK OK   1080p_200 classes HUD without overlaps ()
+screenshot 1080p_200_classes.png
+CHECK OK   1080p_200 classes_locked window open
+CHECK OK   1080p_200 classes_locked layout ()
+CHECK OK   1080p_200 classes_locked HUD without overlaps ()
+screenshot 1080p_200_classes_locked.png
+CHECK OK   1080p_200 talents window open
+CHECK OK   1080p_200 talents layout ()
+CHECK OK   1080p_200 talents HUD without overlaps ()
+screenshot 1080p_200_talents.png
+CHECK OK   1080p_200 talents_full window open
+CHECK OK   1080p_200 talents_full layout ()
+CHECK OK   1080p_200 talents_full HUD without overlaps ()
+screenshot 1080p_200_talents_full.png
+CHECK OK   1080p_200 skills window open
+CHECK OK   1080p_200 skills layout ()
+CHECK OK   1080p_200 skills HUD without overlaps ()
+screenshot 1080p_200_skills.png
+CHECK OK   1080p_200 presets window open
+CHECK OK   1080p_200 presets layout ()
+CHECK OK   1080p_200 presets HUD without overlaps ()
+screenshot 1080p_200_presets.png
+CHECK OK   1080p_200 forge_imprint window open
+CHECK OK   1080p_200 forge_imprint layout ()
+CHECK OK   1080p_200 forge_imprint HUD without overlaps ()
+screenshot 1080p_200_forge_imprint.png
+CHECK OK   1080p_200 forge_affixes window open
+CHECK OK   1080p_200 forge_affixes layout ()
+CHECK OK   1080p_200 forge_affixes HUD without overlaps ()
+screenshot 1080p_200_forge_affixes.png
+CHECK OK   1080p_200 forge_reforge window open
+CHECK OK   1080p_200 forge_reforge layout ()
+CHECK OK   1080p_200 forge_reforge HUD without overlaps ()
+screenshot 1080p_200_forge_reforge.png
+CHECK OK   1080p_200 forge_essences window open
+CHECK OK   1080p_200 forge_essences layout ()
+CHECK OK   1080p_200 forge_essences HUD without overlaps ()
+screenshot 1080p_200_forge_essences.png
+CHECK OK   1080p_200 forge_sockets window open
+CHECK OK   1080p_200 forge_sockets layout ()
+CHECK OK   1080p_200 forge_sockets HUD without overlaps ()
+screenshot 1080p_200_forge_sockets.png
+CHECK OK   1080p_200 forge_quality window open
+CHECK OK   1080p_200 forge_quality layout ()
+CHECK OK   1080p_200 forge_quality HUD without overlaps ()
+screenshot 1080p_200_forge_quality.png
+CHECK OK   1080p_200 forge_evolution window open
+CHECK OK   1080p_200 forge_evolution layout ()
+CHECK OK   1080p_200 forge_evolution HUD without overlaps ()
+screenshot 1080p_200_forge_evolution.png
+CHECK OK   1080p_200 forge_craft window open
+CHECK OK   1080p_200 forge_craft layout ()
+CHECK OK   1080p_200 forge_craft HUD without overlaps ()
+screenshot 1080p_200_forge_craft.png
+CHECK OK   1080p_200 recipes window open
+CHECK OK   1080p_200 recipes layout ()
+CHECK OK   1080p_200 recipes HUD without overlaps ()
+screenshot 1080p_200_recipes.png
+CHECK OK   1080p_200 restoration window open
+CHECK OK   1080p_200 restoration layout ()
+CHECK OK   1080p_200 restoration HUD without overlaps ()
+screenshot 1080p_200_restoration.png
+CHECK OK   1080p_200 dialogue window open
+CHECK OK   1080p_200 dialogue layout ()
+CHECK OK   1080p_200 dialogue HUD without overlaps ()
+screenshot 1080p_200_dialogue.png
+CHECK OK   1080p_200 choice window open
+CHECK OK   1080p_200 choice layout ()
+CHECK OK   1080p_200 choice HUD without overlaps ()
+screenshot 1080p_200_choice.png
+CHECK OK   1080p_200 waystones window open
+CHECK OK   1080p_200 waystones layout ()
+CHECK OK   1080p_200 waystones HUD without overlaps ()
+screenshot 1080p_200_waystones.png
+CHECK OK   1080p_200 journal window open
+CHECK OK   1080p_200 journal layout ()
+CHECK OK   1080p_200 journal HUD without overlaps ()
+screenshot 1080p_200_journal.png
+CHECK OK   1080p_200 journal_haven window open
+CHECK OK   1080p_200 journal_haven layout ()
+CHECK OK   1080p_200 journal_haven HUD without overlaps ()
+screenshot 1080p_200_journal_haven.png
+CHECK OK   1080p_200 map window open
+CHECK OK   1080p_200 map layout ()
+CHECK OK   1080p_200 map HUD without overlaps ()
+screenshot 1080p_200_map.png
+CHECK OK   1080p_200 pause window open
+CHECK OK   1080p_200 pause layout ()
+CHECK OK   1080p_200 pause HUD without overlaps ()
+screenshot 1080p_200_pause.png
+CHECK OK   1080p_200 save window open
+CHECK OK   1080p_200 save layout ()
+CHECK OK   1080p_200 save HUD without overlaps ()
+screenshot 1080p_200_save.png
+CHECK OK   1080p_200 load window open
+CHECK OK   1080p_200 load layout ()
+CHECK OK   1080p_200 load HUD without overlaps ()
+screenshot 1080p_200_load.png
+CHECK OK   1080p_200 options window open
+CHECK OK   1080p_200 options layout ()
+CHECK OK   1080p_200 options HUD without overlaps ()
+screenshot 1080p_200_options.png
+CHECK OK   1080p_200 confirm window open
+CHECK OK   1080p_200 confirm layout ()
+CHECK OK   1080p_200 confirm HUD without overlaps ()
+screenshot 1080p_200_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   2160p_100 title layout ()
+screenshot 2160p_100_title.png
+CHECK OK   2160p_100 hud layout ()
+CHECK OK   2160p_100 hud HUD without overlaps ()
+screenshot 2160p_100_hud.png
+CHECK OK   2160p_100 hud_combat layout ()
+CHECK OK   2160p_100 hud_combat HUD without overlaps ()
+screenshot 2160p_100_hud_combat.png
+CHECK OK   2160p_100 hud_boss layout ()
+CHECK OK   2160p_100 hud_boss HUD without overlaps ()
+screenshot 2160p_100_hud_boss.png
+CHECK OK   2160p_100 hud_death layout ()
+CHECK OK   2160p_100 hud_death HUD without overlaps ()
+screenshot 2160p_100_hud_death.png
+CHECK OK   2160p_100 inventory window open
+CHECK OK   2160p_100 inventory layout ()
+CHECK OK   2160p_100 inventory HUD without overlaps ()
+screenshot 2160p_100_inventory.png
+CHECK OK   2160p_100 inventory_tooltip window open
+CHECK OK   2160p_100 inventory_tooltip layout ()
+CHECK OK   2160p_100 inventory_tooltip HUD without overlaps ()
+screenshot 2160p_100_inventory_tooltip.png
+CHECK OK   2160p_100 character window open
+CHECK OK   2160p_100 character layout ()
+CHECK OK   2160p_100 character HUD without overlaps ()
+screenshot 2160p_100_character.png
+CHECK OK   2160p_100 classes window open
+CHECK OK   2160p_100 classes layout ()
+CHECK OK   2160p_100 classes HUD without overlaps ()
+screenshot 2160p_100_classes.png
+CHECK OK   2160p_100 classes_locked window open
+CHECK OK   2160p_100 classes_locked layout ()
+CHECK OK   2160p_100 classes_locked HUD without overlaps ()
+screenshot 2160p_100_classes_locked.png
+CHECK OK   2160p_100 talents window open
+CHECK OK   2160p_100 talents layout ()
+CHECK OK   2160p_100 talents HUD without overlaps ()
+screenshot 2160p_100_talents.png
+CHECK OK   2160p_100 talents_full window open
+CHECK OK   2160p_100 talents_full layout ()
+CHECK OK   2160p_100 talents_full HUD without overlaps ()
+screenshot 2160p_100_talents_full.png
+CHECK OK   2160p_100 skills window open
+CHECK OK   2160p_100 skills layout ()
+CHECK OK   2160p_100 skills HUD without overlaps ()
+screenshot 2160p_100_skills.png
+CHECK OK   2160p_100 presets window open
+CHECK OK   2160p_100 presets layout ()
+CHECK OK   2160p_100 presets HUD without overlaps ()
+screenshot 2160p_100_presets.png
+CHECK OK   2160p_100 forge_imprint window open
+CHECK OK   2160p_100 forge_imprint layout ()
+CHECK OK   2160p_100 forge_imprint HUD without overlaps ()
+screenshot 2160p_100_forge_imprint.png
+CHECK OK   2160p_100 forge_affixes window open
+CHECK OK   2160p_100 forge_affixes layout ()
+CHECK OK   2160p_100 forge_affixes HUD without overlaps ()
+screenshot 2160p_100_forge_affixes.png
+CHECK OK   2160p_100 forge_reforge window open
+CHECK OK   2160p_100 forge_reforge layout ()
+CHECK OK   2160p_100 forge_reforge HUD without overlaps ()
+screenshot 2160p_100_forge_reforge.png
+CHECK OK   2160p_100 forge_essences window open
+CHECK OK   2160p_100 forge_essences layout ()
+CHECK OK   2160p_100 forge_essences HUD without overlaps ()
+screenshot 2160p_100_forge_essences.png
+CHECK OK   2160p_100 forge_sockets window open
+CHECK OK   2160p_100 forge_sockets layout ()
+CHECK OK   2160p_100 forge_sockets HUD without overlaps ()
+screenshot 2160p_100_forge_sockets.png
+CHECK OK   2160p_100 forge_quality window open
+CHECK OK   2160p_100 forge_quality layout ()
+CHECK OK   2160p_100 forge_quality HUD without overlaps ()
+screenshot 2160p_100_forge_quality.png
+CHECK OK   2160p_100 forge_evolution window open
+CHECK OK   2160p_100 forge_evolution layout ()
+CHECK OK   2160p_100 forge_evolution HUD without overlaps ()
+screenshot 2160p_100_forge_evolution.png
+CHECK OK   2160p_100 forge_craft window open
+CHECK OK   2160p_100 forge_craft layout ()
+CHECK OK   2160p_100 forge_craft HUD without overlaps ()
+screenshot 2160p_100_forge_craft.png
+CHECK OK   2160p_100 recipes window open
+CHECK OK   2160p_100 recipes layout ()
+CHECK OK   2160p_100 recipes HUD without overlaps ()
+screenshot 2160p_100_recipes.png
+CHECK OK   2160p_100 restoration window open
+CHECK OK   2160p_100 restoration layout ()
+CHECK OK   2160p_100 restoration HUD without overlaps ()
+screenshot 2160p_100_restoration.png
+CHECK OK   2160p_100 dialogue window open
+CHECK OK   2160p_100 dialogue layout ()
+CHECK OK   2160p_100 dialogue HUD without overlaps ()
+screenshot 2160p_100_dialogue.png
+CHECK OK   2160p_100 choice window open
+CHECK OK   2160p_100 choice layout ()
+CHECK OK   2160p_100 choice HUD without overlaps ()
+screenshot 2160p_100_choice.png
+CHECK OK   2160p_100 waystones window open
+CHECK OK   2160p_100 waystones layout ()
+CHECK OK   2160p_100 waystones HUD without overlaps ()
+screenshot 2160p_100_waystones.png
+CHECK OK   2160p_100 journal window open
+CHECK OK   2160p_100 journal layout ()
+CHECK OK   2160p_100 journal HUD without overlaps ()
+screenshot 2160p_100_journal.png
+CHECK OK   2160p_100 journal_haven window open
+CHECK OK   2160p_100 journal_haven layout ()
+CHECK OK   2160p_100 journal_haven HUD without overlaps ()
+screenshot 2160p_100_journal_haven.png
+CHECK OK   2160p_100 map window open
+CHECK OK   2160p_100 map layout ()
+CHECK OK   2160p_100 map HUD without overlaps ()
+screenshot 2160p_100_map.png
+CHECK OK   2160p_100 pause window open
+CHECK OK   2160p_100 pause layout ()
+CHECK OK   2160p_100 pause HUD without overlaps ()
+screenshot 2160p_100_pause.png
+CHECK OK   2160p_100 save window open
+CHECK OK   2160p_100 save layout ()
+CHECK OK   2160p_100 save HUD without overlaps ()
+screenshot 2160p_100_save.png
+CHECK OK   2160p_100 load window open
+CHECK OK   2160p_100 load layout ()
+CHECK OK   2160p_100 load HUD without overlaps ()
+screenshot 2160p_100_load.png
+CHECK OK   2160p_100 options window open
+CHECK OK   2160p_100 options layout ()
+CHECK OK   2160p_100 options HUD without overlaps ()
+screenshot 2160p_100_options.png
+CHECK OK   2160p_100 confirm window open
+CHECK OK   2160p_100 confirm layout ()
+CHECK OK   2160p_100 confirm HUD without overlaps ()
+screenshot 2160p_100_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   2160p_150 title layout ()
+screenshot 2160p_150_title.png
+CHECK OK   2160p_150 hud layout ()
+CHECK OK   2160p_150 hud HUD without overlaps ()
+screenshot 2160p_150_hud.png
+CHECK OK   2160p_150 hud_combat layout ()
+CHECK OK   2160p_150 hud_combat HUD without overlaps ()
+screenshot 2160p_150_hud_combat.png
+CHECK OK   2160p_150 hud_boss layout ()
+CHECK OK   2160p_150 hud_boss HUD without overlaps ()
+screenshot 2160p_150_hud_boss.png
+CHECK OK   2160p_150 hud_death layout ()
+CHECK OK   2160p_150 hud_death HUD without overlaps ()
+screenshot 2160p_150_hud_death.png
+CHECK OK   2160p_150 inventory window open
+CHECK OK   2160p_150 inventory layout ()
+CHECK OK   2160p_150 inventory HUD without overlaps ()
+screenshot 2160p_150_inventory.png
+CHECK OK   2160p_150 inventory_tooltip window open
+CHECK OK   2160p_150 inventory_tooltip layout ()
+CHECK OK   2160p_150 inventory_tooltip HUD without overlaps ()
+screenshot 2160p_150_inventory_tooltip.png
+CHECK OK   2160p_150 character window open
+CHECK OK   2160p_150 character layout ()
+CHECK OK   2160p_150 character HUD without overlaps ()
+screenshot 2160p_150_character.png
+CHECK OK   2160p_150 classes window open
+CHECK OK   2160p_150 classes layout ()
+CHECK OK   2160p_150 classes HUD without overlaps ()
+screenshot 2160p_150_classes.png
+CHECK OK   2160p_150 classes_locked window open
+CHECK OK   2160p_150 classes_locked layout ()
+CHECK OK   2160p_150 classes_locked HUD without overlaps ()
+screenshot 2160p_150_classes_locked.png
+CHECK OK   2160p_150 talents window open
+CHECK OK   2160p_150 talents layout ()
+CHECK OK   2160p_150 talents HUD without overlaps ()
+screenshot 2160p_150_talents.png
+CHECK OK   2160p_150 talents_full window open
+CHECK OK   2160p_150 talents_full layout ()
+CHECK OK   2160p_150 talents_full HUD without overlaps ()
+screenshot 2160p_150_talents_full.png
+CHECK OK   2160p_150 skills window open
+CHECK OK   2160p_150 skills layout ()
+CHECK OK   2160p_150 skills HUD without overlaps ()
+screenshot 2160p_150_skills.png
+CHECK OK   2160p_150 presets window open
+CHECK OK   2160p_150 presets layout ()
+CHECK OK   2160p_150 presets HUD without overlaps ()
+screenshot 2160p_150_presets.png
+CHECK OK   2160p_150 forge_imprint window open
+CHECK OK   2160p_150 forge_imprint layout ()
+CHECK OK   2160p_150 forge_imprint HUD without overlaps ()
+screenshot 2160p_150_forge_imprint.png
+CHECK OK   2160p_150 forge_affixes window open
+CHECK OK   2160p_150 forge_affixes layout ()
+CHECK OK   2160p_150 forge_affixes HUD without overlaps ()
+screenshot 2160p_150_forge_affixes.png
+CHECK OK   2160p_150 forge_reforge window open
+CHECK OK   2160p_150 forge_reforge layout ()
+CHECK OK   2160p_150 forge_reforge HUD without overlaps ()
+screenshot 2160p_150_forge_reforge.png
+CHECK OK   2160p_150 forge_essences window open
+CHECK OK   2160p_150 forge_essences layout ()
+CHECK OK   2160p_150 forge_essences HUD without overlaps ()
+screenshot 2160p_150_forge_essences.png
+CHECK OK   2160p_150 forge_sockets window open
+CHECK OK   2160p_150 forge_sockets layout ()
+CHECK OK   2160p_150 forge_sockets HUD without overlaps ()
+screenshot 2160p_150_forge_sockets.png
+CHECK OK   2160p_150 forge_quality window open
+CHECK OK   2160p_150 forge_quality layout ()
+CHECK OK   2160p_150 forge_quality HUD without overlaps ()
+screenshot 2160p_150_forge_quality.png
+CHECK OK   2160p_150 forge_evolution window open
+CHECK OK   2160p_150 forge_evolution layout ()
+CHECK OK   2160p_150 forge_evolution HUD without overlaps ()
+screenshot 2160p_150_forge_evolution.png
+CHECK OK   2160p_150 forge_craft window open
+CHECK OK   2160p_150 forge_craft layout ()
+CHECK OK   2160p_150 forge_craft HUD without overlaps ()
+screenshot 2160p_150_forge_craft.png
+CHECK OK   2160p_150 recipes window open
+CHECK OK   2160p_150 recipes layout ()
+CHECK OK   2160p_150 recipes HUD without overlaps ()
+screenshot 2160p_150_recipes.png
+CHECK OK   2160p_150 restoration window open
+CHECK OK   2160p_150 restoration layout ()
+CHECK OK   2160p_150 restoration HUD without overlaps ()
+screenshot 2160p_150_restoration.png
+CHECK OK   2160p_150 dialogue window open
+CHECK OK   2160p_150 dialogue layout ()
+CHECK OK   2160p_150 dialogue HUD without overlaps ()
+screenshot 2160p_150_dialogue.png
+CHECK OK   2160p_150 choice window open
+CHECK OK   2160p_150 choice layout ()
+CHECK OK   2160p_150 choice HUD without overlaps ()
+screenshot 2160p_150_choice.png
+CHECK OK   2160p_150 waystones window open
+CHECK OK   2160p_150 waystones layout ()
+CHECK OK   2160p_150 waystones HUD without overlaps ()
+screenshot 2160p_150_waystones.png
+CHECK OK   2160p_150 journal window open
+CHECK OK   2160p_150 journal layout ()
+CHECK OK   2160p_150 journal HUD without overlaps ()
+screenshot 2160p_150_journal.png
+CHECK OK   2160p_150 journal_haven window open
+CHECK OK   2160p_150 journal_haven layout ()
+CHECK OK   2160p_150 journal_haven HUD without overlaps ()
+screenshot 2160p_150_journal_haven.png
+CHECK OK   2160p_150 map window open
+CHECK OK   2160p_150 map layout ()
+CHECK OK   2160p_150 map HUD without overlaps ()
+screenshot 2160p_150_map.png
+CHECK OK   2160p_150 pause window open
+CHECK OK   2160p_150 pause layout ()
+CHECK OK   2160p_150 pause HUD without overlaps ()
+screenshot 2160p_150_pause.png
+CHECK OK   2160p_150 save window open
+CHECK OK   2160p_150 save layout ()
+CHECK OK   2160p_150 save HUD without overlaps ()
+screenshot 2160p_150_save.png
+CHECK OK   2160p_150 load window open
+CHECK OK   2160p_150 load layout ()
+CHECK OK   2160p_150 load HUD without overlaps ()
+screenshot 2160p_150_load.png
+CHECK OK   2160p_150 options window open
+CHECK OK   2160p_150 options layout ()
+CHECK OK   2160p_150 options HUD without overlaps ()
+screenshot 2160p_150_options.png
+CHECK OK   2160p_150 confirm window open
+CHECK OK   2160p_150 confirm layout ()
+CHECK OK   2160p_150 confirm HUD without overlaps ()
+screenshot 2160p_150_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   2160p_200 title layout ()
+screenshot 2160p_200_title.png
+CHECK OK   2160p_200 hud layout ()
+CHECK OK   2160p_200 hud HUD without overlaps ()
+screenshot 2160p_200_hud.png
+CHECK OK   2160p_200 hud_combat layout ()
+CHECK OK   2160p_200 hud_combat HUD without overlaps ()
+screenshot 2160p_200_hud_combat.png
+CHECK OK   2160p_200 hud_boss layout ()
+CHECK OK   2160p_200 hud_boss HUD without overlaps ()
+screenshot 2160p_200_hud_boss.png
+CHECK OK   2160p_200 hud_death layout ()
+CHECK OK   2160p_200 hud_death HUD without overlaps ()
+screenshot 2160p_200_hud_death.png
+CHECK OK   2160p_200 inventory window open
+CHECK OK   2160p_200 inventory layout ()
+CHECK OK   2160p_200 inventory HUD without overlaps ()
+screenshot 2160p_200_inventory.png
+CHECK OK   2160p_200 inventory_tooltip window open
+CHECK OK   2160p_200 inventory_tooltip layout ()
+CHECK OK   2160p_200 inventory_tooltip HUD without overlaps ()
+screenshot 2160p_200_inventory_tooltip.png
+CHECK OK   2160p_200 character window open
+CHECK OK   2160p_200 character layout ()
+CHECK OK   2160p_200 character HUD without overlaps ()
+screenshot 2160p_200_character.png
+CHECK OK   2160p_200 classes window open
+CHECK OK   2160p_200 classes layout ()
+CHECK OK   2160p_200 classes HUD without overlaps ()
+screenshot 2160p_200_classes.png
+CHECK OK   2160p_200 classes_locked window open
+CHECK OK   2160p_200 classes_locked layout ()
+CHECK OK   2160p_200 classes_locked HUD without overlaps ()
+screenshot 2160p_200_classes_locked.png
+CHECK OK   2160p_200 talents window open
+CHECK OK   2160p_200 talents layout ()
+CHECK OK   2160p_200 talents HUD without overlaps ()
+screenshot 2160p_200_talents.png
+CHECK OK   2160p_200 talents_full window open
+CHECK OK   2160p_200 talents_full layout ()
+CHECK OK   2160p_200 talents_full HUD without overlaps ()
+screenshot 2160p_200_talents_full.png
+CHECK OK   2160p_200 skills window open
+CHECK OK   2160p_200 skills layout ()
+CHECK OK   2160p_200 skills HUD without overlaps ()
+screenshot 2160p_200_skills.png
+CHECK OK   2160p_200 presets window open
+CHECK OK   2160p_200 presets layout ()
+CHECK OK   2160p_200 presets HUD without overlaps ()
+screenshot 2160p_200_presets.png
+CHECK OK   2160p_200 forge_imprint window open
+CHECK OK   2160p_200 forge_imprint layout ()
+CHECK OK   2160p_200 forge_imprint HUD without overlaps ()
+screenshot 2160p_200_forge_imprint.png
+CHECK OK   2160p_200 forge_affixes window open
+CHECK OK   2160p_200 forge_affixes layout ()
+CHECK OK   2160p_200 forge_affixes HUD without overlaps ()
+screenshot 2160p_200_forge_affixes.png
+CHECK OK   2160p_200 forge_reforge window open
+CHECK OK   2160p_200 forge_reforge layout ()
+CHECK OK   2160p_200 forge_reforge HUD without overlaps ()
+screenshot 2160p_200_forge_reforge.png
+CHECK OK   2160p_200 forge_essences window open
+CHECK OK   2160p_200 forge_essences layout ()
+CHECK OK   2160p_200 forge_essences HUD without overlaps ()
+screenshot 2160p_200_forge_essences.png
+CHECK OK   2160p_200 forge_sockets window open
+CHECK OK   2160p_200 forge_sockets layout ()
+CHECK OK   2160p_200 forge_sockets HUD without overlaps ()
+screenshot 2160p_200_forge_sockets.png
+CHECK OK   2160p_200 forge_quality window open
+CHECK OK   2160p_200 forge_quality layout ()
+CHECK OK   2160p_200 forge_quality HUD without overlaps ()
+screenshot 2160p_200_forge_quality.png
+CHECK OK   2160p_200 forge_evolution window open
+CHECK OK   2160p_200 forge_evolution layout ()
+CHECK OK   2160p_200 forge_evolution HUD without overlaps ()
+screenshot 2160p_200_forge_evolution.png
+CHECK OK   2160p_200 forge_craft window open
+CHECK OK   2160p_200 forge_craft layout ()
+CHECK OK   2160p_200 forge_craft HUD without overlaps ()
+screenshot 2160p_200_forge_craft.png
+CHECK OK   2160p_200 recipes window open
+CHECK OK   2160p_200 recipes layout ()
+CHECK OK   2160p_200 recipes HUD without overlaps ()
+screenshot 2160p_200_recipes.png
+CHECK OK   2160p_200 restoration window open
+CHECK OK   2160p_200 restoration layout ()
+CHECK OK   2160p_200 restoration HUD without overlaps ()
+screenshot 2160p_200_restoration.png
+CHECK OK   2160p_200 dialogue window open
+CHECK OK   2160p_200 dialogue layout ()
+CHECK OK   2160p_200 dialogue HUD without overlaps ()
+screenshot 2160p_200_dialogue.png
+CHECK OK   2160p_200 choice window open
+CHECK OK   2160p_200 choice layout ()
+CHECK OK   2160p_200 choice HUD without overlaps ()
+screenshot 2160p_200_choice.png
+CHECK OK   2160p_200 waystones window open
+CHECK OK   2160p_200 waystones layout ()
+CHECK OK   2160p_200 waystones HUD without overlaps ()
+screenshot 2160p_200_waystones.png
+CHECK OK   2160p_200 journal window open
+CHECK OK   2160p_200 journal layout ()
+CHECK OK   2160p_200 journal HUD without overlaps ()
+screenshot 2160p_200_journal.png
+CHECK OK   2160p_200 journal_haven window open
+CHECK OK   2160p_200 journal_haven layout ()
+CHECK OK   2160p_200 journal_haven HUD without overlaps ()
+screenshot 2160p_200_journal_haven.png
+CHECK OK   2160p_200 map window open
+CHECK OK   2160p_200 map layout ()
+CHECK OK   2160p_200 map HUD without overlaps ()
+screenshot 2160p_200_map.png
+CHECK OK   2160p_200 pause window open
+CHECK OK   2160p_200 pause layout ()
+CHECK OK   2160p_200 pause HUD without overlaps ()
+screenshot 2160p_200_pause.png
+CHECK OK   2160p_200 save window open
+CHECK OK   2160p_200 save layout ()
+CHECK OK   2160p_200 save HUD without overlaps ()
+screenshot 2160p_200_save.png
+CHECK OK   2160p_200 load window open
+CHECK OK   2160p_200 load layout ()
+CHECK OK   2160p_200 load HUD without overlaps ()
+screenshot 2160p_200_load.png
+CHECK OK   2160p_200 options window open
+CHECK OK   2160p_200 options layout ()
+CHECK OK   2160p_200 options HUD without overlaps ()
+screenshot 2160p_200_options.png
+CHECK OK   2160p_200 confirm window open
+CHECK OK   2160p_200 confirm layout ()
+CHECK OK   2160p_200 confirm HUD without overlaps ()
+screenshot 2160p_200_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   720p_100 title layout ()
+screenshot 720p_100_title.png
+CHECK OK   720p_100 hud layout ()
+CHECK OK   720p_100 hud HUD without overlaps ()
+screenshot 720p_100_hud.png
+CHECK OK   720p_100 hud_combat layout ()
+CHECK OK   720p_100 hud_combat HUD without overlaps ()
+screenshot 720p_100_hud_combat.png
+CHECK OK   720p_100 hud_boss layout ()
+CHECK OK   720p_100 hud_boss HUD without overlaps ()
+screenshot 720p_100_hud_boss.png
+CHECK OK   720p_100 hud_death layout ()
+CHECK OK   720p_100 hud_death HUD without overlaps ()
+screenshot 720p_100_hud_death.png
+CHECK OK   720p_100 inventory window open
+CHECK OK   720p_100 inventory layout ()
+CHECK OK   720p_100 inventory HUD without overlaps ()
+screenshot 720p_100_inventory.png
+CHECK OK   720p_100 inventory_tooltip window open
+CHECK OK   720p_100 inventory_tooltip layout ()
+CHECK OK   720p_100 inventory_tooltip HUD without overlaps ()
+screenshot 720p_100_inventory_tooltip.png
+CHECK OK   720p_100 character window open
+CHECK OK   720p_100 character layout ()
+CHECK OK   720p_100 character HUD without overlaps ()
+screenshot 720p_100_character.png
+CHECK OK   720p_100 classes window open
+CHECK OK   720p_100 classes layout ()
+CHECK OK   720p_100 classes HUD without overlaps ()
+screenshot 720p_100_classes.png
+CHECK OK   720p_100 classes_locked window open
+CHECK OK   720p_100 classes_locked layout ()
+CHECK OK   720p_100 classes_locked HUD without overlaps ()
+screenshot 720p_100_classes_locked.png
+CHECK OK   720p_100 talents window open
+CHECK OK   720p_100 talents layout ()
+CHECK OK   720p_100 talents HUD without overlaps ()
+screenshot 720p_100_talents.png
+CHECK OK   720p_100 talents_full window open
+CHECK OK   720p_100 talents_full layout ()
+CHECK OK   720p_100 talents_full HUD without overlaps ()
+screenshot 720p_100_talents_full.png
+CHECK OK   720p_100 skills window open
+CHECK OK   720p_100 skills layout ()
+CHECK OK   720p_100 skills HUD without overlaps ()
+screenshot 720p_100_skills.png
+CHECK OK   720p_100 presets window open
+CHECK OK   720p_100 presets layout ()
+CHECK OK   720p_100 presets HUD without overlaps ()
+screenshot 720p_100_presets.png
+CHECK OK   720p_100 forge_imprint window open
+CHECK OK   720p_100 forge_imprint layout ()
+CHECK OK   720p_100 forge_imprint HUD without overlaps ()
+screenshot 720p_100_forge_imprint.png
+CHECK OK   720p_100 forge_affixes window open
+CHECK OK   720p_100 forge_affixes layout ()
+CHECK OK   720p_100 forge_affixes HUD without overlaps ()
+screenshot 720p_100_forge_affixes.png
+CHECK OK   720p_100 forge_reforge window open
+CHECK OK   720p_100 forge_reforge layout ()
+CHECK OK   720p_100 forge_reforge HUD without overlaps ()
+screenshot 720p_100_forge_reforge.png
+CHECK OK   720p_100 forge_essences window open
+CHECK OK   720p_100 forge_essences layout ()
+CHECK OK   720p_100 forge_essences HUD without overlaps ()
+screenshot 720p_100_forge_essences.png
+CHECK OK   720p_100 forge_sockets window open
+CHECK OK   720p_100 forge_sockets layout ()
+CHECK OK   720p_100 forge_sockets HUD without overlaps ()
+screenshot 720p_100_forge_sockets.png
+CHECK OK   720p_100 forge_quality window open
+CHECK OK   720p_100 forge_quality layout ()
+CHECK OK   720p_100 forge_quality HUD without overlaps ()
+screenshot 720p_100_forge_quality.png
+CHECK OK   720p_100 forge_evolution window open
+CHECK OK   720p_100 forge_evolution layout ()
+CHECK OK   720p_100 forge_evolution HUD without overlaps ()
+screenshot 720p_100_forge_evolution.png
+CHECK OK   720p_100 forge_craft window open
+CHECK OK   720p_100 forge_craft layout ()
+CHECK OK   720p_100 forge_craft HUD without overlaps ()
+screenshot 720p_100_forge_craft.png
+CHECK OK   720p_100 recipes window open
+CHECK OK   720p_100 recipes layout ()
+CHECK OK   720p_100 recipes HUD without overlaps ()
+screenshot 720p_100_recipes.png
+CHECK OK   720p_100 restoration window open
+CHECK OK   720p_100 restoration layout ()
+CHECK OK   720p_100 restoration HUD without overlaps ()
+screenshot 720p_100_restoration.png
+CHECK OK   720p_100 dialogue window open
+CHECK OK   720p_100 dialogue layout ()
+CHECK OK   720p_100 dialogue HUD without overlaps ()
+screenshot 720p_100_dialogue.png
+CHECK OK   720p_100 choice window open
+CHECK OK   720p_100 choice layout ()
+CHECK OK   720p_100 choice HUD without overlaps ()
+screenshot 720p_100_choice.png
+CHECK OK   720p_100 waystones window open
+CHECK OK   720p_100 waystones layout ()
+CHECK OK   720p_100 waystones HUD without overlaps ()
+screenshot 720p_100_waystones.png
+CHECK OK   720p_100 journal window open
+CHECK OK   720p_100 journal layout ()
+CHECK OK   720p_100 journal HUD without overlaps ()
+screenshot 720p_100_journal.png
+CHECK OK   720p_100 journal_haven window open
+CHECK OK   720p_100 journal_haven layout ()
+CHECK OK   720p_100 journal_haven HUD without overlaps ()
+screenshot 720p_100_journal_haven.png
+CHECK OK   720p_100 map window open
+CHECK OK   720p_100 map layout ()
+CHECK OK   720p_100 map HUD without overlaps ()
+screenshot 720p_100_map.png
+CHECK OK   720p_100 pause window open
+CHECK OK   720p_100 pause layout ()
+CHECK OK   720p_100 pause HUD without overlaps ()
+screenshot 720p_100_pause.png
+CHECK OK   720p_100 save window open
+CHECK OK   720p_100 save layout ()
+CHECK OK   720p_100 save HUD without overlaps ()
+screenshot 720p_100_save.png
+CHECK OK   720p_100 load window open
+CHECK OK   720p_100 load layout ()
+CHECK OK   720p_100 load HUD without overlaps ()
+screenshot 720p_100_load.png
+CHECK OK   720p_100 options window open
+CHECK OK   720p_100 options layout ()
+CHECK OK   720p_100 options HUD without overlaps ()
+screenshot 720p_100_options.png
+CHECK OK   720p_100 confirm window open
+CHECK OK   720p_100 confirm layout ()
+CHECK OK   720p_100 confirm HUD without overlaps ()
+screenshot 720p_100_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   720p_150 title layout ()
+screenshot 720p_150_title.png
+CHECK OK   720p_150 hud layout ()
+CHECK OK   720p_150 hud HUD without overlaps ()
+screenshot 720p_150_hud.png
+CHECK OK   720p_150 hud_combat layout ()
+CHECK OK   720p_150 hud_combat HUD without overlaps ()
+screenshot 720p_150_hud_combat.png
+CHECK OK   720p_150 hud_boss layout ()
+CHECK OK   720p_150 hud_boss HUD without overlaps ()
+screenshot 720p_150_hud_boss.png
+CHECK OK   720p_150 hud_death layout ()
+CHECK OK   720p_150 hud_death HUD without overlaps ()
+screenshot 720p_150_hud_death.png
+CHECK OK   720p_150 inventory window open
+CHECK OK   720p_150 inventory layout ()
+CHECK OK   720p_150 inventory HUD without overlaps ()
+screenshot 720p_150_inventory.png
+CHECK OK   720p_150 inventory_tooltip window open
+CHECK OK   720p_150 inventory_tooltip layout ()
+CHECK OK   720p_150 inventory_tooltip HUD without overlaps ()
+screenshot 720p_150_inventory_tooltip.png
+CHECK OK   720p_150 character window open
+CHECK OK   720p_150 character layout ()
+CHECK OK   720p_150 character HUD without overlaps ()
+screenshot 720p_150_character.png
+CHECK OK   720p_150 classes window open
+CHECK OK   720p_150 classes layout ()
+CHECK OK   720p_150 classes HUD without overlaps ()
+screenshot 720p_150_classes.png
+CHECK OK   720p_150 classes_locked window open
+CHECK OK   720p_150 classes_locked layout ()
+CHECK OK   720p_150 classes_locked HUD without overlaps ()
+screenshot 720p_150_classes_locked.png
+CHECK OK   720p_150 talents window open
+CHECK OK   720p_150 talents layout ()
+CHECK OK   720p_150 talents HUD without overlaps ()
+screenshot 720p_150_talents.png
+CHECK OK   720p_150 talents_full window open
+CHECK OK   720p_150 talents_full layout ()
+CHECK OK   720p_150 talents_full HUD without overlaps ()
+screenshot 720p_150_talents_full.png
+CHECK OK   720p_150 skills window open
+CHECK OK   720p_150 skills layout ()
+CHECK OK   720p_150 skills HUD without overlaps ()
+screenshot 720p_150_skills.png
+CHECK OK   720p_150 presets window open
+CHECK OK   720p_150 presets layout ()
+CHECK OK   720p_150 presets HUD without overlaps ()
+screenshot 720p_150_presets.png
+CHECK OK   720p_150 forge_imprint window open
+CHECK OK   720p_150 forge_imprint layout ()
+CHECK OK   720p_150 forge_imprint HUD without overlaps ()
+screenshot 720p_150_forge_imprint.png
+CHECK OK   720p_150 forge_affixes window open
+CHECK OK   720p_150 forge_affixes layout ()
+CHECK OK   720p_150 forge_affixes HUD without overlaps ()
+screenshot 720p_150_forge_affixes.png
+CHECK OK   720p_150 forge_reforge window open
+CHECK OK   720p_150 forge_reforge layout ()
+CHECK OK   720p_150 forge_reforge HUD without overlaps ()
+screenshot 720p_150_forge_reforge.png
+CHECK OK   720p_150 forge_essences window open
+CHECK OK   720p_150 forge_essences layout ()
+CHECK OK   720p_150 forge_essences HUD without overlaps ()
+screenshot 720p_150_forge_essences.png
+CHECK OK   720p_150 forge_sockets window open
+CHECK OK   720p_150 forge_sockets layout ()
+CHECK OK   720p_150 forge_sockets HUD without overlaps ()
+screenshot 720p_150_forge_sockets.png
+CHECK OK   720p_150 forge_quality window open
+CHECK OK   720p_150 forge_quality layout ()
+CHECK OK   720p_150 forge_quality HUD without overlaps ()
+screenshot 720p_150_forge_quality.png
+CHECK OK   720p_150 forge_evolution window open
+CHECK OK   720p_150 forge_evolution layout ()
+CHECK OK   720p_150 forge_evolution HUD without overlaps ()
+screenshot 720p_150_forge_evolution.png
+CHECK OK   720p_150 forge_craft window open
+CHECK OK   720p_150 forge_craft layout ()
+CHECK OK   720p_150 forge_craft HUD without overlaps ()
+screenshot 720p_150_forge_craft.png
+CHECK OK   720p_150 recipes window open
+CHECK OK   720p_150 recipes layout ()
+CHECK OK   720p_150 recipes HUD without overlaps ()
+screenshot 720p_150_recipes.png
+CHECK OK   720p_150 restoration window open
+CHECK OK   720p_150 restoration layout ()
+CHECK OK   720p_150 restoration HUD without overlaps ()
+screenshot 720p_150_restoration.png
+CHECK OK   720p_150 dialogue window open
+CHECK OK   720p_150 dialogue layout ()
+CHECK OK   720p_150 dialogue HUD without overlaps ()
+screenshot 720p_150_dialogue.png
+CHECK OK   720p_150 choice window open
+CHECK OK   720p_150 choice layout ()
+CHECK OK   720p_150 choice HUD without overlaps ()
+screenshot 720p_150_choice.png
+CHECK OK   720p_150 waystones window open
+CHECK OK   720p_150 waystones layout ()
+CHECK OK   720p_150 waystones HUD without overlaps ()
+screenshot 720p_150_waystones.png
+CHECK OK   720p_150 journal window open
+CHECK OK   720p_150 journal layout ()
+CHECK OK   720p_150 journal HUD without overlaps ()
+screenshot 720p_150_journal.png
+CHECK OK   720p_150 journal_haven window open
+CHECK OK   720p_150 journal_haven layout ()
+CHECK OK   720p_150 journal_haven HUD without overlaps ()
+screenshot 720p_150_journal_haven.png
+CHECK OK   720p_150 map window open
+CHECK OK   720p_150 map layout ()
+CHECK OK   720p_150 map HUD without overlaps ()
+screenshot 720p_150_map.png
+CHECK OK   720p_150 pause window open
+CHECK OK   720p_150 pause layout ()
+CHECK OK   720p_150 pause HUD without overlaps ()
+screenshot 720p_150_pause.png
+CHECK OK   720p_150 save window open
+CHECK OK   720p_150 save layout ()
+CHECK OK   720p_150 save HUD without overlaps ()
+screenshot 720p_150_save.png
+CHECK OK   720p_150 load window open
+CHECK OK   720p_150 load layout ()
+CHECK OK   720p_150 load HUD without overlaps ()
+screenshot 720p_150_load.png
+CHECK OK   720p_150 options window open
+CHECK OK   720p_150 options layout ()
+CHECK OK   720p_150 options HUD without overlaps ()
+screenshot 720p_150_options.png
+CHECK OK   720p_150 confirm window open
+CHECK OK   720p_150 confirm layout ()
+CHECK OK   720p_150 confirm HUD without overlaps ()
+screenshot 720p_150_confirm.png
+forge example imprint: Imprinted with Storm Ore. Rolled Sharpened (T3): +4 Physical Damage %
+forge example augment: Added: Rolled Executioner's (T2): +18 Heavy Finisher Power %
+forge example augment: Added: Rolled Furious (T3): +8 Resource Gain %
+forge example essence_insert: Bound Essence of the Storm Wolf.
+forge example essence_insert: Bound Essence of the Stone Golem.
+forge example socket_open: Opened socket 1.
+forge example socket_insert: Socketed Garnet.
+forge example quality: Quality raised to 1.
+CHECK OK   720p_200 title layout ()
+screenshot 720p_200_title.png
+CHECK OK   720p_200 hud layout ()
+CHECK OK   720p_200 hud HUD without overlaps ()
+screenshot 720p_200_hud.png
+CHECK OK   720p_200 hud_combat layout ()
+CHECK OK   720p_200 hud_combat HUD without overlaps ()
+screenshot 720p_200_hud_combat.png
+CHECK OK   720p_200 hud_boss layout ()
+CHECK OK   720p_200 hud_boss HUD without overlaps ()
+screenshot 720p_200_hud_boss.png
+CHECK OK   720p_200 hud_death layout ()
+CHECK OK   720p_200 hud_death HUD without overlaps ()
+screenshot 720p_200_hud_death.png
+CHECK OK   720p_200 inventory window open
+CHECK OK   720p_200 inventory layout ()
+CHECK OK   720p_200 inventory HUD without overlaps ()
+screenshot 720p_200_inventory.png
+CHECK OK   720p_200 inventory_tooltip window open
+CHECK OK   720p_200 inventory_tooltip layout ()
+CHECK OK   720p_200 inventory_tooltip HUD without overlaps ()
+screenshot 720p_200_inventory_tooltip.png
+CHECK OK   720p_200 character window open
+CHECK OK   720p_200 character layout ()
+CHECK OK   720p_200 character HUD without overlaps ()
+screenshot 720p_200_character.png
+CHECK OK   720p_200 classes window open
+CHECK OK   720p_200 classes layout ()
+CHECK OK   720p_200 classes HUD without overlaps ()
+screenshot 720p_200_classes.png
+CHECK OK   720p_200 classes_locked window open
+CHECK OK   720p_200 classes_locked layout ()
+CHECK OK   720p_200 classes_locked HUD without overlaps ()
+screenshot 720p_200_classes_locked.png
+CHECK OK   720p_200 talents window open
+CHECK OK   720p_200 talents layout ()
+CHECK OK   720p_200 talents HUD without overlaps ()
+screenshot 720p_200_talents.png
+CHECK OK   720p_200 talents_full window open
+CHECK OK   720p_200 talents_full layout ()
+CHECK OK   720p_200 talents_full HUD without overlaps ()
+screenshot 720p_200_talents_full.png
+CHECK OK   720p_200 skills window open
+CHECK OK   720p_200 skills layout ()
+CHECK OK   720p_200 skills HUD without overlaps ()
+screenshot 720p_200_skills.png
+CHECK OK   720p_200 presets window open
+CHECK OK   720p_200 presets layout ()
+CHECK OK   720p_200 presets HUD without overlaps ()
+screenshot 720p_200_presets.png
+CHECK OK   720p_200 forge_imprint window open
+CHECK OK   720p_200 forge_imprint layout ()
+CHECK OK   720p_200 forge_imprint HUD without overlaps ()
+screenshot 720p_200_forge_imprint.png
+CHECK OK   720p_200 forge_affixes window open
+CHECK OK   720p_200 forge_affixes layout ()
+CHECK OK   720p_200 forge_affixes HUD without overlaps ()
+screenshot 720p_200_forge_affixes.png
+CHECK OK   720p_200 forge_reforge window open
+CHECK OK   720p_200 forge_reforge layout ()
+CHECK OK   720p_200 forge_reforge HUD without overlaps ()
+screenshot 720p_200_forge_reforge.png
+CHECK OK   720p_200 forge_essences window open
+CHECK OK   720p_200 forge_essences layout ()
+CHECK OK   720p_200 forge_essences HUD without overlaps ()
+screenshot 720p_200_forge_essences.png
+CHECK OK   720p_200 forge_sockets window open
+CHECK OK   720p_200 forge_sockets layout ()
+CHECK OK   720p_200 forge_sockets HUD without overlaps ()
+screenshot 720p_200_forge_sockets.png
+CHECK OK   720p_200 forge_quality window open
+CHECK OK   720p_200 forge_quality layout ()
+CHECK OK   720p_200 forge_quality HUD without overlaps ()
+screenshot 720p_200_forge_quality.png
+CHECK OK   720p_200 forge_evolution window open
+CHECK OK   720p_200 forge_evolution layout ()
+CHECK OK   720p_200 forge_evolution HUD without overlaps ()
+screenshot 720p_200_forge_evolution.png
+CHECK OK   720p_200 forge_craft window open
+CHECK OK   720p_200 forge_craft layout ()
+CHECK OK   720p_200 forge_craft HUD without overlaps ()
+screenshot 720p_200_forge_craft.png
+CHECK OK   720p_200 recipes window open
+CHECK OK   720p_200 recipes layout ()
+CHECK OK   720p_200 recipes HUD without overlaps ()
+screenshot 720p_200_recipes.png
+CHECK OK   720p_200 restoration window open
+CHECK OK   720p_200 restoration layout ()
+CHECK OK   720p_200 restoration HUD without overlaps ()
+screenshot 720p_200_restoration.png
+CHECK OK   720p_200 dialogue window open
+CHECK OK   720p_200 dialogue layout ()
+CHECK OK   720p_200 dialogue HUD without overlaps ()
+screenshot 720p_200_dialogue.png
+CHECK OK   720p_200 choice window open
+CHECK OK   720p_200 choice layout ()
+CHECK OK   720p_200 choice HUD without overlaps ()
+screenshot 720p_200_choice.png
+CHECK OK   720p_200 waystones window open
+CHECK OK   720p_200 waystones layout ()
+CHECK OK   720p_200 waystones HUD without overlaps ()
+screenshot 720p_200_waystones.png
+CHECK OK   720p_200 journal window open
+CHECK OK   720p_200 journal layout ()
+CHECK OK   720p_200 journal HUD without overlaps ()
+screenshot 720p_200_journal.png
+CHECK OK   720p_200 journal_haven window open
+CHECK OK   720p_200 journal_haven layout ()
+CHECK OK   720p_200 journal_haven HUD without overlaps ()
+screenshot 720p_200_journal_haven.png
+CHECK OK   720p_200 map window open
+CHECK OK   720p_200 map layout ()
+CHECK OK   720p_200 map HUD without overlaps ()
+screenshot 720p_200_map.png
+CHECK OK   720p_200 pause window open
+CHECK OK   720p_200 pause layout ()
+CHECK OK   720p_200 pause HUD without overlaps ()
+screenshot 720p_200_pause.png
+CHECK OK   720p_200 save window open
+CHECK OK   720p_200 save layout ()
+CHECK OK   720p_200 save HUD without overlaps ()
+screenshot 720p_200_save.png
+CHECK OK   720p_200 load window open
+CHECK OK   720p_200 load layout ()
+CHECK OK   720p_200 load HUD without overlaps ()
+screenshot 720p_200_load.png
+CHECK OK   720p_200 options window open
+CHECK OK   720p_200 options layout ()
+CHECK OK   720p_200 options HUD without overlaps ()
+screenshot 720p_200_options.png
+CHECK OK   720p_200 confirm window open
+CHECK OK   720p_200 confirm layout ()
+CHECK OK   720p_200 confirm HUD without overlaps ()
+screenshot 720p_200_confirm.png
+RESULT: OK (891 checks, 0 failed)

@@ -4,7 +4,7 @@
 Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat Polish 0.2 + UI Foundation 0.1
 + Crafting Foundation 0.1 (Resonanzschmieden) + Class Foundation 0.2 (Klassen, Talente, Skills, Prolog)
 + Klassen/Combat 0.3–0.4 + Prologue & Haven Vertical Slice 0.1 (Save 1.1, Story-Prolog, Haven, Wegsteine)
-+ UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD; Rezeptfenster `build_panel` nur über das Theme).
++ UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1.
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -42,6 +42,8 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   (`user://settings.cfg`, nie im Save). Standard: `docs/DISPLAY_AND_UI_STANDARD.md`.
   Farben/Schriften/Komponenten nur aus `UiTheme` (Designsystem: `docs/UI_DESIGN_SYSTEM.md`); Item-Texte nur
   über `ItemDescriber`; Bestätigungen nur über `UiConfirmDialog`; neue Bildschirme in `GalleryScreens` eintragen.
+  Inventar: Hover = `ItemTooltip`, Rechtsklick = `CharacterEquipment.quick_slot`, keine Aktions-/Discard-Knöpfe;
+  Währung (`is_currency`) ist ein Zähler, kein Taschenplatz.
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
   Revision); gewürfelte Werte nie neu berechnen; Uniques nur über `CraftingProfile.allowed_operations`;
   Combat-Wirkung nur als `ItemEffect`/`AttackModifier`. Design: `docs/CRAFTING_DESIGN.md`.

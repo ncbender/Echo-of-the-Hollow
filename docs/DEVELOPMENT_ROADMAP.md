@@ -35,6 +35,7 @@
 | Combat Defense & Feedback 0.4 | Focus 6/s, Block & Parry (Shift, Profile, Unblockable/Guard Break), Skill-VFX, Synth-Combat-Audio, Status-/Poise-Lesbarkeit | `COMBAT_DEFENSE_FEEDBACK_04_REPORT.md` |
 | Prologue & Haven Slice 0.1 | Save Foundation 1.1 (Slots, Autosave, Meilensteine, Titel/Pause), Story-Quests, Old Road + Mara, Haven mit Ruinen-Restaurierung, Whispering Stone mit Echos und Klassenwahl, Wegsteine, Save v5 | `PROLOGUE_HAVEN_VERTICAL_SLICE_01_REPORT.md` |
 | UI/UX Redesign 1.0 | Designsystem „The Forgotten Chronicle“, Inventar/Paperdoll, Forge 2.0, Klassenstation, neues HUD mit Ziel-/Bossrahmen und Loot-Feed, Journal, Karte, Dialog, Menüs, Optionen, UI-Galerie | `UI_UX_REDESIGN_01_REPORT.md` |
+| UI/UX Polish 1.1 | Kompakte Klassenkarten, Talentbäume als Knotengraph nebeneinander, sofortiger Item-Tooltip mit Vergleich, Rechtsklick-Ausrüsten, Gold als Zähler, Dash nach WASD (sonst Maus), Rezeptkarten, Toasts, Forge-Ergebnisse sichtbar | `UI_UX_POLISH_11_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von

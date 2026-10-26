@@ -28,7 +28,12 @@ Ausrüstbare Items stapeln nie (validiert). Datenprüfung in `ItemDefinition.val
 `GameDatabase.validate()` (unbekannte Familien/Sets/Items).
 
 ## Inventar ✅ (`Inventory`)
-- Slot-Inventar, Kapazität 40 (Regeln), jede Instanz/jeder Stapel = 1 Slot.
+- Slot-Inventar, Kapazität 40 (Regeln), jede Instanz/jeder Stapel = 1 Slot. Ausnahme seit UI/UX Polish 1.1:
+  Währung (`ItemDefinition.is_currency`, Gold) bleibt als Stapel im Inventar (Save-Format unverändert,
+  keine Migration), belegt aber keinen Taschenplatz und erscheint in der UI als Gold-Zähler.
+- Schnelles Ausrüsten (Rechtsklick) wählt den Slot über `CharacterEquipment.quick_slot`: erster freier
+  passender Slot (Ring 1 vor Ring 2, Main Hand vor Off Hand bei Dual Wield), sonst der erste (Ersatz).
+  Ablegen braucht keinen freien Platz, weil ausgerüstete Items ohnehin im Inventar liegen.
 - `add_item` füllt erst Stapel, dann neue Slots – **alles oder nichts**.
 - `remove_quantity` (über Stapel, atomar), `take`, `set_quantity` (1..max_stack), `remove_instance`,
   `find(instance_id)`, `count`, `room_for`, `transfer_to` (Ziel wird vorher geprüft).

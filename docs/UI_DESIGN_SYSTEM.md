@@ -80,6 +80,24 @@ Alte Namen (`COLOR_TEXT`, `COLOR_ACCENT` …) sind Aliase dieser Tokens.
 - `JournalPanel` (`StageTrack`), `WorldMapPanel` (`MapGraph` aus `MapDefinition.map_cell/neighbors`),
   `SaveSlotList` (gemeinsame Slotliste für Titel und Pausemenü).
 
+### Komponenten aus UI/UX Polish 1.1
+- `CardButton` (Typvariation): klickbare Karte, ausgewählt = Bronze-Rahmen (Klassenkarten).
+- `ClassEmblem`: provisorisches Klassen-Icon (Raute in der Ressourcenfarbe, Initiale), gesperrt gedimmt.
+- Klassenseite: kompakte Karten (Emblem, Name, Status Active/Unlocked/Locked, Level, zwei Zeilen
+  `ClassDefinition.tagline`) links, Detailbereich rechts (Ressource aus Daten, Spielstil, Bäume,
+  Voraussetzungen aus Prolog-Regeln und Klassenquest). Vorbereitete Klassen bleiben ausgeblendet.
+- `TalentTreeView`: Knotengraph statt Textknöpfe. Tier 1 oben bis 7 unten, quadratische Knoten mit
+  Symbol (Raute passiv, Kreis Skill, Stern Transformation), Rang-Badge, Zustandsfarbe; Linien für den
+  Weg nach unten (dünn) und explizite Voraussetzungen (dick). Die drei Bäume stehen immer
+  nebeneinander in `TreeScroll`, das bei wenig Platz selbst scrollt. Darüber eine Detailleiste
+  (Hover/Fokus/Klick).
+- `ItemTooltip`: sofortiger Item-Tooltip des Inventars mit „EQUIPPED“-Vergleichskarten. Liegt neben
+  der Zelle, sonst links davon, sonst darunter/darüber, immer im Bild. Auf kleinen Canvases fallen
+  zuerst die Vergleichskarten weg, dann zwei Spalten, dann eine kompakte dreispaltige Karte ohne
+  gedimmte Zeilen.
+- `ToastFeed`: kompakte HUD-Paneele mit Farbakzent; gleiche Meldungen werden zusammengefasst („x2“).
+- `BuildPanel`: Rezeptkarten (Ausgabe-Icon, „have / need“, Grund bei Sperre).
+
 ## HUD-Layout
 - Oben Mitte: Ziel-/Bossrahmen, darunter Hinweis. Breite nie größer als der Raum zwischen den Spalten.
 - Oben rechts: Quest-Tracker. Unten links: Spielerrahmen. Unten rechts: Loot-Feed über der

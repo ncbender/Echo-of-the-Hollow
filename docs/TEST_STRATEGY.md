@@ -39,6 +39,11 @@ Guardian/Soulbinder). UI/UX Redesign 1.0: `inventory_ui` (Paperdoll, Kategorien,
 die Fensteraktionen, Verwerfen fragt nach), `forge_ui` (sieben Bereiche, Wahrscheinlichkeiten aus dem
 echten System), `hud` (Rahmen, Ziel/Boss, Loot-Feed, Tod, Debug aus), `world_ui` (Journal, Karte,
 Dialog-Schutz, Wegsteine, Restaurierung), `menus_ui` (Titel, Laden, Pausemenü fragt nach, Optionen).
+UI/UX Polish 1.1: `class_ui` (+ Klassenkarten-Status, Details aus Daten, Talentbäume nebeneinander mit
+Tiers/Linien/Detailleiste), `inventory_ui` (echte Mausereignisse über `push_input`: Rechtsklick-Ausrüsten
+mit Ring-/Waffen-Slotwahl, Hover-Tooltip mit Vergleich im Bild, Gold-Zähler, Save/Load nach Wechsel),
+`dash` (WASD-Richtung in vier Richtungen und Diagonalen, Maus-Fallback), `forge_ui` (+ Ergebnisse neben
+den Aktionen, Rezeptkarten, Toasts).
 
 **Prolog-Playtest (Fenster):** `tests/playtest/prologue_playtest.gd` (`--fixed-fps 60`, optional
 `-- --until=road|haven`): Titel → New Game → kompletter Prolog nur über InputFrames und echte
