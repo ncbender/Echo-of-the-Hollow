@@ -7,9 +7,9 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
   `%APPDATA%\Godot\app_userdata\Echoes of the Hollow\saves\`). **F6** speichern, **F9** laden.
 - Tests/Playtests nutzen ausschließlich `user://test_saves/…` und überschreiben den Spieler-Slot nie.
 
-## Format (Version 2) ✅
+## Format (Version 3) ✅
 ```json
-{ "format": "echoes_of_the_hollow_save", "version": 2, "saved_at": 1761460000,
+{ "format": "echoes_of_the_hollow_save", "version": 3, "saved_at": 1761460000,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>" }
 ```
 Die Nutzdaten werden als **exakter JSON-Text** gespeichert, damit die SHA-256-Prüfsumme genau die
@@ -21,7 +21,7 @@ Payload (nur Quelldaten):
 | `id`, `name` | Charakter-ID, Name |
 | `classes` | aktive Klasse, pro Klasse unlocked/level/xp |
 | `mastery` | pro Familie level/xp |
-| `inventory` | Iteminstanzen (id, def, qty, affixes, progress/essence/evolution falls gesetzt) |
+| `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, material, affixes, essences, sockets, evolution, progress, rev) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
 | `world` | Map-ID, Spawnpunkt-ID, Flags, Gebäude |
@@ -52,7 +52,20 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 2; Schritt 1→2 ergänzt `world.map_states` (Overnight 3).
+Aktuell: Version 3.
+- 1→2 ergänzt `world.map_states` (Overnight 3).
+- 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
+  `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in
+  `progress.legacy_essence`. Affixe ohne Affix-ID werden als `legacy` markiert (wirken weiter, nicht
+  umformbar). Es wird **nichts neu gewürfelt**.
+
+Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
+- Qualität wird auf das Maximum begrenzt.
+- Essenzen bzw. Sockel über dem Limit werden als inaktiv in `progress` geparkt, nicht gelöscht.
+- Die Evolutionsstufe wird begrenzt.
+
+JSON-Zahlentypen werden normalisiert, damit gespeicherte Werte bitgleich zurückkommen.
+Unbekannte Essenz-, Einlage- und Affix-IDs bleiben erhalten und werden beim Effektaufbau ignoriert.
 
 ## Offen
 ⬜ Mehrere Slots/Slot-Auswahl-UI, ⬜ Autosave, ⬜ exakte Position statt Spawnpunkt.

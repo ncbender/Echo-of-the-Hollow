@@ -20,6 +20,8 @@ const DEBUG_CRAFTING_ITEMS := {
 	&"transmute_core": 6, &"focus_catalyst": 3, &"storm_wolf_essence": 1, &"stone_golem_essence": 1,
 	&"essence_siphon": 1, &"socket_chisel": 3, &"garnet": 1, &"impact_rune": 1, &"forge_crystal": 10,
 	&"awakening_stone": 1, &"hollow_essence": 5,
+	# smithy build costs + evolution stage 2 ore, so F4 alone is enough for the slice
+	&"timber": 6, &"stone": 4, &"iron_ore": 8,
 }
 
 var session: SessionState

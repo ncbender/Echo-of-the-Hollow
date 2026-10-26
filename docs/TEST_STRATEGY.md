@@ -22,7 +22,9 @@
 `inventory`, `pickup`, `equipment`, `item_effects`, `save`; Overnight 3: `world`, `base`, `gathering`,
 `loop` (End-to-End); Combat Polish 0.2: `knockback`, `lunge`, `combo_reach` (Knockback × Lunge ×
 Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Skalierung, Kamera-Ausgleich),
-`ui_layout` (alle Fenster bei allen UI-Skalierungen im Bild, Scrollen bei 200 %).
+`ui_layout` (alle Fenster bei allen UI-Skalierungen im Bild, Scrollen bei 200 %). Crafting Foundation 0.1:
+`crafting_save`, `affix_pool`, `crafting_stats`, `crafting_ops`, `essences`, `sockets_quality`,
+`evolution`, `crafting_loop` (E2E).
 
 ## Auswahlregeln
 1. Vor jedem Lauf feststellen, welche Systeme geändert wurden.
@@ -50,6 +52,12 @@ Combo-Fenster gegen echte Grunts). UI Foundation 0.1: `settings` (Persistenz, Sk
 | `ui_theme.gd`, `ui_window.gd`, Panels, `game_hud.gd` | ui_layout (+ UI-Playtest) |
 | `user_settings.gd`, Display-Einstellungen, Kamera-Zoom | settings, ui_layout (+ UI-Playtest) |
 | `world_text.gd` / Welttext-Views | hits, enemy (+ Screenshot-Prüfung) |
+| `item_instance.gd`, `item_stats.gd`, Save-Schema | crafting_save, save, equipment |
+| `affix_pool.gd`, Affix-/Materialdaten | affix_pool, crafting_ops |
+| `crafting_service.gd`, Operationsdaten | crafting_ops, essences, sockets_quality, evolution |
+| Essenz-/Runen-/Mutations-Effekte, `item_effect_runner.gd` | essences, sockets_quality, evolution, item_effects |
+| neue Stats / `character_stat_modifier.gd` | crafting_stats, item_effects |
+| `crafting_panel.gd`, Schmiede-Interaktion | crafting_loop, ui_layout (+ `crafting_playtest.gd`) |
 | Testinfrastruktur (`tests/framework/`) | alle (einmalig) |
 | `character.gd`, `player_progression_bridge.gd` | mastery, classes, equipment, item_effects, save |
 | `inventory.gd`, Items | inventory, pickup, equipment, save |
@@ -102,3 +110,19 @@ Vollbild ↔ Fenster und Reset. Prüft automatisch:
 
 Screenshots und Log liegen in `tests/output/ui/`. **Bewegt den echten Mauszeiger und belegt kurz den
 Bildschirm.**
+
+## Crafting-Playtests (Crafting Foundation 0.1)
+```
+Godot_v4.7.2-stable_win64_console.exe --path . -s res://tests/playtest/crafting_playtest.gd             # 1080p/4K x 100/150 %
+Godot_v4.7.2-stable_win64_console.exe --path . --fixed-fps 60 -s res://tests/playtest/crafting_playtest.gd -- --loop   # E2E
+```
+**Ohne Argument** zeigt der Playtest die Resonance Forge in vier Konfigurationen: Wahrscheinlichkeiten,
+Umformen mit Fokus, Essenzen und Resonanz, Sockel, Qualität, Mutationswahl und Tooltip. Er prüft das
+Layout, ob „Confirm“ erreichbar ist und die Idle-Frame-Zeit, und macht einen echten Mausklick.
+
+**`--loop`** spielt den ganzen Loop im Fenster:
+- F4, G an der Schmiede, Craften
+- Ausrüsten, Arenakampf mit Entladung, Golem, Rune und Resonanz
+- F6 und F9, danach Vergleich der Iteminstanz
+
+Screenshots liegen in `tests/output/crafting/`. Bewegt den echten Mauszeiger.

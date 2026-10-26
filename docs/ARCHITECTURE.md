@@ -132,6 +132,28 @@ Tests und skriptierte Playtests liefern `InputFrame`s direkt (`Player.feed_input
   `GameHud` registriert Fenster, `OptionsPanel` (O) editiert `UserSettings`.
 - `WorldText`: scharfe Texte in der gezoomten Welt. Keine `Control.scale`-Skalierung für UI.
 
+## Crafting-Schicht (Crafting Foundation 0.1, Details `CRAFTING_DESIGN.md`)
+- **Definitionen** (`scripts/rpg/crafting/`, Daten `data/crafting/`): Material, Affix/Tier, Essenz,
+  Resonanz, Einlage, Währung, Operation, Evolution (Stufe/Mutation). `ItemDefinition.crafting`
+  (`CraftingProfile`) legt fest, welche Operationen ein Item erlaubt. Alles ist in `GameDatabase`
+  registriert und gegenseitig validiert.
+- **Instanzdaten** auf `ItemInstance`: Level, Qualität, Material, Affixe, Essenzen, Sockel,
+  Evolution, Revision.
+- **`ItemStats`**: einzige Umrechnung von Crafting-Zustand in StatModifier (→ `StatResolver` über
+  `Character._stat_sources`) und ItemEffects (→ `ItemEffectRunner.rebuild`). Keine zweite
+  Stat- oder Effektlogik.
+- **`AffixPool`**: gewichteter Pool, den Vorschau und Würfeln gemeinsam nutzen.
+  **`CraftingService`**: zustandslose Transaktionen über `CraftingRequest` → `CraftingPreview`
+  → `Result`, Tabellen je Operation.
+  **`ItemEvolution`**: Item-EP, von der Bridge bei akzeptierten Treffern vergeben.
+- **Combat-Anbindung** nur über vorhandene Wege:
+  - Neue Stats laufen über `CharacterStatModifier`, also den AttackModifier-Hook.
+  - Essenzen, Runen und Mutationen sind `ItemEffect`s; ihre Modifier laufen über
+    `get_attack_modifiers_for(runner, key)` (mit Weak-Ref auf den Runner, ohne Zyklus).
+  - Der Runner verwaltet Markierungen, geteilten Effektzustand und Stats.
+  - Knockback läuft über `KnockbackMotion` und wird genau einmal skaliert.
+- **UI**: `CraftingPanel` (`UiWindow`) an der Schmiede (`BuildingDefinition.crafting_station`).
+
 ## Kollisionslayer
 1 `world` (Wände, Dummies) · 2 `player` · 3 `enemy` · 4 `hurtbox` (nur Abfragen, kein Monitoring).
 Player-Körper kollidiert mit `world` + `enemy`; Gegner mit `world`, `player`, `enemy`. Interactables

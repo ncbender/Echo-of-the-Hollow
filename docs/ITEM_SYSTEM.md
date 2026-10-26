@@ -8,9 +8,21 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 | stabile `id`, Name, Beschreibung | `instance_id` (64-Bit-Zufall, `itm_…`), unveränderlich |
 | `category`: Weapon, Armor, Jewelry, Trinket, Material, Consumable, Quest | `definition_id` |
 | `rarity`: Normal, Magic, Rare, Epic, Legendary, Unique, Set | `quantity` |
-| `max_stack`, `slot_kind`, `weapon_family_id` | `affixes` (individuelle Stat-Modifikatoren) ✅ |
-| `base_stats`, `effects`, `set_id` | `progress` 🔧, `essence` 🔧, `evolution` 🔧 |
-| `required_class_ids` ✅, `required_class_level` 🔧, `tags` | |
+| `max_stack`, `slot_kind`, `weapon_family_id` | `affixes` (gewürfelt: affix, tier, stat, Wert) ✅ |
+| `base_stats`, `effects`, `set_id` | `item_level`, `quality`, `material_id` ✅ |
+| `required_class_ids` ✅, `required_class_level` 🔧, `tags` | `essences` (≤ 2), `sockets`, `evolution` (stage, xp, path) ✅ |
+| `crafting` (`CraftingProfile`, null = nicht craftbar) ✅ | `progress` (freie Daten, geparkte Einträge), `revision` ✅ |
+
+Der Crafting-Zustand gehört zur Instanz. Er wird so gespeichert, wie er gewürfelt wurde, und nie
+neu berechnet. Was ein ausgerüstetes Item beiträgt, liefert zentral `ItemStats`:
+- Basiswerte × Qualität
+- Affixe
+- Materialprägung
+- Sockel
+- Essenzen und Resonanz
+- Evolution
+
+Details stehen in `CRAFTING_DESIGN.md`.
 
 Ausrüstbare Items stapeln nie (validiert). Datenprüfung in `ItemDefinition.validate()` und
 `GameDatabase.validate()` (unbekannte Familien/Sets/Items).
@@ -35,12 +47,17 @@ Ausrüstbare Items stapeln nie (validiert). Datenprüfung in `ItemDefinition.val
 Aktionen (Ausrüsten, Off-hand, Ring 1/2, Ablegen, Verwerfen). Debug **F7**: ein Exemplar jedes
 ausrüstbaren Items + Baumaterial.
 
-## Testitems (handgestaltet, 28)
+## Testitems (handgestaltet, 28 + Crafting)
 Waffen: Iron Sword, Militia Sword (Magic), Steel Greatsword, **Echo Blade (Legendary)**,
 **Crushing Oath (Unique)** · Schild: Oak Shield · Rüstung für alle Slots inkl. Warlord's Greathelm
 (nur Krieger) · Set „Hollow Warden“ (Helm, Mail, Greaves) · Ringe, Amulett, Trinket · Materialien
 (Iron Ore, Timber, Hollow Essence) · Minor Potion (Consumable, 🔧 noch ohne Benutzen-Aktion) · Old Key (Quest).
+Crafting Foundation 0.1: Basen **Forged Blade**, **Forged Greatsword**, evolvierend **Stormcaller Fang**;
+Materialien Bloodsteel Ingot, Storm Ore, Frost Glass; Währungen Imprint Shard, Transmutation Core,
+Focus Catalyst, Socket Chisel, Forge Crystal, Awakening Stone, Essence Siphon; Essenzen Storm Wolf,
+Stone Golem; Einlagen Garnet, Rune of Impact. Crushing Oath hat ein begrenztes Crafting-Profil.
+Debug **F4**: Crafting-Kit.
 
 ## Offen
-⬜ Loot-Generator/Affix-Rolls, ⬜ Verbrauchsgüter benutzen, ⬜ Sortieren/Stapel teilen in der UI,
-⬜ Essenzen/Entwicklung (Felder vorbereitet).
+⬜ Loot-Generator mit Affix-Rolls (Crafting-Rolls ✅), ⬜ Verbrauchsgüter benutzen, ⬜ Sortieren/Stapel
+teilen in der UI. Essenzen, Sockel, Evolution ✅ (`CRAFTING_DESIGN.md`).

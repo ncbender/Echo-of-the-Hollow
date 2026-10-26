@@ -5,7 +5,9 @@ extends SceneTree
 ## evolution mutation choice; checks that no control leaves the screen or is
 ## squeezed and that the confirm button is reachable. One real mouse click on
 ## the confirm button verifies the wiring. Screenshots: tests/output/crafting/.
-##   godot --path . -s res://tests/playtest/crafting_playtest.gd
+##   godot --path . -s res://tests/playtest/crafting_playtest.gd [-- --loop]
+## --loop: full crafting loop in a window with real keys (F4, G, F6, F9): forge,
+## equip, arena fight (discharge + resonance), save, load, compare.
 
 const OUTPUT := "res://tests/output/crafting"
 const PASSES: Array = [[Vector2i(1920, 1080), 1.0], [Vector2i(1920, 1080), 1.5], [Vector2i(3840, 2160), 1.0], [Vector2i(3840, 2160), 1.5]]
@@ -26,8 +28,11 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT))
 	session = SessionState.find(self)
 	session.save_path = "user://test_saves/crafting_playtest.save.json"
-	for pass_spec: Array in PASSES:
-		await _pass(pass_spec[0], pass_spec[1])
+	if "--loop" in OS.get_cmdline_user_args():
+		await _loop()
+	else:
+		for pass_spec: Array in PASSES:
+			await _pass(pass_spec[0], pass_spec[1])
 	_log("RESULT: %s (%d checks, %d failed)" % ["OK" if failures == 0 else "FAILED", checks, failures])
 	var file := FileAccess.open(OUTPUT.path_join("crafting_playtest_log.txt"), FileAccess.WRITE)
 	file.store_string("\n".join(log_lines))
@@ -259,3 +264,135 @@ func _check(ok: bool, text: String) -> void:
 func _log(text: String) -> void:
 	log_lines.append(text)
 	print(text)
+
+
+# --- --loop: end-to-end crafting loop in a real window ----------------------------
+
+var f := InputFrame.new()
+
+
+func _press(action: StringName) -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventAction.new()
+		event.action = action
+		event.pressed = pressed
+		Input.parse_input_event(event)
+		await _frames(2)
+
+
+func _await_map(map_id: StringName) -> void:
+	for i in 400:
+		await process_frame
+		var current := current_scene as GameMap
+		if current != null and current.map_id == map_id and current.is_node_ready() and not session.is_traveling():
+			map = current
+			f = InputFrame.new()
+			map.player.feed_input(f)
+			await _frames(20)
+			return
+	_check(false, "reached %s" % map_id)
+
+
+func _loop() -> void:
+	root.mode = Window.MODE_WINDOWED
+	root.borderless = true
+	root.size = Vector2i(1920, 1080)
+	root.position = DisplayServer.screen_get_position(DisplayServer.get_primary_screen())
+	session.set_character(CharacterFactory.create_new(session.database))
+	var character := session.character
+	character.inventory.add_item(&"timber", 6)
+	character.inventory.add_item(&"stone", 4)
+	character.inventory.add_item(&"iron_ore", 3)
+	change_scene_to_file("res://scenes/maps/home_base.tscn")
+	await _await_map(&"home_base")
+	await _press(&"debug_crafting_kit")   # F4
+	_check(character.inventory.count(&"imprint_shard") == 10, "F4 crafting kit received")
+	var plot := map.get_node("Plots/PlotWest") as BuildPlot
+	BaseBuilder.build(character, plot.definition(), session.database.buildings[&"smithy"])
+	plot.refresh()
+	map.player.global_position = plot.global_position + Vector2(0, 26)
+	await _frames(8)
+	await _press(&"interact")   # G at the smithy
+	panel = map.hud.crafting_panel
+	_check(panel.visible, "G at the smithy opens the Resonance Forge")
+	panel.rng.seed = 4242
+	var blade := _first(&"forged_blade")
+	panel.select_item(blade.instance_id)
+	panel.select_operation(CraftingOps.IMPRINT)
+	panel.choose_material(&"frost_glass")
+	await _frames(4)
+	await _shot("loop", "01_imprint")
+	_check(panel.confirm().ok, "imprint")
+	panel.select_operation(CraftingOps.AUGMENT)
+	_check(panel.confirm().ok, "augment")
+	panel.select_operation(CraftingOps.REFORGE)
+	panel.choose_affix(0)
+	_check(panel.confirm().ok, "reforge (instant replacement)")
+	for essence_id: StringName in [&"storm_wolf", &"stone_golem"]:
+		panel.select_operation(CraftingOps.ESSENCE_INSERT)
+		panel.choose_essence(essence_id)
+		_check(panel.confirm().ok, "bind %s" % essence_id)
+	panel.select_operation(CraftingOps.SOCKET_OPEN)
+	_check(panel.confirm().ok, "open socket")
+	panel.select_operation(CraftingOps.SOCKET_INSERT)
+	panel.choose_socketable(&"impact_rune")
+	_check(panel.confirm().ok, "insert rune")
+	panel.select_operation(CraftingOps.QUALITY)
+	await _frames(4)
+	await _click_confirm(blade)
+	await _shot("loop", "02_crafted")
+	await _press(&"ui_cancel")
+	_check(character.equipment.equip(blade.instance_id, EquipSlot.Slot.MAIN_HAND) == "", "crafted blade equipped")
+	var expected := blade.to_dict()
+	session.travel(&"test_arena", &"from_home")
+	await _await_map(&"test_arena")
+	var enemy: Enemy = map.call(&"spawn_enemy", map.player.global_position + Vector2(26, 0))
+	enemy.config = enemy.config.duplicate()
+	enemy.config.attack_range = 0.0
+	enemy.config.move_speed = 0.0
+	enemy.health.max_health = 100000.0
+	enemy.health.max_poise = 100000.0
+	enemy.health.reset()
+	var tags: Array[StringName] = []
+	map.player.combat.hit_landed.connect(func(hit: HitData) -> void: tags.append_array(hit.tags))
+	await _frames(10)
+	f.aim_direction = Vector2.RIGHT
+	for step: String in ["L", "L"]:
+		f.light_pressed = true
+		for i in 14:
+			await physics_frame
+	f.heavy_pressed = true
+	f.heavy_held = true
+	for i in 50:
+		await physics_frame
+	f.heavy_held = false
+	f.heavy_released = true
+	for i in 8:
+		await physics_frame
+	await _shot("loop", "03_discharge")
+	for i in 40:
+		await physics_frame
+	_log("finisher knocked the grunt to %.1f px" % map.player.global_position.distance_to(enemy.global_position))
+	for i in 90:   # walk back into reach like a player would
+		var to := enemy.global_position - map.player.global_position
+		if to.length() <= 24.0:
+			break
+		f.move = to.normalized()
+		await physics_frame
+	f.move = Vector2.ZERO
+	f.light_pressed = true
+	for i in 30:
+		await physics_frame
+	var effects := map.bridge.effects
+	_check(effects.shared_state(&"storm_wolf_discharge").get("triggers", 0) >= 1, "Storm Wolf discharge fired in the arena")
+	_check(&"stone_golem_crush" in tags, "Stone Golem boosted the fully charged finisher")
+	_check(&"impact_rune" in tags, "Rune of Impact on heavy hits")
+	_check(&"thunder_quake" in tags, "Thunderquake resonance on the follow-up hit")
+	await _press(&"debug_save")   # F6
+	session.set_character(CharacterFactory.create_new(session.database))
+	await _press(&"debug_load")   # F9
+	await _await_map(&"test_arena")
+	var loaded := session.character.inventory.find(blade.instance_id)
+	_check(loaded != null and loaded.to_dict() == expected, "same instance with identical properties after F6/F9")
+	_check(map.bridge.effects.has_effect(&"thunder_quake"), "effects active again after loading")
+	await _shot("loop", "04_after_load")
