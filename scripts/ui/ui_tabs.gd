@@ -1,6 +1,7 @@
 class_name UiTabs
-extends HBoxContainer
-## Row of tab buttons ("TabButton" style): one is selected at a time.
+extends HFlowContainer
+## Row of tab buttons ("TabButton" style): one is selected at a time. Wraps
+## onto a second row when the window is narrow (high UI scale).
 ## Buttons are named "Tab<Id>" (stable for tests); `tab_selected` reports the id.
 
 signal tab_selected(id: String)
@@ -11,7 +12,8 @@ var _group := ButtonGroup.new()
 
 
 func _init() -> void:
-	add_theme_constant_override(&"separation", 2)
+	add_theme_constant_override(&"h_separation", 2)
+	add_theme_constant_override(&"v_separation", 2)
 
 
 ## Adds a tab; `text` is the visible (English) label.

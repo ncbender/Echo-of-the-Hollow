@@ -17,6 +17,9 @@ static func open(gallery: Object, screen: String) -> String:
 			hud.notify("Picked up Iron Ore x2")
 		"inventory":
 			hud.toggle_inventory()
+			var crafted := character.inventory.items().filter(func(i: ItemInstance) -> bool: return i.definition_id == &"stormcaller_fang")
+			if not crafted.is_empty():
+				hud.inventory_panel.select_item((crafted[0] as ItemInstance).instance_id)
 		"character":
 			hud.toggle_character()
 		"classes", "talents", "skills", "presets":

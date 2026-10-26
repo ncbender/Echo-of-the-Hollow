@@ -136,7 +136,7 @@ func _open_inventory(tag: String) -> void:
 	await _shot(tag, "02_inventory")
 	# hover the first bag slot and the right-most equipped slot -> custom item tooltips
 	var slots: Array[Control] = []
-	for button: Button in map.hud.inventory_panel.find_children("*", "ItemSlotButton", true, false):
+	for button: Button in map.hud.inventory_panel.find_children("*", "ItemCell", true, false):
 		if not button.disabled and button.tooltip_text != "":
 			if slots.is_empty() or button.get_global_rect().end.x > slots[slots.size() - 1].get_global_rect().end.x + 1.0:
 				slots.append(button)
@@ -158,7 +158,7 @@ func _open_inventory(tag: String) -> void:
 			if root.gui_get_hovered_control() == slot:
 				break
 		var hovered := root.gui_get_hovered_control()
-		_log("%s hover target %s -> hovered %s (window px %s, mouse canvas %s, slot %s, os mouse %s)" % [tag, (slot as Button).text, (hovered as Button).text if hovered is Button else str(hovered), at, root.get_mouse_position(), slot.get_global_rect(), DisplayServer.mouse_get_position()])
+		_log("%s hover target %s -> hovered %s (window px %s, mouse canvas %s, slot %s, os mouse %s)" % [tag, (slot as Button).tooltip_text, (hovered as Button).tooltip_text if hovered is Button else str(hovered), at, root.get_mouse_position(), slot.get_global_rect(), DisplayServer.mouse_get_position()])
 		var tooltip := _visible_tooltip(root)
 		_check(tooltip != null, tag + " item tooltip shown")
 		if tooltip != null:
