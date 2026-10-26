@@ -56,9 +56,12 @@ func _class_station_flow() -> void:
 	await _press(&"interact")
 	_check(hud.class_panel.visible, "class panel opened with G")
 	await _shot("r01_class_panel")
-	_click_button(hud.class_panel, "Unlock (debug)")
+	# Class Foundation 0.2: no debug unlock button any more - classes come from the
+	# prologue choice or class quests. The playtest stands in for that choice.
+	session.character.classes.unlock(&"warrior")
+	hud.class_panel.rebuild()
 	await _ticks(2)
-	_check(session.character.classes.is_unlocked(&"warrior"), "warrior unlocked via panel")
+	_check(session.character.classes.is_unlocked(&"warrior"), "warrior unlocked (stand-in for the prologue choice)")
 	_click_button(hud.class_panel, "Activate")
 	await _ticks(2)
 	_check(session.character.classes.active_class_id == &"warrior", "warrior active")

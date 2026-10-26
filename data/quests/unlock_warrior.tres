@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="ClassQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_st55i"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="2_mukqy"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/class_quest_definition.gd" id="3_3hkin"]
+
+[sub_resource type="Resource" id="Resource_ojsxk"]
+script = ExtResource("1_st55i")
+item_id = &"hollow_essence"
+quantity = 3
+
+[sub_resource type="Resource" id="Resource_h73jb"]
+script = ExtResource("1_st55i")
+item_id = &"gold_coin"
+quantity = 20
+
+[sub_resource type="Resource" id="Resource_xxv1t"]
+script = ExtResource("2_mukqy")
+amount = 8.0
+description = "Defeat hollow creatures"
+
+[resource]
+script = ExtResource("3_3hkin")
+id = &"unlock_warrior"
+class_id = &"warrior"
+display_name = "Path of Steel"
+description = "Prove your strength to the Warriors of the Hollow: defeat 8 hollow creatures and bring 3 Hollow Essence and 20 gold to a class station."
+objectives = Array[ExtResource("2_mukqy")]([SubResource("Resource_xxv1t")])
+deliveries = Array[ExtResource("1_st55i")]([SubResource("Resource_ojsxk"), SubResource("Resource_h73jb")])

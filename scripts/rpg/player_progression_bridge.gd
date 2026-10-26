@@ -56,6 +56,9 @@ func bind(target_player: Player, target_character: Character) -> void:
 	_track(effects.hit_dispatched, _on_hit_dispatched)
 	_track(effects.hit_dispatched, class_runtime.on_hit_dispatched)
 	_track(class_runtime.cast_failed, _on_cast_failed)
+	_track(class_runtime.status_consumed, _on_status_consumed)
+	_track(class_runtime.skill_cast, _on_skill_cast)
+	_track(character.prologue.trial_finished, _on_trial_finished)
 	effects.resource_gainer = class_runtime.gain
 	effects.status_applier = apply_status
 	effects.cooldown_reducer = class_runtime.reduce_cooldown
@@ -168,6 +171,9 @@ func _physics_process(delta: float) -> void:
 	if _pending_weapon != null:
 		_apply_pending_weapon()
 	class_runtime.step(delta)
+	var pool := class_runtime.pool
+	if pool != null and character.classes.in_trial():
+		PrologueService.record(character, TrialObjective.Kind.RESOURCE_AT_LEAST, pool.definition.id, pool.value)
 
 
 func _apply_pending_weapon() -> void:
@@ -250,7 +256,10 @@ func apply_status(target: Node, status_id: StringName, power: float = 1.0, stack
 	var component := StatusComponent.of(target)
 	if definition == null or component == null:
 		return false
-	return component.apply(definition, power, player, effects.dispatch_hit, stacks)
+	if not component.apply(definition, power, player, effects.dispatch_hit, stacks):
+		return false
+	PrologueService.record(character, TrialObjective.Kind.STATUS_APPLIED, status_id, 1.0)
+	return true
 
 
 func _roll_status(hit: HitData, chance_stat: StringName, status_id: StringName, power: float) -> void:
@@ -265,6 +274,27 @@ func _roll_status(hit: HitData, chance_stat: StringName, status_id: StringName, 
 func _on_hit_dispatched(hit: HitData) -> void:
 	if not hit.is_direct() and hit.killed and rewards != null:
 		rewards.reward_kill(hit)
+	if hit.source == HitData.Source.SKILL:
+		PrologueService.record(character, TrialObjective.Kind.SKILL_HITS, hit.skill_id, 1.0)
+	if hit.killed and hit.target != null and is_instance_valid(hit.target) and not hit.target.is_in_group(&"training_target"):
+		PrologueService.record(character, TrialObjective.Kind.KILLS, &"", 1.0)
+	for tag in hit.tags:
+		if String(tag).begins_with("rupture_"):
+			PrologueService.record(character, TrialObjective.Kind.STATUS_CONSUMED, StringName(String(tag).trim_prefix("rupture_")), 1.0)
+
+
+func _on_status_consumed(status_id: StringName, stacks: int) -> void:
+	PrologueService.record(character, TrialObjective.Kind.STATUS_CONSUMED, status_id, float(stacks))
+
+
+func _on_skill_cast(skill_id: StringName, _slot: int) -> void:
+	PrologueService.record(character, TrialObjective.Kind.SKILL_CASTS, skill_id, 1.0)
+
+
+func _on_trial_finished(trial_id: StringName, completed: bool) -> void:
+	var trial: TrialDefinition = character.database.trials.get(trial_id)
+	var name := trial.display_name if trial != null else String(trial_id)
+	message.emit("%s complete! You are a Basic Adventurer again." % name if completed else "%s left." % name)
 
 
 ## Talents, slots or mods changed: talent effects may differ (stats re-resolve

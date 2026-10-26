@@ -13,6 +13,8 @@ var build_panel: BuildPanel
 var options_panel: OptionsPanel
 var crafting_panel: CraftingPanel
 var skill_bar: SkillBar
+var objectives: ObjectivePanel
+var class_choice_panel: ClassChoicePanel
 ## Player display preferences (from GameSession); null when running without one.
 var settings: UserSettings
 
@@ -43,6 +45,8 @@ func _ready() -> void:
 	right.add_child(class_info)
 	mastery_panel = MasteryPanel.new()
 	right.add_child(mastery_panel)
+	objectives = ObjectivePanel.new()
+	right.add_child(objectives)
 
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -67,6 +71,7 @@ func _ready() -> void:
 	build_panel = _add_window(BuildPanel.new()) as BuildPanel
 	options_panel = _add_window(OptionsPanel.new()) as OptionsPanel
 	crafting_panel = _add_window(CraftingPanel.new()) as CraftingPanel
+	class_choice_panel = _add_window(ClassChoicePanel.new()) as ClassChoicePanel
 	crafting_panel.recipes_requested.connect(open_build_panel)
 	var session := SessionState.find(get_tree())
 	if session != null:
@@ -80,6 +85,7 @@ func setup(progression_bridge: PlayerProgressionBridge) -> void:
 	mastery_panel.bridge = bridge
 	class_info.bridge = bridge
 	skill_bar.bridge = bridge
+	objectives.bridge = bridge
 	bridge.message.connect(toasts.push.bind(UiTheme.COLOR_ACCENT))
 
 
@@ -104,6 +110,14 @@ func open_class_panel(station: ClassStation) -> void:
 		return
 	close_windows()
 	class_panel.open(bridge.character, station)
+
+
+## One-time prologue class choice (Altar of Choice).
+func open_class_choice(station: ClassChoiceStation) -> void:
+	if bridge == null:
+		return
+	close_windows()
+	class_choice_panel.open(bridge.character, station)
 
 
 func open_build_panel(plot: BuildPlot) -> void:

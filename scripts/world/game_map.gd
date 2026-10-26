@@ -46,6 +46,9 @@ func _ready() -> void:
 	character.world.set_map_value(map_id, "visits", int(character.world.get_map_value(map_id, "visits", 0)) + 1)
 	bridge = session.bind_player(player)
 	hud.setup(bridge)
+	hud.objectives.show_prologue_hint = map_id == session.database.rules.prologue_map_id
+	if character.classes.in_trial() and map_id != session.database.rules.prologue_map_id:
+		PrologueService.end_trial(character, false)   # trials only exist on the prologue map
 	session.message.connect(hud.notify)
 	for text in session.consume_messages():
 		hud.notify(text)

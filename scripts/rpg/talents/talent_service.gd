@@ -115,6 +115,8 @@ static func respec_cost(character: Character, class_id: StringName) -> int:
 
 
 static func can_respec(character: Character, class_id: StringName, at_station: bool) -> String:
+	if character.classes.in_trial():
+		return "Not during a class trial."
 	if not at_station:
 		return "Talents can only be reset at a class station."
 	if character.builds.get_build(class_id).talents.is_empty():

@@ -9,7 +9,15 @@ signal active_class_changed(class_id: StringName)
 signal xp_gained(class_id: StringName, amount: int)
 signal leveled_up(class_id: StringName, level: int)
 
-var active_class_id: StringName
+## The class currently played. During a prologue trial this is the TRIAL class
+## (temporary, never saved); otherwise the real active class.
+var active_class_id: StringName:
+	get: return trial_class_id if trial_class_id != &"" else _active_class_id
+	set(value): _active_class_id = value
+## Prologue class trial: temporary class and level (not unlocked, not saved).
+var trial_class_id: StringName
+var trial_level: int = 1
+var _active_class_id: StringName
 var _db: GameDatabase
 var _progress: Dictionary = {}   # class id -> {"unlocked": bool, "level": int, "xp": int}
 var _unknown: Dictionary = {}    # saved entries of classes missing from the data
@@ -60,6 +68,8 @@ func activation_error(class_id: StringName) -> String:
 func set_active(class_id: StringName) -> bool:
 	if activation_error(class_id) != "":
 		return false
+	if trial_class_id != &"":
+		return false   # no class change while a trial runs
 	if class_id != active_class_id:
 		active_class_id = class_id
 		active_class_changed.emit(class_id)
@@ -67,6 +77,8 @@ func set_active(class_id: StringName) -> bool:
 
 
 func get_level(class_id: StringName) -> int:
+	if trial_class_id != &"" and class_id == trial_class_id:
+		return trial_level
 	return _progress[class_id].level if _progress.has(class_id) else 1
 
 
@@ -106,7 +118,7 @@ func to_dict() -> Dictionary:
 	var progress := _unknown.duplicate(true)
 	for class_id: StringName in _progress:
 		progress[String(class_id)] = _progress[class_id].duplicate()
-	return {"active": String(active_class_id), "progress": progress}
+	return {"active": String(_active_class_id), "progress": progress}
 
 
 func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
@@ -134,3 +146,27 @@ func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
 		warnings.append("active class %s invalid; falling back" % active_class_id)
 		var unlocked := unlocked_class_ids()
 		active_class_id = unlocked[0] if not unlocked.is_empty() else &""
+
+
+## Starts a temporary class trial (prologue): `class_id` becomes the played
+## class at `level` WITHOUT being unlocked. Nothing of it is saved.
+func begin_trial(class_id: StringName, level: int) -> bool:
+	var definition := _db.get_class_def(class_id)
+	if definition == null or trial_class_id != &"":
+		return false
+	trial_class_id = class_id
+	trial_level = clampi(level, 1, definition.max_level)
+	active_class_changed.emit(class_id)
+	return true
+
+
+func end_trial() -> void:
+	if trial_class_id == &"":
+		return
+	trial_class_id = &""
+	trial_level = 1
+	active_class_changed.emit(_active_class_id)
+
+
+func in_trial() -> bool:
+	return trial_class_id != &""

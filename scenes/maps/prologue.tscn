@@ -1,0 +1,168 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/game_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/arena/arena_floor.gd" id="2_floor"]
+[ext_resource type="Script" path="res://scripts/arena/wall_block.gd" id="3_wall"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_overlay"]
+[ext_resource type="Script" path="res://scripts/fx/hitstop_controller.gd" id="6_hitstop"]
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
+[ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="8_spawn"]
+[ext_resource type="Script" path="res://scripts/world/trial_station.gd" id="9_trial"]
+[ext_resource type="Script" path="res://scripts/world/class_choice_station.gd" id="10_choice"]
+[ext_resource type="Script" path="res://scripts/world/map_gate.gd" id="11_gate"]
+[ext_resource type="PackedScene" path="res://scenes/dummy/training_dummy.tscn" id="12_dummy"]
+
+[sub_resource type="CircleShape2D" id="Circle_pad"]
+radius = 24.0
+
+[node name="Prologue" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_map")
+map_id = &"prologue"
+spawn_area = Rect2(-380, -180, 760, 360)
+
+[node name="Floor" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_floor")
+area = Rect2(-416, -208, 832, 416)
+color_a = Color(0.17, 0.16, 0.2, 1)
+color_b = Color(0.2, 0.19, 0.24, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="North" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -216)
+script = ExtResource("3_wall")
+size = Vector2(848, 16)
+
+[node name="South" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 216)
+script = ExtResource("3_wall")
+size = Vector2(848, 16)
+
+[node name="West" type="StaticBody2D" parent="Walls"]
+position = Vector2(-424, 0)
+script = ExtResource("3_wall")
+size = Vector2(16, 448)
+
+[node name="East" type="StaticBody2D" parent="Walls"]
+position = Vector2(424, 0)
+script = ExtResource("3_wall")
+size = Vector2(16, 448)
+
+[node name="DividerA" type="StaticBody2D" parent="Walls"]
+position = Vector2(-150, -150)
+script = ExtResource("3_wall")
+size = Vector2(16, 120)
+
+[node name="DividerB" type="StaticBody2D" parent="Walls"]
+position = Vector2(100, -150)
+script = ExtResource("3_wall")
+size = Vector2(16, 120)
+
+[node name="Dummies" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="DummyA" parent="Dummies" instance=ExtResource("12_dummy")]
+position = Vector2(-300, 70)
+
+[node name="DummyB" parent="Dummies" instance=ExtResource("12_dummy")]
+position = Vector2(-250, 120)
+
+[node name="TrialWarrior" type="Area2D" parent="."]
+position = Vector2(-275, -120)
+script = ExtResource("9_trial")
+trial_id = &"trial_warrior"
+color = Color(0.9, 0.4, 0.3, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialWarrior"]
+shape = SubResource("Circle_pad")
+
+[node name="Spawns" type="Node2D" parent="TrialWarrior"]
+
+[node name="A" type="Marker2D" parent="TrialWarrior/Spawns"]
+position = Vector2(-60, 40)
+
+[node name="B" type="Marker2D" parent="TrialWarrior/Spawns"]
+position = Vector2(60, 40)
+
+[node name="C" type="Marker2D" parent="TrialWarrior/Spawns"]
+position = Vector2(0, 75)
+
+[node name="TrialArcanist" type="Area2D" parent="."]
+position = Vector2(-25, -120)
+script = ExtResource("9_trial")
+trial_id = &"trial_arcanist"
+color = Color(0.7, 0.5, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialArcanist"]
+shape = SubResource("Circle_pad")
+
+[node name="Spawns" type="Node2D" parent="TrialArcanist"]
+
+[node name="A" type="Marker2D" parent="TrialArcanist/Spawns"]
+position = Vector2(-60, 90)
+
+[node name="B" type="Marker2D" parent="TrialArcanist/Spawns"]
+position = Vector2(60, 90)
+
+[node name="C" type="Marker2D" parent="TrialArcanist/Spawns"]
+position = Vector2(0, 120)
+
+[node name="TrialShadowrunner" type="Area2D" parent="."]
+position = Vector2(250, -120)
+script = ExtResource("9_trial")
+trial_id = &"trial_shadowrunner"
+color = Color(0.6, 0.5, 0.9, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialShadowrunner"]
+shape = SubResource("Circle_pad")
+
+[node name="Spawns" type="Node2D" parent="TrialShadowrunner"]
+
+[node name="A" type="Marker2D" parent="TrialShadowrunner/Spawns"]
+position = Vector2(-60, 50)
+
+[node name="B" type="Marker2D" parent="TrialShadowrunner/Spawns"]
+position = Vector2(60, 50)
+
+[node name="C" type="Marker2D" parent="TrialShadowrunner/Spawns"]
+position = Vector2(0, 85)
+
+[node name="AltarOfChoice" type="Area2D" parent="."]
+position = Vector2(250, 130)
+script = ExtResource("10_choice")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AltarOfChoice"]
+shape = SubResource("Circle_pad")
+
+[node name="GateHome" type="Area2D" parent="."]
+position = Vector2(-380, 160)
+script = ExtResource("11_gate")
+target_map_id = &"home_base"
+target_spawn_id = &"from_prologue"
+label = "Home Base"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GateHome"]
+shape = SubResource("Circle_pad")
+
+[node name="Enemies" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="SpawnDefault" type="Marker2D" parent="."]
+position = Vector2(-340, 20)
+script = ExtResource("8_spawn")
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(-340, 20)
+
+[node name="HitstopController" type="Node" parent="."]
+script = ExtResource("6_hitstop")
+
+[node name="GameHud" type="CanvasLayer" parent="."]
+script = ExtResource("7_hud")
+
+[node name="DebugOverlay" parent="." node_paths=PackedStringArray("player") instance=ExtResource("5_overlay")]
+player = NodePath("../Player")

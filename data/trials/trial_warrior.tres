@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="TrialDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="1_cfrdq"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_definition.gd" id="2_rknk4"]
+
+[sub_resource type="Resource" id="Resource_6xp1e"]
+script = ExtResource("1_cfrdq")
+kind = 0
+target_id = &"rage"
+amount = 50.0
+description = "Build up 50 rage"
+
+[sub_resource type="Resource" id="Resource_khnw1"]
+script = ExtResource("1_cfrdq")
+kind = 1
+target_id = &"furious_strike"
+amount = 2.0
+description = "Hit enemies with Furious Strike (Q)"
+
+[sub_resource type="Resource" id="Resource_8frox"]
+script = ExtResource("1_cfrdq")
+amount = 2.0
+description = "Defeat two hollow creatures"
+
+[resource]
+script = ExtResource("2_rknk4")
+id = &"trial_warrior"
+class_id = &"warrior"
+display_name = "Trial of Steel"
+description = "Fight as a Warrior: build rage with your blows, then spend it on Furious Strike."
+talents = Dictionary[StringName, int]({
+&"war_b_seething": 2,
+&"war_wb_hands": 1
+})
+skill_slots = Array[StringName]([&"furious_strike", &"battle_cry", &"blade_rush", &"warbreaker"])
+objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_8frox")])

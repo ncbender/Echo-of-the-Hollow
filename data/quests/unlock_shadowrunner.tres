@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="ClassQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_2lrxp"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="2_gytob"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/class_quest_definition.gd" id="3_rts1y"]
+
+[sub_resource type="Resource" id="Resource_hnr60"]
+script = ExtResource("1_2lrxp")
+item_id = &"hollow_essence"
+quantity = 3
+
+[sub_resource type="Resource" id="Resource_ebvgk"]
+script = ExtResource("1_2lrxp")
+item_id = &"gold_coin"
+quantity = 20
+
+[sub_resource type="Resource" id="Resource_bv2wu"]
+script = ExtResource("2_gytob")
+amount = 8.0
+description = "Defeat hollow creatures"
+
+[resource]
+script = ExtResource("3_rts1y")
+id = &"unlock_shadowrunner"
+class_id = &"shadowrunner"
+display_name = "Path of Shadows"
+description = "The Shadowrunners test your precision: defeat 8 hollow creatures and bring 3 Hollow Essence and 20 gold to a class station."
+objectives = Array[ExtResource("2_gytob")]([SubResource("Resource_bv2wu")])
+deliveries = Array[ExtResource("1_2lrxp")]([SubResource("Resource_hnr60"), SubResource("Resource_ebvgk")])

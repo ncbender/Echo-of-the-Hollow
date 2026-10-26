@@ -16,6 +16,8 @@ var _db: GameDatabase
 var _inventory: Inventory
 var _classes: CharacterClasses
 var _loadouts: Dictionary = {}   # class id -> Loadout
+## Temporary loadout of a prologue trial class (never saved, see begin_trial).
+var _trial_loadout: Loadout
 ## Instance ids unequipped as a side effect of the last equip() call.
 var last_displaced: Array[String] = []
 
@@ -28,6 +30,8 @@ func _init(database: GameDatabase, inventory: Inventory, classes: CharacterClass
 
 
 func loadout_for(class_id: StringName) -> Loadout:
+	if _trial_loadout != null and class_id == _classes.trial_class_id:
+		return _trial_loadout
 	if not _loadouts.has(class_id):
 		_loadouts[class_id] = Loadout.new()
 	return _loadouts[class_id]
@@ -256,3 +260,20 @@ func _on_item_removed(instance_id: String) -> void:
 			slot = loadout.slot_of(instance_id)
 	if touched:
 		changed.emit()
+
+
+## Trial class loadout: a temporary COPY of the references of `source_class_id`
+## (only items the trial class may use). No item is created or moved; the copy
+## is dropped by end_trial() and never saved.
+func begin_trial(class_id: StringName, source_class_id: StringName) -> void:
+	_trial_loadout = null
+	var trial := Loadout.new()
+	var source := loadout_for(source_class_id)
+	for slot: int in source.slots:
+		if can_equip(source.slots[slot], slot, class_id) == "":
+			trial.set_id(slot, source.slots[slot])
+	_trial_loadout = trial
+
+
+func end_trial() -> void:
+	_trial_loadout = null

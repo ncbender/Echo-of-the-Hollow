@@ -27,6 +27,8 @@ const DIRS := {
 	&"skills": "res://data/skills",
 	&"skill_mods": "res://data/skill_mods",
 	&"talent_trees": "res://data/talents",
+	&"trials": "res://data/trials",
+	&"quests": "res://data/quests",
 }
 const RULES_PATH := "res://data/progression/progression_rules.tres"
 
@@ -57,6 +59,8 @@ var skills: Dictionary = {}           # skill id -> SkillDefinition
 var skill_mods: Dictionary = {}       # mod id -> SkillModDefinition
 var talent_trees: Dictionary = {}     # tree id -> TalentTreeDefinition
 var talent_nodes: Dictionary = {}     # node id -> TalentNodeDefinition (indexed from the trees)
+var trials: Dictionary = {}           # trial id -> TrialDefinition
+var quests: Dictionary = {}           # quest id -> ClassQuestDefinition
 var rules: ProgressionRules
 var load_errors: PackedStringArray = []
 
@@ -125,6 +129,10 @@ func register(resource: Resource) -> bool:
 		table = skills; key = resource.id
 	elif resource is SkillModDefinition:
 		table = skill_mods; key = resource.id
+	elif resource is TrialDefinition:
+		table = trials; key = resource.id
+	elif resource is ClassQuestDefinition:
+		table = quests; key = resource.id
 	elif resource is TalentTreeDefinition:
 		table = talent_trees; key = resource.id
 		for node: TalentNodeDefinition in resource.nodes:
@@ -312,4 +320,21 @@ func _validate_classes() -> PackedStringArray:
 			if status != null and not statuses.has(status.status_id):
 				errors.append("mod %s applies unknown status %s" % [mod.id, status.status_id])
 	errors.append_array(TalentService.validate_data(self))
+	for class_id in rules.prologue_class_ids:
+		if get_class_def(class_id) == null:
+			errors.append("prologue class %s unknown" % class_id)
+	for trial: TrialDefinition in trials.values():
+		if not trial.class_id in rules.prologue_class_ids:
+			errors.append("trial %s is not for a prologue class" % trial.id)
+		for skill_id in trial.skill_slots:
+			var skill: SkillDefinition = skills.get(skill_id)
+			if skill == null or skill.class_id != trial.class_id:
+				errors.append("trial %s slots unknown skill %s" % [trial.id, skill_id])
+		errors.append_array(TalentService.validate_allocation(self, trial.class_id, trial.trial_level, trial.talents))
+	for quest: ClassQuestDefinition in quests.values():
+		if get_class_def(quest.class_id) == null:
+			errors.append("quest %s unlocks unknown class %s" % [quest.id, quest.class_id])
+		for cost in quest.deliveries:
+			if not items.has(cost.item_id):
+				errors.append("quest %s needs unknown item %s" % [quest.id, cost.item_id])
 	return errors

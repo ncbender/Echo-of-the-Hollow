@@ -14,6 +14,7 @@ static func _steps() -> Dictionary:
 	return {
 		1: _v1_to_v2,
 		2: _v2_to_v3,
+		3: _v3_to_v4,
 	}
 
 
@@ -76,3 +77,27 @@ static func _upgrade_item_v3(item: Dictionary) -> void:
 		for affix: Variant in affixes:
 			if affix is Dictionary and not affix.has("affix"):
 				affix["legacy"] = true   # plain stat roll from before crafting; applied, not reforgeable
+
+
+## v4 (Class Foundation 0.2): class builds (talents, skill slots, mods, presets),
+## prologue state and class quests. Old characters start with empty builds; the
+## class level they already reached gives its talent points automatically.
+## Prologue: a save that already has a prologue class unlocked (debug unlocks
+## before 0.2) counts as "prologue completed" with that class - nothing that was
+## unlocked is ever locked again. Otherwise the prologue has not started.
+static func _v3_to_v4(data: Dictionary) -> Dictionary:
+	if not data.get("class_builds") is Dictionary:
+		data["class_builds"] = {}
+	if not data.get("quests") is Dictionary:
+		data["quests"] = {}
+	if not data.get("prologue") is Dictionary:
+		var progress: Dictionary = {}
+		if data.get("classes") is Dictionary and data.classes.get("progress") is Dictionary:
+			progress = data.classes.progress
+		var chosen := ""
+		for class_id: String in ["warrior", "arcanist", "shadowrunner"]:
+			if progress.get(class_id) is Dictionary and bool(progress[class_id].get("unlocked", false)):
+				chosen = class_id
+				break
+		data["prologue"] = {"stage": "completed" if chosen != "" else "not_started", "completed_trials": [], "chosen_class": chosen}
+	return data

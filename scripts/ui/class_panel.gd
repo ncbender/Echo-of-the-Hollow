@@ -54,10 +54,8 @@ func _row(definition: ClassDefinition) -> Control:
 	row.add_child(label)
 	var button := Button.new()
 	if not unlocked:
-		button.text = "Unlock (debug)"
-		button.pressed.connect(func() -> void:
-			classes.unlock(definition.id)
-			rebuild())
+		button.text = "Locked"
+		button.disabled = true
 	elif active:
 		button.text = "Active"
 		button.disabled = true

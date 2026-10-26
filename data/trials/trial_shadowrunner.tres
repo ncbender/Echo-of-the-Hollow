@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="TrialDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="1_pnsx4"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_definition.gd" id="2_8qc0q"]
+
+[sub_resource type="Resource" id="Resource_0sif0"]
+script = ExtResource("1_pnsx4")
+kind = 3
+target_id = &"weak_point"
+amount = 2.0
+description = "Expose Weak Points (light finisher or E)"
+
+[sub_resource type="Resource" id="Resource_4n48n"]
+script = ExtResource("1_pnsx4")
+kind = 0
+target_id = &"focus"
+amount = 40.0
+description = "Build up 40 focus"
+
+[sub_resource type="Resource" id="Resource_uixyh"]
+script = ExtResource("1_pnsx4")
+kind = 4
+target_id = &"weak_point"
+description = "Execute a Weak Point (F)"
+
+[resource]
+script = ExtResource("2_8qc0q")
+id = &"trial_shadowrunner"
+class_id = &"shadowrunner"
+display_name = "Trial of Shadows"
+description = "Fight as a Shadowrunner: expose weak points, build focus, and finish with Execution."
+talents = Dictionary[StringName, int]({
+&"sr_as_eye": 1,
+&"sr_as_precision": 2
+})
+skill_slots = Array[StringName]([&"shadow_strike", &"expose_weakness", &"shadowstep", &"execution"])
+objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_0sif0"), SubResource("Resource_4n48n"), SubResource("Resource_uixyh")])

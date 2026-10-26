@@ -63,7 +63,8 @@ func trial_build() -> ClassBuild:
 func to_dict() -> Dictionary:
 	var data := _unknown.duplicate(true)
 	for class_id: StringName in _builds:
-		data[String(class_id)] = _builds[class_id].to_dict()
+		if _classes.is_unlocked(class_id):   # locked classes never keep a build
+			data[String(class_id)] = _builds[class_id].to_dict()
 	return data
 
 

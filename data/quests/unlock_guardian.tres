@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ClassQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_xu8ur"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="2_ts3je"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/class_quest_definition.gd" id="3_vxhy6"]
+
+[sub_resource type="Resource" id="Resource_8xsqw"]
+script = ExtResource("1_xu8ur")
+item_id = &"hollow_essence"
+quantity = 3
+
+[sub_resource type="Resource" id="Resource_rnig1"]
+script = ExtResource("1_xu8ur")
+item_id = &"gold_coin"
+quantity = 20
+
+[sub_resource type="Resource" id="Resource_bchud"]
+script = ExtResource("2_ts3je")
+amount = 20.0
+description = "Defeat hollow creatures"
+
+[resource]
+script = ExtResource("3_vxhy6")
+id = &"unlock_guardian"
+class_id = &"guardian"
+display_name = "Oath of the Guardian"
+description = "Prepared: the Guardian's sacred oaths are not available yet."
+available = false
+objectives = Array[ExtResource("2_ts3je")]([SubResource("Resource_bchud")])
+deliveries = Array[ExtResource("1_xu8ur")]([SubResource("Resource_8xsqw"), SubResource("Resource_rnig1")])

@@ -56,7 +56,7 @@ func test_region_and_map_data_are_consistent() -> void:
 	var region: RegionDefinition = db.regions.get(&"hollow_outskirts")
 	if not check(region != null, "first region exists"):
 		return
-	check_eq(region.map_ids.size(), 3, "three maps in the region")
+	check_eq(region.map_ids.size(), 4, "four maps in the region (incl. the prologue grounds)")
 	for map_id in region.map_ids:
 		var map_def: MapDefinition = db.maps[map_id]
 		var scene: GameMap = load(map_def.scene_path).instantiate()

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ClassQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="1_yjcek"]
+[ext_resource type="Script" path="res://scripts/rpg/prologue/trial_objective.gd" id="2_f0xwj"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/class_quest_definition.gd" id="3_xvrag"]
+
+[sub_resource type="Resource" id="Resource_k0ax7"]
+script = ExtResource("1_yjcek")
+item_id = &"hollow_essence"
+quantity = 3
+
+[sub_resource type="Resource" id="Resource_eqtqt"]
+script = ExtResource("1_yjcek")
+item_id = &"gold_coin"
+quantity = 20
+
+[sub_resource type="Resource" id="Resource_ex0s8"]
+script = ExtResource("2_f0xwj")
+amount = 20.0
+description = "Defeat hollow creatures"
+
+[resource]
+script = ExtResource("3_xvrag")
+id = &"unlock_soulbinder"
+class_id = &"soulbinder"
+display_name = "Bond of Souls"
+description = "Prepared: the Soulbinder's echoes are not available yet."
+available = false
+objectives = Array[ExtResource("2_f0xwj")]([SubResource("Resource_ex0s8")])
+deliveries = Array[ExtResource("1_yjcek")]([SubResource("Resource_k0ax7"), SubResource("Resource_eqtqt")])

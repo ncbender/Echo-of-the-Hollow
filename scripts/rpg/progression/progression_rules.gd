@@ -38,6 +38,11 @@ extends Resource
 ## Talent tiers, points, slots and respec costs (data/progression/talent_rules.tres).
 @export var talents: TalentRules
 
+@export_group("Prologue")
+## Classes tried in the prologue; exactly one of them is chosen permanently.
+@export var prologue_class_ids: Array[StringName] = [&"warrior", &"arcanist", &"shadowrunner"]
+@export var prologue_map_id: StringName = &"prologue"
+
 @export_group("Inventory")
 @export var inventory_capacity: int = 40
 ## Items every new character starts with (ids from data/items).

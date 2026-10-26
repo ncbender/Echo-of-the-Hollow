@@ -17,6 +17,10 @@ var equipment: CharacterEquipment
 var world: WorldState
 ## Talents, skill slots, mods and presets per class (docs/TALENT_SYSTEM.md).
 var builds: ClassBuilds
+## Prologue trials and the permanent starting class choice.
+var prologue := PrologueState.new()
+## Class unlock quests.
+var quests := QuestLog.new()
 ## Raw saved items that could not be restored (e.g. definition removed from the
 ## data). Kept and written back on save so no player property is ever deleted.
 var orphaned_items: Array = []
@@ -57,6 +61,8 @@ func add_class_xp(amount: int) -> int:
 func switch_class(class_id: StringName, in_safe_zone: bool) -> String:
 	if not in_safe_zone:
 		return "classes can only be changed at a class station"
+	if classes.in_trial():
+		return "not during a class trial"
 	if class_id == classes.active_class_id:
 		return "class already active"
 	var error := classes.activation_error(class_id)
@@ -132,6 +138,8 @@ func to_dict() -> Dictionary:
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),
 		"class_builds": builds.to_dict(),
+		"prologue": prologue.to_dict(),
+		"quests": quests.to_dict(),
 		"world": world.to_dict(),
 	}
 
@@ -155,6 +163,8 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 		orphans.append_array(previous)
 	character.orphaned_items = orphans
 	character.equipment.from_dict(_dict(data, "loadouts"), warnings)
+	character.prologue.from_dict(_dict(data, "prologue"), warnings)
+	character.quests.from_dict(_dict(data, "quests"), warnings)
 	character.builds.from_dict(_dict(data, "class_builds"), warnings)
 	for class_id in character.classes.unlocked_class_ids():
 		if character.builds.has_build(class_id):
