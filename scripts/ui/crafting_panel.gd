@@ -13,8 +13,10 @@ extends UiWindow
 signal recipes_requested(plot: BuildPlot)
 
 const ITEMS_WIDTH := 300
-const STATE_WIDTH := 380
-const ACTIONS_WIDTH := 420
+const STATE_WIDTH := 490
+## Headroom so the state and action cards stay side by side (cards may grow a little).
+const SLACK := 24
+const ACTIONS_WIDTH := 560
 const SECTIONS := ["Craft", "Imprint", "Affixes", "Essences", "Sockets", "Quality", "Evolution"]
 const SECTION_OPS := {
 	"Craft": [],
@@ -60,6 +62,7 @@ var _outcomes: GridContainer
 var _confirm: Button
 var _result: Label
 var _action_card: PanelContainer
+var _results_card: PanelContainer
 
 
 func _ready() -> void:
@@ -86,7 +89,7 @@ func _ready() -> void:
 	left.add_child(_stock)
 
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(STATE_WIDTH + ACTIONS_WIDTH + UiTheme.GAP * 2, 0)
+	right.custom_minimum_size = Vector2(STATE_WIDTH + ACTIONS_WIDTH + UiTheme.GAP * 2 + SLACK, 0)
 	_columns.add_child(right)
 	_tabs = UiTabs.new()
 	for id in SECTIONS:
@@ -100,7 +103,16 @@ func _ready() -> void:
 	state_card.custom_minimum_size = Vector2(STATE_WIDTH, 0)
 	_state = state_card.get_node("Box") as VBoxContainer
 	_state.add_theme_constant_override(&"separation", 4)
-	_work.add_child(state_card)
+	# state column: the item's state, below it the possible results (in view at
+	# 1080p / 100 % instead of under the action column's fold)
+	var state_column := VBoxContainer.new()
+	state_column.add_theme_constant_override(&"separation", UiTheme.GAP * 2)
+	state_column.add_child(state_card)
+	_results_card = UiTheme.card(&"InsetPanel")
+	_results_card.name = "PossibleResults"
+	_results_card.custom_minimum_size = Vector2(STATE_WIDTH, 0)
+	state_column.add_child(_results_card)
+	_work.add_child(state_column)
 	var action_card := UiTheme.card(&"InsetPanel")
 	_action_card = action_card
 	action_card.custom_minimum_size = Vector2(ACTIONS_WIDTH, 0)
@@ -117,13 +129,17 @@ func _ready() -> void:
 	actions.add_child(_costs)
 	_notes = UiTheme.wrapped("", UiTheme.WARNING, ACTIONS_WIDTH - 30)
 	actions.add_child(_notes)
+	var results := _results_card.get_node("Box") as VBoxContainer
 	_outcome_title = UiTheme.section("Possible results")
-	actions.add_child(_outcome_title)
+	results.add_child(_outcome_title)
 	_outcomes = GridContainer.new()
 	_outcomes.columns = 3
 	_outcomes.add_theme_constant_override(&"h_separation", UiTheme.GAP * 2)
 	_outcomes.add_theme_constant_override(&"v_separation", 2)
-	actions.add_child(_outcomes)
+	results.add_child(_outcomes)
+	var note := UiTheme.wrapped("One of these is rolled - the result is never guaranteed.", UiTheme.TEXT_MUTED, STATE_WIDTH - 30)
+	note.theme_type_variation = &"SmallLabel"
+	results.add_child(note)
 	_confirm = UiTheme.button("", &"PrimaryButton", confirm)
 	_confirm.name = "Confirm"
 	_confirm.custom_minimum_size = Vector2(0, 44)
@@ -135,7 +151,7 @@ func _ready() -> void:
 
 ## All columns side by side; the flow containers stack them when narrower.
 func preferred_body_size() -> Vector2:
-	return Vector2(ITEMS_WIDTH + STATE_WIDTH + ACTIONS_WIDTH + UiTheme.GAP * 8, body.get_combined_minimum_size().y)
+	return Vector2(ITEMS_WIDTH + STATE_WIDTH + ACTIONS_WIDTH + UiTheme.GAP * 8 + SLACK, body.get_combined_minimum_size().y)
 
 
 func open(target_character: Character, target_plot: BuildPlot = null) -> void:
@@ -301,7 +317,7 @@ func rebuild() -> void:
 	_clear(_costs)
 	_clear(_outcomes)
 	_notes.text = ""
-	_outcome_title.visible = false
+	_results_card.visible = false
 	_show_result()
 	_action_card.visible = section != "Craft"
 	if section == "Craft":
@@ -647,7 +663,7 @@ func _slot_row(count: int, prefix: String, optional: bool) -> void:
 func _build_outcomes(preview: CraftingPreview) -> void:
 	if preview.outcomes.is_empty():
 		return
-	_outcome_title.visible = true
+	_results_card.visible = true
 	var by_affix := AffixPool.by_affix(preview.outcomes)
 	var affix_ids: Array = by_affix.keys()
 	affix_ids.sort_custom(func(a: StringName, b: StringName) -> bool: return by_affix[a] > by_affix[b])
@@ -661,11 +677,9 @@ func _build_outcomes(preview: CraftingPreview) -> void:
 		for entry in preview.outcomes:
 			if entry.affix == affix:
 				tiers.append("T%d %s (%.1f%%)" % [(entry.tier as AffixTier).tier, affix.describe_range(entry.tier).get_slice(" ", 0), entry.probability * 100.0])
-		var detail := UiTheme.wrapped("%s\n%s" % [Stats.display_name(affix.stat), " · ".join(tiers)], UiTheme.TEXT_SECONDARY, 200)
+		var detail := UiTheme.wrapped("%s\n%s" % [Stats.display_name(affix.stat), " · ".join(tiers)], UiTheme.TEXT_SECONDARY, 230)
 		detail.theme_type_variation = &"SmallLabel"
 		_outcomes.add_child(detail)
-	var note := _small("One of these is rolled - the result is never guaranteed.")
-	_outcomes.add_child(note)
 
 
 func _show_result() -> void:

@@ -113,3 +113,50 @@ func _texts(node: Node) -> PackedStringArray:
 	for button: Button in node.find_children("*", "Button", true, false):
 		texts.append(button.text)
 	return texts
+
+
+func test_possible_results_beside_the_actions_at_1080p() -> void:
+	var blade := _item(&"forged_blade")
+	panel.select_item(blade.instance_id)
+	panel.select_operation(CraftingOps.IMPRINT)
+	panel.choose_material(&"storm_ore")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var results := panel.find_child("PossibleResults", true, false) as Control
+	var confirm := panel.find_child("Confirm", true, false) as Control
+	check(results != null and results.visible, "results card shown")
+	check(not results.is_ancestor_of(confirm), "results are not inside the action column")
+	var view := panel.get_viewport_rect()
+	check(results.get_global_rect().position.y < view.size.y * 0.5, "results start in the upper half at 1080p (y=%.0f)" % results.get_global_rect().position.y)
+	check(absf(results.get_global_rect().position.y - confirm.get_global_rect().position.y) < view.size.y * 0.5 \
+		and results.get_global_rect().end.x <= confirm.get_global_rect().position.x + 1.0, "side by side with the action column")
+	# the shown chances are still the service's pool
+	var service := CraftingService.preview(character, panel.current_request())
+	check_eq(AffixPool.by_affix(panel.current_preview().outcomes), AffixPool.by_affix(service.outcomes), "chances unchanged")
+
+
+func test_recipe_window_cards() -> void:
+	panel.hide()
+	var smithy := map.get_node("Ruins/OldSmithy") as RuinSite
+	map.hud.open_build_panel(smithy)
+	await get_tree().process_frame
+	var build := map.hud.build_panel
+	var card := build.find_child("Recipe_*", true, false)
+	check(card != null, "recipe shown as a card")
+	var craft := build.find_children("Craft_*", "Button", true, false)[0] as Button
+	check(" | ".join(_texts(build)).contains(" / "), "costs as have / need")
+	var swords := character.inventory.count(&"iron_sword")
+	craft.pressed.emit()
+	check_eq(character.inventory.count(&"iron_sword"), swords + 1, "crafted through BaseBuilder")
+	check((build.find_child("Status", true, false) as Label).text.begins_with("Crafted"), "result reported")
+
+
+func test_toasts_are_compact_and_merge_repeats() -> void:
+	var toasts := map.hud.toasts
+	map.hud.notify("Progress saved")
+	map.hud.notify("Progress saved")
+	map.hud.notify("Quest complete: The Broken Cart")
+	check_eq(toasts.texts(), PackedStringArray(["Progress saved  x2", "Quest complete: The Broken Cart"]), "repeats merged, order kept")
+	for i in 6:
+		map.hud.notify("Line %d" % i)
+	check(toasts.get_child_count() <= ToastFeed.MAX_LINES, "never more than %d lines" % ToastFeed.MAX_LINES)
