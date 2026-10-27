@@ -120,12 +120,10 @@ func _legendary_flow() -> void:
 	await _walk_to(dummy_a.global_position + Vector2(-26, 0))
 	var bridge: PlayerProgressionBridge = player.get_node("ProgressionBridge")
 	f.aim_direction = Vector2.RIGHT
-	for i in 2:
-		f.light_pressed = true
-		await _ticks(14)
-	f.heavy_pressed = true
+	session.character.mastery.add_xp(&"one_handed_sword", 400)   # Combat Flow: L-L-H (heavy finisher) needs sword mastery 4
+	PlaytestFlowInput.press_path(self, player, f, "LLH")
 	var shot_taken := false
-	for i in 40:
+	for i in 120:   # the path runs alongside (about 1.3 s until the finisher lands)
 		await _ticks(1)
 		if not shot_taken and not arena.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.get_script() == preload("res://scripts/fx/shockwave_fx.gd")).is_empty():
 			await _shot("r05_echo_shockwave")
@@ -141,7 +139,7 @@ func _save_load_flow() -> void:
 	for i in 3:
 		await _press(&"debug_add_mastery_xp")
 	_check(character.mastery.get_level(&"one_handed_sword") > level_before, "mastery raised via F3")
-	_check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "technique unlocked in combat")
+	_check(player.combat.mastery_level == character.mastery.get_level(&"one_handed_sword"), "combo gates follow the raised mastery")
 	await _press(&"debug_save")
 	_check(FileAccess.file_exists(session.save_path), "F6 wrote the test save")
 	var snapshot := character.to_dict()
@@ -165,7 +163,7 @@ func _save_load_flow() -> void:
 	_check(preload("res://tests/playtest/loop_playtest.gd").comparable(loaded.to_dict()) == preload("res://tests/playtest/loop_playtest.gd").comparable(snapshot), "loaded state equals the saved snapshot (except visit counters)")
 	_check(loaded.get_stats() == stats, "stats rebuilt identically")
 	_check(loaded.inventory.count(&"echo_blade") == 1, "discarded blade is back")
-	_check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "technique active after load")
+	_check(player.combat.mastery_level == loaded.mastery.get_level(&"one_handed_sword") and player.combat.chain == "", "mastery gates after load, no combo state revived")
 	var bridge: PlayerProgressionBridge = player.get_node("ProgressionBridge")
 	_check(bridge.effects.has_effect(&"echo_shockwave"), "legendary effect reconstructed")
 	_check(player.combat.weapon.id == loaded.equipment.main_hand_family(), "weapon from loaded main hand")

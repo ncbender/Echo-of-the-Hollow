@@ -9,16 +9,22 @@ Konflikte unter „Offene Designfragen“.
 |---|---|
 | WASD | freie Bewegung in 8 Richtungen |
 | Maus | Ziel- und Angriffsrichtung |
-| Linksklick | genau ein Light Attack pro physischem Klick (kein Auto-Repeat beim Halten) |
-| Rechtsklick halten / loslassen | Heavy aufladen / ausführen |
+| Linksklick | Quick (L): genau eine Eingabe pro physischem Klick, kein Auto-Repeat beim Halten (Ausnahme: Bogen-Flowing-Draw ab Mastery 10) |
+| Rechtsklick | Heavy (H) sofort beim Drücken (Combat Flow 1.5, keine Aufladung); Bogen: halten = Precision Stance, Linksklick dabei = Precision Shot (P) |
 | Space | Dash in WASD-Richtung; ohne WASD in Blickrichtung (zur Maus) |
 | Shift | Block & Parry (seit 0.4): drücken = Parry-Fenster, halten = Block, loslassen = Ende |
 | Q/E/R/F | aktive Klassenfähigkeiten (Class Foundation 0.2, `SKILL_SYSTEM.md`) |
 | C | Klassen-/Talentfenster (Talente lernen überall, Rest an der Klassenstation) |
-| 1 / 2 | Waffenfamilie wechseln (Prototyp) |
+| 1 / 2 | Hearth Flask / Spezialtrank (kein Waffen-Schnellwechsel; Waffe nur im Inventar) |
 | F1 / F2 / F3 / F5 | Debug: Hitboxen + Lunge-/Knockback-Vektoren, Gegner spawnen, Mastery-XP, Map neu laden |
 
 Kein Sprint.
+
+> **Combat Flow 1.5 / Weapon Mastery 1.4 (seit dem Combat Rework):** Für **Spielerwaffen** gelten Angriffe,
+> Combos, Cancel-Fenster und Bogensteuerung aus `docs/WEAPON_MASTERY_COMBAT_FLOW.md` (Spezifikation
+> `docs/Design/WEAPON_MASTERY_COMBAT_FLOW_1_4_1_5.md`). Die Abschnitte „Light Attacks“, „Heavy Attacks“,
+> „Combo-System“, die Schwert-/Zweihänder-Tabellen und „Animation-Cancelling“ unten beschreiben das
+> **Legacy-System**, das Gegner weiterhin nutzen (Grunt, Warden, Husks, Wolf). Dash- und Parry-Werte sind unverändert.
 
 ## Bewegung
 - Unmittelbar und präzise, Bewegung unabhängig von der Zielrichtung.

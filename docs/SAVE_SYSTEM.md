@@ -89,6 +89,9 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
 Aktuell: Version 10.
+Weapon Mastery 1.4 / Combat Flow 1.5 ändert das Schema **nicht** (Mastery war schon pro Familie gespeichert,
+Angriffszustand/Puffer werden nie gespeichert). Eine Waffe in der Nebenhand aus älteren Ständen verwirft die
+Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test `save`).
 - 1→2 ergänzt `world.map_states` (Overnight 3).
 - 2→3 (Crafting Foundation 0.1): Items in `inventory` und `orphaned_items` bekommen `ilvl` 1 und
   `quality` 0. Das vorbereitete Feld `essence` wird zu `essences` (Liste), Unbekanntes landet in

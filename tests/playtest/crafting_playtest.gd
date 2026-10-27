@@ -363,18 +363,12 @@ func _loop() -> void:
 	map.player.combat.hit_landed.connect(func(hit: HitData) -> void: tags.append_array(hit.tags))
 	await _frames(10)
 	f.aim_direction = Vector2.RIGHT
-	for step: String in ["L", "L"]:
-		f.light_pressed = true
-		for i in 14:
-			await physics_frame
-	f.heavy_pressed = true
-	f.heavy_held = true
-	for i in 50:
+	map.bridge.character.mastery.add_xp(&"one_handed_sword", 400)   # Combat Flow: L-L-H (heavy finisher) needs sword mastery 4
+	PlaytestFlowInput.press_path(self, map.player, f, "LLH")
+	for i in 80:   # the finisher lands after about 1.2 s
 		await physics_frame
-	f.heavy_held = false
-	f.heavy_released = true
-	for i in 8:
-		await physics_frame
+		if map.player.combat.chain == "LLH" and map.player.combat.phase == CombatComponent.Phase.RECOVERY:
+			break
 	await _shot("loop", "03_discharge")
 	for i in 40:
 		await physics_frame
@@ -386,12 +380,16 @@ func _loop() -> void:
 		f.move = to.normalized()
 		await physics_frame
 	f.move = Vector2.ZERO
+	for i in 60:   # a new attack needs neutral (Combat Flow: no press during the chain starts one)
+		if not map.player.combat.is_busy():
+			break
+		await physics_frame
 	f.light_pressed = true
 	for i in 30:
 		await physics_frame
 	var effects := map.bridge.effects
 	_check(effects.shared_state(&"storm_wolf_discharge").get("triggers", 0) >= 1, "Storm Wolf discharge fired in the arena")
-	_check(&"stone_golem_crush" in tags, "Stone Golem boosted the fully charged finisher")
+	_check(&"stone_golem_crush" in tags, "Stone Golem boosted the heavy finisher")
 	_check(&"impact_rune" in tags, "Rune of Impact on heavy hits")
 	_check(&"thunder_quake" in tags, "Thunderquake resonance on the follow-up hit")
 	await _press(&"debug_save")   # F6

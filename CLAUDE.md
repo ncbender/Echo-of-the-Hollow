@@ -8,6 +8,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Inventory & Haven Stash 1.0 (Haven-Lager, Save v6) + Professions Foundation 1.0 (neun Berufe, Artisan Quarter, Save v7)
 + Overnight Artisan Crafting 01 (Werkstätten Ruined/Restored/Revitalized, Hollowwood-Sammeln, Restaurierung aus dem Lager).
 + Overnight Systems 02 (Item Integrity + Salvaging, Hearth Flask + Tränke, Armor Mastery, Loot-Economy-Grundlage; Save v10).
++ Combat Rework / Weapon Mastery 1.4–1.5 (Combat Flow für Spielerwaffen, neun Familien, Pfad-Mastery, ein Waffen-Slot; Save v10).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -28,6 +29,12 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 ## Feste Regeln
 - Combat-Design in `docs/COMBAT_DESIGN.md` ist verbindlich. Timings/Tempo/Balance nicht ohne Playtest
   ändern; Vorschläge dort unter „Vorschläge für den Feel-Test“ sammeln.
+- Combat Flow 1.5 / Weapon Mastery 1.4 (`docs/WEAPON_MASTERY_COMBAT_FLOW.md`, Spezifikation `docs/Design/`): Spielerwaffen
+  sind Combo-Pfad-Bäume (`AttackDefinition.combo_input`, `WeaponFamily.combo_paths`), Familien nur über
+  `tools/generate_weapon_families.gd` erzeugen. Eingaben/Fenster/Puffer nur im Flow-Modus von `CombatComponent`
+  (Werte `CombatFlowRules`); Gegner nutzen den Legacy-Baum. Mastery schaltet nur Pfade frei (nie Stats), XP nur
+  beim Kill nach Beitrag (`CombatRewardTracker`). Genau ein Waffen-Slot, kein Quick-Swap; Skills/Tränke nur neutral;
+  Dash/Parry/Block vor dem Cancel-Fenster ablehnen, nie speichern. „Voll aufgeladen“ = `HitData.is_full_power`.
 - Spieldaten sind Resources unter `data/` mit stabilen `StringName`-IDs. Keine `match`/`if`-Ketten
   für einzelne Waffen, Angriffe, Items oder Klassen.
 - Definitionen (Resources) ≠ Laufzeitinstanzen (`Character`, `ItemInstance`, …) ≠ Spielstand (Dict/JSON).

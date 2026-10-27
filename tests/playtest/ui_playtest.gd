@@ -246,7 +246,7 @@ func _open_build_panel(tag: String) -> void:
 func _open_story_windows(tag: String) -> void:
 	var lines: Array[Dictionary] = [{"name": "Mara Veyne", "text": "There's a place north of here. Haven. Not much to look at, but it's got walls, a forge, and people who still give a damn.", "color": UiTheme.COLOR_ACCENT}]
 	map.hud.open_lines(lines)
-	map.hud.show_hint("Hold RMB to charge a heavy attack. Release to strike.")
+	map.hud.show_hint("RMB: heavy attack. Bows: hold RMB for the Precision Stance.")
 	await _frames(4)
 	_check_layout(tag + " dialogue + hint")
 	await _shot(tag, "07_dialogue_hint")

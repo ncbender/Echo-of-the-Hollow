@@ -353,6 +353,7 @@ func _echo_fight(rotation: Array, seconds: float) -> void:
 	var character := session.character
 	var ticks := 0
 	var step := 0
+	var last_skill := -50
 	while character.classes.in_trial() and ticks < seconds * 60.0:
 		var target := _nearest_enemy(character.classes.active_class_id == &"warrior")
 		f.move = Vector2.ZERO
@@ -365,11 +366,18 @@ func _echo_fight(rotation: Array, seconds: float) -> void:
 			var wanted := 60.0 if character.classes.active_class_id == &"arcanist" and next_slot != 1 else 22.0
 			if to.length() > wanted:
 				f.move = to.normalized()
-			if ticks % 15 == 0 and to.length() < 34.0:
-				f.light_pressed = true
-			if ticks % 50 == 25:
+			# Combat Flow: presses count in neutral (no skill cancels, no hidden combos at level 1)
+			var neutral := map.player.can_start_skill()
+			var threat := _telegraphing_enemy(48.0)
+			if threat != null and map.player.dash.can_dash() and map.player.combat.can_dash_cancel():
+				f.move = (map.player.global_position - threat.global_position).normalized()   # dodge like a player
+				f.dash_pressed = true
+			elif ticks % 50 >= 25 and neutral and ticks - last_skill >= 50:
 				f.ability_slot = rotation[step % rotation.size()]
 				step += 1
+				last_skill = ticks
+			elif neutral and to.length() < 34.0 and map.player.combat.state == CombatComponent.State.IDLE:
+				f.light_pressed = true
 		ticks += 1
 		await physics_frame
 	f.move = Vector2.ZERO
@@ -548,3 +556,12 @@ func _clean_profile() -> void:
 		for suffix: String in ["", SaveSystem.BACKUP_SUFFIX, SaveSystem.TEMP_SUFFIX]:
 			if FileAccess.file_exists(path + suffix):
 				DirAccess.remove_absolute(path + suffix)
+
+
+## Nearest enemy within `radius` whose attack is in its telegraph (echo fights dodge it).
+func _telegraphing_enemy(radius: float) -> Enemy:
+	for node in map.find_children("*", "Enemy", true, false):
+		var enemy := node as Enemy
+		if enemy.state == Enemy.State.TELEGRAPH and enemy.global_position.distance_to(map.player.global_position) < radius:
+			return enemy
+	return null

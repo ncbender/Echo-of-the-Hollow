@@ -257,3 +257,25 @@ Galerie-Screens: `professions_salvage`, `hud_consumables`, `flask_upgrades`, `ch
 Bei Änderungen an `item_instance.gd`/`item_protection.gd`/`salvage_service.gd`: salvage, save, stash, inventory_ui, presets;
 an Player/Bridge/`consumable_service.gd`: consumables, input, hud, defense, dash, movement, skills;
 an `armor_mastery_*`/`combat_component.gd` Recovery: armor_mastery, light_attack, heavy_attack, combo, attack_speed, defense.
+
+Weapon Mastery 1.4 / Combat Flow 1.5: `combat_flow` (Zustandsmaschine mit Testfamilie: Level-Gates aller Stufen,
+gesperrte Präfixe, Fenster auf die Millisekunde, ein Puffer, kein Doppel-Input, Übergang bei 30/60/144 Hz,
+Cancel-Anteile je Rolle, Burden nur Recovery, Phasenbewegung, Abbruch leert), `weapon_families` (Katalog: 64 Namen
+und Level, Bogentabelle, 72 Pfade, Referenz-W/A/R und Bewegung aller Familien; alle 64 Nahkampf-Endknoten real am
+Spieler mit echten Treffern, Thousand-Cuts-Deckel), `combat_flow_player` (Dash/Parry vor dem Fenster abgelehnt
+ohne Ladung und Phantom, Dash/Parry-Werte unter Heavy-Burden, Gehen je Familie und Phase, Lunge an der Wand,
+Seitschritt, kein Pivot im Active, Skills/Tränke nur neutral, Stun/UI leeren), `bow` (L/P/RMB allein,
+Tap-Pfade an der Levelgrenze, Flowing Draw inkl. Schuss-1-Zählung, Pflicht-Recovery, neuer Zyklus, Loslassen,
+RMB, Tap/Hold-Kollision, Stance 65 %, Pfeile nach Dash-Cancel), `mastery` (Kurve, Pfad-Freischaltung über die
+Bridge, keine Stat-Boni, keine Treffer-/Trainings-XP, Kill-XP nach Beitrag inkl. Skill-Kill, Klassenwechsel,
+Serialisierung), `weapon_switch` (kein Quick-Swap, Wechsel über Ausrüstung erst neutral, alle Familien),
+`equipment` (ein Waffen-Slot, alle Klassen), `save` (alte Nebenhandwaffe, neun Familien).
+**Legacy-Engine:** Gegner nutzen weiter Charge-Heavy und den alten Combo-Baum. `combo`, `heavy_attack`,
+`light_attack`, `lunge`, `combo_reach`, `attack_speed`, `hits`, `dash`, `defense`, `knockback` laufen deshalb mit
+den Fixtures `tests/fixtures/legacy_sword.tres` / `legacy_greatsword.tres` (`GameplayTestCase.SWORD`,
+`spawn_legacy_player`). Klassen-/Effekt-Suites ohne Ausrüstungswechsel nach dem Binden nutzen das Legacy-Schwert;
+Item-/Essenz-/Evolution-Suites laufen im Flow-Modus (`perform_path`). Playtests: `visual_playtest -- --family=bow
+--mastery=20`, Helfer `PlaytestFlowInput.press_path`.
+Bei Änderungen an `combat_component.gd` (Flow), `weapon_family.gd`, `combat_flow_rules`, `data/weapons`:
+combat_flow, combat_flow_player, weapon_families, bow, mastery, item_effects, essences, evolution, plus die
+Legacy-Suites oben; bei `combat_reward_tracker.gd`: mastery, status_effects, evolution, armor_mastery.

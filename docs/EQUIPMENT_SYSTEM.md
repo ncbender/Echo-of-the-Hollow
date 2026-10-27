@@ -17,19 +17,20 @@ ausgeschlossen (es gibt genau einen Speicherort), Verwerfen entfernt automatisch
 | Fall | Regel |
 |---|---|
 | Zweihandwaffe | nur Hauptwaffe; Nebenhand wird logisch blockiert und **geleert** |
-| Zwei Einhandwaffen | Haupt + Neben (wenn Klasse `can_dual_wield`) |
+| Waffen allgemein | **genau ein Waffen-Slot** (Hauptwaffe, Weapon Mastery 1.4): keine Waffe in der Nebenhand, kein Dual Wield (`can_dual_wield` ungenutzt) |
 | Einhand + Schild | Schild nur Nebenhand, nur wenn Klasse `can_use_shields` |
 | Nebenhand bei ausgerüstetem Zweihänder | Zweihänder wird abgelegt |
-| Dieselbe Waffe in die andere Hand | wird verschoben, nie doppelt |
-| Klassen-/Familienregeln | `required_class_ids`, `ClassDefinition.allowed_weapon_families` |
+| Klassen-/Familienregeln | `required_class_ids`; jede Klasse darf jede Waffenfamilie führen (`allowed_weapon_families` leer) |
 
 **Sichere Transferregel:** Alles, was durch ein Ausrüsten verdrängt wird, verliert nur die Referenz und
 bleibt im Inventar; die UI meldet „Moved back to inventory: …“ (`CharacterEquipment.last_displaced`).
 
 Die **Combat-Waffenfamilie folgt der Hauptwaffe** (Wechsel erst, wenn die Aktionsschicht frei ist).
 Ohne Hauptwaffe: `fallback_weapon_family` (Platzhalter bis waffenloser Kampf existiert).
-Tasten **1/2** rüsten die erste Einhand-/Zweihandwaffe aus dem Inventar aus.
-Nebenhand-Waffen tragen nur Werte bei; der Kampf nutzt die Hauptwaffen-Combos.
+Es gibt **keinen Waffen-Schnellwechsel**: die Waffe wird im Inventar gewechselt (Tasten 1/2 sind Hearth Flask und
+Spezialtrank). Ein Wechsel beendet die laufende Combo und ihren Puffer.
+Ältere Spielstände oder Presets mit einer Waffe in der Nebenhand: die Referenz wird beim Laden bzw. Anwenden
+verworfen, die Waffe bleibt in der Tasche.
 
 ## Stat-Resolver ✅ (`StatResolver`, `Character.get_stats()`)
 `final = Σflat · (1 + Σpercent/100)` über Charakter-Basis + Klasse(Level) + aktive Ausrüstung

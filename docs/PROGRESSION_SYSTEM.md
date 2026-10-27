@@ -2,43 +2,36 @@
 
 Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · ⬜ offen
 
-## Waffenbeherrschung ✅
-- Fortschritt gehört dem **Charakter**, nicht der Klasse (`Character.mastery: WeaponMastery`).
-- Pro Waffenfamilie: Level (1–20), XP im aktuellen Level, XP bis zum nächsten Level, freigeschaltete
-  Techniken, Meilensteine.
+## Waffenbeherrschung ✅ (Weapon Mastery 1.4, `docs/WEAPON_MASTERY_COMBAT_FLOW.md`)
+- Fortschritt gehört dem **Charakter**, nicht der Klasse (`Character.mastery: WeaponMastery`), für alle
+  neun Familien (Level 1–20, XP im Level); Klassenwechsel ändert nichts.
 - Daten: `data/mastery/<family>.tres` (`MasteryTrack`): `max_level`, Kurve
-  `xp_to_next(n) = round(xp_base · xp_growth^(n-1))` (Startwerte 100 / 1,15), Liste von `MasteryUnlock`.
-- `MasteryUnlock.requirement_id` = `AttackDefinition.unlock_requirement` → die Technik wird über den
-  **bestehenden Combo-Baum** freigeschaltet (`CombatComponent.set_unlocked`). Ohne Freischaltung
-  verhält sich der Knoten wie nicht vorhanden (Combo startet neu) – Basis-Combos sind ab Level 1 spielbar.
+  `xp_to_next(n) = round(xp_base · xp_growth^(n-1))` (Startwerte 100 / 1,15, **vorläufig**).
+- Ein Level schaltet **nur Combo-Pfade** frei (`WeaponFamily.combo_paths`, Signal
+  `WeaponMastery.path_unlocked`): Level 1 = ein Quick- und ein Heavy-Grundangriff; Nahkampf Lv 2/4/6/9/11/14/17/20,
+  Bogen Lv 2/4/6/9/14/17/20 + Flowing Draw Lv 10. **Keine passiven Stat-Boni.**
+- Die Bridge setzt `CombatComponent.mastery_level` der getragenen Familie; eine Kette behält das Level ihres Starts.
+- Die alten Techniken (Riposte Spin, Cleaving Echo) und die Namens-Meilensteine sind mit 1.4 entfallen.
 
-| Familie | Technik (Lv 3) | Meilensteine |
-|---|---|---|
-| Einhandschwert | `sword_light_4_mastery` „Riposte Spin“ (L-L-L-L) | Lv 5, 10, 20 (nur Name) 🔧 |
-| Zweihandschwert | `greatsword_light_4_mastery` „Cleaving Echo“ (L-L-L-L, **neu**) | Lv 5, 10, 20 🔧 |
-
-Der neue Zweihand-Knoten ist nur über die Freischaltung erreichbar; bestehende Combos/Timings unverändert.
-
-## XP-Vergabe ✅ (`CombatRewardTracker`, Werte vorläufig in `data/progression/progression_rules.tres`)
+## XP-Vergabe ✅ (`CombatRewardTracker`)
 | Ereignis | Beherrschung | Klasse |
 |---|---|---|
-| akzeptierter Treffer | 4 | 1 |
-| + Finisher (`finisher`-Tag) | +6 | – |
-| + voll geladener Heavy | +4 | – |
-| Gegner besiegt (`EnemyConfig`) | 20 | 30 |
+| akzeptierter Treffer | – (zählt als Beitrag) | 1 |
+| Gegner besiegt (`EnemyConfig.mastery_xp_reward`) | aufgeteilt nach Waffenschaden je Familie | `class_xp_reward` |
 
 **Exploit-Schutz**
-- Nur `hit_landed` (akzeptierte Treffer) zählt – Klicks ins Leere geben nichts.
-- Ein Belohnungs-Schlüssel pro (Schwung, Ziel); doppelte Ereignisse werden ignoriert.
-- Trainingsziele (Gruppe `training_target`): 50 % XP, max. 60 XP pro Ziel-Instanz und Sitzung, kein
-  Kill-XP. Nach Arena-Neuladen beginnt der Deckel neu (bewusst: Sitzungsdeckel; Puppen bleiben langsam).
-- Kill-Belohnung einmal pro Ziel-Instanz.
+- Nur `hit_landed` (akzeptierte Treffer) zählt als Beitrag – Klicks ins Leere geben nichts.
+- Beherrschungs-XP nur beim Kill, nach Beitrag (nicht pro Treffer, nicht nur der letzte Treffer); ein Kill durch
+  Skill/Status zahlt den beteiligten Familien; ohne Waffenbeteiligung keine Beherrschungs-XP.
+- Trainingsziele (Gruppe `training_target`) geben **keine** Beherrschungs-XP (Klassen-XP wie bisher nicht).
+- Kill-Belohnung einmal pro Ziel-Instanz; Klassen-XP pro (Schwung, Ziel) einmal.
 
 ## UI ✅
-Beherrschungsfenster oben rechts (Familie der aktuellen Waffe, Level, XP-Balken, nächste Freischaltung,
-Techniken) + Meldungen bei Level-up/Freischaltung. Debug: **F3** +100 XP für die aktuelle Familie.
+Spielerrahmen: Familie und Level der getragenen Waffe; Klassenstation, Seite **Weapons**: alle neun Familien mit
+Level, XP und ihren Pfaden (Level, Eingabe, Name; freigeschaltet grün); Meldungen bei Level-up und
+„Combo unlocked: …“. Debug: **F3** +100 XP für die aktuelle Familie.
 
 ## Offen
-- ⬜ Progressionsgeschwindigkeit balancieren (Werte sind Platzhalter).
-- 🔧 Meilensteine haben noch keinen Spieleffekt.
-- ⬜ Weitere Familien (Äxte, Dolche, Speere …): neue `WeaponFamily` + `MasteryTrack` – kein Code nötig.
+- ⬜ Progressionsgeschwindigkeit balancieren (Kurve und Kill-XP vorläufig; Ziel laut Design: Hauptfamilie
+  etwa Lv 5–8 am Ende von Hollowwood, Lv 20 im Endgame).
+- ⬜ Schutz gegen das Farmen trivialer Gegner (es gibt noch keine Gegnerstufen).

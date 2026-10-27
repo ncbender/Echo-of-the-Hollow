@@ -2,7 +2,9 @@ extends SceneTree
 ## Scripted visual playtest in the real arena (NOT headless).
 ## Plays a fixed input sequence through Player.feed_input(), saves screenshots and
 ## an event log to tests/output/. Run:
-##   godot --path . --fixed-fps 60 -s res://tests/playtest/visual_playtest.gd [-- --weapon=1 --enemy]
+##   godot --path . --fixed-fps 60 -s res://tests/playtest/visual_playtest.gd [-- --family=bow --mastery=20 --enemy]
+## Combat Flow 1.5: the family comes from the inventory (an item of --family is
+## equipped through the progression bridge); --mastery sets its mastery level.
 
 const ARENA := "res://scenes/arena/test_arena.tscn"
 const OUTPUT := "res://tests/output"
@@ -25,15 +27,20 @@ func _run() -> void:
 	root.add_child(arena)
 	current_scene = arena
 	player = arena.get_node("Player")
+	var session := SessionState.find(self)
+	if session != null:
+		session.save_path = "user://test_saves/visual_playtest.save.json"   # never the real saves
 	player.feed_input(f)
 	_connect_logging()
 	await _ticks(10)
 
-	var weapon_slot := _arg_int("--weapon", 0)
-	if weapon_slot > 0:
-		f.weapon_slot = weapon_slot
-		await _ticks(2)
-		prefix = String(player.combat.weapon.id)
+	var family_arg := _arg_string("--family", "")
+	if family_arg != "":
+		await _wield(StringName(family_arg))
+		prefix = family_arg
+	_set_mastery(_arg_int("--mastery", 20))
+	await _ticks(2)
+	_log("wielding %s at mastery %d" % [player.combat.weapon.id, player.combat.mastery_level])
 	if "--polish" in OS.get_cmdline_user_args():
 		await _polish_sequence()
 	elif "--enemy" in OS.get_cmdline_user_args():
@@ -58,62 +65,94 @@ func _combat_sequence() -> void:
 	f.move = Vector2.ZERO
 	await _ticks_aim(dummy_a, 4)
 	await _shot("01_idle_aim")
-
-	# 2) L-L-L
-	for i in 3:
-		f.light_pressed = true
+	if player.combat.weapon.is_bow():
+		await _bow_sequence(dummy_a)
+		return
+	# 2) L-L-L, L-L-H, H-H-H: each input pressed as soon as the running step accepts it
+	for path in ["LLL", "LLH", "HHH"]:
+		await _path(path, dummy_a)
 		await _until_phase(CombatComponent.Phase.ACTIVE, dummy_a)
 		await _ticks_aim(dummy_a, 2)
-		await _shot("02_light_%d_active" % (i + 1))
-		await _until_phase(CombatComponent.Phase.RECOVERY, dummy_a)
-		await _ticks_aim(dummy_a, 6 if i < 2 else 30)
-
-	# 3) L then fully charged H (L-H thrust)
-	f.light_pressed = true
-	await _until_phase(CombatComponent.Phase.RECOVERY, dummy_a)
-	f.heavy_pressed = true
-	f.heavy_held = true
-	await _ticks_aim(dummy_a, 20)
-	await _shot("03_charging_empowered")
-	await _ticks_aim(dummy_a, 26)
-	await _shot("04_charging_full")
-	f.heavy_held = false
-	f.heavy_released = true
-	await _until_phase(CombatComponent.Phase.ACTIVE, dummy_a)
-	await _ticks_aim(dummy_a, 2)
-	await _shot("05_lh_thrust_active")
-	await _until_idle(dummy_a)
-
-	# 4) Dash away: WASD (away from the dummy) decides the dash direction (UI/UX Polish 1.1).
+		await _shot("02_%s_final_active" % path.to_lower())
+		await _until_idle(dummy_a)
+		await _ticks_aim(dummy_a, 20)
+	# 3) Dash away: WASD (away from the dummy) decides the dash direction (UI/UX Polish 1.1).
 	var away := (player.global_position - dummy_a.global_position).normalized()
 	f.aim_direction = -away   # still facing the dummy
 	f.move = away
 	f.dash_pressed = true
 	await _ticks(4)
 	f.move = Vector2.ZERO
-	await _shot("06_dash_iframes")
+	await _shot("03_dash_iframes")
 	await _ticks_aim(dummy_a, 40)
 
-	# 5) Walk back and do L-L-H (crush) for a poise break
-	f.move = (dummy_a.global_position - player.global_position).normalized()
-	while player.global_position.distance_to(dummy_a.global_position) > 26.0:
-		await _ticks_aim(dummy_a, 1)
-	f.move = Vector2.ZERO
-	for i in 2:
-		f.light_pressed = true
-		await _until_phase(CombatComponent.Phase.RECOVERY, dummy_a)
-		await _ticks_aim(dummy_a, 2)
-	f.heavy_pressed = true
-	f.heavy_held = true
-	await _ticks_aim(dummy_a, 2)
-	f.heavy_held = false
-	f.heavy_released = true
-	await _until_phase(CombatComponent.Phase.ACTIVE, dummy_a)
-	await _ticks_aim(dummy_a, 3)
-	await _shot("07_llh_crush_active")
-	await _ticks_aim(dummy_a, 12)
-	await _shot("08_after_crush")
-	await _until_idle(dummy_a)
+
+## Bow: Precision Shot, Twin Arrow, Flowing Draw (held 2 s).
+func _bow_sequence(target: Node2D) -> void:
+	await _path("P", target)
+	await _until_phase(CombatComponent.Phase.STARTUP, target)
+	await _shot("02_precision_windup")
+	await _until_idle(target)
+	await _path("LL", target)
+	await _until_idle(target)
+	await _ticks_aim(target, 20)
+	f.light_pressed = true
+	f.light_held = true
+	for i in 120:
+		await _ticks_aim(target, 1)
+		if i == 60:
+			await _shot("03_flowing_draw")
+	f.light_held = false
+	await _until_idle(target)
+	await _ticks_aim(target, 20)
+
+
+## Presses `path` (L / H / P), each input as soon as the running step accepts it.
+func _path(path: String, target: Node2D) -> void:
+	for index in path.length():
+		var guard := 0
+		while index > 0 and (player.combat.chain.length() != index or player.combat.attack_clock() < player.combat.accept_from()) and guard < 120:
+			await _ticks_aim(target, 1)
+			guard += 1
+		match path[index]:
+			"L":
+				f.light_pressed = true
+			"H":
+				f.heavy_pressed = true
+			"P":
+				f.light_pressed = true
+				f.heavy_held = true
+		await _ticks_aim(target, 2)   # RMB stays held through the tick that consumes the press
+		f.heavy_held = false
+
+
+func _bridge() -> PlayerProgressionBridge:
+	return player.get_node_or_null("ProgressionBridge") as PlayerProgressionBridge
+
+
+## Equips the first item of `family_id` from the database through the inventory.
+func _wield(family_id: StringName) -> void:
+	var bridge := _bridge()
+	if bridge == null:
+		player.set_weapon_family(GameDatabase.get_default().weapons.get(family_id))
+		return
+	var character := bridge.character
+	for item_id: StringName in character.database.items:
+		var definition := character.database.get_item(item_id)
+		if definition.is_weapon() and definition.weapon_family_id == family_id:
+			character.equipment.equip(character.inventory.add_item(item_id)[0].instance_id)
+			break
+	await _ticks(3)
+
+
+func _set_mastery(level: int) -> void:
+	var bridge := _bridge()
+	var family_id := player.combat.weapon.id
+	if bridge == null:
+		player.combat.mastery_level = level
+		return
+	while bridge.character.mastery.get_level(family_id) < level:
+		bridge.character.mastery.add_xp(family_id, 500)
 
 
 func _enemy_sequence() -> void:
@@ -173,10 +212,7 @@ func _polish_sequence() -> void:
 	await _ticks_aim(enemy, 30)
 	_log_knockback(enemy, "sword light")
 	# 2) sword L-L-L without walking
-	for i in 3:
-		f.light_pressed = true
-		await _until_phase(CombatComponent.Phase.RECOVERY, enemy)
-		await _ticks_aim(enemy, 2)
+	await _path("LLL", enemy)
 	await _until_idle(enemy)
 	await _ticks_aim(enemy, 30)
 	_log_knockback(enemy, "sword L3")
@@ -189,9 +225,9 @@ func _polish_sequence() -> void:
 	await _until_idle(enemy)
 	await _ticks_aim(enemy, 30)
 	_log_knockback(enemy, "sword heavy")
-	# 4) greatsword light and heavy
-	f.weapon_slot = 1
-	await _ticks(2)
+	# 4) greatsword light and heavy (equipped through the inventory)
+	await _wield(&"two_handed_sword")
+	_set_mastery(20)
 	await _walk_to(enemy, 34.0)
 	f.light_pressed = true
 	await _until_idle(enemy)
@@ -216,13 +252,13 @@ func _polish_sequence() -> void:
 	# 6) normal fight against the active grunt with the greatsword, then the sword
 	enemy.config = active_config
 	enemy.health.set_max_health(normal_health)
-	f.weapon_slot = 0
+	await _wield(&"one_handed_sword")
 	var guard := 0
 	while is_instance_valid(enemy) and not enemy.health.is_dead() and guard < 1500:
 		guard += 1
 		var to_enemy := enemy.global_position - player.global_position
 		f.move = to_enemy.normalized() if to_enemy.length() > 24.0 else Vector2.ZERO
-		if player.combat.state != CombatComponent.State.CHARGING and to_enemy.length() < 34.0:
+		if player.combat.state == CombatComponent.State.IDLE and to_enemy.length() < 34.0:
 			f.light_pressed = true
 		player.health.heal(1000.0)
 		if guard == 120:
@@ -251,7 +287,7 @@ func _log_knockback(enemy: Enemy, label: String) -> void:
 func _connect_logging() -> void:
 	var combat := player.combat
 	combat.attack_started.connect(func(attack: AttackDefinition, tier: int) -> void:
-		_log("attack_started %s tier=%d path=%s" % [attack.id, tier, combat.combo.path]))
+		_log("attack_started %s (%s) tier=%d chain=%s" % [attack.id, attack.display_name, tier, combat.chain]))
 	combat.attack_cancelled.connect(func(attack: AttackDefinition, reason: StringName) -> void:
 		_log("attack_cancelled %s by %s" % [attack.id, reason]))
 	combat.hit_landed.connect(func(hit: HitData) -> void:
@@ -310,4 +346,11 @@ func _arg_int(name: String, fallback: int) -> int:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with(name + "="):
 			return arg.get_slice("=", 1).to_int()
+	return fallback
+
+
+func _arg_string(name: String, fallback: String) -> String:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with(name + "="):
+			return arg.get_slice("=", 1)
 	return fallback
