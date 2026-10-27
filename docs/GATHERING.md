@@ -1,6 +1,6 @@
 # Gathering Rework 1.1 – mehrstufiges Sammeln (G halten)
 
-Ergänzt `docs/PROFESSIONS.md`. Status: in Arbeit auf `dev/gathering-rework-11`.
+Ergänzt `docs/PROFESSIONS.md`. Status: umgesetzt auf `dev/gathering-rework-11` (Bericht `GATHERING_REWORK_11_REPORT.md`).
 
 ## 1. Audit (Phase 1, Basis `5af5443`)
 
@@ -42,3 +42,68 @@ Ergänzt `docs/PROFESSIONS.md`. Status: in Arbeit auf `dev/gathering-rework-11`.
   - neu `test_gathering_hold.gd` (G halten, Loslassen, Unterbrechungen, Wiedereinstieg, Reichweite, Block ohne Schaden)
   - angepasst bzw. gezielt ausgeführt: `test_professions`, `test_hollowwood` (nur dort, wo Sammeln betroffen ist), `test_input`
   - `test_loop` und Playtests werden nicht ausgeführt (Teststrategie 1.1).
+
+## 3. Umsetzung
+
+### Daten (Prototypwerte)
+| Beruf | Sekunden pro Schritt (`ProfessionDefinition.gather_step_seconds`) | Knoten: Schritte (`steps`) |
+|---|---:|---|
+| Woodcutting | 0,75 | Oak Tree 3, Old Oak 4 |
+| Mining | 0,85 | Forest Rock 3, Iron Vein 4, Rich Iron Vein 5, Ancient Deposit 5 |
+| Herbalism | 0,65 | Duskleaf Patch 1, Wild Flax 2, Duskleaf Cluster 3 |
+| Skinning | 0,90 | Stag Remains 2, Elk Remains 3 |
+
+- **Gesamtbudgets:** unverändert die bisherigen `yield_quantity` und `gather_xp`. Ein Knoten liefert also über alle Schritte genau den alten Gesamtertrag.
+- **XP:** XP-Budget = `gather_xp` × Level-Band-Anteil (wie bisher), festgelegt beim Planen des Zyklus.
+- **Abschlussbonus:** `completion_bonus` = 1 Einheit des Hauptmaterials auf dem letzten Schritt, Teil des Budgets.
+- **Schrittzahl:** Einfache bzw. Level-1-Vorkommen liegen am unteren Rand der Spanne, reiche bzw. Level-3-Vorkommen am oberen.
+
+### Plan und Zustand (`ResourceGathering`)
+**Plan** (`make_plan`), einmal pro Zyklus festgelegt:
+- Der Bonus geht auf den letzten Schritt, das übrige Material wird zufällig auf die Schritte verteilt; ein Schritt darf 0 ergeben.
+- XP werden gleichmäßig verteilt, der Rest geht auf die letzten Schritte.
+- Saat = Map, Knoten und `gather_cycle.<node_id>`. Unterbrechen, Laden oder erneutes Interagieren würfelt deshalb nie neu; erst der nächste Zyklus nach dem Respawn bekommt einen neuen Plan.
+
+**Zustand pro Instanz:** `map_states[map]["gather.<node_id>"]` als JSON-String mit `steps`, `done`, `item`, `items[]`, `xp[]`, `bonus`, `given_items`, `given_xp`. Daraus ergibt sich das Restbudget (`remaining_items`).
+- Beim Lesen wird geprüft: Länge, Wertebereich und Summen (`given_*` = Summe der erledigten Schritte).
+- Unlesbare oder widersprüchliche Zustände geben nie eine Belohnung; der Knoten gilt dann als erschöpft und respawnt normal.
+
+**`complete_step` als eine Transaktion:**
+1. Prüfung: Level, Verfügbarkeit, Platz in der Tasche für das Material dieses Schritts.
+2. Danach geschieht alles ohne Abbruchmöglichkeit: Material in die Tasche, Fortschritt schreiben, XP vergeben.
+3. Nach dem letzten Schritt: Erschöpfung (`node.<node_id>` wie bisher, Echtzeit-Respawn bzw. dauerhaft), Teilzustand löschen, Zyklus +1.
+
+Eine Ablehnung ändert nichts. `gather()` erntet alle restlichen Schritte am Stück und ist nur für Tests und Simulationen gedacht (gleiche Summen).
+
+### Steuerung (`Player`)
+- `ResourceNode.interact` startet bei der G-**Druck**-Flanke (`GameMap`) `Player.begin_gather(node)`, aber nur aus dem neutralen Zustand (wie Skills) und wenn der Knoten bearbeitbar ist.
+- `_step_gather` zählt die Schrittzeit, solange `InputFrame.interact_held` gilt. Nach jedem vollen Schritt ruft es `complete_step` auf; bei Erschöpfung oder Ablehnung endet die Aktion.
+- Gehaltenes G startet nie einen neuen Knoten; nach jeder Unterbrechung braucht es einen neuen Druck.
+
+**Unterbrechungen** (`gather_stopped(reason)`), jeweils sofort; der angefangene Schritt gibt nichts, erledigte Schritte bleiben:
+- G losgelassen, WASD, Dash, Angriff (L/H), Skill-Taste
+- echter HP-Verlust, Reaktion ab INTERRUPT (Stun), Knockback, Tod
+- offenes Fenster oder Pausemenü (`apply_input_block`)
+- Verlassen der Knoten-Area
+
+Ein Treffer ohne HP-Verlust (z. B. pariert) unterbricht nicht.
+
+Interpretation: Trinken (1/2) startet während des Sammelns nicht. Shift (Block/Parry) bleibt möglich und unterbricht nicht (steht nicht auf der Liste).
+
+### Visuell – nur Platzhalter (keine Sprites oder Animationen vorhanden)
+- `PlayerView._draw_gather_tool`: rein visuelles Werkzeug je Beruf – Axt, Spitzhacke, Sichel, Häutemesser. Es wird über 70 % des Schritts ausgeholt und in den letzten 30 % zugeschlagen. Kein Item, kein Slot, keine Haltbarkeit; der Waffen-Slot bleibt unberührt.
+- `ResourceNode._draw`: Abnutzung wächst mit den Schritten.
+
+| Knoten | Abnutzung | Erschöpft |
+|---|---|---|
+| Baum | Kerbe im Stamm | Fallanimation 0,6 s, danach Stumpf mit Schnittfläche |
+| Fels/Ader | Risse; Erzflecken verschwinden | Geröll |
+| Pflanze | Halme werden einzeln entfernt | Stoppeln |
+| Kadaver | Hautstreifen werden abgezogen | Knochen |
+
+- Partikel pro Schritt über `CombatFx` (SPARKS in Holz-, Stein-, Erz-, Blatt- bzw. Hautfarbe); HUD-Meldung pro Schritt („Oak Tree 2/3 · +1 Timber · Woodcutting 2“).
+- Isolierte Sichtprüfung: `tests/playtest/gathering_visual_check.gd` (Screenshots in `tests/output/gathering/`).
+
+### Save
+- Kein Schemawechsel, die Version bleibt 10: `map_states` war schon frei belegbar (skalare Werte). Neu sind nur die Schlüssel `gather.*` und `gather_cycle.*`.
+- Alte Stände: Erschöpfte Knoten bleiben erschöpft. Teilzustände gab es vorher nicht; unberührte Knoten starten einen frischen Zyklus.

@@ -9,6 +9,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Overnight Artisan Crafting 01 (Werkstätten Ruined/Restored/Revitalized, Hollowwood-Sammeln, Restaurierung aus dem Lager).
 + Overnight Systems 02 (Item Integrity + Salvaging, Hearth Flask + Tränke, Armor Mastery, Loot-Economy-Grundlage; Save v10).
 + Combat Rework / Weapon Mastery 1.4–1.5 (Combat Flow für Spielerwaffen, neun Familien, Pfad-Mastery, ein Waffen-Slot; Save v10).
++ Gathering Rework 1.1 (Sammeln in Schritten mit gehaltenem G, feste Budgets, Teilzustand im Save).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -81,6 +82,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   (Kosten über denselben Materialplan wie die Werkbänke); Werkstätten öffnen zuerst die Werkbank.
   Design: `docs/PROLOGUE_AND_HAVEN.md`.
 - Berufe (`docs/PROFESSIONS.md`): Regeln nur in `ProfessionService` (Lernen, XP, Herstellen als Transaktion mit  einem Materialplan für Zählen und Verbrauchen), Zustand in `Character.professions`; Berufe, Rezepte, Sammelknoten  sind Daten (`data/professions`, `data/world/resource_nodes`); Werkbänke sind Haven-Ruinen mit `profession_id`.
+- Sammeln (`docs/GATHERING.md`): nur in Schritten über `ResourceGathering.complete_step` (eine Transaktion pro Schritt,
+  Plan pro Zyklus fest, nie neu würfeln); Start nur auf der G-Druck-Flanke über `Player.begin_gather`, Halten über
+  `InputFrame.interact_held`, Unterbrechungen nur in `Player`. Werkzeuge sind reine Optik (kein Item/Slot).
 - Item Integrity (`docs/ITEM_SYSTEM.md`): Favorit/Sperre/Herkunft nur über `ItemProtection` (nur Einzelitems);
   Herkunft beim Entstehen setzen (`Inventory.add_item(..., origin)`), nie raten. Zerstören/Verkaufen nur nach
   `ItemProtection.destroy_block`. Salvaging nur über `SalvageService` (Werkbank des Herstellungsrezepts, atomar,

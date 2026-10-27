@@ -89,7 +89,8 @@ Alchemie: Das Spiel hat noch kein Verbrauchsgut-System mit Buffs. Der Trank ist 
 in UI und Service klar als „Potions cannot be used yet“ gekennzeichnet. Es werden keine nutzlosen Tränke ausgegeben.
 
 ## Sammeln
-`ResourceGathering.gather` prüft zusätzlich die Berufsstufe des Knotens und vergibt nach Erfolg Sammel-XP.
+Sammeln ist seit Gathering 1.1 mehrstufig (G halten, `docs/GATHERING.md`): `ResourceGathering.complete_step` prüft die
+Berufsstufe und vergibt pro abgeschlossenem Schritt seinen Material- und XP-Anteil aus dem festen Budget des Knotens.
 Die Erschöpfung liegt in `WorldState.map_states` mit Echtzeit-Stempel. Sie wird gespeichert, also setzt Save/Load
 einen Knoten nicht zurück und es gibt keine doppelte Ernte oder XP.
 

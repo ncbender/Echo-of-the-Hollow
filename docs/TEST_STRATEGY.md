@@ -279,3 +279,11 @@ Item-/Essenz-/Evolution-Suites laufen im Flow-Modus (`perform_path`). Playtests:
 Bei Änderungen an `combat_component.gd` (Flow), `weapon_family.gd`, `combat_flow_rules`, `data/weapons`:
 combat_flow, combat_flow_player, weapon_families, bow, mastery, item_effects, essences, evolution, plus die
 Legacy-Suites oben; bei `combat_reward_tracker.gd`: mastery, status_effects, evolution, armor_mastery.
+
+Gathering Rework 1.1: `gathering_steps` (Schrittdaten je Beruf, Plan = alte Gesamterträge und XP, Bonus auf dem
+letzten Schritt, kein Neuwürfeln, je ein Knoten der vier Berufe Schritt für Schritt, Ablehnungen ändern nichts inkl.
+volle Tasche, Teilfortschritt über Save/Load ohne Reroll/Dupe, erschöpft bleibt erschöpft, manipulierte/alte
+Zustände ohne Belohnung), `gathering_hold` (G halten mit Schritt-Timing, Loslassen + neuer Druck, alle
+Unterbrechungen, geblockter Treffer ohne Schaden, nur neutral, echter ResourceNode mit Spieler). Direkt betroffen:
+professions, hollowwood, input. Sichtprüfung isoliert: `tests/playtest/gathering_visual_check.gd`.
+`test_loop` nutzt `ResourceNode.gather()` (Ernte aller Schritte) und wurde mit Teststrategie 1.1 nicht ausgeführt.
