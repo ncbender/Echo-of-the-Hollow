@@ -208,6 +208,8 @@ func test_migration_v4_to_v5() -> void:
 	check_eq(data.quests.the_first_signs.state, "active", "finished prologue -> main quest active")
 	for entry: Dictionary in data.inventory:
 		check_eq(entry.get("origin"), "unknown_legacy", "v8 marks the origin unknown")
+		check_eq(entry.get("base_damage"), 12.0, "v12 stores the iron sword base damage")
+		entry.erase("base_damage")
 		entry.erase("origin")
 	check_eq(data.inventory, old.inventory, "items otherwise untouched")
 	var unfinished: Dictionary = SaveMigrations.migrate({"world": {}, "prologue": {"stage": "not_started"}}, 4, errors)

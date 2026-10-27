@@ -132,6 +132,8 @@ static func sanitize(item: ItemInstance, db: GameDatabase, warnings: PackedStrin
 	if definition == null:
 		return
 	var profile := definition.crafting
+	if WeaponDamage.is_on_model(definition) and item.base_weapon_damage <= 0.0:
+		warnings.append("%s: weapon without stored base damage (never recomputed on load)" % item.instance_id)
 	var max_quality := profile.max_quality if profile != null else 0
 	if item.quality > max_quality:
 		warnings.append("%s: quality %d clamped to %d" % [item.instance_id, item.quality, max_quality])

@@ -13,6 +13,10 @@ var quantity: int = 1
 var item_level: int = 1
 ## 0..CraftingProfile.max_quality; improves defined base stats (ItemStats.quality_factor, +0.5 % per point).
 var quality: int = 0
+## Weapon Base Damage 1.1: raw weapon base damage, assigned ONCE when the instance is
+## created (ItemCreation) and never recomputed - quality, crafting, equipping, transfers
+## and loading leave it as it is. 0 = not a weapon on the base damage model.
+var base_weapon_damage: float = 0.0
 ## Main material chosen at imprint ("" = not imprinted yet).
 var material_id: StringName = &""
 ## Rolled affixes: {"affix": id, "tier": n, "tier_model": 3/5, "stat": id, "flat": v, "percent": v}
@@ -81,6 +85,8 @@ func to_dict() -> Dictionary:
 		data["ilvl"] = item_level
 	if quality != 0:
 		data["quality"] = quality
+	if base_weapon_damage > 0.0:
+		data["base_damage"] = base_weapon_damage
 	if material_id != &"":
 		data["material"] = String(material_id)
 	if not affixes.is_empty():
@@ -117,6 +123,8 @@ static func from_dict(data: Variant) -> ItemInstance:
 	var item := ItemInstance.create(StringName(def_id), qty, id)
 	item.item_level = maxi(1, _int(data.get("ilvl", 1), 1))
 	item.quality = maxi(0, _int(data.get("quality", 0), 0))
+	var base: Variant = data.get("base_damage", 0.0)
+	item.base_weapon_damage = maxf(0.0, float(base)) if base is float or base is int else 0.0
 	item.material_id = StringName(str(data.get("material", ""))) if data.get("material") is String else &""
 	var saved_affixes: Array = data["affixes"] if data.get("affixes") is Array else []
 	for affix: Variant in saved_affixes:

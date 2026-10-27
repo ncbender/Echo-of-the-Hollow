@@ -22,6 +22,7 @@ static func _steps() -> Dictionary:
 		8: _v8_to_v9,
 		9: _v9_to_v10,
 		10: _v10_to_v11,
+		11: _v11_to_v12,
 	}
 
 
@@ -245,3 +246,39 @@ static func _v10_to_v11(data: Dictionary) -> Dictionary:
 				if affix is Dictionary and affix.has("affix") and affix.has("tier") and not affix.has("tier_model"):
 					affix["tier_model"] = AffixTiers.MODEL_THREE
 	return data
+
+
+## Weapon models on the base damage model at v12, frozen as they were approved (Weapon
+## Base Damage 1.1): id -> [family B1, approved base, creation item level]. A migration
+## never reads the live item data, so later rebalancing cannot change old conversions.
+const V12_WEAPON_MODELS := {
+	"iron_sword": [12.0, 12.0, 1], "militia_sword": [12.0, 12.6, 1], "steel_greatsword": [22.0, 22.0, 1],
+	"iron_axe": [14.0, 14.0, 1], "iron_dagger": [9.0, 9.0, 1], "iron_mace": [15.0, 15.0, 1],
+	"ash_spear": [13.0, 13.0, 1], "oak_staff": [13.0, 13.0, 1], "oak_wand": [10.0, 10.0, 1],
+	"hunting_bow": [13.0, 13.0, 1], "forged_blade": [12.0, 14.4, 12], "forged_greatsword": [22.0, 27.39, 12],
+}
+
+
+## v12 (Weapon Base Damage 1.1): every weapon instance stores its raw base damage. Weapons
+## of the models above get it once, deterministically from their saved item level:
+## B_ref(level) x (approved base / B_ref(creation level)) - nothing is rolled, all other
+## data (quality, affixes incl. global Sharpened rolls, sockets, essences) stays as it is.
+static func _v11_to_v12(data: Dictionary) -> Dictionary:
+	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
+	if data.get("stash") is Dictionary:
+		lists.append(data["stash"].get("items"))
+	for list: Variant in lists:
+		if not list is Array:
+			continue
+		for entry: Variant in list:
+			if not entry is Dictionary or entry.has("base_damage") or not V12_WEAPON_MODELS.has(str(entry.get("def", ""))):
+				continue
+			var model: Array = V12_WEAPON_MODELS[str(entry["def"])]
+			var level: Variant = entry.get("ilvl", 1)
+			var item_level := clampi(int(level) if level is int or level is float else 1, 1, WeaponDamage.MAX_ITEM_LEVEL)
+			entry["base_damage"] = _v12_reference(model[0], item_level) * float(model[1]) / _v12_reference(model[0], int(model[2]))
+	return data
+
+
+static func _v12_reference(family_base: float, item_level: int) -> float:
+	return family_base * (1.0 + 0.012 * (item_level - 1))

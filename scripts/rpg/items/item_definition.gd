@@ -42,10 +42,14 @@ const RARITY_COLORS := {
 @export var armor_type: ArmorType = ArmorType.NONE
 ## Combat weapon family used when equipped in the main hand.
 @export var weapon_family_id: StringName
-## Weapon Base Damage 1.0 (docs/WEAPON_BASE_DAMAGE_1_0.md): own base damage of this weapon
-## model (D_weapon = (base x quality + local flat) x (1 + local %), see WeaponDamage).
+## Weapon Base Damage 1.0/1.1 (docs/WEAPON_BASE_DAMAGE_1_1.md): approved base damage of this
+## weapon model at its creation item level (creation_item_level). It fixes the model factor
+## (WeaponDamage.model_factor); each new instance stores B_ref(its level) x factor once.
 ## 0 = not on the base damage model yet: its attacks deal the family reference damage.
 @export var base_weapon_damage: float = 0.0
+## Approved item level of new instances of an item WITHOUT CraftingProfile (crafted items use
+## CraftingProfile.base_item_level). 0 = no approved source (instances keep level 1).
+@export_range(0, 100) var base_item_level: int = 0
 @export var base_stats: Array[StatModifier] = []
 ## Event-driven effects and combo modifiers (legendary / unique).
 @export var effects: Array[ItemEffect] = []
@@ -94,6 +98,11 @@ static func allows_local_affixes(kind: SlotKind) -> bool:
 		SlotKind.FEET, SlotKind.SHIELD]
 
 
+## Item level of new instances from the item's own data (0 = no approved source).
+func creation_item_level() -> int:
+	return crafting.base_item_level if crafting != null else base_item_level
+
+
 func rarity_color() -> Color:
 	return RARITY_COLORS.get(rarity, Color.WHITE)
 
@@ -110,6 +119,10 @@ func validate() -> PackedStringArray:
 		errors.append("item %s: weapon without weapon_family_id" % id)
 	if base_weapon_damage < 0.0 or (base_weapon_damage > 0.0 and not is_weapon()):
 		errors.append("item %s: base_weapon_damage needs a weapon and must not be negative" % id)
+	if crafting != null and base_item_level != 0:
+		errors.append("item %s: item level comes from its CraftingProfile (base_item_level must stay 0)" % id)
+	if base_weapon_damage > 0.0 and (creation_item_level() < 1 or creation_item_level() > WeaponDamage.MAX_ITEM_LEVEL):
+		errors.append("item %s: a weapon on the base damage model needs an approved item level 1..%d" % [id, WeaponDamage.MAX_ITEM_LEVEL])
 	for effect in effects:
 		if effect == null:
 			errors.append("item %s: null effect" % id)

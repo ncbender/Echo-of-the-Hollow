@@ -458,7 +458,10 @@ func _item_chip(item_id: StringName, quantity: int, edge: float = 48.0) -> Contr
 func _show_item(anchor: Control, item_id: StringName, quantity: int) -> void:
 	if _auto_focusing or not is_instance_valid(anchor) or not anchor.is_inside_tree():
 		return
-	tooltip.show_for(character, ItemInstance.create(item_id, quantity, "preview"), anchor)
+	var definition := character.database.get_item(item_id)
+	var preview := ItemCreation.create(definition, quantity, character.database, 0, "preview") if definition != null \
+		else ItemInstance.create(item_id, quantity, "preview")
+	tooltip.show_for(character, preview, anchor)   # same creation contract as the crafted item
 
 
 func _build_gathering(profession: ProfessionDefinition) -> void:

@@ -14,3 +14,4 @@ max_stack = 1
 slot_kind = 10
 weapon_family_id = &"one_handed_sword"
 base_weapon_damage = 12.0
+base_item_level = 1

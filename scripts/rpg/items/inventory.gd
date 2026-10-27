@@ -86,7 +86,9 @@ func room_for(item_id: StringName) -> int:
 ## Adds `amount` of a definition: fills existing stacks, then creates new
 ## instances. All-or-nothing; returns the touched instances (empty on failure).
 ## `origin` (ItemInstance.ORIGIN_*) is recorded on new single items, never on stacks.
-func add_item(item_id: StringName, amount: int = 1, origin: StringName = &"") -> Array[ItemInstance]:
+## New instances follow ItemCreation (item level: `item_level` if the caller passes one,
+## else the item's approved source; weapon base damage stored once).
+func add_item(item_id: StringName, amount: int = 1, origin: StringName = &"", item_level: int = 0) -> Array[ItemInstance]:
 	var touched: Array[ItemInstance] = []
 	var definition := _db.get_item(item_id)
 	if definition == null or amount <= 0 or room_for(item_id) < amount:
@@ -103,9 +105,7 @@ func add_item(item_id: StringName, amount: int = 1, origin: StringName = &"") ->
 				touched.append(item)
 	while left > 0:
 		var stack := mini(left, definition.max_stack)
-		var item := ItemInstance.create(item_id, stack)
-		if definition.crafting != null:
-			item.item_level = definition.crafting.base_item_level
+		var item := ItemCreation.create(definition, stack, _db, item_level)
 		if not definition.is_stackable():
 			item.origin = origin
 		_insert(item)

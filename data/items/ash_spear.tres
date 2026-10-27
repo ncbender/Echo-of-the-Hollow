@@ -13,3 +13,4 @@ max_stack = 1
 slot_kind = 11
 weapon_family_id = &"spear"
 base_weapon_damage = 13.0
+base_item_level = 1

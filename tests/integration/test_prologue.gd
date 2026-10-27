@@ -182,6 +182,7 @@ func test_migration_v3_to_v4() -> void:
 	check_eq(upgraded.class_builds, {}, "empty builds")
 	for entry: Dictionary in upgraded.inventory:
 		entry.erase("origin")   # v8 marks the origin unknown_legacy (test_salvage)
+		entry.erase("base_damage")   # v12 stores the weapon base damage (test_weapon_base_damage)
 	check_eq(upgraded.inventory, old.inventory, "items otherwise untouched")
 	var warnings: PackedStringArray = []
 	var restored := Character.from_dict(upgraded, db, warnings)

@@ -17,7 +17,7 @@ extends RefCounted
 ## intact; load() falls back to the .bak automatically. Nothing else is deleted.
 
 const FORMAT := "echoes_of_the_hollow_save"
-const VERSION := 11
+const VERSION := 12
 const TEMP_SUFFIX := ".tmp"
 const BACKUP_SUFFIX := ".bak"
 
@@ -56,7 +56,8 @@ static var fail_next_write: bool = false
 
 ## Writes an already captured snapshot (SaveCoordinator takes it in one frame).
 static func write_payload(payload: Dictionary, path: String, meta: Dictionary = {}) -> Error:
-	var payload_json := JSON.stringify(payload, "", true)
+	# full precision: stored decimals (weapon base damage, Striking) load back bit-identical
+	var payload_json := JSON.stringify(payload, "", true, true)
 	var envelope := {
 		"format": FORMAT,
 		"version": VERSION,

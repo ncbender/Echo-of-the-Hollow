@@ -191,4 +191,4 @@ func test_v10_save_marks_three_tier_affixes() -> void:
 	check(db.affixes[&"sharpened"].tier_of(loaded.affixes[0]) != null, "three-tier entry resolves in the three-tier affix")
 	check_eq(SaveSystem.save_to(result.character, path), OK, "re-saved")
 	var envelope: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-	check_eq(int(envelope.version), 11, "written as v11")
+	check_eq(int(envelope.version), SaveSystem.VERSION, "written in the current version")
