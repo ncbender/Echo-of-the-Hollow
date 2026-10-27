@@ -19,8 +19,9 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 	if definition == null:
 		result.append(_l("Unknown item", "title"))
 		return result
-	result.append(_l(definition.display_name, "title", UiTheme.rarity_color(definition.rarity)))
-	var meta: PackedStringArray = [UiTheme.rarity_name(definition.rarity), type_name(definition)]
+	var rarity := item.effective_rarity(definition)
+	result.append(_l(definition.display_name, "title", UiTheme.rarity_color(rarity)))
+	var meta: PackedStringArray = [UiTheme.rarity_name(rarity), type_name(definition)]
 	if definition.is_equippable() or definition.crafting != null:
 		meta.append("Item Level %d" % item.item_level)
 	if definition.is_stackable() and item.quantity > 1:
@@ -204,10 +205,12 @@ static func affix_text(db: GameDatabase, entry: Dictionary) -> String:
 	var number := StatModifier._number(value)
 	if affix == null:
 		return "+%s %s (fixed)" % [number, stat]
+	# a roll of the retired three-tier prototype keeps its value but has no five-tier tier
+	var tier := "tier %d" % int(entry.get("tier", 0)) if affix.tier_of(entry) != null else "legacy roll"
 	if affix.scope == AffixDefinition.Scope.LOCAL:   # changes this weapon's base only
 		var shown := "%s%%" % StatModifier._number(value) if affix.value_kind == AffixDefinition.ValueKind.PERCENT else "%.1f" % value
-		return "+%s %s (local)  ·  %s, tier %d" % [shown, stat, affix.display_name, int(entry.get("tier", 0))]
-	return "+%s %s  ·  %s, tier %d" % [number, stat, affix.display_name, int(entry.get("tier", 0))]
+		return "+%s %s (local)  ·  %s, %s" % [shown, stat, affix.display_name, tier]
+	return "+%s %s  ·  %s, %s" % [number, stat, affix.display_name, tier]
 
 
 ## Plain text (simple tooltips, logs).

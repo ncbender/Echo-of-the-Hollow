@@ -16,6 +16,8 @@ var equipped: bool = false
 ## Item Integrity marks (drawn in the top right corner).
 var favorite: bool = false
 var locked: bool = false
+## Rarity of the shown instance (Loot Foundation 1.0); RARITY_FROM_DEFINITION = the definition's.
+var rarity: int = ItemInstance.RARITY_FROM_DEFINITION
 
 
 func _init() -> void:
@@ -37,10 +39,11 @@ func _draw() -> void:
 	if definition == null:
 		draw_rect(rect, Color(UiTheme.BRONZE_DARK, 0.6), false, 1.0)
 		return
-	var color := UiTheme.rarity_color(definition.rarity)
+	var shown := definition.rarity if rarity == ItemInstance.RARITY_FROM_DEFINITION else rarity as ItemDefinition.Rarity
+	var color := UiTheme.rarity_color(shown)
 	draw_rect(rect, Color(color, 0.85), false, 2.0)
 	# rarity pips along the bottom edge
-	for index in UiTheme.rarity_pips(definition.rarity):
+	for index in UiTheme.rarity_pips(shown):
 		draw_rect(Rect2(Vector2(4 + index * 6, size.y - 6), Vector2(4, 3)), color)
 	var center := size * 0.5 + Vector2(0, -2)
 	var s := minf(size.x, size.y) / 40.0

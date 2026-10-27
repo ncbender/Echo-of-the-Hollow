@@ -53,6 +53,7 @@ func setup(target_character: Character, item: ItemInstance, slot: int = -1) -> I
 	_icon.setup(definition, item.quantity if item != null else 1, item != null and slot < 0 and character.equipment.is_equipped(instance_id))
 	_icon.favorite = item != null and item.favorite
 	_icon.locked = item != null and item.locked
+	_icon.rarity = item.rarity if item != null else ItemInstance.RARITY_FROM_DEFINITION
 	text = ""
 	tooltip_text = ""   # the window's ItemTooltip shows at once (no tooltip delay)
 	return self

@@ -17,6 +17,12 @@ var quality: int = 0
 ## created (ItemCreation) and never recomputed - quality, crafting, equipping, transfers
 ## and loading leave it as it is. 0 = not a weapon on the base damage model.
 var base_weapon_damage: float = 0.0
+## Loot Foundation 1.0 (docs/LOOT_FOUNDATION_1_0.md): rarity of THIS instance
+## (ItemDefinition.Rarity); two instances of one definition may differ. Assigned once at
+## creation (ItemCreation) for equippable items and never changed on load.
+## RARITY_FROM_DEFINITION = not owned by the instance (stacks, previews): effective_rarity
+## then reads the definition.
+var rarity: int = RARITY_FROM_DEFINITION
 ## Main material chosen at imprint ("" = not imprinted yet).
 var material_id: StringName = &""
 ## Rolled affixes: {"affix": id, "tier": n, "tier_model": 3/5, "stat": id, "flat": v, "percent": v}
@@ -43,6 +49,8 @@ var locked: bool = false
 ## test items). Old saves get ORIGIN_LEGACY - never guessed.
 var origin: StringName = &""
 
+const RARITY_FROM_DEFINITION := -1
+
 const ORIGIN_FOUND := &"found"
 const ORIGIN_CRAFTED := &"crafted"
 const ORIGIN_QUEST := &"quest_reward"
@@ -57,6 +65,13 @@ static func create(item_id: StringName, amount: int = 1, id: String = "") -> Ite
 	item.definition_id = item_id
 	item.quantity = amount
 	return item
+
+
+## Rarity shown and used for this instance: its own, else the definition's.
+func effective_rarity(definition: ItemDefinition) -> ItemDefinition.Rarity:
+	if rarity == RARITY_FROM_DEFINITION and definition != null:
+		return definition.rarity
+	return maxi(rarity, ItemDefinition.Rarity.NORMAL) as ItemDefinition.Rarity
 
 
 func is_imprinted() -> bool:
@@ -87,6 +102,8 @@ func to_dict() -> Dictionary:
 		data["quality"] = quality
 	if base_weapon_damage > 0.0:
 		data["base_damage"] = base_weapon_damage
+	if rarity != RARITY_FROM_DEFINITION:
+		data["rarity"] = rarity
 	if material_id != &"":
 		data["material"] = String(material_id)
 	if not affixes.is_empty():
@@ -125,6 +142,8 @@ static func from_dict(data: Variant) -> ItemInstance:
 	item.quality = maxi(0, _int(data.get("quality", 0), 0))
 	var base: Variant = data.get("base_damage", 0.0)
 	item.base_weapon_damage = maxf(0.0, float(base)) if base is float or base is int else 0.0
+	var saved_rarity := _int(data.get("rarity", RARITY_FROM_DEFINITION), RARITY_FROM_DEFINITION)
+	item.rarity = saved_rarity if saved_rarity in ItemDefinition.Rarity.values() else RARITY_FROM_DEFINITION
 	item.material_id = StringName(str(data.get("material", ""))) if data.get("material") is String else &""
 	var saved_affixes: Array = data["affixes"] if data.get("affixes") is Array else []
 	for affix: Variant in saved_affixes:

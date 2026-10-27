@@ -24,6 +24,7 @@ static func _steps() -> Dictionary:
 		10: _v10_to_v11,
 		11: _v11_to_v12,
 		12: _v12_to_v13,
+		13: _v13_to_v14,
 	}
 
 
@@ -324,3 +325,34 @@ static func _assign_weapon_bases(data: Dictionary, models: Dictionary) -> Dictio
 
 static func _v12_reference(family_base: float, item_level: int) -> float:
 	return family_base * (1.0 + 0.012 * (item_level - 1))
+
+
+## Rarity of every equippable item definition at v14 (ItemDefinition.Rarity as int), frozen
+## like V12_WEAPON_MODELS: a migration never reads the live item data.
+const V14_EQUIPMENT_RARITY := {
+	"ash_spear": 0, "bone_amulet": 0, "copper_ring": 0, "crushing_oath": 5, "echo_blade": 4,
+	"forged_blade": 0, "forged_greatsword": 0, "hollow_charm": 1, "hunting_bow": 0, "iron_axe": 0,
+	"iron_dagger": 0, "iron_mace": 0, "iron_sword": 0, "leather_bracers": 0, "leather_cap": 0,
+	"leather_gloves": 0, "linen_trousers": 0, "militia_sword": 1, "oak_shield": 0, "oak_staff": 0,
+	"oak_wand": 0, "padded_mantle": 0, "rope_belt": 0, "silver_ring": 1, "steel_greatsword": 0,
+	"stormcaller_fang": 3, "traveler_cloak": 0, "wanderer_coat": 1, "warden_greaves": 6,
+	"warden_helm": 6, "warden_mail": 6, "warlord_helm": 2, "worn_boots": 0,
+}
+
+
+## v14 (Loot Foundation 1.0): rarity belongs to the item instance. Every equippable entry
+## (bag, stash, orphans) takes over the rarity its definition had - nothing is rolled or
+## upgraded, Unique/Set identities stay. Affixes, level, base damage, quality, sockets,
+## essences, evolution, protection and origin are not touched; unknown items follow
+## their definition as before (no "rarity" written).
+static func _v13_to_v14(data: Dictionary) -> Dictionary:
+	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
+	if data.get("stash") is Dictionary:
+		lists.append(data["stash"].get("items"))
+	for list: Variant in lists:
+		if not list is Array:
+			continue
+		for entry: Variant in list:
+			if entry is Dictionary and not entry.has("rarity") and V14_EQUIPMENT_RARITY.has(str(entry.get("def", ""))):
+				entry["rarity"] = V14_EQUIPMENT_RARITY[str(entry["def"])]
+	return data

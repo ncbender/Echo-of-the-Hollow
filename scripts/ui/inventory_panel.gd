@@ -242,7 +242,7 @@ func _slot_entry(slot: int, caption_left: bool) -> HBoxContainer:
 	state.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	state.custom_minimum_size = Vector2(96, 0)
 	if item != null:
-		state.add_theme_color_override(&"font_color", UiTheme.rarity_color(character.database.get_item(item.definition_id).rarity))
+		state.add_theme_color_override(&"font_color", UiTheme.rarity_color(item.effective_rarity(character.database.get_item(item.definition_id))))
 	info.add_child(name_label)
 	info.add_child(state)
 	if caption_left:
@@ -347,7 +347,7 @@ func visible_items() -> Array[ItemInstance]:
 	match sort_mode:
 		"Rarity":
 			result.sort_custom(func(a: ItemInstance, b: ItemInstance) -> bool:
-				return db.get_item(a.definition_id).rarity > db.get_item(b.definition_id).rarity)
+				return a.effective_rarity(db.get_item(a.definition_id)) > b.effective_rarity(db.get_item(b.definition_id)))
 		"Type":
 			result.sort_custom(func(a: ItemInstance, b: ItemInstance) -> bool:
 				return ItemDescriber.type_name(db.get_item(a.definition_id)) < ItemDescriber.type_name(db.get_item(b.definition_id)))
