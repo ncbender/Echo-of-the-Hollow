@@ -29,5 +29,7 @@ rarity = 4
 max_stack = 1
 slot_kind = 10
 weapon_family_id = &"one_handed_sword"
+base_weapon_damage = 14.016
+base_item_level = 15
 base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_damage")])
 effects = Array[ExtResource("3_echo")]([SubResource("Effect_echo")])

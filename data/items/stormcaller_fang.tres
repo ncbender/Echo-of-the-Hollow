@@ -31,6 +31,7 @@ category = 0
 rarity = 3
 slot_kind = 10
 weapon_family_id = &"one_handed_sword"
+base_weapon_damage = 14.016
 base_stats = Array[ExtResource("1_p5vrv")]([SubResource("Resource_hsaeq"), SubResource("Resource_2wptl")])
 crafting = SubResource("Resource_2nhim")
 tags = Array[StringName]([&"evolving"])

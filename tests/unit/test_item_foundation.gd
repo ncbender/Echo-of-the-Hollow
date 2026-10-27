@@ -225,7 +225,7 @@ func test_quality_scales_existing_base_stats_only() -> void:
 	oath.quality = 10
 	var oath_mods := ItemStats.modifiers(oath, db.get_item(&"crushing_oath"), db)
 	check_eq(oath_mods.size(), 1, "unique: only its one base stat, nothing added")
-	check_near(oath_mods[0].flat, 4.0 * 1.05, 0.0001, "unique base 4 +5 %")
+	check_near(oath_mods[0].flat, 4.0, 0.0001, "unique global base 4 kept, quality only on the weapon base (Weapon Base Damage 1.2)")
 	var cap := ItemInstance.create(&"leather_cap")
 	cap.quality = 20   # no crafting profile: quality cannot reach it
 	var cap_def := db.get_item(&"leather_cap")
