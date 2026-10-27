@@ -16,10 +16,10 @@ static func compute(item: ItemInstance, definition: ItemDefinition, material: Ma
 		replace_index: int = -1) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	var profile := definition.crafting
-	if profile == null or profile.affix_slots <= 0:
+	if profile == null or profile.affix_limit() <= 0:
 		return entries
 	var present := _present_affixes(item, db, replace_index)
-	if replace_index < 0 and item.affixes.size() >= profile.affix_slots:
+	if replace_index < 0 and item.affixes.size() >= profile.affix_limit():
 		return entries   # no free affix slot
 	var groups := {}
 	var exclusions := {}

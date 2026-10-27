@@ -6,9 +6,12 @@ extends Resource
 ## FLAT adds points to the stat (all current stats are point or percent-point
 ## stats, e.g. +6 "Physical Damage %"); PERCENT multiplies the stat total.
 enum ValueKind { FLAT, PERCENT }
+## Item Foundation 1.0: the four affix categories (metadata; no calculation reads it).
+enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
 
 @export var id: StringName
 @export var display_name: String
+@export var category: Category = Category.OFFENSIVE
 @export var stat: StringName
 @export var value_kind: ValueKind = ValueKind.FLAT
 @export var tags: Array[StringName] = []
@@ -63,6 +66,8 @@ func validate() -> PackedStringArray:
 	var errors: PackedStringArray = []
 	if id == &"" or stat == &"" or group == &"":
 		errors.append("affix %s: id, stat and group are required" % id)
+	if not category in Category.values():
+		errors.append("affix %s: unknown category %d" % [id, category])
 	if tiers.is_empty():
 		errors.append("affix %s: no tiers" % id)
 	var seen := {}

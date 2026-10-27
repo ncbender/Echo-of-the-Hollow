@@ -102,6 +102,7 @@ func validate() -> PackedStringArray:
 	if crafting != null:
 		if not is_equippable():
 			errors.append("item %s: only equippable items can be craftable" % id)
+		errors.append_array(crafting.validate(id))
 		for operation in crafting.allowed_operations:
 			if not operation in CraftingOps.ALL:
 				errors.append("item %s: unknown crafting operation %s" % [id, operation])

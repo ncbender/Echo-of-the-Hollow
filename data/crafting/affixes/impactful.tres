@@ -28,6 +28,7 @@ weight = 25.0
 script = ExtResource("1_cvt1e")
 id = &"impactful"
 display_name = "Impactful"
+category = 2
 stat = &"knockback_power"
 tags = Array[StringName]([&"control"])
 group = &"knockback_power"

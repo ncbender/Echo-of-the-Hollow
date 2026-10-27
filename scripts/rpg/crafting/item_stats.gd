@@ -8,6 +8,8 @@ extends RefCounted
 
 ## Base stat improvement per quality point.
 const QUALITY_PERCENT_PER_POINT := 1.0
+## Highest quality any item can reach.
+const MAX_QUALITY := 20
 
 
 static func modifiers(item: ItemInstance, definition: ItemDefinition, db: GameDatabase) -> Array[StatModifier]:
@@ -60,7 +62,7 @@ static func effects(item: ItemInstance, definition: ItemDefinition, db: GameData
 
 ## Essences that are inside the item's slot limit (never more than 2).
 static func active_essences(item: ItemInstance, definition: ItemDefinition) -> Array[StringName]:
-	var limit := mini(2, definition.crafting.essence_slots if definition.crafting != null else 0)
+	var limit := mini(CraftingProfile.MAX_ESSENCE_SLOTS, definition.crafting.essence_slots if definition.crafting != null else 0)
 	return item.essences.slice(0, limit)
 
 
@@ -115,7 +117,7 @@ static func sanitize(item: ItemInstance, db: GameDatabase, warnings: PackedStrin
 	if item.quality > max_quality:
 		warnings.append("%s: quality %d clamped to %d" % [item.instance_id, item.quality, max_quality])
 		item.quality = max_quality
-	var essence_limit := mini(2, profile.essence_slots if profile != null else 0)
+	var essence_limit := mini(CraftingProfile.MAX_ESSENCE_SLOTS, profile.essence_slots if profile != null else 0)
 	if item.essences.size() > essence_limit:
 		_park(item, "inactive_essences", item.essences.slice(essence_limit), warnings)
 		item.essences = item.essences.slice(0, essence_limit)

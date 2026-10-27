@@ -183,8 +183,8 @@ static func _check_augment(context: Context) -> void:
 	if not context.item.is_imprinted():
 		context.preview.error = "Imprint the item first."
 		return
-	if context.item.affixes.size() >= context.profile.affix_slots:
-		context.preview.error = "All %d affix slots are used. Reforge an affix instead." % context.profile.affix_slots
+	if context.item.affixes.size() >= context.profile.affix_limit():
+		context.preview.error = "All %d affix slots are used. Reforge an affix instead." % context.profile.affix_limit()
 		return
 	_roll_pool(context, -1)
 

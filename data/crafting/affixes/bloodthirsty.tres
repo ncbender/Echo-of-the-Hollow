@@ -26,6 +26,7 @@ weight = 25.0
 script = ExtResource("1_1f3qf")
 id = &"bloodthirsty"
 display_name = "Bloodthirsty"
+category = 1
 stat = &"life_on_hit"
 tags = Array[StringName]([&"blood", &"life", &"physical"])
 group = &"life_on_hit"
