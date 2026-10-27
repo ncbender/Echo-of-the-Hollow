@@ -17,8 +17,8 @@ const REFERENCES := {&"one_handed_sword": 12.0, &"two_handed_sword": 22.0, &"axe
 const ON_MODEL := {&"iron_sword": 12.0, &"militia_sword": 12.6, &"steel_greatsword": 22.0, &"iron_axe": 14.0,
 	&"iron_dagger": 9.0, &"iron_mace": 15.0, &"ash_spear": 13.0, &"oak_staff": 13.0, &"oak_wand": 10.0, &"hunting_bow": 13.0,
 	&"forged_blade": 14.4, &"forged_greatsword": 27.39}
-## Not converted (special weapons, V2 later): global base stats kept as they were.
-const UNCHANGED := {&"stormcaller_fang": [8.0, 4.0], &"crushing_oath": [4.0, 0.0], &"echo_blade": [8.0, 0.0]}
+## 1.2 Special Weapons V2: [global physical %, global poise %] kept (never scaled by quality).
+const SPECIALS := {&"stormcaller_fang": [8.0, 4.0], &"crushing_oath": [4.0, 0.0], &"echo_blade": [8.0, 0.0]}
 
 var db: GameDatabase
 var baseline: Dictionary
@@ -102,18 +102,45 @@ func test_items_on_the_model_and_their_quick_heavy_damage() -> void:
 		check(forged.validate().is_empty(), "%s valid" % item_id)
 
 
-func test_unconverted_weapons_keep_their_global_bonuses() -> void:
-	for item_id: StringName in UNCHANGED:
+## 1.2 Special Weapons V2: on the model at item level 15 (base 14.016, factor 1.0); their
+## global base bonuses stay global, exactly once, and quality never scales them.
+func test_special_weapons_v2_keep_global_bonuses_unscaled() -> void:
+	for item_id: StringName in SPECIALS:
 		var definition := db.get_item(item_id)
-		check(not WeaponDamage.is_on_model(definition), "%s not on the model" % item_id)
-		check_eq(WeaponDamage.of(ItemCreation.create(definition, 1, db), definition, db), 0.0, "%s: D_weapon 0 = family reference" % item_id)
-		var totals := ItemDescriber.totals(ItemStats.modifiers(ItemCreation.create(definition, 1, db), definition, db))
-		check_near(float(totals.get("physical_damage|flat", 0.0)), UNCHANGED[item_id][0], 1e-9, "%s physical damage kept" % item_id)
-		check_near(float(totals.get("poise_damage|flat", 0.0)), UNCHANGED[item_id][1], 1e-9, "%s poise damage kept" % item_id)
-	var fang := ItemInstance.create(&"stormcaller_fang")
+		check(WeaponDamage.is_on_model(definition) and definition.validate().is_empty(), "%s on the model" % item_id)
+		check_eq(definition.creation_item_level(), 15, "%s prototype item level 15" % item_id)
+		check_near(WeaponDamage.model_factor(definition, db), 1.0, 1e-15, "%s model factor 1.0" % item_id)
+		for quality: int in [0, 20]:
+			var item := ItemCreation.create(definition, 1, db)
+			item.quality = quality
+			check_eq(item.item_level, 15, "%s created at 15" % item_id)
+			check_near(item.base_weapon_damage, 14.016, 1e-12, "%s stored base 14.016" % item_id)
+			check_near(WeaponDamage.of(item, definition, db), 14.016 * ItemStats.quality_factor(quality), 1e-12, "%s Q%d only on the base" % [item_id, quality])
+			var totals := ItemDescriber.totals(ItemStats.modifiers(item, definition, db))
+			check_near(float(totals.get("physical_damage|flat", 0.0)), SPECIALS[item_id][0], 1e-12, "%s Q%d: global physical once, unscaled" % [item_id, quality])
+			check_near(float(totals.get("poise_damage|flat", 0.0)), SPECIALS[item_id][1], 1e-12, "%s Q%d: global poise unscaled" % [item_id, quality])
+	check_eq(db.get_item(&"crushing_oath").effects[0].reach_multiplier, 1.25, "Crushing Oath reach effect unchanged")
+	check_eq(db.get_item(&"crushing_oath").effects[0].poise_multiplier, 1.5, "Crushing Oath poise effect unchanged")
+	var echo: EchoShockwaveEffect = db.get_item(&"echo_blade").effects[0]
+	check_eq([echo.radius, echo.damage_ratio, echo.poise_damage, echo.cooldown], [52.0, 0.4, 10.0, 0.5], "echo shockwave data unchanged")
+	check(db.get_item(&"echo_blade").crafting == null, "echo blade: still no crafting profile (no quality)")
+
+
+## Stormcaller evolution stage 2: its +6 % physical (and +10 % finisher power) apply once,
+## on top of the kept global +8 %, never scaled by quality.
+func test_stormcaller_stage_two_bonus_once() -> void:
+	character = CharacterFactory.create_new(db)
+	var fang := character.inventory.add_item(&"stormcaller_fang")[0]
+	check_eq(character.equipment.equip(fang.instance_id, S.MAIN_HAND), "", "equipped")
+	var before := character.get_stat(Stats.PHYSICAL_DAMAGE)
+	check_near(before, 8.0, 1e-12, "stage 1: global +8 once")
+	fang.evolution = {"stage": 2, "xp": 0, "path": ""}
 	fang.quality = 20
-	var scaled := ItemDescriber.totals(ItemStats.modifiers(fang, db.get_item(&"stormcaller_fang"), db))
-	check_near(float(scaled["physical_damage|flat"]), 8.8, 1e-9, "unconverted: quality still on the global base stat")
+	character.notify_item_changed(fang.instance_id)
+	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE), 8.0 + 6.0, 1e-12, "stage 2: +6 exactly once, quality never on it")
+	check_near(character.get_stat(Stats.FINISHER_POWER), 10.0, 1e-12, "stage 2 finisher power once")
+	check_near(character.get_stat(Stats.POISE_DAMAGE), 4.0, 1e-12, "global poise 4, unscaled")
+	check_near(fang.base_weapon_damage, 14.016, 1e-12, "evolution never touches the stored base")
 
 
 # --- quality and local affixes -------------------------------------------------------------
@@ -279,14 +306,54 @@ func test_bound_player_deals_d_weapon_without_double_bonus() -> void:
 	check_eq(player.combat.weapon_base_damage, 0.0, "unequipped: back to the family reference")
 
 
-## Not converted: the Echo Blade keeps 12 x (1 + 8 %) on a quick slash exactly as before.
-func test_special_weapon_damage_unchanged() -> void:
+## Special weapons V2 on the real player: quick and heavy = 14.016 x Q x multiplier, then
+## the kept global physical bonus exactly once (CharacterStatModifier).
+func test_special_weapons_quick_and_heavy_hits() -> void:
 	_bind()
+	var cases := [[&"stormcaller_fang", 0], [&"stormcaller_fang", 20], [&"crushing_oath", 0], [&"crushing_oath", 20], [&"echo_blade", 0]]
+	for entry: Array in cases:
+		var item := _equip(entry[0])
+		item.quality = entry[1]
+		character.notify_item_changed(item.instance_id)
+		await wait_physics(2)
+		var global: float = 1.0 + SPECIALS[entry[0]][0] / 100.0
+		var weapon := 14.016 * ItemStats.quality_factor(entry[1])
+		check_near(player.combat.weapon_base_damage, weapon, 1e-9, "%s Q%d D_weapon" % entry)
+		var quick := await _quick_hit()
+		check(quick != null and absf(quick.damage - 12.0 * weapon / 12.0 * global) < 1e-6, "%s Q%d quick %.4f (got %s)" % [entry[0], entry[1], weapon * global, quick.damage if quick else -1.0])
+		hits.clear()
+		var target := add_target(Vector2(18, 0), 20.0)
+		await perform_path("H", Vector2.RIGHT, 4)
+		target.get_parent().queue_free()
+		var heavy: HitData = hits[0] if not hits.is_empty() else null
+		check(heavy != null and absf(heavy.damage - 26.0 * weapon / 12.0 * global) < 1e-6, "%s Q%d heavy %.4f (got %s)" % [entry[0], entry[1], 26.0 * weapon / 12.0 * global, heavy.damage if heavy else -1.0])
+		character.equipment.unequip(S.MAIN_HAND)
+
+
+## Echo shockwave after V2: 40 % of the (higher) real crush hit to a bystander in the radius,
+## once per swing, nothing outside the radius, the triggering target never hit by its own echo.
+func test_echo_shockwave_follows_the_real_hit() -> void:
+	_bind()
+	character.mastery.add_xp(&"one_handed_sword", 400)   # L-L-H needs mastery 4
 	_equip(&"echo_blade")
+	var main := add_target(Vector2(24, 0), 10.0)
+	var near := add_target(Vector2(24, 44), 8.0)   # inside the 52 px radius, outside the crush reach
+	var far := add_target(Vector2(24, 140), 8.0)
 	await wait_physics(2)
-	check_eq(player.combat.weapon_base_damage, 0.0, "echo blade: compatibility (family reference)")
-	var hit := await _quick_hit()
-	check(hit != null and absf(hit.damage - 12.0 * 1.08) < 1e-6, "echo blade quick 12 x 1.08 (got %s)" % (hit.damage if hit else -1.0))
+	hits.clear()
+	await perform_path("LLH", Vector2.RIGHT, 10)
+	var crush: Array = hits.filter(func(hit: HitData) -> bool: return hit.attack != null and hit.attack.id == &"sword_llh_crush" and not &"echo_shockwave" in hit.tags)
+	var echoes: Array = hits.filter(func(hit: HitData) -> bool: return &"echo_shockwave" in hit.tags)
+	check(not crush.is_empty(), "crush landed")
+	check_eq(echoes.size(), 1, "one echo: the bystander, never the struck target, never outside the radius")
+	if not crush.is_empty() and not echoes.is_empty():
+		var main_crush: HitData = crush.filter(func(hit: HitData) -> bool: return hit.target == main.get_entity()).front()
+		check_near(main_crush.damage, 26.0 * 14.016 / 12.0 * 1.08, 1e-6, "crush on the new base, global +8 once")
+		check_near(echoes[0].damage, main_crush.damage * 0.4, 1e-6, "echo = 40 % of the real hit")
+		check_eq(echoes[0].poise_damage, 10.0, "echo poise unchanged")
+		check(echoes[0].target == null or echoes[0].target != main.get_entity(), "triggering target excluded")
+	check(not hits.any(func(hit: HitData) -> bool: return hit.target == far.get_entity()), "nothing outside the radius")
+	check(near != null, "bystander exists")
 
 
 func _hits_of(attack: AttackDefinition) -> Array:
@@ -453,7 +520,11 @@ func test_creation_with_two_item_levels() -> void:
 	check_near(WeaponDamage.of(level_30, forged, db) / WeaponDamage.of(default_level, forged, db),
 		WeaponDamage.reference_at(12.0, 30) / WeaponDamage.reference_at(12.0, 12), 1e-12, "both scale along the same curve")
 	check_eq(character.inventory.add_item(&"copper_ring")[0].base_weapon_damage, 0.0, "no base on non-weapons")
-	check_eq(character.inventory.add_item(&"stormcaller_fang")[0].base_weapon_damage, 0.0, "no base on unconverted special weapons")
+	var fang := character.inventory.add_item(&"stormcaller_fang")[0]
+	check_eq(fang.item_level, 15, "special weapon: approved level 15")
+	check_near(fang.base_weapon_damage, 14.016, 1e-12, "special weapon base 14.016")
+	var echo_30 := character.inventory.add_item(&"echo_blade", 1, &"", 30)[0]
+	check_near(echo_30.base_weapon_damage, WeaponDamage.reference_at(12.0, 30), 1e-12, "explicit level 30: B_ref(30) x 1.0")
 
 
 ## The stored base is never recomputed: quality, equip/unequip, bag <-> stash and
@@ -524,7 +595,8 @@ func test_migration_v11_to_v12() -> void:
 	check_eq(items[0].affixes, [sharpened], "Sharpened kept global and untouched")
 	check_eq(items[0].quality, 20, "quality kept")
 	check_near(items[1].base_damage, 12.6, 1e-12, "militia: 12.6")
-	check(not items[2].has("base_damage") and not items[3].has("base_damage"), "special weapon and material untouched")
+	check_near(items[2].base_damage, 14.016, 1e-12, "v13: stormcaller with saved ilvl 15")
+	check(not items[3].has("base_damage"), "material untouched")
 	check_near(items[4].base_damage, WeaponDamage.reference_at(22.0, 20) * 27.39 / 24.904, 1e-12, "greatsword ilvl 20 along the curve")
 	check_near(data.stash.items[0].base_damage, 22.0, 1e-12, "stash items too")
 	check_eq(data.orphaned_items[0].base_damage, 11.5, "an existing value is never replaced")
@@ -548,3 +620,79 @@ func test_bound_player_forged_greatsword_hits() -> void:
 	var hit := await _quick_hit()
 	check(hit != null and absf(hit.damage - 27.39) < 1e-6, "forged greatsword quick 27.39 (got %s)" % (hit.damage if hit else -1.0))
 	check_near(great.base_weapon_damage, 27.39, 1e-12, "stored base untouched by equipping")
+
+
+
+# --- 1.2: special weapons V2 - persistence and v13 migration -----------------------------
+
+## v12 -> v13: the three special weapons get their base once from their SAVED item level
+## (an echo blade saved at level 1 stays level 1); evolution, essences, sockets, quality,
+## existing values and all other items stay as they are.
+func test_migration_v12_to_v13() -> void:
+	var evolution := {"stage": 2, "xp": 15, "path": ""}
+	var old := {"inventory": [
+		{"id": "a", "def": "stormcaller_fang", "qty": 1, "ilvl": 15, "quality": 20, "essences": ["storm_wolf"], "evolution": evolution.duplicate()},
+		{"id": "b", "def": "crushing_oath", "qty": 1, "ilvl": 15, "quality": 5, "sockets": ["impact_rune"]},
+		{"id": "c", "def": "echo_blade", "qty": 1},
+		{"id": "d", "def": "forged_blade", "qty": 1, "ilvl": 12, "base_damage": 14.4}],
+		"stash": {"items": [{"id": "e", "def": "echo_blade", "qty": 1, "ilvl": 15}]},
+		"orphaned_items": [{"id": "f", "def": "crushing_oath", "qty": 1, "ilvl": 15, "base_damage": 13.5}]}
+	var errors: PackedStringArray = []
+	var data: Dictionary = SaveMigrations.migrate(old.duplicate(true), 12, errors)
+	check(errors.is_empty(), "migrates: %s" % [errors])
+	var items: Array = data.inventory
+	check_near(items[0].base_damage, 14.016, 1e-12, "stormcaller ilvl 15: 14.016")
+	check_eq([items[0].quality, items[0].essences, items[0].evolution], [20, ["storm_wolf"], evolution], "quality, essence, evolution kept")
+	check_near(items[1].base_damage, 14.016, 1e-12, "oath ilvl 15: 14.016")
+	check_eq([items[1].quality, items[1].sockets], [5, ["impact_rune"]], "oath quality and socket kept")
+	check(not items[2].has("ilvl"), "old echo blade keeps its saved level 1 (not moved to 15)")
+	check_near(items[2].base_damage, 12.0, 1e-12, "echo blade level 1: B_ref(1) x 1.0 = 12")
+	check_eq(items[3].base_damage, 14.4, "other weapons untouched")
+	check_near(data.stash.items[0].base_damage, 14.016, 1e-12, "stash echo blade ilvl 15")
+	check_eq(data.orphaned_items[0].base_damage, 13.5, "an existing value is never replaced")
+	check_eq(SaveMigrations.migrate(old.duplicate(true), 12, errors).inventory, items, "deterministic")
+	for model: String in SaveMigrations.V13_WEAPON_MODELS:
+		var definition := db.get_item(StringName(model))
+		var frozen: Array = SaveMigrations.V13_WEAPON_MODELS[model]
+		check_eq([WeaponDamage.family_base(definition, db), definition.base_weapon_damage, definition.creation_item_level()],
+			[frozen[0], frozen[1], frozen[2]], "%s: frozen table matches the approved data" % model)
+	var restored := Character.from_dict(data, db, PackedStringArray())
+	var fang := restored.inventory.find("a")
+	check_eq([fang.item_level, fang.evolution_stage(), fang.quality], [15, 2, 20], "loaded stormcaller state")
+	check_near(WeaponDamage.of(fang, db.get_item(&"stormcaller_fang"), db), 14.016 * 1.1, 1e-9, "loaded: base x quality")
+	check_eq(restored.inventory.find("c").item_level, 1, "loaded echo blade level 1")
+
+
+## Stored special-weapon bases survive equip, bag <-> stash and save/load unchanged.
+func test_special_weapon_base_survives_equip_stash_and_save() -> void:
+	character = CharacterFactory.create_new(db)
+	var ids: Array[String] = []
+	for item_id: StringName in SPECIALS:
+		ids.append(character.inventory.add_item(item_id)[0].instance_id)
+	var oath := character.inventory.find(ids[1])
+	oath.quality = 12
+	check_eq(character.equipment.equip(ids[0], S.MAIN_HAND), "", "equip stormcaller")
+	check_eq(character.equipment.equip(ids[2], S.MAIN_HAND), "", "swap to echo blade")
+	character.equipment.unequip(S.MAIN_HAND)
+	check_eq(StashService.deposit(character, ids[1]), "", "oath into the stash")
+	check_eq(StashService.deposit(character, ids[2]), "", "echo into the stash")
+	check_eq(StashService.withdraw(character, ids[2]), "", "echo back")
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var path := SAVE_DIR.path_join("special_base_%s.save.json" % IdGenerator.new_id("t"))
+	check_eq(SaveSystem.save_to(character, path), OK, "saved")
+	var result := SaveSystem.load_from(path, db)
+	for suffix: String in ["", SaveSystem.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(path + suffix):
+			DirAccess.remove_absolute(path + suffix)
+	check(result.character != null, "loaded: %s" % [result.errors])
+	if result.character == null:
+		return
+	for instance_id in ids:
+		var loaded := result.character.inventory.find(instance_id)
+		if loaded == null:
+			loaded = result.character.stash.find(instance_id)
+		check(loaded != null, "%s found" % instance_id)
+		if loaded != null:
+			check_near(loaded.base_weapon_damage, 14.016, 1e-12, "%s base unchanged" % loaded.definition_id)
+			check_eq(loaded.item_level, 15, "%s level 15 kept" % loaded.definition_id)
+	check_eq(result.character.stash.find(ids[1]).quality, 12, "oath quality kept, raw base unchanged")
