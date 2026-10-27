@@ -11,7 +11,9 @@ var light_pressed: bool = false
 var heavy_pressed: bool = false
 var heavy_released: bool = false
 var dash_pressed: bool = false
-## Level flag: right mouse button currently held.
+## Level flags: left / right mouse button currently held (the bow reads LMB for
+## Flowing Draw and RMB for the Precision Stance).
+var light_held: bool = false
 var heavy_held: bool = false
 ## Weapon loadout slot requested this tick, -1 = none.
 var weapon_slot: int = -1

@@ -162,7 +162,9 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 	dash.step(delta)
 	_dash_buffer.step(delta)
 	skill_lock_left = maxf(0.0, skill_lock_left - delta)
-	if frame.dash_pressed:
+	# Combat Flow: a dash / parry / block pressed before the cancel window is refused, not stored.
+	var refuse_defense := combat.refuses_defense_input()
+	if frame.dash_pressed and not refuse_defense:
 		_dash_buffer.push(DASH_BUFFER_ACTION)
 	if _dash_buffer.has(DASH_BUFFER_ACTION) and dash.can_dash() and combat.can_dash_cancel() \
 			and not reaction.blocks_dash() and not is_in_skill_motion():
@@ -173,7 +175,7 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 		cancel_use()            # and a drink (nothing is consumed)
 		_start_dash(frame.move)
 
-	if defense.step(delta, frame.defend_pressed, frame.defend_held, can_start_defense()):
+	if defense.step(delta, frame.defend_pressed and not refuse_defense, frame.defend_held, can_start_defense()):
 		combat.cancel(&"defend")   # same cancel rule as a dash (see can_start_defense)
 
 	_step_use(frame, delta)
@@ -218,9 +220,10 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 func _step_frozen(frame: InputFrame, delta: float) -> void:
 	hitstop_left = maxf(0.0, hitstop_left - delta)
 	combat.record_inputs(frame)
-	if frame.dash_pressed:
+	var refuse_defense := combat.refuses_defense_input()
+	if frame.dash_pressed and not refuse_defense:
 		_dash_buffer.push(DASH_BUFFER_ACTION)
-	if frame.defend_pressed:
+	if frame.defend_pressed and not refuse_defense:
 		defense.step(0.0, true, frame.defend_held, false)   # keep the press buffered
 	if frame.ability_slot >= 0:
 		_ability_buffer.push(StringName(str(frame.ability_slot)))
@@ -241,11 +244,12 @@ func _step_abilities(frame: InputFrame, delta: float) -> void:
 		_ability_buffer.clear()
 
 
-## A skill may start when an attack could be dash-cancelled right now (same
-## cancel rules), outside dashes, skill motions, cast locks, drinks and hit lockouts.
+## A skill may start when the attack layer allows another action (Combat Flow:
+## only in neutral, no blanket skill cancels; legacy: the dash-cancel rule),
+## outside dashes, skill motions, cast locks, drinks and hit lockouts.
 func can_start_skill() -> bool:
 	return not health.is_dead() and not dash.is_dashing() and not is_in_skill_motion() \
-			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.can_dash_cancel() \
+			and skill_lock_left <= 0.0 and not reaction.blocks_actions() and combat.allows_other_action() \
 			and not defense.blocks_actions() and not is_using()
 
 

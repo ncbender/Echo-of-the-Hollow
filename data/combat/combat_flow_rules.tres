@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CombatFlowRules" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/combat_flow_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+transition_ratio = 0.75
+prebuffer = 0.18
+start_buffer = 0.12
+cancel_ratios = PackedFloat32Array(0.5, 0.65, 0.55, 0.65, 0.75)
+recovery_move_hold = 0.5
+flowing_draw_hold = 0.25
+flowing_draw_shots = 3
+precision_stance_move = 0.65

@@ -4,6 +4,9 @@ extends Resource
 ## is data; CombatComponent contains no per-attack special cases.
 
 enum InputType { LIGHT, HEAVY }
+## Combat Flow 1.5: role of a node in a combo-path tree; picks the defensive
+## cancel share of the recovery (CombatFlowRules.cancel_ratios).
+enum FlowRole { BASE_QUICK, BASE_HEAVY, COMBO_STEP, QUICK_FINISHER, HEAVY_FINISHER }
 
 ## Bit flags for dash_cancel_phases.
 const CANCEL_STARTUP := 1
@@ -79,6 +82,49 @@ const DEFENSE_GUARD_BREAK := 4
 ## Free-form tags forwarded with every hit (for future talents, uniques, VFX/SFX).
 @export var effect_tags: Array[StringName] = []
 
+@export_group("Combat Flow")
+## Node of the family's combo-path tree (Weapon Mastery 1.4 / Combat Flow 1.5):
+## the inputs from the chain start up to and including this attack, e.g. "L",
+## "LLH"; bows use L and P (precision). Empty = legacy combo tree (enemies).
+@export var combo_input: String = ""
+@export var flow_role: FlowRole = FlowRole.BASE_QUICK
+## Walking speed share during windup (startup) and active; the recovery starts at
+## the windup share and blends to 100 % over its second half (CombatFlowRules).
+@export var windup_move: float = 1.0
+@export var active_move: float = 1.0
+## Share of the recovery at which a buffered combo input transitions (< 0 = rules, 75 %).
+@export var transition_ratio: float = -1.0
+## Share of the recovery from which dash / parry / block may cancel (< 0 = by flow_role).
+@export var defense_cancel_ratio: float = -1.0
+## Seconds after the windup before which no combo input is accepted (the
+## pre-buffer never starts before the windup ends).
+@export var combo_open_at: float = 0.0
+## Explicit attack-specific exception: phases that a defense may cancel although
+## windup and active are committed by default (none so far).
+@export_flags("Startup", "Active") var special_cancel_phases: int = 0
+## Direction of the attack movement relative to the attack direction in degrees
+## (0 = forward, +-90 = side step). Distance: lunge_distance.
+@export var lunge_angle: float = 0.0
+## Hit limits: hits per target in one swing, minimum seconds between them, and the
+## most targets one swing may hit (0 = no limit).
+@export var max_hits_per_target: int = 1
+@export var rehit_interval: float = 0.0
+@export var max_targets: int = 0
+## Ranged attacks: projectiles fired at the start of the active phase (the fire
+## event) instead of the melee sector. speed 0 = melee.
+@export var projectile_speed: float = 0.0
+@export var projectile_range: float = 0.0
+@export var projectile_radius: float = 3.0
+@export var projectile_count: int = 1
+@export var projectile_spread: float = 0.0
+@export var projectile_pierce: int = 0
+## SkillProjectile.shape: 0 orb, 1 shard, 2 knife/arrow (visual only).
+@export var projectile_shape: int = 0
+## Animation the attack should play. All Combat Flow attacks use the generic
+## placeholder swing/shot of PlayerView until final animations exist.
+@export var animation_ref: StringName
+@export var placeholder_animation: bool = true
+
 @export_group("Defense")
 ## How the target may defend against this attack (Block & Parry, Shift).
 ## Neither Blockable nor Parryable = UNBLOCKABLE (telegraphed differently).
@@ -92,6 +138,14 @@ func get_follow_up_id(input: InputType) -> StringName:
 
 func total_duration() -> float:
 	return startup + active + recovery
+
+
+func is_flow() -> bool:
+	return combo_input != ""
+
+
+func is_projectile() -> bool:
+	return projectile_speed > 0.0
 
 
 func is_unblockable() -> bool:
