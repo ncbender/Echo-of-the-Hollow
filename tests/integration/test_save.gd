@@ -202,4 +202,4 @@ func test_off_hand_weapon_from_older_save_and_nine_families() -> void:
 	check(loaded.equipment.get_item(S.MAIN_HAND) != null, "the main hand is untouched")
 	for family_id: StringName in db.weapons:
 		check_eq(loaded.mastery.get_level(family_id), 2, "%s mastery level kept" % family_id)
-	check_eq(SaveSystem.VERSION, 10, "no schema change: save version stays 10")
+	check(SaveSystem.VERSION >= 10, "one weapon slot needed no schema change (v11 only adds affix tier models)")

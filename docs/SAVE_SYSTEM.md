@@ -32,7 +32,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 10) ✅
+## Format (Version 11) ✅
 ```json
 { "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 10.
+Aktuell: Version 11.
 Weapon Mastery 1.4 / Combat Flow 1.5 ändert das Schema **nicht** (Mastery war schon pro Familie gespeichert,
 Angriffszustand/Puffer werden nie gespeichert). Eine Waffe in der Nebenhand aus älteren Ständen verwirft die
 Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test `save`).
@@ -126,6 +126,9 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
 - 8→9 (Hearth Flask & Consumables 1.0): `consumables` = keine Upgrades, volle Grundladungen (`charges` -1 → beim Laden aus den Regeln), kein
   Trankslot, kein Buff, kein Cooldown. Sonst ändert sich nichts. Laden begrenzt Stufen/Ladungen und setzt einen laufenden Buff wieder ein.
 - 9→10 (Armor Mastery 1.0): leeres `armor_mastery` → alle vier Tracks Stufe 1 ohne XP. Items, Slots und Loadouts unverändert.
+- 10→11 (Item Foundation 1.0): jeder gewürfelte Affix (`affix` + `tier`) in `inventory`, `stash.items` und `orphaned_items`
+  bekommt `"tier_model": 3` (Dreistufen-Prototyp, `AffixTiers.MODEL_THREE`). Werte, Legacy-Würfe (ohne `affix`) und alles
+  andere bleiben. Eine Tier-Nummer wird nur im eigenen Modell gelesen (`AffixDefinition.tier_of`), nie als Fünf-Tier-Tier.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

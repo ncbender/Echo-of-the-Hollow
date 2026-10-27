@@ -15,7 +15,8 @@ var item_level: int = 1
 var quality: int = 0
 ## Main material chosen at imprint ("" = not imprinted yet).
 var material_id: StringName = &""
-## Rolled affixes: {"affix": id, "tier": n, "stat": id, "flat": v, "percent": v}.
+## Rolled affixes: {"affix": id, "tier": n, "tier_model": 3/5, "stat": id, "flat": v, "percent": v}
+## ("tier_model" = AffixTiers model the tier number belongs to).
 ## Entries without "affix" are legacy stat rolls (still applied, not reforgeable).
 var affixes: Array[Dictionary] = []
 ## Bound essences (max CraftingProfile.essence_slots, never more than 2).
@@ -146,8 +147,9 @@ static func from_dict(data: Variant) -> ItemInstance:
 ## JSON turns integers into floats: restore the canonical types of a rolled affix.
 static func _normalized_affix(affix: Dictionary) -> Dictionary:
 	var result := affix.duplicate(true)
-	if result.has("tier"):
-		result["tier"] = _int(result["tier"], 0)
+	for key: String in ["tier", "tier_model"]:
+		if result.has(key):
+			result[key] = _int(result[key], 0)
 	for key: String in ["flat", "percent"]:
 		result[key] = float(result[key]) if result.get(key) is float or result.get(key) is int else 0.0
 	return result

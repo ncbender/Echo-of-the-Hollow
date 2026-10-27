@@ -156,3 +156,39 @@ func test_invalid_crafting_data_is_repaired_without_loss() -> void:
 	# unknown essence ids never crash effect collection
 	loaded.essences = [&"phantom_essence"] as Array[StringName]
 	check_eq(ItemStats.effects(loaded, db.get_item(&"test_craft_blade"), db).size(), 0, "unknown essence ignored")
+
+
+## Item Foundation 1.0: v10 affixes come from the three-tier model and are marked
+## so (never re-read as five-tier tiers); values and legacy rolls stay untouched.
+func test_v10_save_marks_three_tier_affixes() -> void:
+	var character := CharacterFactory.create_new(db)
+	var blade := character.inventory.add_item(&"test_craft_blade")[0]
+	var stored := character.inventory.add_item(&"test_craft_blade")[0]
+	var payload := character.to_dict()
+	var rolled := {"affix": "sharpened", "tier": 1, "stat": "physical_damage", "flat": 15.0, "percent": 0.0}
+	var legacy := {"stat": "crit_chance", "flat": 3.0, "percent": 0.0, "legacy": true}
+	var stash_entry: Dictionary = {}
+	for entry: Dictionary in payload.inventory:
+		if entry.id == blade.instance_id:
+			entry["affixes"] = [rolled.duplicate(), legacy.duplicate()]
+		if entry.id == stored.instance_id:
+			stash_entry = entry.duplicate(true)
+			stash_entry["affixes"] = [rolled.duplicate()]
+	payload.inventory = payload.inventory.filter(func(e: Dictionary) -> bool: return e.id != stored.instance_id)
+	payload["stash"] = {"items": [stash_entry]}
+	_write_payload(payload, 10)
+	var result := SaveSystem.load_from(path, db)
+	if not check(result.ok(), "v10 save loads: %s" % [result.errors]):
+		return
+	var loaded := result.character.inventory.find(blade.instance_id)
+	check_eq(loaded.affixes[0].get("tier_model"), AffixTiers.MODEL_THREE, "rolled affix marked three-tier")
+	check_eq(loaded.affixes[0].get("tier"), 1, "tier number kept")
+	check_eq(loaded.affixes[0].get("flat"), 15.0, "value kept (nothing re-rolled)")
+	check(not loaded.affixes[1].has("tier_model"), "legacy stat roll has no tier and gets no model")
+	check_eq(loaded.affixes[1].get("flat"), 3.0, "legacy value kept")
+	var in_stash := result.character.stash.find(stored.instance_id)
+	check(in_stash != null and in_stash.affixes[0].get("tier_model") == AffixTiers.MODEL_THREE, "stash affixes marked too")
+	check(db.affixes[&"sharpened"].tier_of(loaded.affixes[0]) != null, "three-tier entry resolves in the three-tier affix")
+	check_eq(SaveSystem.save_to(result.character, path), OK, "re-saved")
+	var envelope: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	check_eq(int(envelope.version), 11, "written as v11")

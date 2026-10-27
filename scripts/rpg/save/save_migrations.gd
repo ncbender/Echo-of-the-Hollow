@@ -21,6 +21,7 @@ static func _steps() -> Dictionary:
 		7: _v7_to_v8,
 		8: _v8_to_v9,
 		9: _v9_to_v10,
+		10: _v10_to_v11,
 	}
 
 
@@ -223,4 +224,24 @@ static func _v8_to_v9(data: Dictionary) -> Dictionary:
 static func _v9_to_v10(data: Dictionary) -> Dictionary:
 	if not data.get("armor_mastery") is Dictionary:
 		data["armor_mastery"] = {}
+	return data
+
+
+## v11 (Item Foundation 1.0): rolled affixes name the tier model of their tier
+## number. Every affix rolled before v11 came from the three-tier prototype model
+## (AffixTiers.MODEL_THREE), so it is marked as such - never read as a five-tier
+## tier. Values (flat/percent), legacy stat rolls and all other data stay as they are.
+static func _v10_to_v11(data: Dictionary) -> Dictionary:
+	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
+	if data.get("stash") is Dictionary:
+		lists.append(data["stash"].get("items"))
+	for list: Variant in lists:
+		if not list is Array:
+			continue
+		for entry: Variant in list:
+			if not entry is Dictionary or not (entry as Dictionary).get("affixes") is Array:
+				continue
+			for affix: Variant in entry["affixes"]:
+				if affix is Dictionary and affix.has("affix") and affix.has("tier") and not affix.has("tier_model"):
+					affix["tier_model"] = AffixTiers.MODEL_THREE
 	return data

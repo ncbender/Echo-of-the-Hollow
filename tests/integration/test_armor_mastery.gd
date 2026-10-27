@@ -243,7 +243,7 @@ func test_save_load_and_migration() -> void:
 	for type: int in ArmorMasteryRules.TYPES:
 		check(old.armor_mastery.level(type) == 1 and old.armor_mastery.xp(type) == 0.0, "type %d starts at level 1" % type)
 	check_eq(JSON.stringify(old.equipment.to_dict()), JSON.stringify(character.equipment.to_dict()), "loadouts untouched")
-	check_eq(int(SaveSystem.VERSION), 10, "save version 10")
+	check(int(SaveSystem.VERSION) >= 10, "save version 10 or later (v11: affix tier models)")
 
 
 func _open_haven() -> bool:

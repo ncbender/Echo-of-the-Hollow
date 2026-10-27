@@ -23,6 +23,9 @@ enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
 @export var allowed_slot_kinds: Array[ItemDefinition.SlotKind] = []
 @export var min_item_level: int = 1
 @export var weight: float = 100.0
+## Tier model of `tiers` (AffixTiers.MODEL_THREE or MODEL_FIVE). Rolls store it, so a
+## saved tier number is never reinterpreted when an affix moves to another model.
+@export var tier_model: int = AffixTiers.MODEL_THREE
 @export var tiers: Array[AffixTier] = []
 
 
@@ -47,11 +50,19 @@ func get_tier(tier_number: int) -> AffixTier:
 	return null
 
 
+## Tier of a rolled entry - only when it was rolled under this affix's tier model
+## (null otherwise: an old tier number is never read as a tier of another model).
+func tier_of(entry: Dictionary) -> AffixTier:
+	if AffixTiers.model_of(entry) != tier_model:
+		return null
+	return get_tier(int(entry.get("tier", 0)))
+
+
 ## Saved affix entry for `tier` with a whole-number value rolled by `rng`.
 func roll(tier: AffixTier, rng: RandomNumberGenerator) -> Dictionary:
 	var value := float(rng.randi_range(roundi(tier.min_value), roundi(tier.max_value)))
 	return {
-		"affix": String(id), "tier": tier.tier, "stat": String(stat),
+		"affix": String(id), "tier": tier.tier, "tier_model": tier_model, "stat": String(stat),
 		"flat": value if value_kind == ValueKind.FLAT else 0.0,
 		"percent": value if value_kind == ValueKind.PERCENT else 0.0,
 	}
@@ -70,12 +81,21 @@ func validate() -> PackedStringArray:
 		errors.append("affix %s: unknown category %d" % [id, category])
 	if tiers.is_empty():
 		errors.append("affix %s: no tiers" % id)
+	if tier_model != AffixTiers.MODEL_THREE and tier_model != AffixTiers.MODEL_FIVE:
+		errors.append("affix %s: unknown tier model %d" % [id, tier_model])
+		return errors
 	var seen := {}
 	for tier in tiers:
 		if tier == null or tier.min_value > tier.max_value or tier.weight <= 0.0:
 			errors.append("affix %s: invalid tier" % id)
 		elif seen.has(tier.tier):
 			errors.append("affix %s: duplicate tier %d" % [id, tier.tier])
+		elif tier.tier < 1 or tier.tier > tier_model:
+			errors.append("affix %s: tier %d outside the %d-tier model" % [id, tier.tier, tier_model])
 		else:
 			seen[tier.tier] = true
+			if tier_model == AffixTiers.MODEL_FIVE and tier.min_item_level != AffixTiers.min_item_level(tier.tier):
+				errors.append("affix %s: T%d must start at item level %d (has %d)" % [id, tier.tier, AffixTiers.min_item_level(tier.tier), tier.min_item_level])
+	if tier_model == AffixTiers.MODEL_FIVE and seen.size() != AffixTiers.COUNT and errors.is_empty():
+		errors.append("affix %s: the five-tier model needs all tiers T5..T1" % id)
 	return errors
