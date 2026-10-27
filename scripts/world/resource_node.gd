@@ -1,13 +1,19 @@
 class_name ResourceNode
 extends Interactable
-## Reusable gathering component for the world: stand next to it and press G.
-## Rules live in ResourceGathering; this node only shows state and forwards
-## the interaction for its map (`node_id` must be unique within the map).
+## Reusable gathering component for the world: stand next to it and HOLD G
+## (Gathering 1.1): the player works the node step by step (Player.begin_gather,
+## one ResourceGathering.complete_step per finished step). Rules live in
+## ResourceGathering; this node only shows state and forwards the interaction
+## for its map (`node_id` must be unique within the map).
 
 @export var definition: ResourceNodeDefinition
 @export var node_id: StringName
 
+## A finished work step: `result` from ResourceGathering.complete_step (views, feedback).
+signal step_completed(result: Dictionary)
+
 var _session: SessionState
+var _hud: GameHud
 var _map_id: StringName
 var _redraw_timer: float = 0.0
 
@@ -26,7 +32,8 @@ func is_available() -> bool:
 	return ResourceGathering.is_available(_session.get_character().world, _map_id, node_id, _now())
 
 
-## Gathers for the session character; returns "" on success or the reason.
+## Harvests all remaining steps at once (non-interactive: tests, the loop
+## test); returns "" on success or the reason. Players use interact (hold G).
 func gather() -> String:
 	if _session == null:
 		return "no session"
@@ -36,24 +43,66 @@ func gather() -> String:
 	return error
 
 
+## G pressed (edge): starts working this node if it can be worked and the
+## player is free. Holding G keeps working; the player stops on interruptions.
 func interact(hud: GameHud) -> void:
-	var error := gather()
-	if error == "":
-		var item := _session.database.get_item(definition.yield_item_id)
-		var text := "Gathered %s x%d" % [item.display_name, definition.yield_quantity]
-		var profession: ProfessionDefinition = _session.database.professions.get(definition.profession_id)
-		if profession != null:
-			text += "  ·  %s %d" % [profession.display_name, _session.get_character().professions.level(profession.id)]
-		hud.notify(text)
-	else:
-		hud.notify(error)
+	_hud = hud
+	if _session == null:
+		return
+	var error := ResourceGathering.gather_error(_session.get_character(), _map_id, node_id, definition, _now())
+	if error != "":
+		if hud != null:
+			hud.notify(error)
+		return
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player != null:
+		player.begin_gather(self)
+
+
+# --- the Player's gather target ---------------------------------------------------
+
+func step_seconds() -> float:
+	var profession: ProfessionDefinition = _session.database.professions.get(definition.profession_id) if _session != null else null
+	return profession.gather_step_seconds if profession != null and profession.gather_step_seconds > 0.0 else 0.75
+
+
+func in_range(_player: Node) -> bool:
+	return player_inside and is_visible_in_tree()
+
+
+func complete_step() -> Dictionary:
+	if _session == null:
+		return {"error": "no session", "exhausted": false}
+	var character := _session.get_character()
+	var result := ResourceGathering.complete_step(character, _map_id, node_id, definition, _now())
+	_update_prompt()
+	queue_redraw()
+	step_completed.emit(result)
+	if _hud != null and is_instance_valid(_hud):
+		_hud.notify(_step_text(result, character))
+	return result
+
+
+func _step_text(result: Dictionary, character: Character) -> String:
+	if String(result.error) != "":
+		return String(result.error)
+	var text := "%s %d/%d" % [definition.display_name, int(result.step), int(result.steps)]
+	if int(result.items) > 0:
+		text += "  ·  +%d %s" % [int(result.items), _session.database.get_item(result.item).display_name]
+	var profession: ProfessionDefinition = _session.database.professions.get(definition.profession_id)
+	if profession != null:
+		text += "  ·  %s %d" % [profession.display_name, character.professions.level(profession.id)]
+	if result.exhausted:
+		text += "  ·  exhausted"
+	return text
 
 
 func _update_prompt() -> void:
 	if definition == null:
 		return
 	if is_available():
-		prompt = "Gather %s" % definition.display_name
+		var done := ResourceGathering.steps_done(_session.get_character().world, _map_id, node_id) if _session != null else 0
+		prompt = "Hold to gather %s  (%d/%d)" % [definition.display_name, done, maxi(1, definition.steps)]
 	elif definition.respawn_seconds <= 0.0:
 		prompt = "%s (exhausted)" % definition.display_name
 	else:

@@ -160,3 +160,47 @@ func test_only_from_neutral() -> void:
 	drink.flask_pressed = true
 	await tick(drink)
 	check(not player.is_using(), "no drink while gathering")
+
+
+
+## A real ResourceNode with the session character: hold G through all steps,
+## interrupt midway, resume with a new press; materials and XP arrive per step.
+func test_real_node_with_held_g() -> void:
+	var session := SessionState.find(get_tree())
+	var previous := session.character
+	var character := CharacterFactory.create_new(GameDatabase.get_default())
+	session.set_character(character)
+	var definition: ResourceNodeDefinition = GameDatabase.get_default().resource_nodes[&"oak_tree"]
+	var node := ResourceNode.new()
+	node.definition = definition
+	node.node_id = &"test_oak"
+	var shape := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = 20.0
+	shape.shape = circle
+	node.add_child(shape)
+	add_child(node)
+	spawn_player()
+	player.gather_stopped.connect(func(reason: StringName) -> void: stops.append(reason))
+	await wait_physics(3)
+	check(node.player_inside, "player stands at the tree")
+	var start_timber := character.inventory.count(&"timber")
+	node.interact(null)
+	check(player.is_gathering(), "G press starts woodcutting")
+	var step_ticks := seconds_to_ticks(0.75)
+	await tick(held(), step_ticks)
+	check_eq(ResourceGathering.steps_done(character.world, &"", &"test_oak"), 1, "one chop done")
+	await tick(held(), 20)
+	await tick(frame())   # released mid-chop
+	check_eq(stops.back(), Player.GATHER_RELEASED, "released")
+	check_eq(ResourceGathering.steps_done(character.world, &"", &"test_oak"), 1, "the half chop gave nothing")
+	node.interact(null)
+	await tick(held(), step_ticks * definition.steps)
+	check_eq(stops.back(), Player.GATHER_EXHAUSTED, "the tree is felled")
+	check_eq(character.inventory.count(&"timber") - start_timber, definition.yield_quantity, "all timber of the budget, once")
+	check(not node.is_available(), "exhausted")
+	node.interact(null)
+	check(not player.is_gathering(), "an exhausted node does not start again")
+	node.queue_free()
+	session.set_character(previous)
+

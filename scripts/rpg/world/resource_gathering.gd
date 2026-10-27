@@ -1,8 +1,12 @@
 class_name ResourceGathering
 extends RefCounted
-## Gathering rules. State per node is stored in WorldState.map_states:
+## Gathering rules (docs/GATHERING.md). State per node is stored in WorldState.map_states:
 ##   "node.<node_id>" -> unix time when the node is available again, or -1
 ##   for permanently depleted nodes. Missing key = available.
+##   "gather.<node_id>" / "gather_cycle.<node_id>" -> partial state of the running
+##   cycle and the number of exhaustions (Gathering 1.1, see below).
+## A node is worked in steps (G held, Player.begin_gather); each completed step
+## is one transaction (complete_step).
 ## `now` is passed in (unix seconds) so the rule is deterministic in tests.
 
 const PERMANENT := -1.0
@@ -31,11 +35,9 @@ static func seconds_left(world: WorldState, map_id: StringName, node_id: StringN
 	return maxf(0.0, float(value) - now)
 
 
-## Gathers once: adds the yield to the inventory, depletes the node and gives
-## the node profession's XP. The depletion is world state (saved), so loading
-## a save never makes a node gatherable again before its time.
-## Refused (nothing changes) when depleted or when the inventory has no room.
-static func gather(character: Character, map_id: StringName, node_id: StringName,
+## Why the node cannot be worked right now ("" = it can): invalid data, level,
+## depleted. Checked before an action starts and again by every step.
+static func gather_error(character: Character, map_id: StringName, node_id: StringName,
 		definition: ResourceNodeDefinition, now: float) -> String:
 	if definition == null or character.database.get_item(definition.yield_item_id) == null:
 		return "invalid resource node"
@@ -44,13 +46,78 @@ static func gather(character: Character, map_id: StringName, node_id: StringName
 		return "Requires %s level %d" % [profession.display_name if profession != null else "profession", definition.required_level]
 	if not is_available(character.world, map_id, node_id, now):
 		return "%s is depleted" % definition.display_name
-	if character.inventory.room_for(definition.yield_item_id) < definition.yield_quantity:
-		return "inventory full"
-	character.inventory.add_item(definition.yield_item_id, definition.yield_quantity)
-	var until := PERMANENT if definition.respawn_seconds <= 0.0 else now + definition.respawn_seconds
-	character.world.set_map_value(map_id, state_key(node_id), until)
-	ProfessionService.grant_gather_xp(character, definition.profession_id, ProfessionService.gather_xp_budget(character, definition))   # only after a successful gather
 	return ""
+
+
+## Completes ONE work step (Gathering 1.1) as one transaction: the step's planned
+## materials go into the bag, its planned XP is granted, the progress is written,
+## and after the last step the node is exhausted (respawn as before) - or nothing
+## changes at all (level, depleted, no room for this step's materials).
+## Returns {"error", "exhausted", "items", "xp", "step", "steps", "item"}.
+static func complete_step(character: Character, map_id: StringName, node_id: StringName,
+		definition: ResourceNodeDefinition, now: float) -> Dictionary:
+	var result := {"error": "", "exhausted": false, "items": 0, "xp": 0, "step": 0, "steps": 0, "item": &""}
+	result.error = gather_error(character, map_id, node_id, definition, now)
+	if result.error != "":
+		return result
+	var world := character.world
+	var data := progress(world, map_id, node_id)
+	if data.has("invalid"):
+		# unreadable partial state: never a reward from it - the node counts as exhausted
+		_exhaust(world, map_id, node_id, definition, now)
+		result.error = "%s is depleted" % definition.display_name
+		return result
+	if data.is_empty():
+		data = make_plan(character, map_id, node_id, definition)
+	var step := int(data.done)
+	var item_id := StringName(data.item)
+	var amount := int(data.items[step])
+	var xp := int(data.xp[step])
+	if amount > 0 and (character.database.get_item(item_id) == null or character.inventory.room_for(item_id) < amount):
+		result.error = "inventory full"
+		return result
+	# --- from here on nothing can fail: materials, progress and XP move together
+	if amount > 0:
+		character.inventory.add_item(item_id, amount)
+	data.done = step + 1
+	data.given_items = int(data.given_items) + amount
+	data.given_xp = int(data.given_xp) + xp
+	if int(data.done) >= int(data.steps):
+		_exhaust(world, map_id, node_id, definition, now)
+		result.exhausted = true
+	else:
+		_store(world, map_id, node_id, data)
+	ProfessionService.grant_gather_xp(character, definition.profession_id, xp)
+	result.items = amount
+	result.xp = xp
+	result.step = step + 1
+	result.steps = int(data.steps)
+	result.item = item_id
+	return result
+
+
+## Non-interactive harvest of all remaining steps at once (tests, simulations,
+## the gameplay-loop test): same totals as stepping with G. "" or the first error.
+static func gather(character: Character, map_id: StringName, node_id: StringName,
+		definition: ResourceNodeDefinition, now: float) -> String:
+	var first := true
+	for attempt in 64:   # more than any node has steps
+		var result := complete_step(character, map_id, node_id, definition, now)
+		if result.error != "":
+			return result.error if first else ""
+		first = false
+		if result.exhausted:
+			return ""
+	return ""
+
+
+## Exhausted: depleted until its respawn time (or forever), the partial state
+## removed and the cycle counter raised (the next cycle gets a new fixed plan).
+static func _exhaust(world: WorldState, map_id: StringName, node_id: StringName, definition: ResourceNodeDefinition, now: float) -> void:
+	var until := PERMANENT if definition.respawn_seconds <= 0.0 else now + definition.respawn_seconds
+	world.set_map_value(map_id, state_key(node_id), until)
+	world.erase_map_value(map_id, progress_key(node_id))
+	world.set_map_value(map_id, CYCLE_KEY % node_id, int(world.get_map_value(map_id, CYCLE_KEY % node_id, 0)) + 1)
 
 
 # --- Gathering 1.1: steps, fixed budgets, persistent partial state ---------------
@@ -76,7 +143,11 @@ static func progress(world: WorldState, map_id: StringName, node_id: StringName)
 	var raw: Variant = world.get_map_value(map_id, progress_key(node_id), null)
 	if raw == null or raw == "":
 		return {}
-	var data: Variant = JSON.parse_string(String(raw)) if raw is String else null
+	var data: Variant = null
+	if raw is String:
+		var json := JSON.new()
+		if json.parse(String(raw)) == OK:   # silent on broken text (no engine error)
+			data = json.data
 	if not data is Dictionary or not _consistent(data):
 		return {"invalid": true}
 	return data
