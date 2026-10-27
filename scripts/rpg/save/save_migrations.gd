@@ -277,8 +277,30 @@ const V13_WEAPON_MODELS := {
 ## v13 (Weapon Base Damage 1.2): the three special weapons store their raw base damage,
 ## assigned exactly like v12 from their SAVED item level (a stored level is never moved to
 ## the new creation level 15). Global bonuses, evolution, sockets, essences, quality stay.
+## Exception (1.2.1): development echo blades (saved level 1, no "base_damage") are first moved
+## to the approved prototype instance, before the general assignment would give them base 12.
 static func _v12_to_v13(data: Dictionary) -> Dictionary:
+	_restore_legacy_echo_blades(data)
 	return _assign_weapon_bases(data, V13_WEAPON_MODELS)
+
+
+## An "echo_blade" entry with saved level exactly 1 ("ilvl" missing or 1) and no "base_damage"
+## in the ORIGINAL payload gets ilvl 15 and base 14.016. Every other field stays; any other
+## entry (other level, existing base, other item) is left alone. Runs before any base is assigned.
+static func _restore_legacy_echo_blades(data: Dictionary) -> void:
+	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
+	if data.get("stash") is Dictionary:
+		lists.append(data["stash"].get("items"))
+	for list: Variant in lists:
+		if not list is Array:
+			continue
+		for entry: Variant in list:
+			if not entry is Dictionary or str(entry.get("def", "")) != "echo_blade" or entry.has("base_damage"):
+				continue
+			var level: Variant = entry.get("ilvl", 1)   # "ilvl" is only written when it is not 1
+			if (level is int or level is float) and float(level) == 1.0:
+				entry["ilvl"] = 15
+				entry["base_damage"] = 14.016
 
 
 ## One deterministic base per weapon instance of `models` without "base_damage" (bag, stash,

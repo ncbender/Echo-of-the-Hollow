@@ -134,7 +134,11 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
   gewürfelt; vorhandene Werte, Affixe (auch globales Sharpened), Quality und alle anderen Items bleiben. Der Payload-Text
   wird seit v12 mit voller Gleitkomma-Präzision geschrieben (`docs/WEAPON_BASE_DAMAGE_1_1.md`).
 - 12→13 (Weapon Base Damage 1.2): stormcaller_fang, crushing_oath, echo_blade (Tabelle `V13_WEAPON_MODELS`) ohne `base_damage`
-  bekommen ihn einmalig wie bei v12 aus dem **gespeicherten** ilvl (alte Echo Blades: Level 1 → 12,0). Sonst ändert sich nichts.
+  bekommen ihn einmalig wie bei v12 aus dem **gespeicherten** ilvl. Sonst ändert sich nichts.
+  **Ausnahme 1.2.1** (`_restore_legacy_echo_blades`, im selben Schritt **vor** der Basisübernahme, prüft den Originaleintrag):
+  `def == "echo_blade"`, gespeichertes Level genau 1 (`ilvl` fehlt oder 1) und kein `base_damage` → `ilvl` 15,
+  `base_damage` 14,016; alle anderen Felder bleiben. Keine neue Version (bleibt 13). v13-Stände mit bereits zugewiesener
+  Basis 12 sind nicht mehr unterscheidbar und bleiben unverändert.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

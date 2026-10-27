@@ -626,8 +626,8 @@ func test_bound_player_forged_greatsword_hits() -> void:
 # --- 1.2: special weapons V2 - persistence and v13 migration -----------------------------
 
 ## v12 -> v13: the three special weapons get their base once from their SAVED item level
-## (an echo blade saved at level 1 stays level 1); evolution, essences, sockets, quality,
-## existing values and all other items stay as they are.
+## (1.2.1: an old echo blade at level 1 without base becomes the prototype instance 15 / 14.016);
+## evolution, essences, sockets, quality, existing values and all other items stay as they are.
 func test_migration_v12_to_v13() -> void:
 	var evolution := {"stage": 2, "xp": 15, "path": ""}
 	var old := {"inventory": [
@@ -645,8 +645,7 @@ func test_migration_v12_to_v13() -> void:
 	check_eq([items[0].quality, items[0].essences, items[0].evolution], [20, ["storm_wolf"], evolution], "quality, essence, evolution kept")
 	check_near(items[1].base_damage, 14.016, 1e-12, "oath ilvl 15: 14.016")
 	check_eq([items[1].quality, items[1].sockets], [5, ["impact_rune"]], "oath quality and socket kept")
-	check(not items[2].has("ilvl"), "old echo blade keeps its saved level 1 (not moved to 15)")
-	check_near(items[2].base_damage, 12.0, 1e-12, "echo blade level 1: B_ref(1) x 1.0 = 12")
+	check_eq([items[2].ilvl, items[2].base_damage], [15, 14.016], "old echo blade: level 15, base 14.016 (1.2.1)")
 	check_eq(items[3].base_damage, 14.4, "other weapons untouched")
 	check_near(data.stash.items[0].base_damage, 14.016, 1e-12, "stash echo blade ilvl 15")
 	check_eq(data.orphaned_items[0].base_damage, 13.5, "an existing value is never replaced")
@@ -660,7 +659,7 @@ func test_migration_v12_to_v13() -> void:
 	var fang := restored.inventory.find("a")
 	check_eq([fang.item_level, fang.evolution_stage(), fang.quality], [15, 2, 20], "loaded stormcaller state")
 	check_near(WeaponDamage.of(fang, db.get_item(&"stormcaller_fang"), db), 14.016 * 1.1, 1e-9, "loaded: base x quality")
-	check_eq(restored.inventory.find("c").item_level, 1, "loaded echo blade level 1")
+	check_eq(restored.inventory.find("c").item_level, 15, "loaded old echo blade level 15")
 
 
 ## Stored special-weapon bases survive equip, bag <-> stash and save/load unchanged.
@@ -696,3 +695,116 @@ func test_special_weapon_base_survives_equip_stash_and_save() -> void:
 			check_near(loaded.base_weapon_damage, 14.016, 1e-12, "%s base unchanged" % loaded.definition_id)
 			check_eq(loaded.item_level, 15, "%s level 15 kept" % loaded.definition_id)
 	check_eq(result.character.stash.find(ids[1]).quality, 12, "oath quality kept, raw base unchanged")
+
+
+
+# --- 1.2.1: legacy echo blade migration ---------------------------------------------------
+
+## Cases A-E in one payload: only an "echo_blade" with saved level exactly 1 and no
+## "base_damage" in the original entry becomes 15 / 14.016; everything else stays.
+func test_legacy_echo_blade_migration_cases() -> void:
+	var meta := {"id": "e", "def": "echo_blade", "qty": 1, "quality": 7, "origin": "crafted", "fav": true, "lock": true,
+		"affixes": [{"affix": "honed", "tier": 2, "tier_model": 5, "stat": "physical_damage", "flat": 3.0, "percent": 0.0}],
+		"essences": ["storm_wolf"], "sockets": ["impact_rune"], "evolution": {"stage": 2, "xp": 15, "path": ""},
+		"progress": {"kills": 4}}
+	var old := {"inventory": [
+		{"id": "a", "def": "echo_blade", "qty": 1},
+		{"id": "b", "def": "echo_blade", "qty": 1, "base_damage": 12.0},
+		{"id": "c", "def": "echo_blade", "qty": 1, "ilvl": 15},
+		{"id": "d", "def": "iron_sword", "qty": 1},
+		meta.duplicate(true),
+		{"id": "f", "def": "echo_blade", "qty": 1, "ilvl": 1},
+		{"id": "g", "def": "echo_blade", "qty": 1, "ilvl": 30},
+		{"id": "h", "def": "stormcaller_fang", "qty": 1}],
+		"stash": {"items": [{"id": "s", "def": "echo_blade", "qty": 1}]},
+		"orphaned_items": [{"id": "o", "def": "echo_blade", "qty": 1}]}
+	var errors: PackedStringArray = []
+	var data: Dictionary = SaveMigrations.migrate(old.duplicate(true), 12, errors)
+	check(errors.is_empty(), "migrates: %s" % [errors])
+	var items: Array = data.inventory
+	check_eq([items[0].ilvl, items[0].base_damage], [15, 14.016], "A: old echo blade -> 15 / 14.016")
+	check_eq(items[1], old.inventory[1], "B: level 1 with base 12 completely unchanged")
+	check_eq(items[2].ilvl, 15, "C: level 15 kept")
+	check_near(items[2].base_damage, 14.016, 1e-12, "C: normal assignment B_ref(15) x 1.0")
+	check_eq(items[3], old.inventory[3], "D: other weapon at level 1 without base completely unchanged (v12 step already ran)")
+	var expected: Dictionary = meta.duplicate(true)
+	expected["ilvl"] = 15
+	expected["base_damage"] = 14.016
+	check_eq(items[4], expected, "E: affixes, essence, evolution, sockets, quality, fav/lock, origin, progress kept")
+	check_eq([items[5].ilvl, items[5].base_damage], [15, 14.016], "explicit ilvl 1 counts as level 1")
+	check_eq(items[6].ilvl, 30, "level 30 not moved")
+	check_near(items[6].base_damage, WeaponDamage.reference_at(12.0, 30), 1e-12, "level 30: normal assignment")
+	check(not items[7].has("ilvl"), "stormcaller at level 1 is no echo blade")
+	check_near(items[7].base_damage, 12.0, 1e-12, "stormcaller level 1: normal assignment")
+	check_eq([data.stash.items[0].ilvl, data.orphaned_items[0].ilvl], [15, 15], "stash and orphans too")
+	var restored := Character.from_dict(data, db, PackedStringArray())
+	var blade := restored.inventory.find("a")
+	check_eq([blade.item_level, blade.base_weapon_damage], [15, 14.016], "loaded instance 15 / 14.016")
+	check_near(WeaponDamage.of(blade, db.get_item(&"echo_blade"), db), 14.016, 1e-12, "D_weapon 14.016")
+
+
+## F: a second load or migration pass changes nothing - the migrated payload is v13 and
+## carries its base, so neither step touches it again (nothing is rolled).
+func test_legacy_echo_blade_second_load_is_stable() -> void:
+	var payload := CharacterFactory.create_new(db).to_dict()
+	(payload.inventory as Array).append({"id": "old_echo", "def": "echo_blade", "qty": 1, "fav": true})
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var path := SAVE_DIR.path_join("echo_legacy_%s.save.json" % IdGenerator.new_id("t"))
+	check_eq(SaveSystem.write_payload(payload, path), OK, "written")
+	var envelope: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	envelope["version"] = 12   # the checksum covers only the payload text
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(envelope))
+	file.close()
+	var first := SaveSystem.load_from(path, db)
+	check(first.character != null, "v12 file loads: %s" % [first.errors])
+	if first.character == null:
+		_remove_save(path)
+		return
+	var blade := first.character.inventory.find("old_echo")
+	check_eq([blade.item_level, blade.favorite], [15, true], "first load: level 15, favourite kept")
+	check_near(blade.base_weapon_damage, 14.016, 1e-12, "first load: base 14.016")
+	check_eq(SaveSystem.save_to(first.character, path), OK, "saved as v13")
+	var second := SaveSystem.load_from(path, db)
+	_remove_save(path)
+	check(second.character != null, "v13 file loads: %s" % [second.errors])
+	if second.character != null:
+		var again := second.character.inventory.find("old_echo")
+		check_eq([again.item_level, again.favorite], [15, true], "second load: level and favourite unchanged")
+		check_near(again.base_weapon_damage, blade.base_weapon_damage, 1e-12, "second load: base unchanged, no reroll")
+	var migrated: Dictionary = SaveMigrations.migrate({"inventory": [{"id": "x", "def": "echo_blade", "qty": 1}]}, 12, PackedStringArray())
+	var snapshot: Dictionary = migrated.duplicate(true)
+	check_eq(SaveMigrations._v12_to_v13(migrated), snapshot, "running the step again changes nothing")
+
+
+## G: older supported versions reach the same result from their original fields; a v13
+## save is already final (an assigned base 12 is indistinguishable and stays).
+func test_legacy_echo_blade_from_older_versions() -> void:
+	for version: int in [2, 3, 10, 11, 12]:
+		var old := {"inventory": [
+			{"id": "a", "def": "echo_blade", "qty": 1},
+			{"id": "b", "def": "echo_blade", "qty": 1, "ilvl": 15},
+			{"id": "c", "def": "iron_sword", "qty": 1}]}
+		var errors: PackedStringArray = []
+		var data: Variant = SaveMigrations.migrate(old, version, errors)
+		check(data is Dictionary and errors.is_empty(), "v%d migrates: %s" % [version, errors])
+		if not data is Dictionary:
+			continue
+		var items: Array = data.inventory
+		check_eq([items[0].ilvl, items[0].base_damage], [15, 14.016], "v%d: old echo blade 15 / 14.016" % version)
+		check_eq(items[1].ilvl, 15, "v%d: level-15 echo blade kept" % version)
+		check_near(items[1].base_damage, 14.016, 1e-12, "v%d: level-15 echo blade normal base" % version)
+		check(int(items[2].get("ilvl", 1)) == 1, "v%d: iron sword level 1" % version)
+		if version < 12:
+			check_near(items[2].base_damage, 12.0, 1e-12, "v%d: iron sword gets only its v12 base" % version)
+		else:
+			check(not items[2].has("base_damage"), "v12: iron sword not touched by the echo fix")
+	var v13 := {"inventory": [{"id": "a", "def": "echo_blade", "qty": 1, "base_damage": 12.0}]}
+	var unchanged: Dictionary = SaveMigrations.migrate(v13.duplicate(true), 13, PackedStringArray())
+	check_eq(unchanged, v13, "v13 payload: no step runs, stored base 12 stays")
+
+
+func _remove_save(path: String) -> void:
+	for suffix: String in ["", SaveSystem.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(path + suffix):
+			DirAccess.remove_absolute(path + suffix)

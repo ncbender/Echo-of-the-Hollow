@@ -40,8 +40,8 @@ bei Q0 und mit Echo Blade unverändert. Keine Kompensation.
   `V13_WEAPON_MODELS` (B1 12, Basis 14,016, Erzeugungslevel 15): Basis = B_ref(**gespeichertes** ilvl) × 1,0.
   Vorhandene Werte werden nie ersetzt; Evolution, Essenzen, Sockel, Quality, Affixe bleiben.
 - **Folge für alte Echo Blades:** Sie wurden ohne Level-Quelle erzeugt und sind mit Level 1 gespeichert (das Format lässt `ilvl`
-  bei 1 weg). Dieses gespeicherte Level wird nicht auf 15 gehoben → Basis **12,0** (Treffer wie bisher 12,96 / 28,08). Nur neue
-  Echo Blades erhalten Level 15 / 14,016. Stormcaller und Oath waren immer mit ilvl 15 gespeichert → 14,016.
+  bei 1 weg). In 1.2 blieb dieses Level → Basis 12,0; **seit 1.2.1** werden sie im selben Schritt zu Level 15 / 14,016
+  (Abschnitt 7). Stormcaller und Oath waren immer mit ilvl 15 gespeichert → 14,016.
 
 ## 5. Tests
 `test_weapon_base_damage` (29 Tests; neu/ersetzt für 1.2: V2-Boni ohne Quality, Stormcaller Stufe 2 genau einmal, Quick/Heavy
@@ -57,8 +57,26 @@ crafting_save, forge_ui, save, save_foundation, stash, equipment, inventory_ui, 
 defense, skills – **194 bestanden, 0 fehlgeschlagen**. `check_project.ps1`: OK. `crafting_loop` (bekannter Altfehler) nicht ausgeführt.
 
 ## 6. Offen
-1. Alte Echo Blades auf Level 1 (Basis 12,0) gegenüber neuen auf Level 15 (14,016): Ob alte Instanzen angehoben werden sollen,
-   ist eine Designentscheidung (Regel: gespeichertes Level nicht überschreiben) – nicht umgesetzt.
+1. ~~Alte Echo Blades auf Level 1~~ → entschieden und umgesetzt in 1.2.1 (Abschnitt 7).
 2. Echo Blade hat weiterhin keine Quality (kein CraftingProfile); ein Profil hinzuzufügen wäre eine neue Crafting-Fähigkeit.
 3. Die Kompatibilitätsgrenze (Waffe ohne Basis → Familienreferenz) wird von keinem Daten-Item mehr genutzt, nur noch vom
    unbewaffneten Fallback. Entfernen erst nach Entscheidung zum Fallback.
+
+## 7. 1.2.1 – Echo-Blade-Migration (Branch `dev/echo-blade-migration-fix`)
+- **Bedingung** (alle drei, am Originaleintrag): `def` exakt `"echo_blade"`, gespeichertes Level exakt 1 (`ilvl` fehlt – das
+  Format lässt 1 weg – oder ist 1), kein `base_damage`. Dann `ilvl = 15`, `base_damage = 14,016`; Affixe, Quality, Evolution,
+  Essenzen, Sockel, Fav/Lock, Herkunft, Fortschritt bleiben. Bag, Lager, verwaiste Items.
+- **Reihenfolge:** `base_damage` wird für echo_blade erst im Schritt v12→v13 ergänzt (v11→v12 kennt die Waffe nicht, das Laden
+  ergänzt nie). `_restore_legacy_echo_blades` läuft in `_v12_to_v13` **vor** `_assign_weapon_bases`, sonst würde die
+  allgemeine Übernahme die Klinge vorher zu Level 1 / 12,0 machen. Ältere Stände (v2–v11) laufen durch dieselbe Kette
+  (v2→v3 schreibt `ilvl: 1` explizit – zählt als Level 1).
+- **Save-Version:** unverändert 13. Ein v13→v14-Schritt wäre wirkungslos: in v13 trägt jede Echo Blade bereits `base_damage`.
+- **Ausnahmen (bestätigt):** Echo Blades mit vorhandenem `base_damage` (auch 12), mit Level ≠ 1, andere Waffen/Items und neue
+  Instanzen bleiben unberührt. **Nicht korrigierbar:** Stände, die bereits mit dem 1.2-Build als v13 gespeichert wurden – ihre
+  Basis 12 ist nicht mehr von einer bewusst gesetzten zu unterscheiden; keine Heuristik, sie bleiben unverändert.
+- Kein Sondercode in `WeaponDamage`, `ItemStats` oder `ItemCreation`.
+- **Tests:** `test_weapon_base_damage` neu: Fälle A–E in einem Payload (inkl. Lager/Waisen, explizites `ilvl: 1`, Level 30,
+  Stormcaller Level 1), F (v12-Datei unter `user://test_saves/` laden → speichern → erneut laden; Schritt zweimal = keine
+  Änderung), G (v2, v3, v10, v11, v12 → gleiches Ergebnis; v13 unverändert); `test_migration_v12_to_v13` angepasst.
+  Lauf weapon_base_damage, save, save_foundation, item_foundation, stash: **76 bestanden, 0 fehlgeschlagen**.
+  Mutationsprobe (Korrektur abgeschaltet) → 4 Tests rot.
