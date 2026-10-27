@@ -255,7 +255,8 @@ func test_local_affixes_are_offered_by_no_pool() -> void:
 		forged.item_level = level
 		var pool := AffixPool.by_affix(AffixPool.compute(forged, db.get_item(&"forged_blade"), null, db))
 		check(not pool.has(&"tempered_blade") and not pool.has(&"striking"), "forged blade ilvl %d: no local affixes" % level)
-		check_eq(pool.size(), 11, "forged blade pool as before (ilvl %d)" % level)
+		# Loot Foundation 1.0: the crafting tier weights end at item level 24 (ilvl 70: not configured)
+		check_eq(pool.size(), 11 if level < 25 else 0, "forged blade global pool (ilvl %d)" % level)
 	var other := AffixPool.by_affix(AffixPool.compute(ItemCreation.create(_craftable(), 1, db), _craftable(), null, db))
 	check(not other.has(&"tempered_blade") and not other.has(&"striking"), "no model weapon gets them")
 
@@ -721,6 +722,7 @@ func test_legacy_echo_blade_migration_cases() -> void:
 	var errors: PackedStringArray = []
 	var data: Dictionary = SaveMigrations.migrate(old.duplicate(true), 12, errors)
 	check(errors.is_empty(), "migrates: %s" % [errors])
+	_strip_v14_rarity(data.inventory)   # Loot Foundation 1.0 step, checked in test_loot_foundation
 	var items: Array = data.inventory
 	check_eq([items[0].ilvl, items[0].base_damage], [15, 14.016], "A: old echo blade -> 15 / 14.016")
 	check_eq(items[1], old.inventory[1], "B: level 1 with base 12 completely unchanged")
@@ -801,10 +803,20 @@ func test_legacy_echo_blade_from_older_versions() -> void:
 			check(not items[2].has("base_damage"), "v12: iron sword not touched by the echo fix")
 	var v13 := {"inventory": [{"id": "a", "def": "echo_blade", "qty": 1, "base_damage": 12.0}]}
 	var unchanged: Dictionary = SaveMigrations.migrate(v13.duplicate(true), 13, PackedStringArray())
-	check_eq(unchanged, v13, "v13 payload: no step runs, stored base 12 stays")
+	check_eq(unchanged.inventory[0].get("rarity"), 4, "v13 payload: only the v14 rarity step runs")
+	_strip_v14_rarity(unchanged.inventory)
+	check_eq(unchanged, v13, "v13 payload: stored base 12 stays")
 
 
 func _remove_save(path: String) -> void:
 	for suffix: String in ["", SaveSystem.BACKUP_SUFFIX]:
 		if FileAccess.file_exists(path + suffix):
 			DirAccess.remove_absolute(path + suffix)
+
+
+## Removes the instance rarity the v14 step (Loot Foundation 1.0) adds, so the Weapon Base
+## Damage checks keep comparing exactly the fields they own.
+func _strip_v14_rarity(entries: Array) -> void:
+	for entry: Variant in entries:
+		if entry is Dictionary:
+			(entry as Dictionary).erase("rarity")

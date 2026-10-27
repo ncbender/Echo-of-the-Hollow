@@ -209,6 +209,8 @@ func test_migration_v4_to_v5() -> void:
 	for entry: Dictionary in data.inventory:
 		check_eq(entry.get("origin"), "unknown_legacy", "v8 marks the origin unknown")
 		check_eq(entry.get("base_damage"), 12.0, "v12 stores the iron sword base damage")
+		check_eq(entry.get("rarity"), 0, "v14 stamps the definition rarity (Normal)")
+		entry.erase("rarity")
 		entry.erase("base_damage")
 		entry.erase("origin")
 	check_eq(data.inventory, old.inventory, "items otherwise untouched")
