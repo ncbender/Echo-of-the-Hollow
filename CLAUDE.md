@@ -11,7 +11,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Combat Rework / Weapon Mastery 1.4–1.5 (Combat Flow für Spielerwaffen, neun Familien, Pfad-Mastery, ein Waffen-Slot; Save v10).
 + Gathering Rework 1.1 (Sammeln in Schritten mit gehaltenem G, feste Budgets, Teilzustand im Save).
 + Pre-Alpha Item Foundation 1.0 (max. 5 reguläre Affixe, Affix-Kategorien, Fünf-Tier-Modell, Local/Global, Quality 0,5 %; Save v11).
-+ Weapon Base Damage 1.0–1.1 (Instanz-Basis bei Erzeugung, Angriffsmultiplikatoren, Forged V3, Local-Affixe; Save v12).
++ Weapon Base Damage 1.0–1.2 (Instanz-Basis bei Erzeugung, Angriffsmultiplikatoren, Forged V3, Spezialwaffen V2, Local-Affixe; Save v13).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -64,7 +64,7 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
   Revision); gewürfelte Werte nie neu berechnen; Uniques nur über `CraftingProfile.allowed_operations`;
   Combat-Wirkung nur als `ItemEffect`/`AttackModifier`. Design: `docs/CRAFTING_DESIGN.md`.
-  Weapon Base Damage 1.0/1.1 (`docs/WEAPON_BASE_DAMAGE_1_1.md`): neue Instanzen nur über `ItemCreation` (Item-Level
+  Weapon Base Damage 1.0–1.2 (`docs/WEAPON_BASE_DAMAGE_1_2.md`): neue Instanzen nur über `ItemCreation` (Item-Level
   explizit oder freigegebene Quelle, Waffenbasis einmalig gespeichert, nie neu berechnet); Waffenschaden nur über `WeaponDamage` (D_weapon) ×
   `AttackDefinition.weapon_damage_multiplier` (Generator); Waffen ohne `base_weapon_damage` = Familienreferenz (Kompatibilität);
   LOCAL-Affixe nie in `StatResolver`; Quality bei Modellwaffen nur auf die Basis.

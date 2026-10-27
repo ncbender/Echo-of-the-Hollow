@@ -32,7 +32,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 12) ✅
+## Format (Version 13) ✅
 ```json
 { "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 12.
+Aktuell: Version 13.
 Weapon Mastery 1.4 / Combat Flow 1.5 ändert das Schema **nicht** (Mastery war schon pro Familie gespeichert,
 Angriffszustand/Puffer werden nie gespeichert). Eine Waffe in der Nebenhand aus älteren Ständen verwirft die
 Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test `save`).
@@ -133,6 +133,8 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
   `base_damage` bekommen einmalig `B_ref(gespeichertes ilvl) × freigegebene Basis / B_ref(Erzeugungslevel)`. Nichts wird
   gewürfelt; vorhandene Werte, Affixe (auch globales Sharpened), Quality und alle anderen Items bleiben. Der Payload-Text
   wird seit v12 mit voller Gleitkomma-Präzision geschrieben (`docs/WEAPON_BASE_DAMAGE_1_1.md`).
+- 12→13 (Weapon Base Damage 1.2): stormcaller_fang, crushing_oath, echo_blade (Tabelle `V13_WEAPON_MODELS`) ohne `base_damage`
+  bekommen ihn einmalig wie bei v12 aus dem **gespeicherten** ilvl (alte Echo Blades: Level 1 → 12,0). Sonst ändert sich nichts.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.
