@@ -1,13 +1,6 @@
 [gd_resource type="Resource" script_class="ItemDefinition" format=3]
 
 [ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
-[ext_resource type="Script" path="res://scripts/rpg/stat_modifier.gd" id="2_mod"]
-
-[sub_resource type="Resource" id="Mod_1"]
-script = ExtResource("2_mod")
-stat = &"physical_damage"
-flat = 5
-percent = 0
 
 [resource]
 script = ExtResource("1_item")
@@ -19,4 +12,4 @@ rarity = 1
 max_stack = 1
 slot_kind = 10
 weapon_family_id = &"one_handed_sword"
-base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_1")])
+base_weapon_damage = 12.6

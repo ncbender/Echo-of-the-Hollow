@@ -22,56 +22,60 @@ const REF_HEAVY := [26.0, 30.0, 0.85]
 const SWORD_GUARD := "res://data/combat/defense/sword_guard.tres"
 const HEAVY_GUARD := "res://data/combat/defense/heavy_guard.tres"
 
-## id, display name, scheme, colour, blade length, defense profile,
+## Weapon Base Damage 1.0 (docs/WEAPON_BASE_DAMAGE_1_0.md): "base" is the approved family
+## reference base damage at item level 1 (B1). Every attack stores the placeholder damage
+## below as weapon_damage_multiplier = damage / base (unrounded), so a weapon with base B1
+## deals exactly the previous damage; `damage` stays as the reference value.
+## id, family reference base, display name, scheme, colour, blade length, defense profile,
 ## quick [W, A, R] s, heavy [W, A, R] s, quick move [windup, active], heavy move,
 ## quick geometry [reach, arc], heavy geometry, base names [L, H],
 ## fixed base values (null = scaled) [quick dmg, quick poise, quick kb, heavy dmg, heavy poise, heavy kb, heavy hitstop]
 const FAMILIES := [
-	{"id": "dagger", "name": "Dagger", "bow": false, "color": Color(0.80, 0.86, 0.90), "blade": 9.0, "guard": SWORD_GUARD,
+	{"id": "dagger", "base": 9.0, "name": "Dagger", "bow": false, "color": Color(0.80, 0.86, 0.90), "blade": 9.0, "guard": SWORD_GUARD,
 		"q": [0.10, 0.09, 0.23], "h": [0.19, 0.12, 0.37], "qm": [0.90, 0.80], "hm": [0.75, 0.65],
 		"qg": [24.0, 90.0], "hg": [28.0, 100.0], "names": ["Quick Attack", "Heavy Attack"],
 		"anim": "placeholder.swing",
 		"finishers": ["Quick Fangs", "Twin Fang", "Shadow Rhythm", "Hunter's Opening", "Serpent's Bite", "Crossed Blades", "Serpent's Dance", "Thousand Cuts"]},
-	{"id": "wand", "name": "Scepter / Wand", "bow": false, "color": Color(0.78, 0.66, 1.0), "blade": 10.0, "guard": SWORD_GUARD,
+	{"id": "wand", "base": 10.0, "name": "Scepter / Wand", "bow": false, "color": Color(0.78, 0.66, 1.0), "blade": 10.0, "guard": SWORD_GUARD,
 		"q": [0.13, 0.07, 0.28], "h": [0.24, 0.10, 0.42], "qm": [0.85, 0.75], "hm": [0.70, 0.60],
 		"qp": [360.0, 220.0, 3.0], "hp": [300.0, 240.0, 5.0], "names": ["Quick Spell", "Heavy Spell"],
 		"anim": "placeholder.bolt",
 		"finishers": ["Spark Pattern", "Focused Bolt", "Twin Spark", "Guided Sequence", "Arcane Cadence", "Prismatic Weave", "Forked Current", "Spellweaver's Finale"]},
-	{"id": "one_handed_sword", "name": "One-Handed Sword", "bow": false, "color": Color(0.91, 0.89, 0.82), "blade": 14.0, "guard": SWORD_GUARD,
+	{"id": "one_handed_sword", "base": 12.0, "name": "One-Handed Sword", "bow": false, "color": Color(0.91, 0.89, 0.82), "blade": 14.0, "guard": SWORD_GUARD,
 		"q": [0.14, 0.11, 0.30], "h": [0.27, 0.14, 0.44], "qm": [0.80, 0.70], "hm": [0.65, 0.50],
 		"qg": [30.0, 110.0], "hg": [38.0, 130.0], "names": ["Slash", "Heavy Cleave"],
 		"anim": "placeholder.swing", "fixed": [12.0, 8.0, 6.0, 26.0, 30.0, 18.0, 0.06],
 		"ids": {"L": "sword_light_1", "H": "sword_heavy", "LL": "sword_light_2", "LH": "sword_lh_thrust", "LLL": "sword_light_3", "LLH": "sword_llh_crush"},
 		"step_names": {"LL": "Backhand", "LH": "Lunging Thrust"},
 		"finishers": ["Threefold Edge", "Guard Splitter", "Crosscut", "Duelist's Advance", "Twin Crescent", "Flowing Reversal", "Steel Tempest", "Final Oath"]},
-	{"id": "staff", "name": "Staff", "bow": false, "color": Color(0.55, 0.85, 1.0), "blade": 18.0, "guard": HEAVY_GUARD,
+	{"id": "staff", "base": 13.0, "name": "Staff", "bow": false, "color": Color(0.55, 0.85, 1.0), "blade": 18.0, "guard": HEAVY_GUARD,
 		"q": [0.16, 0.10, 0.32], "h": [0.30, 0.14, 0.48], "qm": [0.75, 0.65], "hm": [0.60, 0.45],
 		"qg": [40.0, 90.0], "hg": [48.0, 110.0], "names": ["Quick Spell", "Heavy Spell"],
 		"anim": "placeholder.arcane_strike",
 		"finishers": ["Ember Sequence", "Arcane Sweep", "Echo Reversal", "Channeler's Reach", "Resonant Current", "Crossing Echoes", "Resonant Spiral", "Astral Convergence"]},
-	{"id": "spear", "name": "Spear", "bow": false, "color": Color(0.86, 0.80, 0.62), "blade": 24.0, "guard": HEAVY_GUARD,
+	{"id": "spear", "base": 13.0, "name": "Spear", "bow": false, "color": Color(0.86, 0.80, 0.62), "blade": 24.0, "guard": HEAVY_GUARD,
 		"q": [0.17, 0.10, 0.34], "h": [0.32, 0.14, 0.52], "qm": [0.75, 0.60], "hm": [0.55, 0.40],
 		"qg": [50.0, 30.0], "hg": [56.0, 40.0], "names": ["Quick Attack", "Heavy Attack"],
 		"anim": "placeholder.thrust",
 		"finishers": ["Sentinel's Rhythm", "Driving Thrust", "Sweeping Point", "Advancing Spear", "Iron Reach", "Measured Reversal", "Spearwheel", "Unbroken Reach"]},
-	{"id": "axe", "name": "Axe", "bow": false, "color": Color(0.85, 0.70, 0.55), "blade": 13.0, "guard": SWORD_GUARD,
+	{"id": "axe", "base": 14.0, "name": "Axe", "bow": false, "color": Color(0.85, 0.70, 0.55), "blade": 13.0, "guard": SWORD_GUARD,
 		"q": [0.19, 0.12, 0.35], "h": [0.36, 0.15, 0.54], "qm": [0.70, 0.55], "hm": [0.50, 0.35],
 		"qg": [34.0, 120.0], "hg": [40.0, 140.0], "names": ["Quick Attack", "Heavy Attack"],
 		"anim": "placeholder.swing",
 		"finishers": ["Rough Hewing", "Splitting Strike", "Hooking Chop", "Ravager's Step", "Double Cleave", "Reaper's Turn", "Splintering Arc", "Reaver's Crown"]},
-	{"id": "mace", "name": "Mace / Hammer", "bow": false, "color": Color(0.75, 0.75, 0.80), "blade": 12.0, "guard": SWORD_GUARD,
+	{"id": "mace", "base": 15.0, "name": "Mace / Hammer", "bow": false, "color": Color(0.75, 0.75, 0.80), "blade": 12.0, "guard": SWORD_GUARD,
 		"q": [0.22, 0.12, 0.36], "h": [0.40, 0.16, 0.56], "qm": [0.65, 0.50], "hm": [0.45, 0.30],
 		"qg": [32.0, 110.0], "hg": [38.0, 120.0], "names": ["Quick Attack", "Heavy Attack"],
 		"anim": "placeholder.swing",
 		"finishers": ["Iron Rhythm", "Breaker Strike", "Counterweight", "Hammer March", "Crushing Follow-Through", "Anvil Turn", "Shatterfall", "Shatterpoint"]},
-	{"id": "two_handed_sword", "name": "Two-Handed Sword", "bow": false, "color": Color(0.72, 0.84, 1.0), "blade": 22.0, "guard": HEAVY_GUARD,
+	{"id": "two_handed_sword", "base": 22.0, "name": "Two-Handed Sword", "bow": false, "color": Color(0.72, 0.84, 1.0), "blade": 22.0, "guard": HEAVY_GUARD,
 		"q": [0.25, 0.15, 0.36], "h": [0.44, 0.18, 0.60], "qm": [0.60, 0.45], "hm": [0.40, 0.25],
 		"qg": [44.0, 130.0], "hg": [52.0, 150.0], "names": ["Heavy Swing", "Sundering Blow"],
 		"anim": "placeholder.swing", "fixed": [22.0, 16.0, 12.0, 48.0, 50.0, 35.0, 0.09],
 		"ids": {"L": "greatsword_light_1", "H": "greatsword_heavy", "LL": "greatsword_light_2", "LH": "greatsword_lh_overhead", "LLL": "greatsword_light_3", "LLH": "greatsword_llh_whirl"},
 		"step_names": {"LL": "Return Swing", "LH": "Overhead Slam"},
 		"finishers": ["Broadsteel Sequence", "Falling Judgment", "Rising Cleave", "March of Iron", "Relentless Swing", "Iron Reversal", "Broken Horizon", "Executioner's Sequence"]},
-	{"id": "bow", "name": "Bow", "bow": true, "color": Color(0.80, 0.72, 0.50), "blade": 12.0, "guard": HEAVY_GUARD,
+	{"id": "bow", "base": 13.0, "name": "Bow", "bow": true, "color": Color(0.80, 0.72, 0.50), "blade": 12.0, "guard": HEAVY_GUARD,
 		"q": [0.18, 0.04, 0.38], "h": [0.38, 0.05, 0.62], "qm": [0.75, 0.60], "hm": [0.60, 0.45],
 		"qp": [520.0, 300.0, 3.0], "hp": [700.0, 380.0, 3.0], "names": ["Quick Shot", "Precision Shot"],
 		"anim": "placeholder.shot",
@@ -121,6 +125,7 @@ func _build(data: Dictionary) -> WeaponFamily:
 	var family := WeaponFamily.new()
 	family.id = StringName(data.id)
 	family.display_name = data.name
+	family.reference_base_damage = data.base
 	family.input_scheme = WeaponFamily.InputScheme.BOW if data.bow else WeaponFamily.InputScheme.MELEE
 	family.display_color = data.color
 	family.visual_blade_length = data.blade
@@ -230,4 +235,5 @@ func _attack(data: Dictionary, family: WeaponFamily, sequence: String, levels: D
 		attack.max_hits_per_target = multi
 		attack.rehit_interval = attack.active / multi
 		attack.damage = roundf(attack.damage / multi)
+	attack.weapon_damage_multiplier = attack.damage / data.base   # per hit / per projectile
 	return attack

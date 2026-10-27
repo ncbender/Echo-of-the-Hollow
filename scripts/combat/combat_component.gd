@@ -63,6 +63,10 @@ var recovery_multiplier: float = 1.0
 ## Combat Flow: mastery level of the wielded family (set by the owner; 1 = only
 ## the base attacks). A chain keeps the level it started with.
 var mastery_level: int = 1
+## Weapon Base Damage 1.0: D_weapon of the wielded weapon item (set by the owner,
+## WeaponDamage). 0 = no item or a weapon not on the model yet: the family
+## reference base, i.e. exactly the attacks' reference damage.
+var weapon_base_damage: float = 0.0
 ## Combat Flow prototype values (transition, buffer, cancel shares, bow).
 var flow_rules: CombatFlowRules = CombatFlowRules.get_default()
 
@@ -580,16 +584,16 @@ func _fire_projectiles() -> void:
 		projectile.team = hitbox.team if hitbox != null else &"player"
 		projectile.color = weapon.display_color
 		projectile.shape = attack.projectile_shape
-		projectile.on_hit = _on_projectile_hit.bind(attack, attack_instance, attack_direction)
+		projectile.on_hit = _on_projectile_hit.bind(attack, attack_instance, attack_direction, weapon_damage())
 		world.add_child(projectile)
 		projectile.global_position = origin_node.global_position + attack_direction * 6.0
 		projectile_fired.emit(attack, projectile)
 
 
-func _on_projectile_hit(hurtbox: Hurtbox, attack: AttackDefinition, instance: int, direction: Vector2) -> bool:
+func _on_projectile_hit(hurtbox: Hurtbox, attack: AttackDefinition, instance: int, direction: Vector2, weapon_base: float) -> bool:
 	if not is_instance_valid(hurtbox):
 		return false
-	var hit := _make_hit(hurtbox, attack, instance, direction, 0)
+	var hit := _make_hit(hurtbox, attack, instance, direction, 0, weapon_base)
 	if not hurtbox.receive_hit(hit):
 		return false
 	hit_landed.emit(hit)
@@ -773,10 +777,25 @@ func _scan_hits() -> void:
 
 
 func _build_hit(hurtbox: Hurtbox) -> HitData:
-	return _make_hit(hurtbox, current_attack, attack_instance, attack_direction, charge_tier)
+	return _make_hit(hurtbox, current_attack, attack_instance, attack_direction, charge_tier, weapon_damage())
 
 
-func _make_hit(hurtbox: Hurtbox, attack: AttackDefinition, instance: int, direction: Vector2, tier: int) -> HitData:
+## D_weapon the wielded weapon's attacks scale with (Weapon Base Damage 1.0).
+func weapon_damage() -> float:
+	if weapon_base_damage > 0.0:
+		return weapon_base_damage
+	return weapon.reference_base_damage if weapon != null else 0.0
+
+
+## Damage of `attack` before any modifier: D_weapon x multiplier for player weapon
+## attacks, the absolute damage for everything else (enemies, legacy data).
+static func base_damage(attack: AttackDefinition, base: float) -> float:
+	if attack.weapon_damage_multiplier <= 0.0 or base <= 0.0:
+		return attack.damage
+	return base * attack.weapon_damage_multiplier
+
+
+func _make_hit(hurtbox: Hurtbox, attack: AttackDefinition, instance: int, direction: Vector2, tier: int, base: float) -> HitData:
 	var profile := attack.charge_profile
 	var hit := HitData.new()
 	hit.attacker = get_parent()
@@ -784,7 +803,7 @@ func _make_hit(hurtbox: Hurtbox, attack: AttackDefinition, instance: int, direct
 	hit.attack = attack
 	hit.attack_instance_id = instance
 	hit.charge_tier = tier
-	hit.damage = attack.damage * (profile.damage_multiplier(tier) if profile else 1.0)
+	hit.damage = base_damage(attack, base) * (profile.damage_multiplier(tier) if profile else 1.0)
 	hit.poise_damage = attack.poise_damage * (profile.poise_multiplier(tier) if profile else 1.0)
 	hit.damage_type = attack.damage_type
 	hit.knockback = direction * attack.knockback

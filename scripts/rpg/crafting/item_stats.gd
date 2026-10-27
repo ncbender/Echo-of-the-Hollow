@@ -19,11 +19,13 @@ static func modifiers(item: ItemInstance, definition: ItemDefinition, db: GameDa
 	for modifier in definition.base_stats:
 		if modifier == null:
 			continue
-		if item.quality > 0 and profile != null and (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats):
+		if quality_scales_base_stats(item, definition) and (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats):
 			result.append(StatModifier.make(modifier.stat, modifier.flat * factor, modifier.percent * factor))
 		else:
 			result.append(modifier)
-	result.append_array(item.affix_modifiers())
+	for entry in item.affixes:
+		if not WeaponDamage.is_local(entry, db):   # LOCAL affixes only change D_weapon (WeaponDamage)
+			result.append(StatModifier.make(StringName(str(entry.get("stat", ""))), float(entry.get("flat", 0.0)), float(entry.get("percent", 0.0))))
 	var material := db.materials.get(item.material_id) as MaterialDefinition if item.is_imprinted() else null
 	if material != null:
 		result.append_array(material.imprint_modifiers)
@@ -37,6 +39,12 @@ static func modifiers(item: ItemInstance, definition: ItemDefinition, db: GameDa
 ## Multiplier quality applies to an eligible base stat (1.0 .. 1.1).
 static func quality_factor(quality: int) -> float:
 	return 1.0 + clampi(quality, 0, MAX_QUALITY) * QUALITY_PERCENT_PER_POINT / 100.0
+
+
+## Whether quality improves the item's global base stats. Weapons on the base damage
+## model (WeaponDamage) take quality only on base_weapon_damage, never on global stats.
+static func quality_scales_base_stats(item: ItemInstance, definition: ItemDefinition) -> bool:
+	return item.quality > 0 and definition.crafting != null and not WeaponDamage.is_on_model(definition)
 
 
 ## Quality bonus in percent for display ("2.5").

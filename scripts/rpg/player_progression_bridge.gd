@@ -145,6 +145,7 @@ func apply_stats() -> void:
 			rules.attack_speed_min, rules.attack_speed_max)
 	if class_runtime.character != null:
 		class_runtime.refresh_stats()
+	_refresh_weapon_damage()
 
 
 ## Re-collects item/set effects from the active loadout and swaps the combo
@@ -200,6 +201,21 @@ func _apply_pending_weapon() -> void:
 	if player.combat.weapon == _pending_weapon or player.set_weapon_family(_pending_weapon):
 		_pending_weapon = null
 		refresh_unlocks()
+		_refresh_weapon_damage()
+
+
+## D_weapon of the main-hand item -> combat (Weapon Base Damage 1.0), recomputed from
+## the instance after every equipment, quality or crafting change (never additive).
+## 0 = the family reference (no weapon item, or a weapon not on the model yet).
+## While a family switch waits, the running family keeps its value.
+func _refresh_weapon_damage() -> void:
+	if _pending_weapon != null:
+		return
+	var item := character.equipment.get_item(EquipSlot.Slot.MAIN_HAND)
+	var definition := character.database.get_item(item.definition_id) if item != null else null
+	var family := player.combat.weapon
+	var wielded := definition != null and family != null and definition.weapon_family_id == family.id
+	player.combat.weapon_base_damage = WeaponDamage.of(item, definition, character.database) if wielded else 0.0
 
 
 func _track(sig: Signal, callable: Callable) -> void:

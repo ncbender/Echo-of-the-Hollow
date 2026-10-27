@@ -13,3 +13,4 @@ rarity = 0
 max_stack = 1
 slot_kind = 11
 weapon_family_id = &"two_handed_sword"
+base_weapon_damage = 22.0

@@ -65,6 +65,8 @@ const ATTACK_RECOVERY_SPEED := &"attack_recovery_speed"
 const POISE := &"poise"
 ## Percent less damage through a block (on top of the guard's block reduction).
 const BLOCK_EFFICIENCY := &"block_efficiency"
+## Item-local target of LOCAL weapon affixes (WeaponDamage), never a character stat (not in ALL).
+const WEAPON_DAMAGE := &"weapon_damage"
 
 const ALL: Array[StringName] = [MAX_HEALTH, PHYSICAL_DAMAGE, ARMOR, CRIT_CHANCE, ATTACK_SPEED, POISE_DAMAGE,
 	CRIT_DAMAGE, FINISHER_POWER, KNOCKBACK_POWER, RESOURCE_GAIN, LIFE_ON_HIT, SHOCK_DAMAGE,
@@ -84,7 +86,7 @@ const NAMES := {
 	DAMAGE_DEALT: "Damage Dealt %", DAMAGE_REDUCTION: "Damage Taken Reduction %", MOVE_SPEED: "Movement Speed %",
 	STATUS_RESISTANCE: "Status Resistance %", MAGIC_RESISTANCE: "Magic Resistance %", PHYSICAL_RESISTANCE: "Physical Damage Reduction %",
 	SKILL_RECOVERY_SPEED: "Skill Recovery Speed %", ATTACK_RECOVERY_SPEED: "Attack Recovery Speed %", POISE: "Poise %",
-	BLOCK_EFFICIENCY: "Block Efficiency %",
+	BLOCK_EFFICIENCY: "Block Efficiency %", WEAPON_DAMAGE: "Weapon Damage",
 }
 
 

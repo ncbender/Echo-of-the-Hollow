@@ -55,13 +55,6 @@ static func create(item_id: StringName, amount: int = 1, id: String = "") -> Ite
 	return item
 
 
-func affix_modifiers() -> Array[StatModifier]:
-	var result: Array[StatModifier] = []
-	for affix in affixes:
-		result.append(StatModifier.make(StringName(str(affix.get("stat", ""))), float(affix.get("flat", 0.0)), float(affix.get("percent", 0.0))))
-	return result
-
-
 func is_imprinted() -> bool:
 	return material_id != &""
 

@@ -35,7 +35,12 @@ const DEFENSE_GUARD_BREAK := 4
 @export_range(0.0, 1.0) var attack_speed_scaling: float = 1.0
 
 @export_group("Damage")
+## Absolute damage (enemies, legacy tree). Player weapon attacks (weapon_damage_multiplier
+## > 0) keep it as their reference damage at the family reference base (display, tests).
 @export var damage: float = 10.0
+## Weapon Base Damage 1.0: player weapon attacks deal D_weapon x this (CombatComponent);
+## generated as old damage / family reference base, never rounded. 0 = absolute `damage`.
+@export var weapon_damage_multiplier: float = 0.0
 @export var damage_type: StringName = &"physical"
 @export var poise_damage: float = 10.0
 ## Knockback DISTANCE in px against a standard target (resistance 0). The receiver

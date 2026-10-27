@@ -30,10 +30,12 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 	# 3 base stats (quality applies to them)
 	var factor := ItemStats.quality_factor(item.quality)
 	var base: Array[Dictionary] = []
+	if WeaponDamage.is_on_model(definition):
+		base.append(_l("%s %s" % [Stats.display_name(Stats.WEAPON_DAMAGE), StatModifier._number(WeaponDamage.of(item, definition, db))], "line"))
 	for modifier in definition.base_stats:
 		if modifier == null:
 			continue
-		var scaled := item.quality > 0 and profile != null and (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats)
+		var scaled := ItemStats.quality_scales_base_stats(item, definition) and (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats)
 		var shown := StatModifier.make(modifier.stat, modifier.flat * factor, modifier.percent * factor) if scaled else modifier
 		base.append(_l(shown.describe() + ("  (quality)" if scaled else ""), "line"))
 	if item.is_imprinted():

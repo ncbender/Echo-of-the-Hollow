@@ -509,6 +509,11 @@ func _state_quality(item: ItemInstance, definition: ItemDefinition) -> void:
 	_state.add_child(UiTheme.section("Base stats now -> after +1 quality"))
 	var now := ItemStats.quality_factor(item.quality)
 	var after := ItemStats.quality_factor(item.quality + 1)
+	if WeaponDamage.is_on_model(definition):   # quality works on the weapon base damage only
+		_state.add_child(_line("%s:  %.2f  ->  %.2f" % [Stats.display_name(Stats.WEAPON_DAMAGE), definition.base_weapon_damage * now,
+			definition.base_weapon_damage * after], UiTheme.SUCCESS))
+		_state.add_child(_line("Affixes, essences and special effects stay unchanged.", UiTheme.TEXT_MUTED))
+		return
 	for modifier in definition.base_stats:
 		if modifier == null or not (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats):
 			continue

@@ -21,6 +21,9 @@ enum InputScheme { MELEE, BOW }
 @export var input_scheme: InputScheme = InputScheme.MELEE
 ## Unlockable complete paths (and the bow's Flowing Draw). Non-empty = Combat Flow family.
 @export var combo_paths: Array[ComboPathDefinition] = []
+## Weapon Base Damage 1.0: family reference base damage at item level 1 (B1). Attacks
+## scale with the wielded weapon's D_weapon; weapons not on the model yet use this.
+@export var reference_base_damage: float = 0.0
 
 @export_group("Presentation")
 ## Placeholder-visual hints only; gameplay never reads these.
@@ -149,6 +152,12 @@ func _validate_flow(errors: PackedStringArray) -> void:
 			errors.append("%s: %s is charged (Combat Flow heavies are instant)" % [id, attack.id])
 		if attack.max_hits_per_target < 1:
 			errors.append("%s: %s needs a hit limit" % [id, attack.id])
+		if attack.weapon_damage_multiplier <= 0.0:
+			pass   # absolute damage (hand-built families); generated families always scale
+		elif reference_base_damage <= 0.0:
+			errors.append("%s: %s scales with the weapon but the family has no reference base" % [id, attack.id])
+		elif not is_equal_approx(attack.weapon_damage_multiplier * reference_base_damage, attack.damage):
+			errors.append("%s: %s reference damage %s does not match multiplier x base" % [id, attack.id, attack.damage])
 		var used := attack.combo_input.length() == 1
 		for path in combo_paths:
 			used = used or (path.kind == ComboPathDefinition.Kind.PATH and path.inputs.begins_with(attack.combo_input))

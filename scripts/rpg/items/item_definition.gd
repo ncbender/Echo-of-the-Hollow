@@ -42,6 +42,10 @@ const RARITY_COLORS := {
 @export var armor_type: ArmorType = ArmorType.NONE
 ## Combat weapon family used when equipped in the main hand.
 @export var weapon_family_id: StringName
+## Weapon Base Damage 1.0 (docs/WEAPON_BASE_DAMAGE_1_0.md): own base damage of this weapon
+## model (D_weapon = (base x quality + local flat) x (1 + local %), see WeaponDamage).
+## 0 = not on the base damage model yet: its attacks deal the family reference damage.
+@export var base_weapon_damage: float = 0.0
 @export var base_stats: Array[StatModifier] = []
 ## Event-driven effects and combo modifiers (legendary / unique).
 @export var effects: Array[ItemEffect] = []
@@ -104,6 +108,8 @@ func validate() -> PackedStringArray:
 		errors.append("item %s: equippable items must not stack" % id)
 	if is_weapon() and weapon_family_id == &"":
 		errors.append("item %s: weapon without weapon_family_id" % id)
+	if base_weapon_damage < 0.0 or (base_weapon_damage > 0.0 and not is_weapon()):
+		errors.append("item %s: base_weapon_damage needs a weapon and must not be negative" % id)
 	for effect in effects:
 		if effect == null:
 			errors.append("item %s: null effect" % id)
