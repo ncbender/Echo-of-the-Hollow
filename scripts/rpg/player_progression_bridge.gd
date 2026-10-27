@@ -261,6 +261,7 @@ func _on_mastery_unlocked(family_id: StringName, unlock: MasteryUnlock) -> void:
 
 
 func _on_active_class_changed(class_id: StringName) -> void:
+	player.combat.cancel(&"class_change")   # a class change ends the running combo and its buffer
 	class_runtime.rebuild()
 	message.emit("Class changed: %s" % _class_name(class_id))
 

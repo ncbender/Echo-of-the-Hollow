@@ -50,6 +50,11 @@ var consumable_handler: Callable
 var use_left: float = 0.0
 var use_move_multiplier: float = 1.0
 var _use_done: Callable
+## True while a UI window or the pause menu holds the input (set by the map):
+## combat inputs and hold states are cleared once, attack buttons are ignored
+## meanwhile, and a key still held needs a new press afterwards.
+var input_blocker: Callable
+var _input_was_blocked: bool = false
 
 var _external_frame := InputFrame.new()
 var _locomotion_velocity: Vector2 = Vector2.ZERO
@@ -100,9 +105,24 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var frame := _external_frame if use_external_input else input.poll(self)
+	apply_input_block(frame)
 	physics_step(frame, delta)
 	if use_external_input:
 		_external_frame.clear_edges()
+
+
+## UI open or paused: drops attack presses and holds of this frame; clears the
+## combat buffer and the bow hold state once when the block begins.
+func apply_input_block(frame: InputFrame) -> void:
+	var blocked: bool = input_blocker.is_valid() and input_blocker.call()
+	if blocked and not _input_was_blocked:
+		combat.clear_inputs()
+	_input_was_blocked = blocked
+	if blocked:
+		frame.light_pressed = false
+		frame.heavy_pressed = false
+		frame.light_held = false
+		frame.heavy_held = false
 
 
 ## Replaces the externally fed intent; edge flags are consumed by the next tick.

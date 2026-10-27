@@ -38,6 +38,7 @@ func _ready() -> void:
 	var audio := CombatAudio.new()   # combat sounds of this map (freed with it)
 	audio.name = "CombatAudio"
 	add_child(audio)
+	player.input_blocker = hud.is_window_open   # open windows / pause menu hold the combat input
 	session = SessionState.find(get_tree())
 	if session == null:
 		return
