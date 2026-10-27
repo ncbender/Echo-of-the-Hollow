@@ -82,6 +82,14 @@ func is_weapon() -> bool:
 	return slot_kind == SlotKind.ONE_HAND_WEAPON or slot_kind == SlotKind.TWO_HAND_WEAPON
 
 
+## Item Foundation 1.0: weapons and armour allow LOCAL and GLOBAL affixes; rings and
+## amulets only GLOBAL. Off hand and trinket are not decided yet and stay GLOBAL only.
+static func allows_local_affixes(kind: SlotKind) -> bool:
+	return kind in [SlotKind.ONE_HAND_WEAPON, SlotKind.TWO_HAND_WEAPON, SlotKind.HEAD, SlotKind.SHOULDERS,
+		SlotKind.BACK, SlotKind.CHEST, SlotKind.WRISTS, SlotKind.HANDS, SlotKind.BELT, SlotKind.LEGS,
+		SlotKind.FEET, SlotKind.SHIELD]
+
+
 func rarity_color() -> Color:
 	return RARITY_COLORS.get(rarity, Color.WHITE)
 

@@ -149,3 +149,39 @@ func test_pool_follows_five_tier_thresholds() -> void:
 		tiers.sort()
 		check_eq(tiers.size(), 6 - AffixTiers.highest_tier(level), "ilvl %d: tiers %s" % [level, tiers])
 		check_eq(tiers[0], AffixTiers.highest_tier(level), "ilvl %d: best tier" % level)
+
+
+func test_local_and_global_scope_rules() -> void:
+	var K := ItemDefinition.SlotKind
+	for kind: int in [K.ONE_HAND_WEAPON, K.TWO_HAND_WEAPON, K.HEAD, K.CHEST, K.HANDS, K.LEGS, K.FEET, K.SHIELD]:
+		check(ItemDefinition.allows_local_affixes(kind), "slot kind %d allows local" % kind)
+	for kind: int in [K.RING, K.NECK]:
+		check(not ItemDefinition.allows_local_affixes(kind), "rings and amulets: global only (%d)" % kind)
+	var local := _five_tier_affix()
+	local.scope = AffixDefinition.Scope.LOCAL
+	check(not local.validate().is_empty(), "local affix without slot list rejected")
+	local.allowed_slot_kinds = [K.CHEST, K.RING] as Array[ItemDefinition.SlotKind]
+	check(not local.validate().is_empty(), "local affix on a ring rejected")
+	local.allowed_slot_kinds = [K.CHEST, K.ONE_HAND_WEAPON] as Array[ItemDefinition.SlotKind]
+	check(local.validate().is_empty(), "local affix on armour and weapons valid: %s" % [local.validate()])
+	check(not local.allows_slot(K.NECK), "local never on an amulet")
+	var global := _five_tier_affix()
+	check(global.allows_slot(K.RING) and global.allows_slot(K.CHEST), "global fits rings and armour")
+
+
+## Every existing affix is GLOBAL, so stats, damage and defence work exactly as
+## before; a LOCAL affix is never offered while the local calculation is open.
+func test_existing_affixes_stay_global_and_local_is_not_rolled() -> void:
+	for affix: AffixDefinition in db.affixes.values():
+		check_eq(affix.scope, AffixDefinition.Scope.GLOBAL, "%s is global" % affix.id)
+	var local_db := GameDatabase.new()
+	local_db.load_all()
+	var local := _five_tier_affix()
+	local.scope = AffixDefinition.Scope.LOCAL
+	local.allowed_slot_kinds = [ItemDefinition.SlotKind.ONE_HAND_WEAPON] as Array[ItemDefinition.SlotKind]
+	local_db.affixes[local.id] = local
+	var item := ItemInstance.create(&"forged_blade")
+	item.item_level = 70
+	var pool := AffixPool.by_affix(AffixPool.compute(item, local_db.get_item(&"forged_blade"), null, local_db))
+	check(not pool.has(&"test_five"), "local affix not rollable yet")
+	check_eq(pool.size(), 11, "the eleven global weapon affixes are offered as before")

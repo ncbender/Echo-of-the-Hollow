@@ -31,6 +31,8 @@ static func compute(item: ItemInstance, definition: ItemDefinition, material: Ma
 	ids.sort()   # deterministic order: same seed -> same result
 	for affix_id: StringName in ids:
 		var affix: AffixDefinition = db.affixes[affix_id]
+		if affix.scope == AffixDefinition.Scope.LOCAL:
+			continue   # local calculation not decided yet (docs/ITEM_FOUNDATION_1_0.md)
 		if not affix.allows_slot(definition.slot_kind) or groups.has(affix.group):
 			continue
 		if affix.exclusion_group != &"" and exclusions.has(affix.exclusion_group):

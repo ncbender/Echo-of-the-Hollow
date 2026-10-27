@@ -8,10 +8,16 @@ extends Resource
 enum ValueKind { FLAT, PERCENT }
 ## Item Foundation 1.0: the four affix categories (metadata; no calculation reads it).
 enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
+## Item Foundation 1.0: GLOBAL works on the character (StatResolver, as every affix
+## so far); LOCAL would only change the item's own base value. Both share the regular
+## affix slots. LOCAL is metadata only for now: the local calculation is not decided,
+## so LOCAL affixes are never offered by AffixPool (docs/ITEM_FOUNDATION_1_0.md).
+enum Scope { GLOBAL, LOCAL }
 
 @export var id: StringName
 @export var display_name: String
 @export var category: Category = Category.OFFENSIVE
+@export var scope: Scope = Scope.GLOBAL
 @export var stat: StringName
 @export var value_kind: ValueKind = ValueKind.FLAT
 @export var tags: Array[StringName] = []
@@ -30,6 +36,8 @@ enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
 
 
 func allows_slot(kind: ItemDefinition.SlotKind) -> bool:
+	if scope == Scope.LOCAL and not ItemDefinition.allows_local_affixes(kind):
+		return false
 	return allowed_slot_kinds.is_empty() or kind in allowed_slot_kinds
 
 
@@ -79,6 +87,14 @@ func validate() -> PackedStringArray:
 		errors.append("affix %s: id, stat and group are required" % id)
 	if not category in Category.values():
 		errors.append("affix %s: unknown category %d" % [id, category])
+	if scope == Scope.LOCAL:
+		if allowed_slot_kinds.is_empty():
+			errors.append("affix %s: a local affix must list its weapon/armour slot kinds" % id)
+		for kind in allowed_slot_kinds:
+			if not ItemDefinition.allows_local_affixes(kind):
+				errors.append("affix %s: local affixes are not allowed on slot kind %d" % [id, kind])
+	elif scope != Scope.GLOBAL:
+		errors.append("affix %s: unknown scope %d" % [id, scope])
 	if tiers.is_empty():
 		errors.append("affix %s: no tiers" % id)
 	if tier_model != AffixTiers.MODEL_THREE and tier_model != AffixTiers.MODEL_FIVE:
