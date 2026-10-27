@@ -107,7 +107,10 @@ func test_quality_upgrades_base_stats_only() -> void:
 	var result := _do(CraftingOps.QUALITY, blade)
 	check(not result.ok and "Maximum" in result.error, "capped at 20")
 	check_eq(character.inventory.count(&"forge_crystal"), 5, "20 crystals used")
-	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE) - before, 6.0 * 0.1, 0.001, "base 6 +10 % (0.5 % per point), affix 5 unchanged")
+	# Weapon Base Damage 1.1: quality works on the stored weapon base only
+	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE) - before, 0.0, 0.001, "global stats unchanged (affix 5 stays, no global base)")
+	check_near(blade.base_weapon_damage, 14.4, 0.0001, "stored raw base unchanged by quality")
+	check_near(WeaponDamage.of(blade, db.get_item(&"forged_blade"), db), 14.4 * 1.1, 0.0001, "effective base +10 % (0.5 % per point)")
 	check_eq(blade.item_level, 12, "item level independent of quality")
 
 

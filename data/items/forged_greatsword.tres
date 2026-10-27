@@ -5,11 +5,6 @@
 [ext_resource type="Script" path="res://scripts/rpg/effects/item_effect.gd" id="3_iwf7y"]
 [ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="4_ohcoy"]
 
-[sub_resource type="Resource" id="Resource_j5woq"]
-script = ExtResource("1_e33xq")
-stat = &"physical_damage"
-flat = 10.0
-
 [sub_resource type="Resource" id="Resource_opkc8"]
 script = ExtResource("1_e33xq")
 stat = &"poise_damage"
@@ -31,5 +26,6 @@ description = "Craftable weapon base for the Resonance Forge."
 category = 0
 slot_kind = 11
 weapon_family_id = &"two_handed_sword"
-base_stats = Array[ExtResource("1_e33xq")]([SubResource("Resource_j5woq"), SubResource("Resource_opkc8")])
+base_weapon_damage = 27.39
+base_stats = Array[ExtResource("1_e33xq")]([SubResource("Resource_opkc8")])
 crafting = SubResource("Resource_s6oud")

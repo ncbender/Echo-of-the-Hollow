@@ -209,15 +209,18 @@ func test_quality_is_half_a_percent_per_point() -> void:
 ## Quality only scales base stats that exist (eligible = profile.quality_stats or
 ## all); affixes are untouched and items without base stats get nothing invented.
 func test_quality_scales_existing_base_stats_only() -> void:
+	# Weapon Base Damage 1.1: the forged blade is on the base damage model - quality only
+	# raises its weapon base, never the global poise base or the global Sharpened affix.
 	var definition := db.get_item(&"forged_blade")
-	var blade := ItemInstance.create(&"forged_blade")
+	var blade := ItemCreation.create(definition, 1, db)
 	blade.quality = 20
 	blade.affixes.append({"affix": "sharpened", "tier": 3, "tier_model": 3, "stat": "physical_damage", "flat": 5.0, "percent": 0.0})
 	var totals := {}
 	for modifier in ItemStats.modifiers(blade, definition, db):
 		totals[modifier.stat] = totals.get(modifier.stat, 0.0) + modifier.flat
-	check_near(totals[Stats.PHYSICAL_DAMAGE], 6.0 * 1.1 + 5.0, 0.0001, "base 6 +10 %, affix 5 unchanged")
-	check_near(totals[Stats.POISE_DAMAGE], 4.0 * 1.1, 0.0001, "base 4 +10 %")
+	check_near(totals[Stats.PHYSICAL_DAMAGE], 5.0, 0.0001, "no global base any more, affix 5 unchanged")
+	check_near(totals[Stats.POISE_DAMAGE], 4.0, 0.0001, "global poise base 4 kept, quality never raises it")
+	check_near(WeaponDamage.of(blade, definition, db), 14.4 * 1.1, 0.0001, "quality 20 on the weapon base")
 	var oath := ItemInstance.create(&"crushing_oath")
 	oath.quality = 10
 	var oath_mods := ItemStats.modifiers(oath, db.get_item(&"crushing_oath"), db)

@@ -11,7 +11,7 @@ enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
 ## Item Foundation 1.0: GLOBAL works on the character (StatResolver); LOCAL only changes
 ## the item's own base value. Both share the regular affix slots. Weapon Base Damage 1.0:
 ## the only local target so far is the weapon base damage (stat Stats.WEAPON_DAMAGE,
-## WeaponDamage); AffixPool offers LOCAL affixes only on weapons on that model.
+## WeaponDamage); AffixPool does not offer LOCAL affixes yet (activation not decided).
 enum Scope { GLOBAL, LOCAL }
 
 @export var id: StringName

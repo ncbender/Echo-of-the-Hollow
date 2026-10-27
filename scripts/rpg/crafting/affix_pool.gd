@@ -31,8 +31,8 @@ static func compute(item: ItemInstance, definition: ItemDefinition, material: Ma
 	ids.sort()   # deterministic order: same seed -> same result
 	for affix_id: StringName in ids:
 		var affix: AffixDefinition = db.affixes[affix_id]
-		if affix.scope == AffixDefinition.Scope.LOCAL and not (affix.stat == Stats.WEAPON_DAMAGE and WeaponDamage.is_on_model(definition)):
-			continue   # a local affix needs a local base: so far only the weapon base damage (WeaponDamage)
+		if affix.scope == AffixDefinition.Scope.LOCAL:
+			continue   # local affixes are defined and calculated, but no pool offers them yet (docs/WEAPON_BASE_DAMAGE_1_1.md)
 		if not affix.allows_slot(definition.slot_kind) or groups.has(affix.group):
 			continue
 		if affix.exclusion_group != &"" and exclusions.has(affix.exclusion_group):
