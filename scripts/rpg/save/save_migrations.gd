@@ -23,6 +23,7 @@ static func _steps() -> Dictionary:
 		9: _v9_to_v10,
 		10: _v10_to_v11,
 		11: _v11_to_v12,
+		12: _v12_to_v13,
 	}
 
 
@@ -264,6 +265,25 @@ const V12_WEAPON_MODELS := {
 ## B_ref(level) x (approved base / B_ref(creation level)) - nothing is rolled, all other
 ## data (quality, affixes incl. global Sharpened rolls, sockets, essences) stays as it is.
 static func _v11_to_v12(data: Dictionary) -> Dictionary:
+	return _assign_weapon_bases(data, V12_WEAPON_MODELS)
+
+
+## Weapon Base Damage 1.2 (Special Weapons V2): models added at v13, frozen like V12_WEAPON_MODELS.
+const V13_WEAPON_MODELS := {
+	"stormcaller_fang": [12.0, 14.016, 15], "crushing_oath": [12.0, 14.016, 15], "echo_blade": [12.0, 14.016, 15],
+}
+
+
+## v13 (Weapon Base Damage 1.2): the three special weapons store their raw base damage,
+## assigned exactly like v12 from their SAVED item level (a stored level is never moved to
+## the new creation level 15). Global bonuses, evolution, sockets, essences, quality stay.
+static func _v12_to_v13(data: Dictionary) -> Dictionary:
+	return _assign_weapon_bases(data, V13_WEAPON_MODELS)
+
+
+## One deterministic base per weapon instance of `models` without "base_damage" (bag, stash,
+## orphans): B_ref(saved level) x approved base / B_ref(creation level). Nothing is rolled.
+static func _assign_weapon_bases(data: Dictionary, models: Dictionary) -> Dictionary:
 	var lists: Array = [data.get("inventory"), data.get("orphaned_items")]
 	if data.get("stash") is Dictionary:
 		lists.append(data["stash"].get("items"))
@@ -271,10 +291,10 @@ static func _v11_to_v12(data: Dictionary) -> Dictionary:
 		if not list is Array:
 			continue
 		for entry: Variant in list:
-			if not entry is Dictionary or entry.has("base_damage") or not V12_WEAPON_MODELS.has(str(entry.get("def", ""))):
+			if not entry is Dictionary or entry.has("base_damage") or not models.has(str(entry.get("def", ""))):
 				continue
-			var model: Array = V12_WEAPON_MODELS[str(entry["def"])]
-			var level: Variant = entry.get("ilvl", 1)
+			var model: Array = models[str(entry["def"])]
+			var level: Variant = entry.get("ilvl", 1)   # "ilvl" is only written when it is not 1
 			var item_level := clampi(int(level) if level is int or level is float else 1, 1, WeaponDamage.MAX_ITEM_LEVEL)
 			entry["base_damage"] = _v12_reference(model[0], item_level) * float(model[1]) / _v12_reference(model[0], int(model[2]))
 	return data
