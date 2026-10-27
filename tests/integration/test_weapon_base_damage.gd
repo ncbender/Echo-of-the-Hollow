@@ -4,18 +4,21 @@ extends GameplayTestCase
 ## the ten weapons on the model, quality, the local affixes Tempered Blade / Striking,
 ## real hits incl. Thousand Cuts, wand forks, Precision Shot and Flowing Draw, and the
 ## weapons that stay on their previous damage (compatibility through the family reference).
+## 1.1 (docs/WEAPON_BASE_DAMAGE_1_1.md): base stored per instance at creation (ItemCreation),
+## model factors, forged weapons (V3), save v12 migration, bag/stash/save persistence.
 
 const S := EquipSlot.Slot
 const BASELINE := "res://tests/fixtures/weapon_damage_baseline_2_7.json"
+const SAVE_DIR := "user://test_saves"
 ## Approved family reference bases B1 (item level 1).
 const REFERENCES := {&"one_handed_sword": 12.0, &"two_handed_sword": 22.0, &"axe": 14.0, &"dagger": 9.0,
 	&"mace": 15.0, &"spear": 13.0, &"staff": 13.0, &"wand": 10.0, &"bow": 13.0}
-## Weapons on the model: base_weapon_damage.
+## Weapons on the model: approved base at their creation item level.
 const ON_MODEL := {&"iron_sword": 12.0, &"militia_sword": 12.6, &"steel_greatsword": 22.0, &"iron_axe": 14.0,
-	&"iron_dagger": 9.0, &"iron_mace": 15.0, &"ash_spear": 13.0, &"oak_staff": 13.0, &"oak_wand": 10.0, &"hunting_bow": 13.0}
-## Not converted (special weapons, blocked forged bases): global base stats kept as they were.
-const UNCHANGED := {&"stormcaller_fang": [8.0, 4.0], &"crushing_oath": [4.0, 0.0], &"echo_blade": [8.0, 0.0],
-	&"forged_blade": [6.0, 4.0], &"forged_greatsword": [10.0, 8.0]}
+	&"iron_dagger": 9.0, &"iron_mace": 15.0, &"ash_spear": 13.0, &"oak_staff": 13.0, &"oak_wand": 10.0, &"hunting_bow": 13.0,
+	&"forged_blade": 14.4, &"forged_greatsword": 27.39}
+## Not converted (special weapons, V2 later): global base stats kept as they were.
+const UNCHANGED := {&"stormcaller_fang": [8.0, 4.0], &"crushing_oath": [4.0, 0.0], &"echo_blade": [8.0, 0.0]}
 
 var db: GameDatabase
 var baseline: Dictionary
@@ -75,7 +78,7 @@ func test_items_on_the_model_and_their_quick_heavy_damage() -> void:
 		var definition := db.get_item(item_id)
 		check(WeaponDamage.is_on_model(definition), "%s on the model" % item_id)
 		check_eq(definition.base_weapon_damage, ON_MODEL[item_id], "%s base" % item_id)
-		var weapon_damage := WeaponDamage.of(ItemInstance.create(item_id), definition, db)
+		var weapon_damage := WeaponDamage.of(ItemCreation.create(definition, 1, db), definition, db)
 		check_near(weapon_damage, ON_MODEL[item_id], 1e-9, "%s D_weapon at quality 0" % item_id)
 		var family: WeaponFamily = db.weapons[definition.weapon_family_id]
 		var heavy := "P" if family.is_bow() else "H"
@@ -85,14 +88,26 @@ func test_items_on_the_model_and_their_quick_heavy_damage() -> void:
 	var militia := db.get_item(&"militia_sword")
 	check(militia.base_stats.is_empty(), "militia: global +5 % physical damage removed")
 	check_near(CombatComponent.base_damage(db.weapons[&"one_handed_sword"].node("H"), 12.6), 27.3, 1e-9, "militia heavy 26 x 1.05")
+	check_near(WeaponDamage.model_factor(militia, db), 1.05, 1e-12, "militia model factor 1.05")
+	for item_id: StringName in [&"iron_sword", &"steel_greatsword", &"iron_axe", &"iron_dagger", &"iron_mace", &"ash_spear", &"oak_staff", &"oak_wand", &"hunting_bow"]:
+		check_eq(WeaponDamage.model_factor(db.get_item(item_id), db), 1.0, "%s model factor 1.0" % item_id)
+		check_eq(db.get_item(item_id).creation_item_level(), 1, "%s approved item level 1" % item_id)
+	check_near(WeaponDamage.model_factor(db.get_item(&"forged_blade"), db), 14.4 / 13.584, 1e-15, "forged blade factor exactly 14.40 / B_ref(12)")
+	check_near(WeaponDamage.model_factor(db.get_item(&"forged_greatsword"), db), 27.39 / 24.904, 1e-15, "forged greatsword factor exactly 27.39 / B_ref(12)")
+	for item_id: StringName in [&"forged_blade", &"forged_greatsword"]:
+		var forged := db.get_item(item_id)
+		check_eq(forged.creation_item_level(), 12, "%s item level 12 from its profile" % item_id)
+		check_eq(forged.base_stats.size(), 1, "%s: only the global poise base left" % item_id)
+		check_eq(forged.base_stats[0].stat, Stats.POISE_DAMAGE, "%s: physical base removed, poise kept" % item_id)
+		check(forged.validate().is_empty(), "%s valid" % item_id)
 
 
 func test_unconverted_weapons_keep_their_global_bonuses() -> void:
 	for item_id: StringName in UNCHANGED:
 		var definition := db.get_item(item_id)
 		check(not WeaponDamage.is_on_model(definition), "%s not on the model" % item_id)
-		check_eq(WeaponDamage.of(ItemInstance.create(item_id), definition, db), 0.0, "%s: D_weapon 0 = family reference" % item_id)
-		var totals := ItemDescriber.totals(ItemStats.modifiers(ItemInstance.create(item_id), definition, db))
+		check_eq(WeaponDamage.of(ItemCreation.create(definition, 1, db), definition, db), 0.0, "%s: D_weapon 0 = family reference" % item_id)
+		var totals := ItemDescriber.totals(ItemStats.modifiers(ItemCreation.create(definition, 1, db), definition, db))
 		check_near(float(totals.get("physical_damage|flat", 0.0)), UNCHANGED[item_id][0], 1e-9, "%s physical damage kept" % item_id)
 		check_near(float(totals.get("poise_damage|flat", 0.0)), UNCHANGED[item_id][1], 1e-9, "%s poise damage kept" % item_id)
 	var fang := ItemInstance.create(&"stormcaller_fang")
@@ -111,12 +126,13 @@ func _craftable(item_id: StringName = &"iron_sword") -> ItemDefinition:
 	definition.crafting.allowed_operations = [CraftingOps.AUGMENT, CraftingOps.QUALITY] as Array[StringName]
 	var bonus := StatModifier.make(Stats.PHYSICAL_DAMAGE, 5.0, 0.0)
 	definition.base_stats = [bonus] as Array[StatModifier]
+	definition.base_item_level = 0   # the crafting profile is the item level source
 	return definition
 
 
 func test_quality_only_on_the_weapon_base() -> void:
 	var definition := _craftable()
-	var item := ItemInstance.create(&"iron_sword")
+	var item := ItemCreation.create(definition, 1, db)
 	check_near(WeaponDamage.of(item, definition, db), 12.0, 1e-9, "quality 0")
 	item.quality = 20
 	check_near(WeaponDamage.of(item, definition, db), 13.2, 1e-9, "quality 20: 12 x 1.1")
@@ -173,7 +189,7 @@ func test_striking_is_rolled_once_from_the_reference_curve() -> void:
 			check(share >= tier.min_value and share <= tier.max_value, "share %s inside T%d" % [share, tier.tier])
 			check_near(float(entry["flat"]), reference * share / 100.0, 1e-9, "flat = B_ref x share")
 			check_eq(float(entry["percent"]), 0.0, "Striking has no percent part")
-	var sword := ItemInstance.create(&"iron_sword")
+	var sword := ItemCreation.create(_craftable(), 1, db)
 	sword.affixes.append({"affix": "striking", "tier": 5, "tier_model": 5, "stat": "weapon_damage", "flat": 0.6, "percent": 0.0, "share": 5.0})
 	var definition := _craftable()
 	check_near(WeaponDamage.of(sword, definition, db), 12.6, 1e-9, "12 + 0.6")
@@ -185,7 +201,7 @@ func test_striking_is_rolled_once_from_the_reference_curve() -> void:
 
 func test_tempered_blade_striking_and_both() -> void:
 	var definition := _craftable()
-	var item := ItemInstance.create(&"iron_sword")
+	var item := ItemCreation.create(definition, 1, db)
 	item.quality = 20
 	item.affixes.append(_tempered(10.0, 3))
 	check_near(WeaponDamage.of(item, definition, db), 13.2 * 1.1, 1e-9, "Tempered Blade: (12 x 1.1) x 1.1")
@@ -204,18 +220,17 @@ func test_tempered_blade_striking_and_both() -> void:
 	check(item.affixes.size() <= CraftingProfile.MAX_AFFIX_SLOTS, "local affixes use the regular slots")
 
 
-func test_local_affixes_only_offered_on_model_weapons() -> void:
-	var item := ItemInstance.create(&"iron_sword")
-	var pool := AffixPool.by_affix(AffixPool.compute(item, _craftable(), null, db))
-	check(pool.has(&"tempered_blade") and pool.has(&"striking"), "model weapon: local affixes offered")
-	var tiers := AffixPool.compute(item, _craftable(), null, db).filter(func(entry: Dictionary) -> bool: return (entry.affix as AffixDefinition).scope == AffixDefinition.Scope.LOCAL)
-	for entry: Dictionary in tiers:
-		check_eq((entry.tier as AffixTier).tier, 5, "item level 1: only T5")
-	var forged := ItemInstance.create(&"forged_blade")
-	forged.item_level = 12
-	var forged_pool := AffixPool.by_affix(AffixPool.compute(forged, db.get_item(&"forged_blade"), null, db))
-	check(not forged_pool.has(&"tempered_blade") and not forged_pool.has(&"striking"), "forged blade (not converted): no local affixes")
-	check_eq(forged_pool.size(), 11, "forged blade pool as before")
+## No pool offers the local affixes yet (activation not decided): converting the forged
+## weapons adds no new rolls to augment / reforge.
+func test_local_affixes_are_offered_by_no_pool() -> void:
+	var forged := ItemCreation.create(db.get_item(&"forged_blade"), 1, db)
+	for level: int in [12, 70]:
+		forged.item_level = level
+		var pool := AffixPool.by_affix(AffixPool.compute(forged, db.get_item(&"forged_blade"), null, db))
+		check(not pool.has(&"tempered_blade") and not pool.has(&"striking"), "forged blade ilvl %d: no local affixes" % level)
+		check_eq(pool.size(), 11, "forged blade pool as before (ilvl %d)" % level)
+	var other := AffixPool.by_affix(AffixPool.compute(ItemCreation.create(_craftable(), 1, db), _craftable(), null, db))
+	check(not other.has(&"tempered_blade") and not other.has(&"striking"), "no model weapon gets them")
 
 
 # --- real hits -------------------------------------------------------------------------------
@@ -355,3 +370,181 @@ func test_projectile_snapshots_weapon_damage() -> void:
 	player.combat.weapon_base_damage = 1000.0
 	await tick(frame(), 40)
 	check(not hits.is_empty() and absf(hits[0].damage - 13.0) < 1e-6, "arrow deals the damage it was fired with")
+
+
+
+# --- 1.1: instance base, forged weapons, persistence, migration ----------------------------
+
+## Forged weapons, quality 0, before (family reference x global +6 % / +10 %) and after (V3).
+func test_forged_weapons_before_and_after() -> void:
+	var sword: WeaponFamily = db.weapons[&"one_handed_sword"]
+	var great: WeaponFamily = db.weapons[&"two_handed_sword"]
+	var cases := [[&"forged_blade", sword, 6.0, 14.4], [&"forged_greatsword", great, 10.0, 27.39]]
+	for entry: Array in cases:
+		var definition := db.get_item(entry[0])
+		var item := ItemCreation.create(definition, 1, db)
+		check_eq(item.item_level, 12, "%s created at item level 12" % entry[0])
+		check_near(item.base_weapon_damage, entry[3], 1e-12, "%s stored base" % entry[0])
+		var family: WeaponFamily = entry[1]
+		for node: String in ["L", "H"]:
+			var before: float = family.node(node).damage * (1.0 + entry[2] / 100.0)
+			var after := CombatComponent.base_damage(family.node(node), WeaponDamage.of(item, definition, db))
+			check_near(after, family.node(node).damage * entry[3] / family.reference_base_damage, 1e-9, "%s %s after" % [entry[0], node])
+			check(after > before, "%s %s: %.3f -> %.3f" % [entry[0], node, before, after])
+		item.quality = 20
+		check_near(WeaponDamage.of(item, definition, db), entry[3] * 1.1, 1e-9, "%s quality 20" % entry[0])
+		check_near(item.base_weapon_damage, entry[3], 1e-12, "%s raw base unchanged by quality" % entry[0])
+
+
+## Quality 0 and 20 never change the global physical / poise stats of a forged weapon.
+func test_quality_never_raises_global_poise_or_physical() -> void:
+	character = CharacterFactory.create_new(db)
+	var physical_before := character.get_stat(Stats.PHYSICAL_DAMAGE)
+	var poise_before := character.get_stat(Stats.POISE_DAMAGE)
+	var blade := character.inventory.add_item(&"forged_blade")[0]
+	blade.affixes.append({"affix": "sharpened", "tier": 3, "tier_model": 3, "stat": "physical_damage", "flat": 5.0, "percent": 0.0})
+	check_eq(character.equipment.equip(blade.instance_id, S.MAIN_HAND), "", "equipped")
+	for quality: int in [0, 20]:
+		blade.quality = quality
+		character.notify_item_changed(blade.instance_id)
+		check_near(character.get_stat(Stats.PHYSICAL_DAMAGE) - physical_before, 5.0, 1e-9, "quality %d: only the global Sharpened +5" % quality)
+		check_near(character.get_stat(Stats.POISE_DAMAGE) - poise_before, 4.0, 1e-9, "quality %d: global poise base 4, never scaled" % quality)
+	check_eq(blade.affixes[0].affix, "sharpened", "stored Sharpened stays global and is not converted")
+
+
+## Physical skills lose the removed global base bonus (report only, no compensation):
+## the same physical skill hit with the old and the new stats.
+func test_physical_skills_lose_the_removed_global_base() -> void:
+	for entry: Array in [[&"forged_blade", 6.0], [&"forged_greatsword", 10.0], [&"militia_sword", 5.0]]:
+		character = CharacterFactory.create_new(db)
+		var item := character.inventory.add_item(entry[0])[0]
+		character.equipment.equip(item.instance_id, S.MAIN_HAND)
+		var now := CharacterStatModifier.new()
+		now.stats = character.get_stats()
+		var old := CharacterStatModifier.new()
+		old.stats = character.get_stats().duplicate()
+		old.stats[Stats.PHYSICAL_DAMAGE] = float(old.stats.get(Stats.PHYSICAL_DAMAGE, 0.0)) + entry[1]
+		check_near(_skill_hit(old) / _skill_hit(now), 1.0 + entry[1] / 100.0, 1e-9, "%s: physical skills %.0f %% lower than before" % [entry[0], entry[1]])
+
+
+func _skill_hit(modifier: CharacterStatModifier) -> float:
+	var hit := HitData.new()
+	hit.source = HitData.Source.SKILL
+	hit.damage_type = &"physical"
+	hit.damage = 100.0
+	modifier.modify_hit(hit)
+	return hit.damage
+
+
+## Two item levels through the shared creation contract (explicit caller level and the
+## item's own source); the base is B_ref(level) x model factor, stored once.
+func test_creation_with_two_item_levels() -> void:
+	character = CharacterFactory.create_new(db)
+	var forged := db.get_item(&"forged_blade")
+	var default_level := character.inventory.add_item(&"forged_blade")[0]
+	var level_30 := character.inventory.add_item(&"forged_blade", 1, &"", 30)[0]
+	check_eq([default_level.item_level, level_30.item_level], [12, 30], "levels: profile source / explicit")
+	check_near(level_30.base_weapon_damage, WeaponDamage.reference_at(12.0, 30) * 14.4 / 13.584, 1e-12, "level 30: B_ref(30) x factor")
+	var axe_1 := character.inventory.add_item(&"iron_axe")[0]
+	var axe_50 := character.inventory.add_item(&"iron_axe", 1, &"", 50)[0]
+	check_eq([axe_1.item_level, axe_50.item_level], [1, 50], "axe levels")
+	check_near(axe_1.base_weapon_damage, 14.0, 1e-12, "axe level 1: 14")
+	check_near(axe_50.base_weapon_damage, 14.0 * 1.588, 1e-12, "axe level 50: 14 x 1.588")
+	check_near(WeaponDamage.of(level_30, forged, db) / WeaponDamage.of(default_level, forged, db),
+		WeaponDamage.reference_at(12.0, 30) / WeaponDamage.reference_at(12.0, 12), 1e-12, "both scale along the same curve")
+	check_eq(character.inventory.add_item(&"copper_ring")[0].base_weapon_damage, 0.0, "no base on non-weapons")
+	check_eq(character.inventory.add_item(&"stormcaller_fang")[0].base_weapon_damage, 0.0, "no base on unconverted special weapons")
+
+
+## The stored base is never recomputed: quality, equip/unequip, bag <-> stash and
+## save/load keep it bit-identical (also a value that differs from today's data).
+func test_stored_base_survives_everything_unchanged() -> void:
+	character = CharacterFactory.create_new(db)
+	var blade := character.inventory.add_item(&"forged_blade", 1, &"", 37)[0]
+	blade.affixes.append({"affix": "sharpened", "tier": 3, "tier_model": 3, "stat": "physical_damage", "flat": 5.0, "percent": 0.0})
+	var striking: AffixDefinition = db.affixes[&"striking"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	blade.affixes.append(striking.roll(striking.get_tier(4), rng, WeaponDamage.reference_of(blade, db.get_item(&"forged_blade"), db)))
+	var odd := character.inventory.add_item(&"iron_dagger")[0]
+	odd.base_weapon_damage = 9.123456789012345   # e.g. created under older data: kept as stored
+	var base := blade.base_weapon_damage
+	var flat: float = blade.affixes[1].flat
+	blade.quality = 20
+	check_eq(character.equipment.equip(blade.instance_id, S.MAIN_HAND), "", "equip")
+	character.equipment.unequip(S.MAIN_HAND)
+	check_eq(StashService.deposit(character, blade.instance_id), "", "into the stash")
+	check_eq(character.stash.find(blade.instance_id).base_weapon_damage, base, "stash: identical")
+	check_eq(StashService.withdraw(character, blade.instance_id), "", "back to the bag")
+	check_eq(StashService.deposit(character, odd.instance_id), "", "dagger into the stash")
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var path := SAVE_DIR.path_join("weapon_base_%s.save.json" % IdGenerator.new_id("t"))
+	check_eq(SaveSystem.save_to(character, path), OK, "saved")
+	var result := SaveSystem.load_from(path, db)
+	for suffix: String in ["", SaveSystem.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(path + suffix):
+			DirAccess.remove_absolute(path + suffix)
+	check(result.character != null, "loaded: %s" % [result.errors])
+	if result.character == null:
+		return
+	var loaded := result.character.inventory.find(blade.instance_id)
+	check_near(loaded.base_weapon_damage, base, 1e-12, "save/load: base identical (full-precision JSON)")
+	check_near(float(loaded.affixes[1].flat), flat, 1e-12, "save/load: Striking flat identical (full-precision JSON)")
+	check_eq(loaded.affixes[0].affix, "sharpened", "existing affix kept")
+	check_eq([loaded.item_level, loaded.quality], [37, 20], "level and quality kept")
+	check_near(result.character.stash.find(odd.instance_id).base_weapon_damage, 9.123456789012345, 1e-12, "stored value never recomputed from data")
+	for warning in result.warnings:
+		check(not warning.contains("without stored base"), "no base warning: %s" % warning)
+
+
+func test_striking_tooltip_one_decimal() -> void:
+	var entry := {"affix": "striking", "tier": 4, "tier_model": 5, "stat": "weapon_damage", "flat": 0.86724, "percent": 0.0, "share": 7.0}
+	var text := ItemDescriber.affix_text(db, entry)
+	check(text.begins_with("+0.9 Weapon Damage (local)"), "one decimal in the tooltip: %s" % text)
+	check_eq(entry.flat, 0.86724, "stored value not rounded")
+
+
+## v11 -> v12: one deterministic assignment from the frozen model table and the saved
+## item level; everything else (affixes, quality, unconverted items) stays as it is.
+func test_migration_v11_to_v12() -> void:
+	var sharpened := {"affix": "sharpened", "tier": 2, "tier_model": 3, "stat": "physical_damage", "flat": 9.0, "percent": 0.0}
+	var old := {"inventory": [
+		{"id": "a", "def": "forged_blade", "qty": 1, "ilvl": 12, "quality": 20, "affixes": [sharpened.duplicate()]},
+		{"id": "b", "def": "militia_sword", "qty": 1},
+		{"id": "c", "def": "stormcaller_fang", "qty": 1, "ilvl": 15},
+		{"id": "d", "def": "iron_ore", "qty": 5},
+		{"id": "e", "def": "forged_greatsword", "qty": 1, "ilvl": 20}],
+		"stash": {"items": [{"id": "f", "def": "steel_greatsword", "qty": 1}]},
+		"orphaned_items": [{"id": "g", "def": "oak_wand", "qty": 1, "base_damage": 11.5}]}
+	var errors: PackedStringArray = []
+	var data: Dictionary = SaveMigrations.migrate(old.duplicate(true), 11, errors)
+	check(errors.is_empty(), "migrates: %s" % [errors])
+	var items: Array = data.inventory
+	check_near(items[0].base_damage, 14.4, 1e-12, "forged blade ilvl 12: 14.40")
+	check_eq(items[0].affixes, [sharpened], "Sharpened kept global and untouched")
+	check_eq(items[0].quality, 20, "quality kept")
+	check_near(items[1].base_damage, 12.6, 1e-12, "militia: 12.6")
+	check(not items[2].has("base_damage") and not items[3].has("base_damage"), "special weapon and material untouched")
+	check_near(items[4].base_damage, WeaponDamage.reference_at(22.0, 20) * 27.39 / 24.904, 1e-12, "greatsword ilvl 20 along the curve")
+	check_near(data.stash.items[0].base_damage, 22.0, 1e-12, "stash items too")
+	check_eq(data.orphaned_items[0].base_damage, 11.5, "an existing value is never replaced")
+	var again: Dictionary = SaveMigrations.migrate(old.duplicate(true), 11, errors)
+	check_eq(again.inventory, data.inventory, "deterministic")
+	for model: String in SaveMigrations.V12_WEAPON_MODELS:
+		var definition := db.get_item(StringName(model))
+		var frozen: Array = SaveMigrations.V12_WEAPON_MODELS[model]
+		check_eq([WeaponDamage.family_base(definition, db), definition.base_weapon_damage, definition.creation_item_level()],
+			[frozen[0], frozen[1], frozen[2]], "%s: frozen table matches the approved data" % model)
+	var restored := Character.from_dict(data, db, PackedStringArray())
+	check_near(WeaponDamage.of(restored.inventory.find("a"), db.get_item(&"forged_blade"), db), 14.4 * 1.1, 1e-9, "loaded forged blade: base x quality")
+
+
+func test_bound_player_forged_greatsword_hits() -> void:
+	_bind()
+	var great := _equip(&"forged_greatsword")
+	await wait_physics(2)
+	check_near(player.combat.weapon_base_damage, 27.39, 1e-9, "D_weapon 27.39")
+	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE), 0.0, 1e-9, "no global physical base left")
+	var hit := await _quick_hit()
+	check(hit != null and absf(hit.damage - 27.39) < 1e-6, "forged greatsword quick 27.39 (got %s)" % (hit.damage if hit else -1.0))
+	check_near(great.base_weapon_damage, 27.39, 1e-12, "stored base untouched by equipping")
