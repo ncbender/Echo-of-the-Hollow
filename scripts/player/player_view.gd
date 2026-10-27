@@ -65,7 +65,9 @@ func _draw() -> void:
 
 	if player.defense != null and player.defense.is_defending():
 		_draw_guard()
-	if combat.state == CombatComponent.State.ATTACKING:
+	if player.is_gathering():
+		_draw_gather_tool()
+	elif combat.state == CombatComponent.State.ATTACKING:
 		_draw_swing(combat)
 	else:
 		_draw_idle_blade()
@@ -170,6 +172,37 @@ func _draw_shot(combat: CombatComponent) -> void:
 		CombatComponent.Phase.RECOVERY:
 			var fade := 1.0 - combat.phase_progress()
 			draw_arc(hand, 6.0, direction.angle() - 1.2, direction.angle() + 1.2, 10, Color(color, 0.4 + 0.5 * fade), 2.0)
+
+
+## Gathering 1.1 placeholder: a purely visual tool per profession (axe, pickaxe,
+## sickle, skinning knife) raised during the step and brought down at its end.
+## No item, slot or durability - the one weapon slot is untouched.
+func _draw_gather_tool() -> void:
+	var node := player.gather_target as ResourceNode
+	var profession := node.definition.profession_id if node != null and node.definition != null else &""
+	var toward := (node.global_position - player.global_position).normalized() if node != null else player.aim_direction
+	if toward == Vector2.ZERO:
+		toward = player.aim_direction
+	var t := player.gather_progress()
+	# raise over the first 70 %, strike in the last 30 %
+	var angle := lerpf(0.0, -1.6, t / 0.7) if t < 0.7 else lerpf(-1.6, 0.5, (t - 0.7) / 0.3)
+	var dir := toward.rotated(angle)
+	var hand := Vector2(0, -2) + toward.orthogonal() * 3.0
+	var handle := Color(0.55, 0.4, 0.25)
+	var metal := Color(0.78, 0.8, 0.84)
+	match profession:
+		&"woodcutting":
+			draw_line(hand, hand + dir * 13.0, handle, 2.0)
+			draw_colored_polygon(PackedVector2Array([hand + dir * 10.0, hand + dir * 14.0 + dir.orthogonal() * 4.0, hand + dir * 9.0 + dir.orthogonal() * 4.0]), metal)
+		&"mining":
+			draw_line(hand, hand + dir * 13.0, handle, 2.0)
+			draw_line(hand + dir * 13.0 - dir.orthogonal() * 5.0, hand + dir * 13.0 + dir.orthogonal() * 5.0, metal, 2.0)
+		&"herbalism":
+			draw_line(hand, hand + dir * 6.0, handle, 2.0)
+			draw_arc(hand + dir * 9.0, 4.0, dir.angle() - 1.6, dir.angle() + 1.2, 8, metal, 1.5)
+		_:
+			draw_line(hand, hand + dir * 5.0, handle, 2.0)
+			draw_line(hand + dir * 5.0, hand + dir * 10.0, metal, 1.5)
 
 
 func _draw_wedge(from: float, to: float, radius: float, color: Color) -> void:
