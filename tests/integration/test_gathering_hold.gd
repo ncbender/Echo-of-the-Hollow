@@ -156,10 +156,6 @@ func test_only_from_neutral() -> void:
 	await tick(frame(), 30)
 	check(player.begin_gather(target), "from neutral")
 	check(not player.begin_gather(FakeTarget.new()), "never two at once")
-	var drink := held()
-	drink.flask_pressed = true
-	await tick(drink)
-	check(not player.is_using(), "no drink while gathering")
 
 
 
@@ -204,3 +200,60 @@ func test_real_node_with_held_g() -> void:
 	node.queue_free()
 	session.set_character(previous)
 
+
+
+## Final integration: keys 1 / 2 interrupt gathering and the drink then starts
+## under its own rules; Shift interrupts and the defense reacts normally;
+## gathering never runs together with a drink or a block / parry.
+func test_drink_keys_interrupt_and_the_drink_starts() -> void:
+	for key in [0, 1]:
+		stops.clear()
+		var target := _spawn()
+		var asked: Array[int] = []
+		player.consumable_handler = func(kind: int) -> bool:
+			asked.append(kind)
+			player.begin_use(1.1, 0.45, Callable())   # stands in for the bridge (the real rules are not touched)
+			return true
+		await tick(held(), 20)
+		var press := held()
+		if key == 0:
+			press.flask_pressed = true
+		else:
+			press.potion_pressed = true
+		await tick(press)
+		check_eq(stops, [Player.GATHER_DRINK] as Array[StringName], "key %d interrupts gathering" % (key + 1))
+		check_eq(asked, [key] as Array[int], "key %d: the drink is asked for in the same tick" % (key + 1))
+		check(player.is_using() and not player.is_gathering(), "drinking, not gathering")
+		check(not player.begin_gather(target), "no gathering while drinking")
+		check_eq(target.done, 0, "the partial step gave nothing")
+		player.queue_free()
+		await get_tree().physics_frame
+
+
+func test_shift_interrupts_and_the_defense_reacts() -> void:
+	var target := _spawn()
+	await tick(held(), 20)
+	var shift := held()
+	shift.defend_pressed = true
+	shift.defend_held = true
+	await tick(shift)
+	check_eq(stops, [Player.GATHER_DEFEND] as Array[StringName], "Shift interrupts gathering")
+	check(player.defense.is_defending(), "the parry window opened in the same tick")
+	check(not player.begin_gather(target), "no gathering while blocking or parrying")
+	var guard := held()
+	guard.defend_held = true
+	await tick(guard, 30)
+	check(not player.is_gathering() and target.done == 0, "holding G and Shift never gathers")
+
+
+## Holding G must not repeat single interactions: a held key only sends echo
+## events, and the map reacts to non-echo presses only (GameMap._unhandled_input).
+func test_held_g_sends_no_repeated_interaction() -> void:
+	GameHud.ensure_input_actions()
+	var press := InputEventKey.new()
+	press.physical_keycode = KEY_G
+	press.pressed = true
+	check(press.is_action_pressed(&"interact"), "the first G press is an interaction")
+	var echo := press.duplicate() as InputEventKey
+	echo.echo = true
+	check(not echo.is_action_pressed(&"interact"), "auto-repeat while G is held is no new interaction")

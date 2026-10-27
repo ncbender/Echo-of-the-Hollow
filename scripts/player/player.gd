@@ -29,6 +29,8 @@ const GATHER_KNOCKBACK := &"knockback"
 const GATHER_DEATH := &"death"
 const GATHER_MENU := &"menu"
 const GATHER_RANGE := &"range"
+const GATHER_DRINK := &"drink"
+const GATHER_DEFEND := &"defend"
 
 @export var input_buffer_time: float = 0.12
 ## Weapon family wielded at start when no character progression controls the
@@ -319,8 +321,10 @@ func stop_gather(reason: StringName) -> void:
 	gather_stopped.emit(reason)
 
 
-## G must stay held; moving, dashing, attacking or a skill press interrupt, as
-## does leaving the node's range. A full step completes the target's next step.
+## G must stay held; moving, dashing, attacking, a skill press, keys 1/2 (drink)
+## and Shift (block/parry) interrupt, as does leaving the node's range. It runs
+## before dash, defense and drink in physics_step, so the interrupting action
+## starts in the same tick under its normal rules. A full step completes the target's next step.
 func _step_gather(frame: InputFrame, delta: float) -> void:
 	if gather_target == null:
 		return
@@ -338,6 +342,10 @@ func _step_gather(frame: InputFrame, delta: float) -> void:
 		reason = GATHER_ATTACK
 	elif frame.ability_slot >= 0:
 		reason = GATHER_SKILL
+	elif frame.flask_pressed or frame.potion_pressed:
+		reason = GATHER_DRINK    # the drink may then start under its own rules (_step_use, same tick)
+	elif frame.defend_pressed:
+		reason = GATHER_DEFEND   # the defense then reacts normally (DefenseComponent, same tick)
 	elif health.is_dead():
 		reason = GATHER_DEATH
 	elif not gather_target.call(&"in_range", self):
@@ -371,7 +379,7 @@ func gather_progress() -> float:
 ## Keys 1 / 2 ask the handler (progression bridge) whether a drink starts; the
 ## running drink completes after its time (then `_use_done` applies the effect).
 func _step_use(frame: InputFrame, delta: float) -> void:
-	if (frame.flask_pressed or frame.potion_pressed) and consumable_handler.is_valid() and can_start_skill() and not is_gathering():
+	if (frame.flask_pressed or frame.potion_pressed) and consumable_handler.is_valid() and can_start_skill():
 		consumable_handler.call(0 if frame.flask_pressed else 1)
 	if use_left <= 0.0:
 		return

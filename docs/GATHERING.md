@@ -81,14 +81,19 @@ Eine Ablehnung ändert nichts. `gather()` erntet alle restlichen Schritte am St�
 - Gehaltenes G startet nie einen neuen Knoten; nach jeder Unterbrechung braucht es einen neuen Druck.
 
 **Unterbrechungen** (`gather_stopped(reason)`), jeweils sofort; der angefangene Schritt gibt nichts, erledigte Schritte bleiben:
-- G losgelassen, WASD, Dash, Angriff (L/H), Skill-Taste
+- G losgelassen, WASD, Dash, Angriff (L/H), Skill-Taste, Tasten 1/2 (Trinken), Shift (Block/Parry)
 - echter HP-Verlust, Reaktion ab INTERRUPT (Stun), Knockback, Tod
 - offenes Fenster oder Pausemenü (`apply_input_block`)
 - Verlassen der Knoten-Area
 
 Ein Treffer ohne HP-Verlust (z. B. pariert) unterbricht nicht.
 
-Interpretation: Trinken (1/2) startet während des Sammelns nicht. Shift (Block/Parry) bleibt möglich und unterbricht nicht (steht nicht auf der Liste).
+Final Integration: Tasten 1/2 und Shift unterbrechen das Sammeln ebenfalls (`GATHER_DRINK`, `GATHER_DEFEND`).
+Danach starten Trank bzw. Block/Parry im selben Tick unter ihren unveränderten Regeln. Sammeln läuft nie
+gleichzeitig mit Trinken, Block oder Parry (Start nur aus dem neutralen Zustand). Ein angearbeiteter Knoten
+bleibt dauerhaft angearbeitet; die bestehende Nachwachszeit beginnt erst bei der Erschöpfung. Die
+Datenbank-Validierung prüft `steps >= 1` und `0 <= completion_bonus <= yield_quantity`. Gehaltenes G löst keine
+weiteren Interaktionen aus, weil die Map nur Druck-Ereignisse ohne Echo auswertet.
 
 ### Visuell – nur Platzhalter (keine Sprites oder Animationen vorhanden)
 - `PlayerView._draw_gather_tool`: rein visuelles Werkzeug je Beruf – Axt, Spitzhacke, Sichel, Häutemesser. Es wird über 70 % des Schritts ausgeholt und in den letzten 30 % zugeschlagen. Kein Item, kein Slot, keine Haltbarkeit; der Waffen-Slot bleibt unberührt.

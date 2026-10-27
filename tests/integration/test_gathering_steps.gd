@@ -182,3 +182,40 @@ func test_tampered_or_old_states_never_create_rewards() -> void:
 	check(String(ResourceGathering.complete_step(character, MAP, &"oak_2", node, 1000.0).error).ends_with("depleted"), "old permanent depletion respected")
 	check_eq(ResourceGathering.complete_step(character, MAP, &"oak_3", node, 1000.0).error, "", "an untouched old node starts a fresh cycle")
 	check_eq(ResourceGathering.steps_done(character.world, MAP, &"oak_3"), 1, "first step recorded")
+
+
+## Final integration: a partly worked node stays partly worked (no timer while
+## partial); the existing respawn time starts only at exhaustion.
+func test_partial_node_persists_and_respawn_starts_at_exhaustion() -> void:
+	var node: ResourceNodeDefinition = db.resource_nodes[&"old_oak"]
+	_raise(&"woodcutting", node.required_level)
+	ResourceGathering.complete_step(character, MAP, &"oak_p", node, 1000.0)
+	for later: float in [1000.0 + node.respawn_seconds, 1000.0 + 100000.0]:
+		check(ResourceGathering.is_available(character.world, MAP, &"oak_p", later), "partial: still workable at t+%d" % (later - 1000.0))
+		check_eq(ResourceGathering.steps_done(character.world, MAP, &"oak_p"), 1, "partial progress kept")
+	for i in node.steps - 1:
+		ResourceGathering.complete_step(character, MAP, &"oak_p", node, 5000.0)
+	check_near(ResourceGathering.seconds_left(character.world, MAP, &"oak_p", 5000.0), node.respawn_seconds, 0.001, "the existing respawn time starts at exhaustion")
+
+
+## The completion bonus never creates material outside the budget.
+func test_bonus_inside_the_budget_and_zero_budgets() -> void:
+	var base: ResourceNodeDefinition = db.resource_nodes[&"forest_rock"]
+	for case: Array in [[0, 1, 3], [1, 3, 3], [2, 1, 1], [3, -2, 3], [2, 1, 0]]:   # yield, bonus, steps
+		var node := base.duplicate() as ResourceNodeDefinition
+		node.yield_quantity = case[0]
+		node.completion_bonus = case[1]
+		node.steps = case[2]
+		var plan := ResourceGathering.make_plan(character, MAP, &"budget", node)
+		var total := 0
+		for value: int in plan.items:
+			check(value >= 0, "no negative step")
+			total += value
+		check_eq(total, case[0], "yield %d / bonus %d / steps %d: exactly the budget" % case)
+		check(int(plan.bonus) <= case[0] and int(plan.bonus) >= 0, "bonus clamped into the budget")
+		check(int(plan.steps) >= 1, "at least one step")
+	var zero := base.duplicate() as ResourceNodeDefinition
+	zero.gather_xp = 0
+	var zero_plan := ResourceGathering.make_plan(character, MAP, &"budget_xp", zero)
+	check((zero_plan.xp as Array).all(func(v: int) -> bool: return v == 0), "zero XP budget: no XP")
+	check(db.load_errors.is_empty(), "all data nodes: bonus inside the yield, steps >= 1 (%s)" % [db.load_errors])
