@@ -13,6 +13,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Pre-Alpha Item Foundation 1.0 (max. 5 reguläre Affixe, Affix-Kategorien, Fünf-Tier-Modell, Local/Global, Quality 0,5 %; Save v11).
 + Weapon Base Damage 1.0–1.2 (Instanz-Basis bei Erzeugung, Angriffsmultiplikatoren, Forged V3, Spezialwaffen V2, Local-Affixe; Save v13).
 + Loot Foundation 1.0 (Instanz-Rarity, Fünf-Tier-Affixe, gemeinsamer Affix-Kern `AffixRoller`, `ItemCreation.generate`; Save v14).
++ Hollowwood Loot Integration 1.0 (Grunt-/Wolf-Equipment-Drops über `EquipmentLootTable`/`EquipmentLoot`, Instanz-Pickups).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -75,6 +76,8 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   Loot Foundation 1.0 (`docs/LOOT_FOUNDATION_1_0.md`): Rarity gehört der Instanz (`ItemInstance.rarity`, Anzeige über
   `effective_rarity`); Affix-Eligibility und -Rolls nur über `AffixRoller` (Identität, Tier, Wert getrennt); Tier-Gewichte nur als
   explizite `AffixTierWeights`-Eingabe, nie Standardverteilung; neue Loot-Items nur über `ItemCreation.generate`.
+  Equipment-Drops nur über `EquipmentLoot.roll` mit einer `EquipmentLootTable` (`docs/HOLLOWWOOD_LOOT_INTEGRATION_1_0.md`):
+  ein Wurf pro Ereignis, erzeugte Instanz unverändert über `GameMap.spawn_item_pickup` / `ItemPickup.item`.
 - Klassen (`docs/CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`): Talent-/Skill-/
   Preset-/Prolog-/Quest-Regeln nur in `TalentService`, `SkillBook`, `PresetService`, `PrologueService`,
   `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).
