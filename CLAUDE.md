@@ -7,6 +7,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + UI/UX Redesign 1.0 (Designsystem „The Forgotten Chronicle“, neues HUD) + UI/UX Polish 1.1 + Talent UI Polish 1.2
 + Inventory & Haven Stash 1.0 (Haven-Lager, Save v6) + Professions Foundation 1.0 (neun Berufe, Artisan Quarter, Save v7)
 + Overnight Artisan Crafting 01 (Werkstätten Ruined/Restored/Revitalized, Hollowwood-Sammeln, Restaurierung aus dem Lager).
++ Overnight Systems 02 (Item Integrity + Salvaging, Hearth Flask + Tränke, Armor Mastery, Loot-Economy-Grundlage; Save v10).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -73,6 +74,15 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   (Kosten über denselben Materialplan wie die Werkbänke); Werkstätten öffnen zuerst die Werkbank.
   Design: `docs/PROLOGUE_AND_HAVEN.md`.
 - Berufe (`docs/PROFESSIONS.md`): Regeln nur in `ProfessionService` (Lernen, XP, Herstellen als Transaktion mit  einem Materialplan für Zählen und Verbrauchen), Zustand in `Character.professions`; Berufe, Rezepte, Sammelknoten  sind Daten (`data/professions`, `data/world/resource_nodes`); Werkbänke sind Haven-Ruinen mit `profession_id`.
+- Item Integrity (`docs/ITEM_SYSTEM.md`): Favorit/Sperre/Herkunft nur über `ItemProtection` (nur Einzelitems);
+  Herkunft beim Entstehen setzen (`Inventory.add_item(..., origin)`), nie raten. Zerstören/Verkaufen nur nach
+  `ItemProtection.destroy_block`. Salvaging nur über `SalvageService` (Werkbank des Herstellungsrezepts, atomar,
+  keine XP); Verkaufswerte nur über `EconomyService` (`docs/ECONOMY.md`, Basiswerte noch offen).
+- Hearth Flask & Tränke (`docs/CONSUMABLES.md`): Regeln nur in `ConsumableService`, Zustand `Character.consumables`;
+  Trinken nur über `Player.begin_use` (Wirkung erst bei Abschluss); Trankwirkungen sind `PotionEffectDefinition`-Daten;
+  Tasten 1/2 als Laufzeitaktionen. HUD-Effektleiste nur Anzeige.
+- Armor Mastery (`docs/ARMOR_MASTERY.md`): Regeln nur in `ArmorMasteryService`, Werte in `ArmorMasteryRules`;
+  Burden wirkt nur über `Player.move_speed_multiplier` und `CombatComponent.recovery_multiplier` - nie Dash/Parry.
 - Saves nur über `SaveCoordinator` (manuell/periodisch/Meilenstein); Meilensteine nie unterdrücken,
   Erfolg erst nach erfolgreichem Schreiben anzeigen. Tod/Respawn speichert nie.
 

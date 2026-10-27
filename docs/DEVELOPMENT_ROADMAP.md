@@ -40,9 +40,10 @@
 | Inventory & Haven Stash 1.0 | Haven-Lager am Old Storehouse (schon als Ruine): Equipment Chest, Material Vault, Collection Vault als Ansichten eines Besitzcontainers, atomare Transfers, Rechtsklick und Drag & Drop, Deposit All, Sort, Save v6 | `INVENTORY_HAVEN_STASH_01_REPORT.md` |
 | Professions Foundation 1.0 | UI-Skalierung 75–150 %; neun klassenunabhängige Berufe (5 Herstellung, 4 Sammeln) mit Stufen 1–100, Rängen, XP-Bändern und Erstherstellungsbonus; datengetriebene Rezepte (inkl. Verarbeitung), dauerhaftes Lernen, atomares Herstellen mit Lager-Materialien in Haven; Artisan Quarter mit vier Werkstätten; Berufefenster (P); Save v7 | `PROFESSIONS_FOUNDATION_01_REPORT.md` |
 | Overnight Artisan Crafting 01 | Playtests ohne Bauplätze, Craft-Knopf in fester Fußzeile (150 %); vier Werkstätten Ruined → Restored → Revitalized (datengetriebene Kosten, atomar, Zielstufe, Save v7), Restaurierung auch aus dem Haven-Lager; Stufe-3-Sammelknoten für alle vier Sammelberufe, Pattern: Leather Bracers im Whisper Forest, vier neue Ausrüstungsrezepte; Salvage blockiert (kein Favoriten-/Sperrmodell) | `OVERNIGHT_ARTISAN_CRAFTING_01_REPORT.md` |
+| Overnight Systems 02 | Item Integrity (Favorit, Sperre, Herkunft, Save v8) und Salvaging 1.0; Hearth Flask mit Mara-Upgrades, fünf Spezialtränke, Effektleiste (Save v9); Armor Mastery Foundation 1.0 mit Burden und Meilensteinen (Save v10); Loot-Economy-Grundlage mit Simulation (Basiswerte offen) | `OVERNIGHT_SYSTEMS_02_REPORT.md` |
 
 ## Danach (Vorschlag, nicht begonnen)
-- **Berufe 1.1:** Item-Sperre/Favoriten (Voraussetzung für Salvaging), Trainer-/Quest-/Drop-Quellen für Rezepte,  Verbrauchsgüter (dann Alchemie herstellbar), weitere Rezepte bis Master, Material-Parameter/Affixe aus  `output_parameters`, Rezeptgegenstände in Beutetabellen, Salvaging.
+- **Berufe 1.1:** Trainer-/Quest-/Drop-Quellen für Rezepte,  Verbrauchsgüter (dann Alchemie herstellbar), weitere Rezepte bis Master, Material-Parameter/Affixe aus  `output_parameters`, Rezeptgegenstände in Beutetabellen, Salvaging.
 - **Crafting 0.2:** Loot-Generator mit Affixen (Gleichwertigkeit Loot ↔ Crafting), Essenz-Drops von
   Monstern, Balance nach menschlichem Playtest, VFX/SFX für Entladung und Resonanz, Respec-Regeln.
 - **0.2 Combat Feel:** echte Sprite-Animationen statt Platzhalter, Animationsdaten an Attack-Phasen

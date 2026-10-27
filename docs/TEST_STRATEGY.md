@@ -246,3 +246,14 @@ Werkbank, schnelle Klicks, volle Tasche; keine Tränke/Bögen). `professions_ui`
 jeder UI-Skalierung in der festen Fußzeile sichtbar ist. Galerie-Screens `hud_artisan_stages`, `restoration_revitalize`.
 Bei Änderungen an `restoration_service.gd`, `ruin_definition.gd`, `ruin_site.gd`, `restoration_panel.gd`, Ruinendaten:
 workshops, haven, world_ui, stash_ui. Bei Rezepten, Sammelknoten, Karten mit Knoten: hollowwood, professions, professions_ui.
+
+Overnight Systems 02: `salvage` (Markierungen, Herkunft, Migration v7→v8, Schutzklassen, Werkstatt/Vorschau,
+Wiederholungen und Rollback, volle Tasche, Save/Load, Herstellen→Verwerten ohne Gewinn, echte Maus inkl. Strg/Alt-Klick),
+`consumables` (Flask-Ladungen, Abschluss, Unterbrechungen, Rast, Mara-Upgrades inkl. Maus, Tränke/Buffs/Cooldown/Exklusivität,
+Buff-Werte und Grenzen, Save v9 + Migration, Effekt-Icon, Alchemie), `armor_mastery` (Burden/Stufen, Abdeckung, XP-Verteilung,
+Meilensteine, Strafen nur Laufen/Recovery, Klassenwechsel, XP-Quellen und Deckel, Save v10 + Migration, Armor-Seite),
+`economy` (Verkaufsformel, Schutz/Atomarität, Simulation, persistenter Boss über Save/Load), `input` (Tasten 1/2).
+Galerie-Screens: `professions_salvage`, `hud_consumables`, `flask_upgrades`, `character_armor`.
+Bei Änderungen an `item_instance.gd`/`item_protection.gd`/`salvage_service.gd`: salvage, save, stash, inventory_ui, presets;
+an Player/Bridge/`consumable_service.gd`: consumables, input, hud, defense, dash, movement, skills;
+an `armor_mastery_*`/`combat_component.gd` Recovery: armor_mastery, light_attack, heavy_attack, combo, attack_speed, defense.
