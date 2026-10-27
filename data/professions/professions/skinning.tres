@@ -8,5 +8,6 @@ id = &"skinning"
 display_name = "Skinning"
 description = "Takes hides and pelts from slain beasts."
 kind = 1
+gather_step_seconds = 0.9
 color = Color(0.7, 0.45, 0.4, 1)
 station_id = &""

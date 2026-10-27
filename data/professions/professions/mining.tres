@@ -8,5 +8,6 @@ id = &"mining"
 display_name = "Mining"
 description = "Breaks ore and stone from veins and rocks."
 kind = 1
+gather_step_seconds = 0.85
 color = Color(0.6, 0.6, 0.66, 1)
 station_id = &""

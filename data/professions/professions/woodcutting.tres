@@ -8,5 +8,6 @@ id = &"woodcutting"
 display_name = "Woodcutting"
 description = "Fells trees for timber."
 kind = 1
+gather_step_seconds = 0.75
 color = Color(0.55, 0.45, 0.3, 1)
 station_id = &""

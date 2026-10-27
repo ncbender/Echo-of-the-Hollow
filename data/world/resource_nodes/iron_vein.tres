@@ -13,3 +13,5 @@ look = 2
 profession_id = &"mining"
 required_level = 1
 gather_xp = 8
+steps = 4
+completion_bonus = 1

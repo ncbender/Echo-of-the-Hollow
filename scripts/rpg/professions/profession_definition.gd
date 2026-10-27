@@ -18,6 +18,11 @@ enum Kind { CRAFTING, GATHERING }
 @export var station_id: StringName
 @export var max_level: int = 100
 
+@export_group("Gathering")
+## Gathering 1.1: seconds of one work step (hit, swing, cut) on a resource node
+## of this profession while G is held. Prototype values.
+@export var gather_step_seconds: float = 0.0
+
 @export_group("XP curve")
 ## XP from level n to n+1 = round(xp_base * xp_growth^(n-1)).
 @export var xp_base: int = 60

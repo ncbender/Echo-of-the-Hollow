@@ -13,3 +13,5 @@ look = 4
 profession_id = &"skinning"
 required_level = 1
 gather_xp = 8
+steps = 2
+completion_bonus = 1

@@ -128,14 +128,20 @@ static func craft_xp(character: Character, recipe: ProfessionRecipeDefinition) -
 
 ## Gathering XP (successful gathers only; the node gives its gather_xp with the
 ## same level bands as recipes).
-static func gather_xp(character: Character, node: ResourceNodeDefinition) -> int:
+## Gathering XP budget of one node cycle (level band at the cycle start).
+static func gather_xp_budget(character: Character, node: ResourceNodeDefinition) -> int:
 	if node.profession_id == &"":
 		return 0
-	var share := xp_share(character.professions.level(node.profession_id), node.required_level)
-	var gained := character.professions.add_xp(node.profession_id, roundi(node.gather_xp * share))
-	if gained > 0:
+	return roundi(node.gather_xp * xp_share(character.professions.level(node.profession_id), node.required_level))
+
+
+## Grants `amount` gathering XP of `profession_id` (one completed step).
+static func grant_gather_xp(character: Character, profession_id: StringName, amount: int) -> int:
+	if profession_id == &"" or amount <= 0:
+		return 0
+	if character.professions.add_xp(profession_id, amount) > 0:
 		learn_automatic(character)
-	return roundi(node.gather_xp * share)
+	return amount
 
 
 # --- materials --------------------------------------------------------------------

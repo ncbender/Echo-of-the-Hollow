@@ -59,6 +59,11 @@ func set_map_value(map: StringName, key: String, value: Variant) -> void:
 	map_states[map][key] = value
 
 
+func erase_map_value(map: StringName, key: String) -> void:
+	if map_states.has(map):
+		(map_states[map] as Dictionary).erase(key)
+
+
 func to_dict() -> Dictionary:
 	var saved_flags := {}
 	for flag: StringName in flags:

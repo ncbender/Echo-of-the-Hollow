@@ -13,3 +13,5 @@ look = 0
 profession_id = &"woodcutting"
 required_level = 1
 gather_xp = 6
+steps = 3
+completion_bonus = 1

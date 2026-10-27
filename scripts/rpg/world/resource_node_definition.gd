@@ -22,3 +22,11 @@ enum Look { TREE, ROCK, ORE, HERB, CARCASS }
 @export var required_level: int = 1
 ## Profession XP for a successful gather (level bands as for recipes).
 @export var gather_xp: int = 6
+
+@export_group("Steps (Gathering 1.1)")
+## Work steps until the node is exhausted (by resource type: Woodcutting 2-4,
+## Mining 3-5, Herbalism 1-3, Skinning 2-3). yield_quantity and gather_xp are
+## the node's fixed total budgets, spread over the steps.
+@export var steps: int = 1
+## Guaranteed units of yield_item_id on the last step - part of yield_quantity.
+@export var completion_bonus: int = 1

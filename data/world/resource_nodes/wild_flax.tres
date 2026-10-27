@@ -13,3 +13,5 @@ look = 3
 profession_id = &"herbalism"
 required_level = 1
 gather_xp = 6
+steps = 2
+completion_bonus = 1
