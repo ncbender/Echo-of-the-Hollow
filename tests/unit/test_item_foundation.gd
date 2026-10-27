@@ -107,10 +107,13 @@ func test_five_tier_validation() -> void:
 	check(not unknown.validate().is_empty(), "unknown tier model rejected")
 
 
-## The real affixes stay on the three-tier prototype model: their tiers are not
-## silently renumbered or re-levelled (five-tier values are not designed yet).
+## The real global affixes stay on the three-tier prototype model: their tiers are not
+## silently renumbered or re-levelled (five-tier values are not designed yet). Only the
+## local weapon damage affixes of Weapon Base Damage 1.0 are five-tier.
 func test_existing_affixes_are_not_reinterpreted() -> void:
 	for affix: AffixDefinition in db.affixes.values():
+		if affix.scope == AffixDefinition.Scope.LOCAL:
+			continue
 		check_eq(affix.tier_model, AffixTiers.MODEL_THREE, "%s stays three-tier" % affix.id)
 		check_eq(affix.tiers.size(), 3, "%s keeps its three tiers" % affix.id)
 	var sharpened: AffixDefinition = db.affixes[&"sharpened"]
@@ -169,11 +172,15 @@ func test_local_and_global_scope_rules() -> void:
 	check(global.allows_slot(K.RING) and global.allows_slot(K.CHEST), "global fits rings and armour")
 
 
-## Every existing affix is GLOBAL, so stats, damage and defence work exactly as
-## before; a LOCAL affix is never offered while the local calculation is open.
+## Every pre-existing affix is GLOBAL, so stats, damage and defence work exactly as
+## before; a LOCAL affix is only offered on a weapon on the base damage model (none of
+## the craftable weapons is on it yet), never for a local target without a calculation.
 func test_existing_affixes_stay_global_and_local_is_not_rolled() -> void:
 	for affix: AffixDefinition in db.affixes.values():
-		check_eq(affix.scope, AffixDefinition.Scope.GLOBAL, "%s is global" % affix.id)
+		if affix.id in [&"tempered_blade", &"striking"]:
+			check_eq(affix.scope, AffixDefinition.Scope.LOCAL, "%s is local" % affix.id)
+		else:
+			check_eq(affix.scope, AffixDefinition.Scope.GLOBAL, "%s is global" % affix.id)
 	var local_db := GameDatabase.new()
 	local_db.load_all()
 	var local := _five_tier_affix()

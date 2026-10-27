@@ -8,10 +8,10 @@ extends Resource
 enum ValueKind { FLAT, PERCENT }
 ## Item Foundation 1.0: the four affix categories (metadata; no calculation reads it).
 enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
-## Item Foundation 1.0: GLOBAL works on the character (StatResolver, as every affix
-## so far); LOCAL would only change the item's own base value. Both share the regular
-## affix slots. LOCAL is metadata only for now: the local calculation is not decided,
-## so LOCAL affixes are never offered by AffixPool (docs/ITEM_FOUNDATION_1_0.md).
+## Item Foundation 1.0: GLOBAL works on the character (StatResolver); LOCAL only changes
+## the item's own base value. Both share the regular affix slots. Weapon Base Damage 1.0:
+## the only local target so far is the weapon base damage (stat Stats.WEAPON_DAMAGE,
+## WeaponDamage); AffixPool offers LOCAL affixes only on weapons on that model.
 enum Scope { GLOBAL, LOCAL }
 
 @export var id: StringName
@@ -33,6 +33,10 @@ enum Scope { GLOBAL, LOCAL }
 ## saved tier number is never reinterpreted when an affix moves to another model.
 @export var tier_model: int = AffixTiers.MODEL_THREE
 @export var tiers: Array[AffixTier] = []
+## LOCAL flat affix whose tier range is a percent share of the family reference curve
+## B_ref(item level) (Striking): the roll stores flat = B_ref x roll / 100 once and
+## never follows quality or character stats afterwards.
+@export var reference_share: bool = false
 
 
 func allows_slot(kind: ItemDefinition.SlotKind) -> bool:
@@ -67,16 +71,24 @@ func tier_of(entry: Dictionary) -> AffixTier:
 
 
 ## Saved affix entry for `tier` with a whole-number value rolled by `rng`.
-func roll(tier: AffixTier, rng: RandomNumberGenerator) -> Dictionary:
+## `reference` = B_ref of the item (WeaponDamage.reference_of), used by reference_share
+## affixes: the whole-number roll is then the percent share, kept as "share".
+func roll(tier: AffixTier, rng: RandomNumberGenerator, reference: float = 0.0) -> Dictionary:
 	var value := float(rng.randi_range(roundi(tier.min_value), roundi(tier.max_value)))
-	return {
+	var entry := {
 		"affix": String(id), "tier": tier.tier, "tier_model": tier_model, "stat": String(stat),
 		"flat": value if value_kind == ValueKind.FLAT else 0.0,
 		"percent": value if value_kind == ValueKind.PERCENT else 0.0,
 	}
+	if reference_share:
+		entry["share"] = value
+		entry["flat"] = reference * value / 100.0
+	return entry
 
 
 func describe_range(tier: AffixTier) -> String:
+	if reference_share:
+		return "+%d-%d%% of reference %s" % [roundi(tier.min_value), roundi(tier.max_value), Stats.display_name(stat)]
 	var suffix := " (x%)" if value_kind == ValueKind.PERCENT else ""
 	return "+%d-%d %s%s" % [roundi(tier.min_value), roundi(tier.max_value), Stats.display_name(stat), suffix]
 
@@ -95,6 +107,10 @@ func validate() -> PackedStringArray:
 				errors.append("affix %s: local affixes are not allowed on slot kind %d" % [id, kind])
 	elif scope != Scope.GLOBAL:
 		errors.append("affix %s: unknown scope %d" % [id, scope])
+	if reference_share and (scope != Scope.LOCAL or value_kind != ValueKind.FLAT):
+		errors.append("affix %s: a reference share is a local flat value" % id)
+	if stat == Stats.WEAPON_DAMAGE and scope != Scope.LOCAL:
+		errors.append("affix %s: %s is item-local, never a global stat" % [id, stat])
 	if tiers.is_empty():
 		errors.append("affix %s: no tiers" % id)
 	if tier_model != AffixTiers.MODEL_THREE and tier_model != AffixTiers.MODEL_FIVE:

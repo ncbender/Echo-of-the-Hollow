@@ -27,7 +27,7 @@ func _ids(entries: Array[Dictionary]) -> Dictionary:
 
 func test_data_is_complete() -> void:
 	check_eq(db.materials.size(), 3, "three main materials")
-	check(db.affixes.size() >= 10 and db.affixes.size() <= 12, "10-12 affixes (%d)" % db.affixes.size())
+	check(db.affixes.size() >= 10 and db.affixes.size() <= 14, "10-14 affixes (%d)" % db.affixes.size())
 	for affix: AffixDefinition in db.affixes.values():
 		check(not affix.tags.is_empty() and affix.group != &"" and not affix.tiers.is_empty(), "%s complete" % affix.id)
 

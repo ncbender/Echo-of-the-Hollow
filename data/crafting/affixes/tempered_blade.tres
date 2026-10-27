@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_affix"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_tier"]
+
+[sub_resource type="Resource" id="Tier_5"]
+script = ExtResource("2_tier")
+tier = 5
+min_item_level = 1
+min_value = 3.0
+max_value = 5.0
+
+[sub_resource type="Resource" id="Tier_4"]
+script = ExtResource("2_tier")
+tier = 4
+min_item_level = 10
+min_value = 6.0
+max_value = 8.0
+
+[sub_resource type="Resource" id="Tier_3"]
+script = ExtResource("2_tier")
+tier = 3
+min_item_level = 25
+min_value = 9.0
+max_value = 12.0
+
+[sub_resource type="Resource" id="Tier_2"]
+script = ExtResource("2_tier")
+tier = 2
+min_item_level = 45
+min_value = 13.0
+max_value = 16.0
+
+[sub_resource type="Resource" id="Tier_1"]
+script = ExtResource("2_tier")
+tier = 1
+min_item_level = 70
+min_value = 17.0
+max_value = 20.0
+
+[resource]
+script = ExtResource("1_affix")
+id = &"tempered_blade"
+display_name = "Tempered Blade"
+scope = 1
+stat = &"weapon_damage"
+value_kind = 1
+tags = Array[StringName]([&"physical", &"attack"])
+group = &"local_weapon_damage_percent"
+allowed_slot_kinds = Array[int]([10, 11])
+tier_model = 5
+tiers = Array[ExtResource("2_tier")]([SubResource("Tier_5"), SubResource("Tier_4"), SubResource("Tier_3"), SubResource("Tier_2"), SubResource("Tier_1")])

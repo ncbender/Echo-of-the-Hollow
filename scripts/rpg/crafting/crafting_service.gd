@@ -52,7 +52,7 @@ static func execute(character: Character, request: CraftingRequest, rng: RandomN
 	var rolled := {}
 	if request.operation in CraftingOps.ROLLING:
 		var entry := AffixPool.pick(context.preview.outcomes, rng)
-		rolled = (entry.affix as AffixDefinition).roll(entry.tier, rng)
+		rolled = (entry.affix as AffixDefinition).roll(entry.tier, rng, WeaponDamage.reference_of(context.item, context.definition, character.database))
 	for cost in context.preview.costs:   # all checked in _prepare: cannot fail
 		character.inventory.remove_quantity(cost.item_id, cost.quantity)
 	result.message = _apply(context, rolled)

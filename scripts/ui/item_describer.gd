@@ -204,6 +204,9 @@ static func affix_text(db: GameDatabase, entry: Dictionary) -> String:
 	var number := StatModifier._number(value)
 	if affix == null:
 		return "+%s %s (fixed)" % [number, stat]
+	if affix.scope == AffixDefinition.Scope.LOCAL:   # changes this weapon's base only
+		var shown := "%s%%" % StatModifier._number(value) if affix.value_kind == AffixDefinition.ValueKind.PERCENT else "%.2f" % value
+		return "+%s %s (local)  ·  %s, tier %d" % [shown, stat, affix.display_name, int(entry.get("tier", 0))]
 	return "+%s %s  ·  %s, tier %d" % [number, stat, affix.display_name, int(entry.get("tier", 0))]
 
 

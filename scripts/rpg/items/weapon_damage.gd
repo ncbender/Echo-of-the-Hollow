@@ -24,13 +24,13 @@ static func of(item: ItemInstance, definition: ItemDefinition, db: GameDatabase)
 	var flat := 0.0
 	var percent := 0.0
 	for entry in item.affixes:
-		if is_local(entry, db):
+		if is_local(entry, db) and StringName(str(entry.get("stat", ""))) == Stats.WEAPON_DAMAGE:
 			flat += float(entry.get("flat", 0.0))
 			percent += float(entry.get("percent", 0.0))
 	return (definition.base_weapon_damage * ItemStats.quality_factor(item.quality) + flat) * (1.0 + percent / 100.0)
 
 
-## A rolled entry of a LOCAL weapon damage affix (never a character stat).
+## A rolled entry of a LOCAL affix: it only changes its item's base, never a character stat.
 static func is_local(entry: Dictionary, db: GameDatabase) -> bool:
 	var affix: AffixDefinition = db.affixes.get(StringName(str(entry.get("affix", ""))))
 	return affix != null and affix.scope == AffixDefinition.Scope.LOCAL
