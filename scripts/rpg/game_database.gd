@@ -274,6 +274,14 @@ func _validate_crafting() -> PackedStringArray:
 				errors.append("material %s: unknown essence affinity %s" % [material.id, essence_id])
 	for affix: AffixDefinition in affixes.values():
 		errors.append_array(affix.validate())
+	# Loot Foundation 1.0: generation affixes must exist and fit the item by the shared rules.
+	for item: ItemDefinition in items.values():
+		for affix_id in item.generation_affixes:
+			var affix: AffixDefinition = affixes.get(affix_id)
+			if affix == null or not affix.rollable or not affix.allows_slot(item.slot_kind) or not affix.fits_family(item, self):
+				errors.append("item %s: generation affix %s is unknown or not eligible" % [item.id, affix_id])
+	if rules != null and rules.crafting_tier_weights != null:
+		errors.append_array(rules.crafting_tier_weights.validate())
 	for essence: EssenceDefinition in essences.values():
 		if not items.has(essence.item_id) or essence.effect == null:
 			errors.append("essence %s needs an existing item and an effect" % essence.id)

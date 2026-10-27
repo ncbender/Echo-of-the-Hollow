@@ -70,6 +70,12 @@ const RARITY_COLORS := {
 ## Special potion: its timed buff (ConsumableService). Null for everything else.
 @export var potion_effect: PotionEffectDefinition
 
+@export_group("Loot")
+## Loot Foundation 1.0 (docs/LOOT_FOUNDATION_1_0.md): affix ids new instances may roll when
+## generated (ItemCreation.generate), still filtered by the shared rules of AffixRoller.
+## Empty = the item is not prepared for generation. Never used for Unique or Set items.
+@export var generation_affixes: Array[StringName] = []
+
 @export_group("Crafting")
 ## Crafting capabilities (null = not craftable). See docs/CRAFTING_DESIGN.md.
 @export var crafting: CraftingProfile
@@ -119,6 +125,8 @@ func validate() -> PackedStringArray:
 		errors.append("item %s: weapon without weapon_family_id" % id)
 	if base_weapon_damage < 0.0 or (base_weapon_damage > 0.0 and not is_weapon()):
 		errors.append("item %s: base_weapon_damage needs a weapon and must not be negative" % id)
+	if not generation_affixes.is_empty() and (not is_equippable() or rarity in [Rarity.UNIQUE, Rarity.SET]):
+		errors.append("item %s: only regular equipment can be prepared for generation" % id)
 	if crafting != null and base_item_level != 0:
 		errors.append("item %s: item level comes from its CraftingProfile (base_item_level must stay 0)" % id)
 	if base_weapon_damage > 0.0 and (creation_item_level() < 1 or creation_item_level() > WeaponDamage.MAX_ITEM_LEVEL):

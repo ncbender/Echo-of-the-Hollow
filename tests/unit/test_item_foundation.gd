@@ -41,7 +41,7 @@ func test_full_five_slot_item_has_no_free_slot() -> void:
 	definition.crafting = definition.crafting.duplicate() as CraftingProfile
 	definition.crafting.affix_slots = 5
 	var item := ItemInstance.create(&"forged_blade")
-	item.item_level = 30
+	item.item_level = 20   # inside the configured crafting tier weights (Loot Foundation 1.0)
 	check(not AffixPool.compute(item, definition, null, db).is_empty(), "free slots: pool offered")
 	for index in 5:
 		item.affixes.append({"affix": "x%d" % index, "tier": 3, "stat": "armor", "flat": 1.0, "percent": 0.0})
@@ -107,18 +107,13 @@ func test_five_tier_validation() -> void:
 	check(not unknown.validate().is_empty(), "unknown tier model rejected")
 
 
-## The real global affixes stay on the three-tier prototype model: their tiers are not
-## silently renumbered or re-levelled (five-tier values are not designed yet). Only the
-## local weapon damage affixes of Weapon Base Damage 1.0 are five-tier.
-func test_existing_affixes_are_not_reinterpreted() -> void:
+## Loot Foundation 1.0: every affix definition is on the five-tier model (the approved
+## values per tier are checked in test_loot_foundation); the three-tier model survives
+## only as the marker of old saved rolls.
+func test_every_affix_is_five_tier() -> void:
 	for affix: AffixDefinition in db.affixes.values():
-		if affix.scope == AffixDefinition.Scope.LOCAL:
-			continue
-		check_eq(affix.tier_model, AffixTiers.MODEL_THREE, "%s stays three-tier" % affix.id)
-		check_eq(affix.tiers.size(), 3, "%s keeps its three tiers" % affix.id)
-	var sharpened: AffixDefinition = db.affixes[&"sharpened"]
-	check_eq(sharpened.get_tier(1).min_item_level, 20, "sharpened T1 still from ilvl 20")
-	check_eq(sharpened.get_tier(1).max_value, 18.0, "sharpened T1 values unchanged")
+		check_eq(affix.tier_model, AffixTiers.MODEL_FIVE, "%s is five-tier" % affix.id)
+		check_eq(affix.tiers.size(), AffixTiers.COUNT, "%s has five tiers" % affix.id)
 
 
 func test_rolls_carry_their_tier_model() -> void:
@@ -129,29 +124,40 @@ func test_rolls_carry_their_tier_model() -> void:
 	check_eq(entry.get("tier_model"), AffixTiers.MODEL_FIVE, "five-tier roll stamped")
 	check_eq(five.tier_of(entry), five.get_tier(2), "tier found in its own model")
 	var sharpened: AffixDefinition = db.affixes[&"sharpened"]
-	var old := sharpened.roll(sharpened.get_tier(1), rng)
-	check_eq(old.get("tier_model"), AffixTiers.MODEL_THREE, "three-tier roll stamped")
-	check_eq(five.tier_of(old), null, "a three-tier T1 is never read as five-tier T1")
+	check_eq(sharpened.roll(sharpened.get_tier(1), rng).get("tier_model"), AffixTiers.MODEL_FIVE, "real affixes roll five-tier")
+	var old := {"affix": "sharpened", "tier": 1, "tier_model": AffixTiers.MODEL_THREE, "stat": "physical_damage", "flat": 15.0, "percent": 0.0}
+	check_eq(sharpened.tier_of(old), null, "a saved three-tier T1 is never read as five-tier T1")
 	check_eq(sharpened.tier_of({"affix": "sharpened", "tier": 1}), null, "unknown model: no tier")
 	var saved := ItemInstance.from_dict(JSON.parse_string(JSON.stringify({"id": "a", "def": "forged_blade", "qty": 1, "affixes": [entry]})))
 	check_eq(typeof(saved.affixes[0].tier_model), TYPE_INT, "tier model restored as int after JSON")
 
 
-func test_pool_follows_five_tier_thresholds() -> void:
-	var local_db := GameDatabase.new()
-	local_db.load_all()
-	local_db.affixes = {&"test_five": _five_tier_affix()}
-	var definition := local_db.get_item(&"forged_blade").duplicate() as ItemDefinition
-	definition.slot_kind = ItemDefinition.SlotKind.CHEST
+## Synthetic table with every reachable tier at weight 1 (test values, not designed weights).
+static func _all_tier_weights() -> AffixTierWeights:
+	var weights := AffixTierWeights.new()
+	var starts := [1, 10, 25, 45, 70, WeaponDamage.MAX_ITEM_LEVEL + 1]
+	for index in 5:
+		var band := {"min_level": starts[index], "max_level": starts[index + 1] - 1, "weights": {}}
+		for tier in range(5, 4 - index, -1):
+			band.weights[tier] = 1.0
+		weights.bands.append(band)
+	return weights
+
+
+func test_tier_draw_follows_five_tier_thresholds() -> void:
+	var affix := _five_tier_affix()
+	var weights := _all_tier_weights()
+	check(weights.validate().is_empty(), "synthetic table valid: %s" % [weights.validate()])
 	for level: int in [1, 10, 25, 45, 70]:
-		var item := ItemInstance.create(&"forged_blade")
-		item.item_level = level
 		var tiers := []
-		for entry in AffixPool.compute(item, definition, null, local_db):
-			tiers.append((entry.tier as AffixTier).tier)
+		for option in AffixRoller.tier_options(affix, level, weights):
+			tiers.append((option.tier as AffixTier).tier)
 		tiers.sort()
 		check_eq(tiers.size(), 6 - AffixTiers.highest_tier(level), "ilvl %d: tiers %s" % [level, tiers])
-		check_eq(tiers[0], AffixTiers.highest_tier(level), "ilvl %d: best tier" % level)
+		check(not tiers.is_empty() and tiers[0] == AffixTiers.highest_tier(level), "ilvl %d: best tier" % level)
+	var item := ItemInstance.create(&"forged_blade")
+	item.item_level = 25
+	check(AffixPool.compute(item, db.get_item(&"forged_blade"), null, db).is_empty(), "crafting pool: ilvl 25 not configured, nothing offered")
 
 
 func test_local_and_global_scope_rules() -> void:
@@ -173,11 +179,10 @@ func test_local_and_global_scope_rules() -> void:
 
 
 ## Every pre-existing affix is GLOBAL, so stats, damage and defence work exactly as
-## before; a LOCAL affix is only offered on a weapon on the base damage model (none of
-## the craftable weapons is on it yet), never for a local target without a calculation.
+## before; the crafting pool offers no LOCAL affix (loot generation does, Loot Foundation 1.0).
 func test_existing_affixes_stay_global_and_local_is_not_rolled() -> void:
 	for affix: AffixDefinition in db.affixes.values():
-		if affix.id in [&"tempered_blade", &"striking"]:
+		if affix.id in [&"tempered_blade", &"striking", &"armored"]:
 			check_eq(affix.scope, AffixDefinition.Scope.LOCAL, "%s is local" % affix.id)
 		else:
 			check_eq(affix.scope, AffixDefinition.Scope.GLOBAL, "%s is global" % affix.id)
@@ -188,7 +193,7 @@ func test_existing_affixes_stay_global_and_local_is_not_rolled() -> void:
 	local.allowed_slot_kinds = [ItemDefinition.SlotKind.ONE_HAND_WEAPON] as Array[ItemDefinition.SlotKind]
 	local_db.affixes[local.id] = local
 	var item := ItemInstance.create(&"forged_blade")
-	item.item_level = 70
+	item.item_level = 12
 	var pool := AffixPool.by_affix(AffixPool.compute(item, local_db.get_item(&"forged_blade"), null, local_db))
 	check(not pool.has(&"test_five"), "local affix not rollable yet")
 	check_eq(pool.size(), 11, "the eleven global weapon affixes are offered as before")

@@ -188,7 +188,7 @@ func test_v10_save_marks_three_tier_affixes() -> void:
 	check_eq(loaded.affixes[1].get("flat"), 3.0, "legacy value kept")
 	var in_stash := result.character.stash.find(stored.instance_id)
 	check(in_stash != null and in_stash.affixes[0].get("tier_model") == AffixTiers.MODEL_THREE, "stash affixes marked too")
-	check(db.affixes[&"sharpened"].tier_of(loaded.affixes[0]) != null, "three-tier entry resolves in the three-tier affix")
+	check(db.affixes[&"sharpened"].tier_of(loaded.affixes[0]) == null, "Loot Foundation 1.0: a three-tier entry keeps its value but is never read as a five-tier tier")
 	check_eq(SaveSystem.save_to(result.character, path), OK, "re-saved")
 	var envelope: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
 	check_eq(int(envelope.version), SaveSystem.VERSION, "written in the current version")

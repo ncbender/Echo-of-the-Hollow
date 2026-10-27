@@ -6,7 +6,9 @@ extends RefCounted
 
 ## Tier model ids stored in every rolled affix entry ("tier_model"): a tier number
 ## means something different in each model, so it is never read across models.
-const MODEL_THREE := 3   # prototype model of Crafting Foundation 0.1 (T3 lowest, T1 highest)
+## Legacy marker only (Loot Foundation 1.0): saved rolls of the retired three-tier prototype
+## keep their values and this model id; no definition uses it any more.
+const MODEL_THREE := 3
 const MODEL_FIVE := 5    # Item Foundation 1.0 model (T5 lowest, T1 highest)
 
 const COUNT := 5

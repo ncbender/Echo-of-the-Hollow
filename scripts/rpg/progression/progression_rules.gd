@@ -78,6 +78,11 @@ extends Resource
 ## items are never salvaged.
 @export var salvage_return_percent: PackedVector2Array = PackedVector2Array([Vector2(20, 30), Vector2(20, 30), Vector2(25, 35), Vector2(25, 35), Vector2(30, 40)])
 
+@export_group("Crafting")
+## Loot Foundation 1.0: affix tier draw of the crafting pool (AffixPool). Uses the approved early
+## Hollowwood table (item level 1-24); higher item levels are not configured (no tier is drawn).
+@export var crafting_tier_weights: AffixTierWeights
+
 @export_group("Class XP")
 ## Class XP for an accepted hit on a non-training target.
 @export var class_xp_per_hit: int = 1

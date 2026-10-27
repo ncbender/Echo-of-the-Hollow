@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="AffixDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_affix"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_tier"]
+
+[sub_resource type="Resource" id="Tier_5"]
+script = ExtResource("2_tier")
+tier = 5
+min_item_level = 1
+min_value = 3.0
+max_value = 5.0
+
+[sub_resource type="Resource" id="Tier_4"]
+script = ExtResource("2_tier")
+tier = 4
+min_item_level = 10
+min_value = 6.0
+max_value = 9.0
+
+[sub_resource type="Resource" id="Tier_3"]
+script = ExtResource("2_tier")
+tier = 3
+min_item_level = 25
+min_value = 10.0
+max_value = 13.0
+
+[sub_resource type="Resource" id="Tier_2"]
+script = ExtResource("2_tier")
+tier = 2
+min_item_level = 45
+min_value = 14.0
+max_value = 18.0
+
+[sub_resource type="Resource" id="Tier_1"]
+script = ExtResource("2_tier")
+tier = 1
+min_item_level = 70
+min_value = 19.0
+max_value = 24.0
+
+[resource]
+script = ExtResource("1_affix")
+id = &"armored"
+display_name = "Armored"
+category = 1
+scope = 1
+stat = &"armor"
+value_kind = 1
+tags = Array[StringName]([&"defense"])
+group = &"local_armor_percent"
+allowed_slot_kinds = Array[int]([1, 2, 3, 4, 5, 6, 7, 8, 9])
+tier_model = 5
+tiers = Array[ExtResource("2_tier")]([SubResource("Tier_5"), SubResource("Tier_4"), SubResource("Tier_3"), SubResource("Tier_2"), SubResource("Tier_1")])
+rollable = false

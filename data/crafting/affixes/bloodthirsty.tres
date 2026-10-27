@@ -1,29 +1,45 @@
 [gd_resource type="Resource" script_class="AffixDefinition" format=3]
 
-[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_1f3qf"]
-[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_oosns"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_definition.gd" id="1_affix"]
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier.gd" id="2_tier"]
 
-[sub_resource type="Resource" id="Resource_rnf6d"]
-script = ExtResource("2_oosns")
-tier = 3
+[sub_resource type="Resource" id="Tier_5"]
+script = ExtResource("2_tier")
+tier = 5
+min_item_level = 1
+min_value = 1.0
+max_value = 1.0
 
-[sub_resource type="Resource" id="Resource_4l60f"]
-script = ExtResource("2_oosns")
-tier = 2
+[sub_resource type="Resource" id="Tier_4"]
+script = ExtResource("2_tier")
+tier = 4
 min_item_level = 10
+min_value = 1.0
+max_value = 1.0
+
+[sub_resource type="Resource" id="Tier_3"]
+script = ExtResource("2_tier")
+tier = 3
+min_item_level = 25
 min_value = 2.0
 max_value = 2.0
-weight = 60.0
 
-[sub_resource type="Resource" id="Resource_ycvac"]
-script = ExtResource("2_oosns")
-min_item_level = 20
+[sub_resource type="Resource" id="Tier_2"]
+script = ExtResource("2_tier")
+tier = 2
+min_item_level = 45
+min_value = 2.0
+max_value = 2.0
+
+[sub_resource type="Resource" id="Tier_1"]
+script = ExtResource("2_tier")
+tier = 1
+min_item_level = 70
 min_value = 3.0
-max_value = 4.0
-weight = 25.0
+max_value = 3.0
 
 [resource]
-script = ExtResource("1_1f3qf")
+script = ExtResource("1_affix")
 id = &"bloodthirsty"
 display_name = "Bloodthirsty"
 category = 1
@@ -32,4 +48,6 @@ tags = Array[StringName]([&"blood", &"life", &"physical"])
 group = &"life_on_hit"
 exclusion_group = &"element_core"
 allowed_slot_kinds = Array[int]([10, 11])
-tiers = Array[ExtResource("2_oosns")]([SubResource("Resource_rnf6d"), SubResource("Resource_4l60f"), SubResource("Resource_ycvac")])
+weight = 80.0
+tier_model = 5
+tiers = Array[ExtResource("2_tier")]([SubResource("Tier_5"), SubResource("Tier_4"), SubResource("Tier_3"), SubResource("Tier_2"), SubResource("Tier_1")])

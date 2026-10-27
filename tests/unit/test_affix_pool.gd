@@ -27,7 +27,7 @@ func _ids(entries: Array[Dictionary]) -> Dictionary:
 
 func test_data_is_complete() -> void:
 	check_eq(db.materials.size(), 3, "three main materials")
-	check(db.affixes.size() >= 10 and db.affixes.size() <= 14, "10-14 affixes (%d)" % db.affixes.size())
+	check_eq(db.affixes.size(), 15, "12 global + striking, tempered blade, armored (%d)" % db.affixes.size())
 	for affix: AffixDefinition in db.affixes.values():
 		check(not affix.tags.is_empty() and affix.group != &"" and not affix.tiers.is_empty(), "%s complete" % affix.id)
 
@@ -48,9 +48,10 @@ func test_tiers_follow_item_level() -> void:
 				found.append((entry.tier as AffixTier).tier)
 		found.sort()
 		return found
-	check_eq(tiers_at.call(1), [3], "ilvl 1: tier 3 only")
-	check_eq(tiers_at.call(12), [2, 3], "ilvl 12: tiers 3 and 2")
-	check_eq(tiers_at.call(20), [1, 2, 3], "ilvl 20: all tiers")
+	check_eq(tiers_at.call(1), [5], "ilvl 1: T5 only")
+	check_eq(tiers_at.call(12), [4, 5], "ilvl 12: T5 and T4")
+	check_eq(tiers_at.call(24), [4, 5], "ilvl 24: still T5 and T4 (early Hollowwood table)")
+	check_eq(tiers_at.call(25), [], "ilvl 25: tier weights not configured, nothing offered")
 
 
 func test_probabilities_are_exact_and_normalized() -> void:
@@ -59,24 +60,30 @@ func test_probabilities_are_exact_and_normalized() -> void:
 	for entry in neutral:
 		total += entry.probability
 	check_near(total, 1.0, 0.000001, "normalized")
-	check_near(_ids(neutral)[&"thundering"], 1.0 / 11.0, 0.000001, "no material: uniform 1/11")
-	# Storm Ore: shock x3, speed x2, crit x1.5 (keen, cruel), 7 others x1 -> total 15
+	# Loot Foundation 1.0 base weights: 8 standard affixes x 100, executioner 90,
+	# bloodthirsty 80, thundering 30 -> total 1000
+	check_near(_ids(neutral)[&"thundering"], 30.0 / 1000.0, 0.000001, "no material: thundering weight 30")
+	check_near(_ids(neutral)[&"executioner"], 90.0 / 1000.0, 0.000001, "executioner weight 90")
+	check_near(_ids(neutral)[&"bloodthirsty"], 80.0 / 1000.0, 0.000001, "bloodthirsty weight 80")
+	check_near(_ids(neutral)[&"vital"], 100.0 / 1000.0, 0.000001, "standard weight 100")
+	# Storm Ore: shock x3 (90), speed x2 (200), crit x1.5 (keen, cruel 150 each), rest x1 -> 1260
 	var storm := _ids(AffixPool.compute(_blade(), blade_def, _material(&"storm_ore"), db))
-	check_near(storm[&"thundering"], 3.0 / 15.0, 0.000001, "storm ore triples shock")
-	check_near(storm[&"swift"], 2.0 / 15.0, 0.000001, "storm ore doubles speed")
-	check_near(storm[&"cruel"], 1.5 / 15.0, 0.000001, "largest matching tag multiplier (crit)")
-	check_near(storm[&"sharpened"], 1.0 / 15.0, 0.000001, "unrelated affix unchanged")
+	check_near(storm[&"thundering"], 90.0 / 1260.0, 0.000001, "storm ore triples shock")
+	check_near(storm[&"swift"], 200.0 / 1260.0, 0.000001, "storm ore doubles speed")
+	check_near(storm[&"cruel"], 150.0 / 1260.0, 0.000001, "largest matching tag multiplier (crit)")
+	check_near(storm[&"sharpened"], 100.0 / 1260.0, 0.000001, "unrelated affix unchanged")
 	var split := AffixPool.compute(_blade(12), blade_def, null, db)
 	for entry in split:
-		if (entry.affix as AffixDefinition).id == &"sharpened" and (entry.tier as AffixTier).tier == 3:
-			check_near(entry.probability, (1.0 / 11.0) * 100.0 / 160.0, 0.000001, "tier share inside the affix")
+		if (entry.affix as AffixDefinition).id == &"sharpened":
+			var share := 0.75 if (entry.tier as AffixTier).tier == 5 else 0.25
+			check_near(entry.probability, 0.1 * share, 0.000001, "tier share inside the affix (T5 75 / T4 25)")
 
 
 func test_focus_catalyst_raises_tag_weight() -> void:
 	var pool := _ids(AffixPool.compute(_blade(), blade_def, null, db, &"crit", 4.0))
-	# keen and cruel x4: total = 4 + 4 + 9 = 17
-	check_near(pool[&"keen"], 4.0 / 17.0, 0.000001, "focused tag x4")
-	check_near(pool[&"vital"], 1.0 / 17.0, 0.000001, "others relatively rarer")
+	# keen and cruel x4: total = 400 + 400 + 800 (others) = 1600
+	check_near(pool[&"keen"], 400.0 / 1600.0, 0.000001, "focused tag x4")
+	check_near(pool[&"vital"], 100.0 / 1600.0, 0.000001, "others relatively rarer")
 	check(AffixPool.tags_of(AffixPool.compute(_blade(), blade_def, null, db)).has(&"crit"), "focus tags listed")
 
 

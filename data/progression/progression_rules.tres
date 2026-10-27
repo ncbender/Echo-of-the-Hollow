@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/progression/progression_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
 [ext_resource type="Resource" path="res://data/progression/talent_rules.tres" id="3_talents"]
+[ext_resource type="Resource" path="res://data/loot/hollowwood_early_tiers.tres" id="4_tiers"]
 
 [sub_resource type="Resource" id="Start_sword"]
 script = ExtResource("2_cost")
@@ -32,3 +33,4 @@ inventory_capacity = 40
 starting_items = Array[ExtResource("2_cost")]([SubResource("Start_sword"), SubResource("Start_greatsword"), SubResource("Start_cap"), SubResource("Start_coat"), SubResource("Start_potions")])
 class_xp_per_hit = 1
 talents = ExtResource("3_talents")
+crafting_tier_weights = ExtResource("4_tiers")

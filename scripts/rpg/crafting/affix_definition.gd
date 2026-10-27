@@ -1,7 +1,8 @@
 class_name AffixDefinition
 extends Resource
 ## A rollable item property. Rolled values are stored on the ItemInstance and
-## never re-rolled on load.
+## never re-rolled on load. Eligibility and rolls go through AffixRoller (Loot
+## Foundation 1.0, docs/LOOT_FOUNDATION_1_0.md), shared by loot and crafting.
 
 ## FLAT adds points to the stat (all current stats are point or percent-point
 ## stats, e.g. +6 "Physical Damage %"); PERCENT multiplies the stat total.
@@ -11,7 +12,7 @@ enum Category { OFFENSIVE, DEFENSIVE, UTILITY, RESOURCE }
 ## Item Foundation 1.0: GLOBAL works on the character (StatResolver); LOCAL only changes
 ## the item's own base value. Both share the regular affix slots. Weapon Base Damage 1.0:
 ## the only local target so far is the weapon base damage (stat Stats.WEAPON_DAMAGE,
-## WeaponDamage); AffixPool does not offer LOCAL affixes yet (activation not decided).
+## WeaponDamage). Loot generation offers LOCAL affixes; the crafting pool does not yet.
 enum Scope { GLOBAL, LOCAL }
 
 @export var id: StringName
@@ -27,12 +28,21 @@ enum Scope { GLOBAL, LOCAL }
 @export var exclusion_group: StringName
 ## Slot kinds this affix can roll on (empty = every equippable kind).
 @export var allowed_slot_kinds: Array[ItemDefinition.SlotKind] = []
+## Effect condition as an eligibility rule: the item's weapon family must own at least one
+## attack whose effect tags contain all of these (Executioner: heavy + finisher, the tags
+## CharacterStatModifier requires). Empty = no condition. Non-weapons never qualify.
+@export var required_attack_tags: Array[StringName] = []
 @export var min_item_level: int = 1
+## Base weight of the affix identity among the eligible affixes (Loot Foundation 1.0).
 @export var weight: float = 100.0
-## Tier model of `tiers` (AffixTiers.MODEL_THREE or MODEL_FIVE). Rolls store it, so a
-## saved tier number is never reinterpreted when an affix moves to another model.
-@export var tier_model: int = AffixTiers.MODEL_THREE
+## False = defined, but never drawn by any pool yet (Armored: local armour base missing).
+@export var rollable: bool = true
+## Tier model of `tiers`; every definition uses AffixTiers.MODEL_FIVE. Rolls store it, so a
+## saved tier number of another model (legacy MODEL_THREE rolls) is never reinterpreted.
+@export var tier_model: int = AffixTiers.MODEL_FIVE
 @export var tiers: Array[AffixTier] = []
+## Granularity of rolled values (1 = whole numbers; Keen rolls tenths of a percent point).
+@export var value_step: float = 1.0
 ## LOCAL flat affix whose tier range is a percent share of the family reference curve
 ## B_ref(item level) (Striking): the roll stores flat = B_ref x roll / 100 once and
 ## never follows quality or character stats afterwards.
@@ -43,6 +53,24 @@ func allows_slot(kind: ItemDefinition.SlotKind) -> bool:
 	if scope == Scope.LOCAL and not ItemDefinition.allows_local_affixes(kind):
 		return false
 	return allowed_slot_kinds.is_empty() or kind in allowed_slot_kinds
+
+
+## The effect condition (required_attack_tags) can apply to items of `definition`.
+func fits_family(definition: ItemDefinition, db: GameDatabase) -> bool:
+	if required_attack_tags.is_empty():
+		return true
+	var family: WeaponFamily = db.weapons.get(definition.weapon_family_id) if definition != null and definition.is_weapon() else null
+	if family == null:
+		return false
+	for attack in family.attacks:
+		if attack == null:
+			continue
+		var matches := true
+		for tag in required_attack_tags:
+			matches = matches and tag in attack.effect_tags
+		if matches:
+			return true
+	return false
 
 
 func tiers_for_level(item_level: int) -> Array[AffixTier]:
@@ -70,11 +98,12 @@ func tier_of(entry: Dictionary) -> AffixTier:
 	return get_tier(int(entry.get("tier", 0)))
 
 
-## Saved affix entry for `tier` with a whole-number value rolled by `rng`.
+## Saved affix entry for `tier` with a value rolled once by `rng` in steps of value_step.
 ## `reference` = B_ref of the item (WeaponDamage.reference_of), used by reference_share
 ## affixes: the whole-number roll is then the percent share, kept as "share".
 func roll(tier: AffixTier, rng: RandomNumberGenerator, reference: float = 0.0) -> Dictionary:
-	var value := float(rng.randi_range(roundi(tier.min_value), roundi(tier.max_value)))
+	var steps := roundi((tier.max_value - tier.min_value) / value_step)
+	var value := snappedf(tier.min_value + rng.randi_range(0, steps) * value_step, value_step)
 	var entry := {
 		"affix": String(id), "tier": tier.tier, "tier_model": tier_model, "stat": String(stat),
 		"flat": value if value_kind == ValueKind.FLAT else 0.0,
@@ -90,7 +119,11 @@ func describe_range(tier: AffixTier) -> String:
 	if reference_share:
 		return "+%d-%d%% of reference %s" % [roundi(tier.min_value), roundi(tier.max_value), Stats.display_name(stat)]
 	var suffix := " (x%)" if value_kind == ValueKind.PERCENT else ""
-	return "+%d-%d %s%s" % [roundi(tier.min_value), roundi(tier.max_value), Stats.display_name(stat), suffix]
+	return "+%s-%s %s%s" % [_number(tier.min_value), _number(tier.max_value), Stats.display_name(stat), suffix]
+
+
+func _number(value: float) -> String:
+	return str(roundi(value)) if is_equal_approx(value, roundf(value)) else str(snappedf(value, value_step))
 
 
 func validate() -> PackedStringArray:
@@ -107,18 +140,20 @@ func validate() -> PackedStringArray:
 				errors.append("affix %s: local affixes are not allowed on slot kind %d" % [id, kind])
 	elif scope != Scope.GLOBAL:
 		errors.append("affix %s: unknown scope %d" % [id, scope])
-	if reference_share and (scope != Scope.LOCAL or value_kind != ValueKind.FLAT):
-		errors.append("affix %s: a reference share is a local flat value" % id)
+	if reference_share and (scope != Scope.LOCAL or value_kind != ValueKind.FLAT or value_step != 1.0):
+		errors.append("affix %s: a reference share is a local flat whole-number value" % id)
 	if stat == Stats.WEAPON_DAMAGE and scope != Scope.LOCAL:
 		errors.append("affix %s: %s is item-local, never a global stat" % [id, stat])
+	if weight <= 0.0 or value_step <= 0.0:
+		errors.append("affix %s: weight and value_step must be positive" % id)
 	if tiers.is_empty():
 		errors.append("affix %s: no tiers" % id)
-	if tier_model != AffixTiers.MODEL_THREE and tier_model != AffixTiers.MODEL_FIVE:
-		errors.append("affix %s: unknown tier model %d" % [id, tier_model])
+	if tier_model != AffixTiers.MODEL_FIVE:
+		errors.append("affix %s: definitions use the five-tier model (has %d)" % [id, tier_model])
 		return errors
 	var seen := {}
 	for tier in tiers:
-		if tier == null or tier.min_value > tier.max_value or tier.weight <= 0.0:
+		if tier == null or tier.min_value > tier.max_value:
 			errors.append("affix %s: invalid tier" % id)
 		elif seen.has(tier.tier):
 			errors.append("affix %s: duplicate tier %d" % [id, tier.tier])
@@ -126,8 +161,14 @@ func validate() -> PackedStringArray:
 			errors.append("affix %s: tier %d outside the %d-tier model" % [id, tier.tier, tier_model])
 		else:
 			seen[tier.tier] = true
-			if tier_model == AffixTiers.MODEL_FIVE and tier.min_item_level != AffixTiers.min_item_level(tier.tier):
+			if tier.min_item_level != AffixTiers.min_item_level(tier.tier):
 				errors.append("affix %s: T%d must start at item level %d (has %d)" % [id, tier.tier, AffixTiers.min_item_level(tier.tier), tier.min_item_level])
-	if tier_model == AffixTiers.MODEL_FIVE and seen.size() != AffixTiers.COUNT and errors.is_empty():
+			if not _on_step(tier.min_value) or not _on_step(tier.max_value):
+				errors.append("affix %s: T%d range is not a multiple of value_step %s" % [id, tier.tier, value_step])
+	if seen.size() != AffixTiers.COUNT and errors.is_empty():
 		errors.append("affix %s: the five-tier model needs all tiers T5..T1" % id)
 	return errors
+
+
+func _on_step(value: float) -> bool:
+	return value_step > 0.0 and is_equal_approx(value / value_step, roundf(value / value_step))
