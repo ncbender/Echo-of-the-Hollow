@@ -32,7 +32,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 11) ✅
+## Format (Version 12) ✅
 ```json
 { "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
@@ -50,7 +50,7 @@ Payload (nur Quelldaten):
 | `id`, `name` | Charakter-ID, Name |
 | `classes` | aktive Klasse, pro Klasse unlocked/level/xp |
 | `mastery` | pro Familie level/xp |
-| `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, material, affixes, essences, sockets, evolution, progress, rev) |
+| `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, base_damage (v12, Waffen-Rohbasis), material, affixes, essences, sockets, evolution, progress, rev) |
 | `stash` | Haven-Lager (v6): `{"items": [...]}`, Iteminstanzen im selben Format wie `inventory`; die Kategorien werden nicht gespeichert, sondern aus der Definition abgeleitet (`docs/STASH.md`) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 11.
+Aktuell: Version 12.
 Weapon Mastery 1.4 / Combat Flow 1.5 ändert das Schema **nicht** (Mastery war schon pro Familie gespeichert,
 Angriffszustand/Puffer werden nie gespeichert). Eine Waffe in der Nebenhand aus älteren Ständen verwirft die
 Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test `save`).
@@ -129,6 +129,10 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
 - 10→11 (Item Foundation 1.0): jeder gewürfelte Affix (`affix` + `tier`) in `inventory`, `stash.items` und `orphaned_items`
   bekommt `"tier_model": 3` (Dreistufen-Prototyp, `AffixTiers.MODEL_THREE`). Werte, Legacy-Würfe (ohne `affix`) und alles
   andere bleiben. Eine Tier-Nummer wird nur im eigenen Modell gelesen (`AffixDefinition.tier_of`), nie als Fünf-Tier-Tier.
+- 11→12 (Weapon Base Damage 1.1): Waffen der zwölf Modell-Waffen (eingefrorene Tabelle `V12_WEAPON_MODELS`) ohne
+  `base_damage` bekommen einmalig `B_ref(gespeichertes ilvl) × freigegebene Basis / B_ref(Erzeugungslevel)`. Nichts wird
+  gewürfelt; vorhandene Werte, Affixe (auch globales Sharpened), Quality und alle anderen Items bleiben. Der Payload-Text
+  wird seit v12 mit voller Gleitkomma-Präzision geschrieben (`docs/WEAPON_BASE_DAMAGE_1_1.md`).
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.
