@@ -197,19 +197,24 @@ static func remaining_items(world: WorldState, map_id: StringName, node_id: Stri
 
 
 ## The fixed plan of a fresh cycle: total materials = yield_quantity (the
-## completion bonus on the last step, the rest spread over the steps; a step may
-## give nothing), total XP = gather_xp x level-band share, spread evenly.
+## completion bonus on the last step, one guaranteed unit on the first of two or
+## more steps, the rest spread over the steps; a step may give nothing), total XP = gather_xp x level-band share, spread evenly.
 static func make_plan(character: Character, map_id: StringName, node_id: StringName, definition: ResourceNodeDefinition) -> Dictionary:
 	var steps := maxi(1, definition.steps)
 	var total := maxi(0, definition.yield_quantity)
-	var bonus := clampi(definition.completion_bonus, 0, total)
+	# guaranteed main material (Gathering final guarantee), all inside the budget:
+	# the last step >= 1 (completion bonus), the first step >= 1 when there are
+	# two or more steps; the rest is spread at random (a step may give 0)
+	var bonus := clampi(maxi(definition.completion_bonus, 1), 0, total)
+	var first := 1 if steps >= 2 and total - bonus >= 1 else 0
 	var rng := RandomNumberGenerator.new()
 	var cycle := int(character.world.get_map_value(map_id, CYCLE_KEY % node_id, 0))
 	rng.seed = hash("gather:%s:%s:%d" % [map_id, node_id, cycle])
 	var items: Array = []
 	items.resize(steps)
 	items.fill(0)
-	for unit in total - bonus:
+	items[0] += first
+	for unit in total - bonus - first:
 		items[rng.randi_range(0, steps - 1)] += 1
 	items[steps - 1] += bonus
 	var xp_total := ProfessionService.gather_xp_budget(character, definition)

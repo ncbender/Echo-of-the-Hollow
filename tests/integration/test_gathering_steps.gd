@@ -219,3 +219,88 @@ func test_bonus_inside_the_budget_and_zero_budgets() -> void:
 	var zero_plan := ResourceGathering.make_plan(character, MAP, &"budget_xp", zero)
 	check((zero_plan.xp as Array).all(func(v: int) -> bool: return v == 0), "zero XP budget: no XP")
 	check(db.load_errors.is_empty(), "all data nodes: bonus inside the yield, steps >= 1 (%s)" % [db.load_errors])
+
+
+
+# --- final guarantee: first and last step give main material -----------------------
+
+func _node(yield_quantity: int, steps: int, bonus: int = 1) -> ResourceNodeDefinition:
+	var node := (db.resource_nodes[&"forest_rock"] as ResourceNodeDefinition).duplicate() as ResourceNodeDefinition
+	node.id = &"test_budget"
+	node.yield_quantity = yield_quantity
+	node.steps = steps
+	node.completion_bonus = bonus
+	return node
+
+
+func _plan_at_cycle(node_id: StringName, node: ResourceNodeDefinition, cycle: int) -> Dictionary:
+	character.world.set_map_value(MAP, ResourceGathering.CYCLE_KEY % node_id, cycle)
+	return ResourceGathering.make_plan(character, MAP, node_id, node)
+
+
+func test_every_data_node_guarantees_first_and_last_unit() -> void:
+	for node_id: StringName in NODES:
+		var node: ResourceNodeDefinition = db.resource_nodes[node_id]
+		check(node.budget_errors().is_empty(), "%s: budget holds the guarantees (%s)" % [node_id, node.budget_errors()])
+		for cycle in 25:   # many cycles = many different fixed plans
+			var plan := _plan_at_cycle(node_id, node, cycle)
+			var items: Array = plan.items
+			check_eq(_sum(items, node.steps), node.yield_quantity, "%s cycle %d: exactly the budget" % [node_id, cycle])
+			check(int(items[node.steps - 1]) >= 1, "%s cycle %d: last step >= 1 (completion bonus)" % [node_id, cycle])
+			if node.steps >= 2:
+				check(int(items[0]) >= 1, "%s cycle %d: first step >= 1" % [node_id, cycle])
+			check(items.all(func(v: int) -> bool: return v >= 0), "%s cycle %d: no negative step" % [node_id, cycle])
+
+
+func test_one_and_many_steps_and_minimum_budgets() -> void:
+	check_eq(ResourceGathering.make_plan(character, MAP, &"one", _node(1, 1)).items, [1], "one step, budget 1: the one guaranteed unit")
+	check_eq(ResourceGathering.make_plan(character, MAP, &"two", _node(2, 2)).items, [1, 1], "two steps, minimum budget 2: first and last")
+	check_eq(ResourceGathering.make_plan(character, MAP, &"five", _node(2, 5)).items, [1, 0, 0, 0, 1], "five steps, budget 2: the middle gives nothing")
+	for cycle in 25:
+		var plan := _plan_at_cycle(&"many", _node(5, 4), cycle)
+		check(int(plan.items[0]) >= 1 and int(plan.items[3]) >= 1 and _sum(plan.items, 4) == 5, "cycle %d: %s" % [cycle, plan.items])
+
+
+func test_invalid_budgets_are_reported_and_never_exceeded() -> void:
+	for case: Array in [[1, 2, 1], [0, 1, 1], [3, 3, 0], [2, 0, 1], [2, 2, 2]]:   # yield, steps, bonus
+		var node := _node(case[0], case[1], case[2])
+		check(not node.budget_errors().is_empty(), "yield %d / steps %d / bonus %d is reported as invalid" % case)
+		var plan := ResourceGathering.make_plan(character, MAP, &"bad", node)
+		check(_sum(plan.items, int(plan.steps)) <= maxi(0, case[0]), "never more than the budget (%s)" % [plan.items])
+		check((plan.items as Array).all(func(v: int) -> bool: return v >= 0), "never negative")
+	var tight := _node(1, 3)   # cannot hold first + last: the one unit stays the completion bonus
+	check_eq(ResourceGathering.make_plan(character, MAP, &"tight", tight).items, [0, 0, 1], "budget 1 on 3 steps: only the bonus, nothing invented")
+
+
+func test_interruption_after_the_first_step_keeps_the_plan() -> void:
+	var node: ResourceNodeDefinition = db.resource_nodes[&"iron_vein"]   # 4 steps, budget 2
+	var plan := ResourceGathering.make_plan(character, MAP, &"vein_i", node)
+	var first := ResourceGathering.complete_step(character, MAP, &"vein_i", node, 1000.0)
+	check(int(first.items) >= 1, "the first step already gives ore")
+	# interrupted here (no further step), later resumed
+	check_eq(ResourceGathering.remaining_items(character.world, MAP, &"vein_i", node), node.yield_quantity - int(first.items), "the rest of the budget waits")
+	var stored := ResourceGathering.progress(character.world, MAP, &"vein_i")
+	check_eq((stored.items as Array).map(func(v: Variant) -> int: return int(v)), plan.items, "the stored plan is the fixed one")
+	var total := int(first.items)
+	for i in node.steps - 1:
+		total += int(ResourceGathering.complete_step(character, MAP, &"vein_i", node, 2000.0).items)
+	check_eq(total, node.yield_quantity, "resumed: exactly the budget in total")
+
+
+func test_save_load_before_the_last_step_and_a_single_bonus() -> void:
+	var node: ResourceNodeDefinition = db.resource_nodes[&"oak_tree"]   # 3 steps
+	var plan := ResourceGathering.make_plan(character, MAP, &"oak_s", node)
+	for i in node.steps - 1:
+		ResourceGathering.complete_step(character, MAP, &"oak_s", node, 1000.0)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(PATH.get_base_dir()))
+	check_eq(SaveSystem.save_to(character, PATH), OK, "saved before the last step")
+	for attempt in 2:   # the same save loaded twice: the same last step both times, never a re-roll
+		var loaded := SaveSystem.load_from(PATH, db).character
+		var before := loaded.inventory.count(&"timber")
+		var last := ResourceGathering.complete_step(loaded, MAP, &"oak_s", node, 1000.0)
+		check_eq(int(last.items), int(plan.items[node.steps - 1]), "load %d: the planned last step" % attempt)
+		check(int(last.items) >= 1 and last.exhausted, "load %d: completion bonus and exhaustion" % attempt)
+		var again := ResourceGathering.complete_step(loaded, MAP, &"oak_s", node, 1001.0)
+		check(int(again.items) == 0 and String(again.error) != "", "load %d: the bonus is given once" % attempt)
+		check_eq(loaded.inventory.count(&"timber") - before, int(plan.items[node.steps - 1]), "load %d: nothing more" % attempt)
+		check(ResourceGathering.is_available(loaded.world, MAP, &"oak_s", 1000.0 + node.respawn_seconds), "load %d: respawns as before" % attempt)

@@ -233,10 +233,9 @@ func validate() -> PackedStringArray:
 				if not items.has(input.item_id):
 					errors.append("recipe %s needs unknown item %s" % [recipe.id, input.item_id])
 	for node_def: ResourceNodeDefinition in resource_nodes.values():
-		if not items.has(node_def.yield_item_id) or node_def.yield_quantity < 1:
+		if not items.has(node_def.yield_item_id):
 			errors.append("resource node %s has an invalid yield" % node_def.id)
-		if node_def.steps < 1 or node_def.completion_bonus < 0 or node_def.completion_bonus > node_def.yield_quantity:
-			errors.append("resource node %s: steps and completion bonus must fit its yield budget" % node_def.id)
+		errors.append_array(node_def.budget_errors())
 	for plot: BuildingPlotDefinition in plots.values():
 		if not maps.has(plot.map_id):
 			errors.append("plot %s on unknown map %s" % [plot.id, plot.map_id])

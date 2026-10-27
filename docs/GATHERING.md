@@ -112,3 +112,14 @@ weiteren Interaktionen aus, weil die Map nur Druck-Ereignisse ohne Echo auswerte
 ### Save
 - Kein Schemawechsel, die Version bleibt 10: `map_states` war schon frei belegbar (skalare Werte). Neu sind nur die Schlüssel `gather.*` und `gather_cycle.*`.
 - Alte Stände: Erschöpfte Knoten bleiben erschöpft. Teilzustände gab es vorher nicht; unberührte Knoten starten einen frischen Zyklus.
+
+### Final Guarantee (garantierte Ausbeute)
+- **Garantien**, alle innerhalb des einmal festgelegten Gesamtbudgets:
+  - Bei zwei oder mehr Schritten gibt der **erste** abgeschlossene Schritt ≥ 1 Hauptmaterial.
+  - Der **letzte** Schritt gibt ≥ 1 als Abschlussbonus.
+  - Ein Ein-Schritt-Vorkommen gibt seine garantierte Einheit in diesem einen Schritt.
+  - Die übrigen Einheiten werden zufällig verteilt; Zwischenschritte dürfen 0 geben.
+- **Prüfung:** `ResourceNodeDefinition.budget_errors()` (in der Datenbank-Validierung) verlangt Ertrag ≥ 1, Schritte ≥ 1 und `1 ≤ completion_bonus ≤ yield − (1 bei ≥ 2 Schritten)`.
+  - Alle 11 vorhandenen Vorkommen erfüllen das; keine Budget- oder Balanceänderung nötig.
+  - Ungültige Budgets werden gemeldet. Selbst dann erzeugt der Plan nie mehr als das Budget: Bei Budget 1 auf 3 Schritten bleibt die eine Einheit der Abschlussbonus.
+- **Bestehende Pläne:** Gespeicherte Teilzustände (aus 1.1) werden unverändert weitergeführt, nie neu gewürfelt. Ihr erster Schritt ist ohnehin schon abgeschlossen. Defekte Zustände geben weiter nie etwas.

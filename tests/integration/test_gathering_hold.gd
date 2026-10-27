@@ -186,6 +186,7 @@ func test_real_node_with_held_g() -> void:
 	var step_ticks := seconds_to_ticks(0.75)
 	await tick(held(), step_ticks)
 	check_eq(ResourceGathering.steps_done(character.world, &"", &"test_oak"), 1, "one chop done")
+	check(character.inventory.count(&"timber") >= start_timber + 1, "the first chop already gives timber")
 	await tick(held(), 20)
 	await tick(frame())   # released mid-chop
 	check_eq(stops.back(), Player.GATHER_RELEASED, "released")

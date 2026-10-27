@@ -30,3 +30,19 @@ enum Look { TREE, ROCK, ORE, HERB, CARCASS }
 @export var steps: int = 1
 ## Guaranteed units of yield_item_id on the last step - part of yield_quantity.
 @export var completion_bonus: int = 1
+
+
+## Budget rules of the gathering guarantee (empty = valid): a positive yield,
+## at least one step, a completion bonus of at least 1, and room in the yield
+## for the guaranteed first unit when there are two or more steps.
+func budget_errors() -> PackedStringArray:
+	var errors: PackedStringArray = []
+	if yield_quantity < 1:
+		errors.append("resource node %s: yield must be at least 1" % id)
+	if steps < 1:
+		errors.append("resource node %s: needs at least one step" % id)
+	var first := 1 if steps >= 2 else 0
+	if completion_bonus < 1 or completion_bonus + first > yield_quantity:
+		errors.append("resource node %s: yield %d cannot hold the completion bonus %d%s" % [id, yield_quantity, completion_bonus,
+			" and the guaranteed first unit" if first > 0 else ""])
+	return errors
