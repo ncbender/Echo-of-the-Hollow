@@ -15,6 +15,8 @@ var dash_pressed: bool = false
 ## Flowing Draw and RMB for the Precision Stance).
 var light_held: bool = false
 var heavy_held: bool = false
+## Level flag: G (interact) currently held - gathering continues only while held.
+var interact_held: bool = false
 ## Active skill slot (Q/E/R/F = 0..3) pressed this tick, -1 = none.
 var ability_slot: int = -1
 ## Shift (defensive): pressed this tick (edge) and currently held (level).

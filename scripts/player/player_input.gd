@@ -47,6 +47,7 @@ func poll(character: Node2D) -> InputFrame:
 	frame.aim_direction = to_mouse.normalized() if to_mouse.length() > AIM_DEADZONE else Vector2.ZERO
 	frame.light_held = Input.is_action_pressed(&"attack_light")
 	frame.heavy_held = Input.is_action_pressed(&"attack_heavy")
+	frame.interact_held = Input.is_action_pressed(&"interact")
 	frame.light_pressed = _pending.light_pressed
 	frame.heavy_pressed = _pending.heavy_pressed
 	frame.heavy_released = _pending.heavy_released

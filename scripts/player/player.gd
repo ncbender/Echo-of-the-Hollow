@@ -9,8 +9,26 @@ signal respawned
 signal skill_motion_finished(completed: bool)
 ## A drink (Hearth Flask, potion) ended: completed = its effect happened, false = interrupted.
 signal use_finished(completed: bool)
+## Gathering 1.1: one work step on a resource node ended (`result` from the target,
+## {"error", "exhausted", ...}); the whole action stopped (`reason`: GATHER_*).
+signal gather_step_completed(result: Dictionary)
+signal gather_stopped(reason: StringName)
 
 const DASH_BUFFER_ACTION := &"dash"
+## Why gathering stopped (gather_stopped).
+const GATHER_RELEASED := &"released"
+const GATHER_EXHAUSTED := &"exhausted"
+const GATHER_REFUSED := &"refused"
+const GATHER_MOVED := &"moved"
+const GATHER_DASH := &"dash"
+const GATHER_ATTACK := &"attack"
+const GATHER_SKILL := &"skill"
+const GATHER_DAMAGE := &"damage"
+const GATHER_STUN := &"stun"
+const GATHER_KNOCKBACK := &"knockback"
+const GATHER_DEATH := &"death"
+const GATHER_MENU := &"menu"
+const GATHER_RANGE := &"range"
 
 @export var input_buffer_time: float = 0.12
 ## Weapon family wielded at start when no character progression controls the
@@ -49,6 +67,11 @@ var consumable_handler: Callable
 var use_left: float = 0.0
 var use_move_multiplier: float = 1.0
 var _use_done: Callable
+## Gathering 1.1: the resource being worked (null = none) and seconds into the
+## running step. The target provides step_seconds(), in_range(player) and
+## complete_step() -> {"error": String, "exhausted": bool} (ResourceNode).
+var gather_target: Object
+var gather_time: float = 0.0
 ## True while a UI window or the pause menu holds the input (set by the map):
 ## combat inputs and hold states are cleared once, attack buttons are ignored
 ## meanwhile, and a key still held needs a new press afterwards.
@@ -111,11 +134,13 @@ func _physics_process(delta: float) -> void:
 
 
 ## UI open or paused: drops attack presses and holds of this frame; clears the
-## combat buffer and the bow hold state once when the block begins.
+## combat buffer and the bow hold state once when the block begins, and stops
+## gathering (a blocking menu interrupts it).
 func apply_input_block(frame: InputFrame) -> void:
 	var blocked: bool = input_blocker.is_valid() and input_blocker.call()
 	if blocked and not _input_was_blocked:
 		combat.clear_inputs()
+		stop_gather(GATHER_MENU)
 	_input_was_blocked = blocked
 	if blocked:
 		frame.light_pressed = false
@@ -171,6 +196,7 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 	if hitstop_left > 0.0:
 		_step_frozen(frame, delta)
 		return
+	_step_gather(frame, delta)
 	reaction.step(delta)
 	dash.step(delta)
 	_dash_buffer.step(delta)
@@ -266,12 +292,86 @@ func can_start_skill() -> bool:
 			and not defense.blocks_actions() and not is_using()
 
 
+# --- gathering (Gathering 1.1, docs/GATHERING.md) -------------------------------
+
+## Starts working `target` (called on the G press edge, never by holding G).
+## Only when the player could start another action (neutral, not dashing,
+## not drinking, not locked) and not already gathering.
+func begin_gather(target: Object) -> bool:
+	if target == null or is_gathering() or not can_start_skill():
+		return false
+	gather_target = target
+	gather_time = 0.0
+	return true
+
+
+func is_gathering() -> bool:
+	return gather_target != null
+
+
+## Ends the running gathering action at once; the partial step gives nothing,
+## completed steps stay. A new action needs a new G press.
+func stop_gather(reason: StringName) -> void:
+	if gather_target == null:
+		return
+	gather_target = null
+	gather_time = 0.0
+	gather_stopped.emit(reason)
+
+
+## G must stay held; moving, dashing, attacking or a skill press interrupt, as
+## does leaving the node's range. A full step completes the target's next step.
+func _step_gather(frame: InputFrame, delta: float) -> void:
+	if gather_target == null:
+		return
+	if not is_instance_valid(gather_target):
+		stop_gather(GATHER_RANGE)
+		return
+	var reason := &""
+	if not frame.interact_held:
+		reason = GATHER_RELEASED
+	elif frame.move.length_squared() > 0.0001:
+		reason = GATHER_MOVED
+	elif frame.dash_pressed:
+		reason = GATHER_DASH
+	elif frame.light_pressed or frame.heavy_pressed:
+		reason = GATHER_ATTACK
+	elif frame.ability_slot >= 0:
+		reason = GATHER_SKILL
+	elif health.is_dead():
+		reason = GATHER_DEATH
+	elif not gather_target.call(&"in_range", self):
+		reason = GATHER_RANGE
+	if reason != &"":
+		stop_gather(reason)
+		return
+	gather_time += delta
+	var step_seconds: float = gather_target.call(&"step_seconds")
+	if gather_time + 0.00001 < step_seconds:
+		return
+	gather_time = 0.0
+	var target := gather_target
+	var result: Dictionary = target.call(&"complete_step")
+	gather_step_completed.emit(result)
+	if String(result.get("error", "")) != "":
+		stop_gather(GATHER_REFUSED)
+	elif result.get("exhausted", false):
+		stop_gather(GATHER_EXHAUSTED)
+
+
+## 0..1 progress of the running step (views).
+func gather_progress() -> float:
+	if gather_target == null or not is_instance_valid(gather_target):
+		return 0.0
+	return clampf(gather_time / maxf(float(gather_target.call(&"step_seconds")), 0.001), 0.0, 1.0)
+
+
 # --- quick use: Hearth Flask and potions (Consumables 1.0) ------------------------
 
 ## Keys 1 / 2 ask the handler (progression bridge) whether a drink starts; the
 ## running drink completes after its time (then `_use_done` applies the effect).
 func _step_use(frame: InputFrame, delta: float) -> void:
-	if (frame.flask_pressed or frame.potion_pressed) and consumable_handler.is_valid() and can_start_skill():
+	if (frame.flask_pressed or frame.potion_pressed) and consumable_handler.is_valid() and can_start_skill() and not is_gathering():
 		consumable_handler.call(0 if frame.flask_pressed else 1)
 	if use_left <= 0.0:
 		return
@@ -353,10 +453,17 @@ func _start_dash(move: Vector2) -> void:
 ## current action is interrupted (HitReactionComponent, docs/COMBAT_DESIGN.md).
 func _on_hit_received(hit: HitData) -> void:
 	hit.damage *= incoming_damage_multiplier * (physical_damage_multiplier if hit.damage_type == &"physical" else magic_damage_multiplier)
+	var health_before := health.health
 	health.apply_hit(hit)
 	if health.is_dead():
 		return
+	if health.health < health_before:
+		stop_gather(GATHER_DAMAGE)   # real HP damage; a fully blocked / parried hit alone does not
 	var type := reaction.apply(hit, combat, dash)
+	if type >= HitReaction.Type.INTERRUPT:
+		stop_gather(GATHER_STUN)
+	if hit.knockback.length() * reaction.knockback_multiplier(type) > 0.01:
+		stop_gather(GATHER_KNOCKBACK)
 	if type >= HitReaction.Type.INTERRUPT:
 		skill_lock_left = 0.0
 		stop_skill_motion()
@@ -368,6 +475,7 @@ func _on_hit_received(hit: HitData) -> void:
 
 func _on_died() -> void:
 	combat.cancel(&"death")
+	stop_gather(GATHER_DEATH)
 	cancel_use()
 	defense.cancel()
 	stop_skill_motion()
