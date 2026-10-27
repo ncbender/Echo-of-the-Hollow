@@ -1,0 +1,874 @@
+{
+	"axe": {
+		"H": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_h",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_hh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_hhh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_hhl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_hl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_hlh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_hll",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_l",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_lh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_lhh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_lhl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_ll",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "axe_llh",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 14.0,
+			"hits_per_target": 1,
+			"id": "axe_lll",
+			"poise": 10.0,
+			"projectiles": 1
+		}
+	},
+	"bow": {
+		"L": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "bow_l",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "bow_ll",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"LLP": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "bow_llp",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"LP": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "bow_lp",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"LPL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "bow_lpl",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"P": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "bow_p",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"PL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "bow_pl",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"PLL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "bow_pll",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"PLLP": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "bow_pllp",
+			"poise": 37.0,
+			"projectiles": 1
+		},
+		"PLP": {
+			"damage": 32.0,
+			"hits_per_target": 1,
+			"id": "bow_plp",
+			"poise": 37.0,
+			"projectiles": 1
+		}
+	},
+	"dagger": {
+		"H": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_h",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_hh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 7.0,
+			"hits_per_target": 3,
+			"id": "dagger_hhh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_hhl",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_hl",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_hlh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_hll",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_l",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_lh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_lhh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_lhl",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_ll",
+			"poise": 6.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 21.0,
+			"hits_per_target": 1,
+			"id": "dagger_llh",
+			"poise": 24.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 9.0,
+			"hits_per_target": 1,
+			"id": "dagger_lll",
+			"poise": 6.0,
+			"projectiles": 1
+		}
+	},
+	"mace": {
+		"H": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_h",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_hh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_hhh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_hhl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_hl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_hlh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_hll",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_l",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_lh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_lhh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_lhl",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_ll",
+			"poise": 10.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 34.0,
+			"hits_per_target": 1,
+			"id": "mace_llh",
+			"poise": 40.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 15.0,
+			"hits_per_target": 1,
+			"id": "mace_lll",
+			"poise": 10.0,
+			"projectiles": 1
+		}
+	},
+	"one_handed_sword": {
+		"H": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "sword_heavy",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hh",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hhh",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hhl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hlh",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_hll",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "sword_light_1",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "sword_lh_thrust",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_lhh",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "one_handed_sword_lhl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "sword_light_2",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 26.0,
+			"hits_per_target": 1,
+			"id": "sword_llh_crush",
+			"poise": 30.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 12.0,
+			"hits_per_target": 1,
+			"id": "sword_light_3",
+			"poise": 8.0,
+			"projectiles": 1
+		}
+	},
+	"spear": {
+		"H": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_h",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_hh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_hhh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_hhl",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_hl",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_hlh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_hll",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_l",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_lh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_lhh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_lhl",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_ll",
+			"poise": 9.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 30.0,
+			"hits_per_target": 1,
+			"id": "spear_llh",
+			"poise": 35.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "spear_lll",
+			"poise": 9.0,
+			"projectiles": 1
+		}
+	},
+	"staff": {
+		"H": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_h",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_hh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_hhh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_hhl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_hl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_hlh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_hll",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_l",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_lh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_lhh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_lhl",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_ll",
+			"poise": 8.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 28.0,
+			"hits_per_target": 1,
+			"id": "staff_llh",
+			"poise": 32.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 13.0,
+			"hits_per_target": 1,
+			"id": "staff_lll",
+			"poise": 8.0,
+			"projectiles": 1
+		}
+	},
+	"two_handed_sword": {
+		"H": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "greatsword_heavy",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hh",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hhh",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hhl",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"HL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hl",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hlh",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_hll",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "greatsword_light_1",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "greatsword_lh_overhead",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_lhh",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "two_handed_sword_lhl",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"LL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "greatsword_light_2",
+			"poise": 16.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 48.0,
+			"hits_per_target": 1,
+			"id": "greatsword_llh_whirl",
+			"poise": 50.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 22.0,
+			"hits_per_target": 1,
+			"id": "greatsword_light_3",
+			"poise": 16.0,
+			"projectiles": 1
+		}
+	},
+	"wand": {
+		"H": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_h",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"HH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_hh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"HHH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_hhh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"HHL": {
+			"damage": 5.0,
+			"hits_per_target": 1,
+			"id": "wand_hhl",
+			"poise": 7.0,
+			"projectiles": 2
+		},
+		"HL": {
+			"damage": 10.0,
+			"hits_per_target": 1,
+			"id": "wand_hl",
+			"poise": 7.0,
+			"projectiles": 1
+		},
+		"HLH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_hlh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"HLL": {
+			"damage": 10.0,
+			"hits_per_target": 1,
+			"id": "wand_hll",
+			"poise": 7.0,
+			"projectiles": 1
+		},
+		"L": {
+			"damage": 10.0,
+			"hits_per_target": 1,
+			"id": "wand_l",
+			"poise": 7.0,
+			"projectiles": 1
+		},
+		"LH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_lh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"LHH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_lhh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"LHL": {
+			"damage": 5.0,
+			"hits_per_target": 1,
+			"id": "wand_lhl",
+			"poise": 7.0,
+			"projectiles": 2
+		},
+		"LL": {
+			"damage": 10.0,
+			"hits_per_target": 1,
+			"id": "wand_ll",
+			"poise": 7.0,
+			"projectiles": 1
+		},
+		"LLH": {
+			"damage": 23.0,
+			"hits_per_target": 1,
+			"id": "wand_llh",
+			"poise": 27.0,
+			"projectiles": 1
+		},
+		"LLL": {
+			"damage": 10.0,
+			"hits_per_target": 1,
+			"id": "wand_lll",
+			"poise": 7.0,
+			"projectiles": 1
+		}
+	}
+}
