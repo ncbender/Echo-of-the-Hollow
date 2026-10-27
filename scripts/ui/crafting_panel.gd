@@ -507,8 +507,8 @@ func _state_quality(item: ItemInstance, definition: ItemDefinition) -> void:
 		_state.add_child(_line("Maximum quality reached.", UiTheme.TEXT_SECONDARY))
 		return
 	_state.add_child(UiTheme.section("Base stats now -> after +1 quality"))
-	var now := 1.0 + item.quality * ItemStats.QUALITY_PERCENT_PER_POINT / 100.0
-	var after := 1.0 + (item.quality + 1) * ItemStats.QUALITY_PERCENT_PER_POINT / 100.0
+	var now := ItemStats.quality_factor(item.quality)
+	var after := ItemStats.quality_factor(item.quality + 1)
 	for modifier in definition.base_stats:
 		if modifier == null or not (profile.quality_stats.is_empty() or modifier.stat in profile.quality_stats):
 			continue

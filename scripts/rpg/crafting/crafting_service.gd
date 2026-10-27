@@ -369,8 +369,8 @@ static func _check_quality(context: Context) -> void:
 	if context.item.quality >= context.profile.max_quality:
 		context.preview.error = "Maximum quality (%d) reached." % context.profile.max_quality
 		return
-	context.preview.notes.append("Quality %d -> %d: base stats +%d %% (affixes and special effects unchanged)." % [
-		context.item.quality, context.item.quality + 1, roundi((context.item.quality + 1) * ItemStats.QUALITY_PERCENT_PER_POINT)])
+	context.preview.notes.append("Quality %d -> %d: base stats +%s %% (affixes and special effects unchanged)." % [
+		context.item.quality, context.item.quality + 1, ItemStats.quality_percent_text(context.item.quality + 1)])
 
 
 static func _apply_socket_open(context: Context, _rolled: Dictionary) -> String:

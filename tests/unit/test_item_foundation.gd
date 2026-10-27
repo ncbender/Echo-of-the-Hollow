@@ -185,3 +185,41 @@ func test_existing_affixes_stay_global_and_local_is_not_rolled() -> void:
 	var pool := AffixPool.by_affix(AffixPool.compute(item, local_db.get_item(&"forged_blade"), null, local_db))
 	check(not pool.has(&"test_five"), "local affix not rollable yet")
 	check_eq(pool.size(), 11, "the eleven global weapon affixes are offered as before")
+
+
+func test_quality_is_half_a_percent_per_point() -> void:
+	check_near(ItemStats.quality_factor(0), 1.0, 0.0001, "quality 0: no bonus")
+	check_near(ItemStats.quality_factor(1), 1.005, 0.0001, "+0.5 % per point")
+	check_near(ItemStats.quality_factor(20), 1.1, 0.0001, "quality 20: +10 %")
+	check_near(ItemStats.quality_factor(35), 1.1, 0.0001, "never above +10 %")
+	check_eq(ItemStats.quality_percent_text(1), "0.5", "display 0.5")
+	check_eq(ItemStats.quality_percent_text(20), "10", "display 10")
+	var too_high := _profile(0)
+	too_high.max_quality = 20
+	check(too_high.validate(&"t").is_empty(), "max quality 20 valid")
+
+
+## Quality only scales base stats that exist (eligible = profile.quality_stats or
+## all); affixes are untouched and items without base stats get nothing invented.
+func test_quality_scales_existing_base_stats_only() -> void:
+	var definition := db.get_item(&"forged_blade")
+	var blade := ItemInstance.create(&"forged_blade")
+	blade.quality = 20
+	blade.affixes.append({"affix": "sharpened", "tier": 3, "tier_model": 3, "stat": "physical_damage", "flat": 5.0, "percent": 0.0})
+	var totals := {}
+	for modifier in ItemStats.modifiers(blade, definition, db):
+		totals[modifier.stat] = totals.get(modifier.stat, 0.0) + modifier.flat
+	check_near(totals[Stats.PHYSICAL_DAMAGE], 6.0 * 1.1 + 5.0, 0.0001, "base 6 +10 %, affix 5 unchanged")
+	check_near(totals[Stats.POISE_DAMAGE], 4.0 * 1.1, 0.0001, "base 4 +10 %")
+	var oath := ItemInstance.create(&"crushing_oath")
+	oath.quality = 10
+	var oath_mods := ItemStats.modifiers(oath, db.get_item(&"crushing_oath"), db)
+	check_eq(oath_mods.size(), 1, "unique: only its one base stat, nothing added")
+	check_near(oath_mods[0].flat, 4.0 * 1.05, 0.0001, "unique base 4 +5 %")
+	var cap := ItemInstance.create(&"leather_cap")
+	cap.quality = 20   # no crafting profile: quality cannot reach it
+	var cap_def := db.get_item(&"leather_cap")
+	var cap_mods := ItemStats.modifiers(cap, cap_def, db)
+	check_eq(cap_mods.size(), cap_def.base_stats.size(), "no stats invented")
+	for index in cap_mods.size():
+		check_eq(cap_mods[index], cap_def.base_stats[index], "item without profile: base stat untouched")

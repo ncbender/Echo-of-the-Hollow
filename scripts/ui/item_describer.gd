@@ -28,7 +28,7 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 	result.append(_l("  ·  ".join(meta), "meta"))
 	var profile := definition.crafting
 	# 3 base stats (quality applies to them)
-	var factor := 1.0 + item.quality * ItemStats.QUALITY_PERCENT_PER_POINT / 100.0
+	var factor := ItemStats.quality_factor(item.quality)
 	var base: Array[Dictionary] = []
 	for modifier in definition.base_stats:
 		if modifier == null:
@@ -75,7 +75,7 @@ static func lines(character: Character, item: ItemInstance, compare: bool = true
 	_section(result, "Sockets", socket_lines)
 	# 7 quality
 	if profile != null and profile.max_quality > 0:
-		_section(result, "Quality", [_l("%d / %d  (+%d%% base stats)" % [item.quality, profile.max_quality, roundi(item.quality * ItemStats.QUALITY_PERCENT_PER_POINT)], "line")])
+		_section(result, "Quality", [_l("%d / %d  (+%s%% base stats)" % [item.quality, profile.max_quality, ItemStats.quality_percent_text(item.quality)], "line")])
 	# 8 unique core / set / evolution
 	var special: Array[Dictionary] = []
 	for effect in definition.effects:

@@ -90,7 +90,7 @@ func test_quality_scales_base_stats_only() -> void:
 	for modifier in ItemStats.modifiers(item, definition, db):
 		if modifier.stat == Stats.PHYSICAL_DAMAGE:
 			flat += modifier.flat
-	check_near(flat, 10.0 * 1.2 + 5.0, 0.001, "quality +20 % on the base value, affix unchanged")
+	check_near(flat, 10.0 * 1.1 + 5.0, 0.001, "quality 20 = +10 % on the base value, affix unchanged")
 	check_eq(definition.base_stats[0].flat, 10.0, "shared definition untouched")
 
 

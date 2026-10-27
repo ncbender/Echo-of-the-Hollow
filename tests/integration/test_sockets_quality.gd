@@ -107,7 +107,7 @@ func test_quality_upgrades_base_stats_only() -> void:
 	var result := _do(CraftingOps.QUALITY, blade)
 	check(not result.ok and "Maximum" in result.error, "capped at 20")
 	check_eq(character.inventory.count(&"forge_crystal"), 5, "20 crystals used")
-	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE) - before, 6.0 * 0.2, 0.001, "base 6 +20 %, affix 5 unchanged")
+	check_near(character.get_stat(Stats.PHYSICAL_DAMAGE) - before, 6.0 * 0.1, 0.001, "base 6 +10 % (0.5 % per point), affix 5 unchanged")
 	check_eq(blade.item_level, 12, "item level independent of quality")
 
 

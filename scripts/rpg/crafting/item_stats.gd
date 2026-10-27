@@ -6,8 +6,8 @@ extends RefCounted
 ## into StatModifiers (for StatResolver) and ItemEffects (for ItemEffectRunner),
 ## so every system sees the same values and nothing is applied twice.
 
-## Base stat improvement per quality point.
-const QUALITY_PERCENT_PER_POINT := 1.0
+## Base stat improvement per quality point (Item Foundation 1.0: 0.5 %, max +10 % at 20).
+const QUALITY_PERCENT_PER_POINT := 0.5
 ## Highest quality any item can reach.
 const MAX_QUALITY := 20
 
@@ -15,7 +15,7 @@ const MAX_QUALITY := 20
 static func modifiers(item: ItemInstance, definition: ItemDefinition, db: GameDatabase) -> Array[StatModifier]:
 	var result: Array[StatModifier] = []
 	var profile := definition.crafting
-	var factor := 1.0 + item.quality * QUALITY_PERCENT_PER_POINT / 100.0
+	var factor := quality_factor(item.quality)
 	for modifier in definition.base_stats:
 		if modifier == null:
 			continue
@@ -32,6 +32,17 @@ static func modifiers(item: ItemInstance, definition: ItemDefinition, db: GameDa
 	for part in _evolution_parts(item, definition, db):
 		result.append_array(part.modifiers)
 	return result
+
+
+## Multiplier quality applies to an eligible base stat (1.0 .. 1.1).
+static func quality_factor(quality: int) -> float:
+	return 1.0 + clampi(quality, 0, MAX_QUALITY) * QUALITY_PERCENT_PER_POINT / 100.0
+
+
+## Quality bonus in percent for display ("2.5").
+static func quality_percent_text(quality: int) -> String:
+	var percent := (quality_factor(quality) - 1.0) * 100.0
+	return str(roundi(percent)) if is_equal_approx(percent, roundf(percent)) else "%.1f" % percent
 
 
 ## Active effects as {"effect": ItemEffect, "key": String, "power": float}.

@@ -11,7 +11,7 @@ var definition_id: StringName
 var quantity: int = 1
 ## Affix tiers depend on it; independent of quality.
 var item_level: int = 1
-## 0..CraftingProfile.max_quality; improves defined base stats (+1 % per point).
+## 0..CraftingProfile.max_quality; improves defined base stats (ItemStats.quality_factor, +0.5 % per point).
 var quality: int = 0
 ## Main material chosen at imprint ("" = not imprinted yet).
 var material_id: StringName = &""
