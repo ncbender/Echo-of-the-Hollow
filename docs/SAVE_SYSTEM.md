@@ -32,7 +32,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 13) ✅
+## Format (Version 14) ✅
 ```json
 { "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
@@ -50,7 +50,7 @@ Payload (nur Quelldaten):
 | `id`, `name` | Charakter-ID, Name |
 | `classes` | aktive Klasse, pro Klasse unlocked/level/xp |
 | `mastery` | pro Familie level/xp |
-| `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, base_damage (v12, Waffen-Rohbasis), material, affixes, essences, sockets, evolution, progress, rev) |
+| `inventory` | Iteminstanzen (id, def, qty; falls gesetzt: ilvl, quality, base_damage (v12, Waffen-Rohbasis), rarity (v14, Instanz-Rarity als `ItemDefinition.Rarity`-Zahl), material, affixes, essences, sockets, evolution, progress, rev) |
 | `stash` | Haven-Lager (v6): `{"items": [...]}`, Iteminstanzen im selben Format wie `inventory`; die Kategorien werden nicht gespeichert, sondern aus der Definition abgeleitet (`docs/STASH.md`) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
@@ -139,6 +139,11 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
   `def == "echo_blade"`, gespeichertes Level genau 1 (`ilvl` fehlt oder 1) und kein `base_damage` → `ilvl` 15,
   `base_damage` 14,016; alle anderen Felder bleiben. Keine neue Version (bleibt 13). v13-Stände mit bereits zugewiesener
   Basis 12 sind nicht mehr unterscheidbar und bleiben unverändert.
+- 13→14 (Loot Foundation 1.0, `docs/LOOT_FOUNDATION_1_0.md`): jeder ausrüstbare Eintrag (`inventory`, `stash.items`,
+  `orphaned_items`) ohne `rarity` bekommt die Rarity seiner Definition aus der eingefrorenen Tabelle `V14_EQUIPMENT_RARITY`
+  (Unique/Set/Legendary bleiben, nichts wird gewürfelt oder aufgewertet). Stapel und unbekannte Items bleiben ohne `rarity`
+  und folgen ihrer Definition. Affixe (auch `tier_model: 3`), Level, Basis, Quality, Sockel, Essenzen, Evolution, Schutz und
+  Herkunft bleiben unverändert; Drei-Tier-Rolls behalten ihren Wert und werden nie als Fünf-Tier-Tier gelesen.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.

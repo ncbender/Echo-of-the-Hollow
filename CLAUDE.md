@@ -12,6 +12,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Gathering Rework 1.1 (Sammeln in Schritten mit gehaltenem G, feste Budgets, Teilzustand im Save).
 + Pre-Alpha Item Foundation 1.0 (max. 5 reguläre Affixe, Affix-Kategorien, Fünf-Tier-Modell, Local/Global, Quality 0,5 %; Save v11).
 + Weapon Base Damage 1.0–1.2 (Instanz-Basis bei Erzeugung, Angriffsmultiplikatoren, Forged V3, Spezialwaffen V2, Local-Affixe; Save v13).
++ Loot Foundation 1.0 (Instanz-Rarity, Fünf-Tier-Affixe, gemeinsamer Affix-Kern `AffixRoller`, `ItemCreation.generate`; Save v14).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -71,6 +72,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   Item Foundation 1.0 (`docs/ITEM_FOUNDATION_1_0.md`): max. `CraftingProfile.MAX_AFFIX_SLOTS` (5) reguläre Affixe, Essenzen
   getrennt (max. 2); Tier-Schwellen nur aus `AffixTiers`, Tier-Nummern nur im eigenen `tier_model` lesen (`tier_of`);
   Ringe/Amulette nur GLOBAL; Quality nur über `ItemStats.quality_factor`.
+  Loot Foundation 1.0 (`docs/LOOT_FOUNDATION_1_0.md`): Rarity gehört der Instanz (`ItemInstance.rarity`, Anzeige über
+  `effective_rarity`); Affix-Eligibility und -Rolls nur über `AffixRoller` (Identität, Tier, Wert getrennt); Tier-Gewichte nur als
+  explizite `AffixTierWeights`-Eingabe, nie Standardverteilung; neue Loot-Items nur über `ItemCreation.generate`.
 - Klassen (`docs/CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`): Talent-/Skill-/
   Preset-/Prolog-/Quest-Regeln nur in `TalentService`, `SkillBook`, `PresetService`, `PrologueService`,
   `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).
