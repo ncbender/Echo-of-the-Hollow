@@ -34,7 +34,7 @@ Alle sechs Phasen sind fertig.
 
 **Summe: 32 / 32 grün.** `--import` lief ohne Fehler und Warnungen.
 
-Die alte Prüfung „unterbricht alle Unterbrechungsarten“ deckt alle zehn Gründe ab: Loslassen, WASD, Dash, Angriff, Skill, HP-Schaden, Stun, Knockback, Tod, Menü – plus Reichweite.
+`test_every_interruption` deckt alle zehn Gründe ab: Loslassen, WASD, Dash, Angriff, Skill, HP-Schaden, Stun, Knockback, Tod, Menü – plus Reichweite.
 
 **Sichtprüfung:** isoliert mit `tests/playtest/gathering_visual_check.gd` (eigene Mini-Szene, kein Map- oder Story-Durchlauf). Vier Screenshots in `tests/output/gathering/`:
 - alle vier Berufe unberührt, angearbeitet und erschöpft
