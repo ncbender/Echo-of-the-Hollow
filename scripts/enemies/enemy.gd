@@ -17,6 +17,9 @@ enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
 ## defeated across map changes and saves. Normal enemies leave it empty and
 ## respawn whenever the map is loaded again.
 @export var persistent_id: StringName
+## Hollowwood Loot Integration 1.0: equipment roll of THIS placed enemy per real death
+## (EquipmentLoot, once; GameMap._spawn_drops). Null = fixed drops only.
+@export var equipment_loot: EquipmentLootTable
 
 var target: Node2D
 var state: State = State.CHASE

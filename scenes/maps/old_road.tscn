@@ -25,6 +25,7 @@
 [ext_resource type="Resource" path="res://data/world/resource_nodes/oak_tree.tres" id="23_oak"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="24_rock"]
 [ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="25_cost"]
+[ext_resource type="Resource" path="res://data/loot/hollowwood_wolves_equipment.tres" id="90_wolf_loot"]
 
 [sub_resource type="RectangleShape2D" id="Rect_band"]
 size = Vector2(520, 40)
@@ -464,6 +465,7 @@ config = ExtResource("19_husk")
 position = Vector2(-430, -60)
 script = ExtResource("11_enc")
 encounter_id = &"road_side_wolves"
+completion_loot = ExtResource("90_wolf_loot")
 trigger_radius = 90.0
 persistent = false
 

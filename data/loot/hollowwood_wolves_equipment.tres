@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EquipmentLootTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/equipment_loot_table.gd" id="1_table"]
+[ext_resource type="Resource" path="res://data/loot/hollowwood_early_tiers.tres" id="2_tiers"]
+
+[resource]
+script = ExtResource("1_table")
+id = &"hollowwood_wolves_equipment"
+chance = 0.15
+item_ids = Array[StringName]([&"steel_greatsword", &"oak_staff", &"oak_wand", &"hunting_bow", &"oak_shield"])
+rarity_weights = {
+0: 60.0,
+1: 40.0
+}
+source_level = 10
+level_spread = 2
+tier_weights = ExtResource("2_tiers")

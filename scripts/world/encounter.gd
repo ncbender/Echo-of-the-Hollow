@@ -19,6 +19,9 @@ signal cleared
 @export var bark_text: String
 ## Optional tutorial hint shown when the fight starts (once per character).
 @export_multiline var hint: String
+## Hollowwood Loot Integration 1.0: one equipment roll per completed encounter (never per
+## enemy), dropped where the last enemy fell. Null = no equipment drop.
+@export var completion_loot: EquipmentLootTable
 
 var character: Character
 var enemies: Array[Enemy] = []
@@ -26,6 +29,9 @@ var running: bool = false
 ## Cleared during this visit of the map (non-persistent encounters too).
 var done: bool = false
 var _remaining: int = 0
+## Enemies already counted as defeated in this run: a repeated signal never counts twice.
+var _defeated: Dictionary = {}
+var _last_position: Vector2
 
 
 func _ready() -> void:
@@ -62,6 +68,8 @@ func start() -> void:
 		return
 	running = true
 	enemies.clear()
+	_defeated.clear()
+	_last_position = global_position
 	for child in get_children():
 		var spawn := child as EncounterSpawn
 		if spawn == null:
@@ -84,7 +92,11 @@ func start() -> void:
 		_finish()
 
 
-func _on_enemy_defeated(_enemy: Enemy) -> void:
+func _on_enemy_defeated(enemy: Enemy) -> void:
+	if _defeated.has(enemy.get_instance_id()):
+		return
+	_defeated[enemy.get_instance_id()] = true
+	_last_position = enemy.global_position
 	_remaining -= 1
 	if _remaining <= 0 and running:
 		_finish()
@@ -95,5 +107,8 @@ func _finish() -> void:
 	done = true
 	if persistent:
 		character.world.set_flag(cleared_flag())
+	var map := get_tree().current_scene as GameMap
+	if completion_loot != null and map != null:
+		map.roll_equipment_drop(completion_loot, _last_position)   # once: _finish only runs while running
 	cleared.emit()
 	StoryService.notify(character, StringName("encounter:%s" % encounter_id))

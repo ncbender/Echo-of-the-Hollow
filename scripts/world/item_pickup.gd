@@ -13,6 +13,11 @@ signal picked_up(item_id: StringName, quantity: int)
 ## Empty for transient pickups (enemy drops).
 @export var persistent_id: StringName
 
+## Hollowwood Loot Integration 1.0: a generated instance (equipment drop) handed over exactly as
+## it is - level, rarity, base damage and affixes are never rolled again. Null = a plain
+## item_id/quantity pickup, created by Inventory.add_item.
+var item: ItemInstance
+
 var _taken: bool = false
 
 
@@ -37,7 +42,10 @@ func try_pick_up(player: Node) -> bool:
 	var bridge := player.get_node_or_null("ProgressionBridge") as PlayerProgressionBridge
 	if bridge == null or not bridge.is_bound():
 		return false
-	if bridge.character.inventory.add_item(item_id, quantity, ItemInstance.ORIGIN_FOUND).is_empty():
+	var inventory := bridge.character.inventory
+	var added := inventory.add_instance(item) == "" if item != null \
+		else not inventory.add_item(item_id, quantity, ItemInstance.ORIGIN_FOUND).is_empty()
+	if not added:
 		bridge.message.emit("Inventory full - %s stays on the ground" % _name())
 		return false
 	_taken = true
@@ -69,7 +77,8 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	var definition := GameDatabase.get_default().get_item(item_id)
-	var color := definition.rarity_color() if definition != null else Color.WHITE
+	var rarity: int = item.effective_rarity(definition) if item != null else (definition.rarity if definition != null else -1)
+	var color: Color = ItemDefinition.RARITY_COLORS.get(rarity, Color.WHITE)
 	var bob := sin(Time.get_ticks_msec() * 0.005) * 1.5
 	draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2.ZERO, 5.0, Color(0, 0, 0, 0.3))

@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/world/story_pickup.gd" id="15_pickup"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_config.tres" id="13_warden_cfg"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="14_warden_attacks"]
+[ext_resource type="Resource" path="res://data/loot/hollow_grunt_equipment.tres" id="90_grunt_loot"]
 
 [sub_resource type="CircleShape2D" id="Circle_pack"]
 radius = 18.0
@@ -219,12 +220,15 @@ y_sort_enabled = true
 
 [node name="GruntA" parent="Enemies" instance=ExtResource("8_grunt")]
 position = Vector2(90, -50)
+equipment_loot = ExtResource("90_grunt_loot")
 
 [node name="GruntB" parent="Enemies" instance=ExtResource("8_grunt")]
 position = Vector2(160, 60)
+equipment_loot = ExtResource("90_grunt_loot")
 
 [node name="GruntC" parent="Enemies" instance=ExtResource("8_grunt")]
 position = Vector2(230, -100)
+equipment_loot = ExtResource("90_grunt_loot")
 
 [node name="GroveWarden" parent="Enemies" instance=ExtResource("8_grunt")]
 position = Vector2(260, 120)

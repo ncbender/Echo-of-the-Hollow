@@ -26,6 +26,7 @@
 [ext_resource type="Resource" path="res://data/world/resource_nodes/rich_iron_vein.tres" id="32_rich_vein"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/duskleaf_cluster.tres" id="33_duskleaf"]
 [ext_resource type="Resource" path="res://data/world/resource_nodes/elk_remains.tres" id="34_elk"]
+[ext_resource type="Resource" path="res://data/loot/hollowwood_wolves_equipment.tres" id="90_wolf_loot"]
 
 [sub_resource type="RectangleShape2D" id="Rect_exit"]
 size = Vector2(56, 12)
@@ -327,6 +328,7 @@ config = ExtResource("20_wolf")
 position = Vector2(400, 0)
 script = ExtResource("13_enc")
 encounter_id = &"shrine_side_wolves"
+completion_loot = ExtResource("90_wolf_loot")
 trigger_radius = 90.0
 persistent = false
 

@@ -29,12 +29,15 @@ const DEBUG_CRAFTING_ITEMS := {
 
 var session: SessionState
 var bridge: PlayerProgressionBridge
+## Equipment drop rolls of this map (Hollowwood Loot Integration 1.0); tests may seed it.
+var loot_rng := RandomNumberGenerator.new()
 
 @onready var player: Player = $Player
 @onready var hud: GameHud = $GameHud
 
 
 func _ready() -> void:
+	loot_rng.randomize()
 	var audio := CombatAudio.new()   # combat sounds of this map (freed with it)
 	audio.name = "CombatAudio"
 	add_child(audio)
@@ -112,11 +115,32 @@ func spawn_pickup(item_id: StringName, quantity: int, at: Vector2) -> ItemPickup
 	return pickup
 
 
+## Lays a generated instance (equipment drop) into the world unchanged: the pickup hands
+## over exactly this instance, nothing is rolled again.
+func spawn_item_pickup(item: ItemInstance, at: Vector2) -> ItemPickup:
+	var pickup := ItemPickup.new()
+	pickup.item = item
+	pickup.item_id = item.definition_id
+	pickup.quantity = item.quantity
+	pickup.position = at
+	add_child.call_deferred(pickup)
+	return pickup
+
+
 func _spawn_drops(enemy: Enemy) -> void:
 	var offset := 0.0
 	for drop in enemy.config.drops:
 		spawn_pickup(drop.item_id, drop.quantity, enemy.global_position + Vector2(offset - 6.0, 6.0))
 		offset += 12.0
+	if enemy.equipment_loot != null and not enemy.has_meta(&"equipment_rolled"):
+		enemy.set_meta(&"equipment_rolled", true)   # at most one equipment roll per death
+		roll_equipment_drop(enemy.equipment_loot, enemy.global_position + Vector2(offset - 6.0, 6.0))
+
+
+## One equipment roll of a drop event (Hollowwood Loot Integration 1.0); the item lies at `at`.
+func roll_equipment_drop(table: EquipmentLootTable, at: Vector2) -> ItemPickup:
+	var item := EquipmentLoot.roll(table, GameDatabase.get_default() if session == null else session.get_character().database, loot_rng)
+	return spawn_item_pickup(item, at) if item != null else null
 
 
 ## Persistent pickups that were already taken (world flag) never come back.
