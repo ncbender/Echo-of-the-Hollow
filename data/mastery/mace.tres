@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MasteryTrack" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_track.gd" id="1_vc32g"]
+[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_unlock.gd" id="2_0gam8"]
+
+[resource]
+script = ExtResource("1_vc32g")
+family_id = &"mace"

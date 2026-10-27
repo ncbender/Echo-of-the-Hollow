@@ -8,7 +8,7 @@
 script = ExtResource("3_uuw5c")
 id = &"stone_golem_essence"
 display_name = "Essence of the Stone Golem"
-description = "Fully charged heavy finishers deal +60% poise damage."
+description = "Heavy finishers deal +60% poise damage."
 rarity = 3
 max_stack = 20
 tags = Array[StringName]([&"crafting", &"essence"])

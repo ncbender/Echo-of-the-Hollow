@@ -25,7 +25,7 @@ func _swing_light(f: InputFrame) -> void:
 
 
 func test_dummy_loses_health_per_hit() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var dummy := _spawn_dummy(Vector2(22, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -36,7 +36,7 @@ func test_dummy_loses_health_per_hit() -> void:
 
 
 func test_one_swing_hits_several_targets_once_each() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var upper := _spawn_dummy(Vector2(18, -14))
 	var lower := _spawn_dummy(Vector2(18, 14))
 	await wait_physics(2)
@@ -47,7 +47,7 @@ func test_one_swing_hits_several_targets_once_each() -> void:
 
 
 func test_poise_break_staggers_and_recovers() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var dummy := _spawn_dummy(Vector2(24, 0))
 	await wait_physics(2)
 	var broken := [false]
@@ -82,7 +82,7 @@ func test_dummy_dies_ignores_hits_and_revives() -> void:
 
 
 func test_dash_iframes_reject_hits() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	check(player.hurtbox.receive_hit(HitData.new()), "hit accepted when not dashing")
 	var f := frame(Vector2.RIGHT)
@@ -94,7 +94,7 @@ func test_dash_iframes_reject_hits() -> void:
 
 
 func test_modifiers_and_hit_event_hook() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(22, 0))
 	await wait_physics(2)
 	player.combat.modifiers.append(DoubleDamageModifier.new())
@@ -109,7 +109,7 @@ func test_modifiers_and_hit_event_hook() -> void:
 
 
 func test_hitstop_is_local_to_attacker_and_target() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var target := _spawn_dummy(Vector2(24, 0))
 	var bystander: Enemy = load("res://scenes/enemies/grunt.tscn").instantiate()
 	bystander.position = Vector2(-150, 0)
@@ -140,7 +140,7 @@ func test_hitstop_is_local_to_attacker_and_target() -> void:
 
 
 func test_hitstop_requests_do_not_stack() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	player.apply_hitstop(0.08)
 	player.apply_hitstop(0.08)
@@ -149,7 +149,7 @@ func test_hitstop_requests_do_not_stack() -> void:
 
 
 func test_inputs_during_hitstop_are_kept_and_combo_survives() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	await tick(light(f))

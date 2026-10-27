@@ -34,10 +34,8 @@ func matches(hit: HitData, runner: ItemEffectRunner) -> bool:
 			return false
 	if not any_tags.is_empty() and not any_tags.any(func(tag: StringName) -> bool: return tag in hit.tags):
 		return false
-	if full_charge_only:
-		var profile := hit.attack.charge_profile if hit.attack != null else null
-		if profile == null or profile.max_tier() <= 0 or hit.charge_tier < profile.max_tier():
-			return false
+	if full_charge_only and not hit.is_full_power():
+		return false
 	if requires_kill and not hit.killed:
 		return false
 	if requires_poise_break and not hit.broke_poise:

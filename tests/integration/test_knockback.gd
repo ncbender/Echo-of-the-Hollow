@@ -3,7 +3,7 @@ extends GameplayTestCase
 ## profiles, enemy resistance tiers, walls, no double application.
 
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
-const GREATSWORD: WeaponFamily = preload("res://data/weapons/two_handed_sword.tres")
+const GREATSWORD: WeaponFamily = LEGACY_GREATSWORD
 const GRUNT_CONFIG: EnemyConfig = preload("res://data/enemies/grunt_config.tres")
 const WARDEN_CONFIG: EnemyConfig = preload("res://data/enemies/grove_warden_config.tres")
 
@@ -33,7 +33,7 @@ func _settle(count: int = 60) -> void:
 
 ## Real player attack against a standard grunt; returns the enemy's displacement.
 func _attack_push(weapon: WeaponFamily, heavy: bool) -> float:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(weapon)
 	var enemy := _spawn_enemy(Vector2(24, 0))
 	await wait_physics(2)
@@ -79,7 +79,7 @@ func test_weapon_profiles_are_ordered() -> void:
 
 
 func test_resistance_tiers_scale_distance() -> void:
-	spawn_player(Vector2(-200, 0))
+	spawn_legacy_player(Vector2(-200, 0))
 	var expected := {-0.5: 30.0, 0.0: 20.0, 0.5: 10.0, 0.8: 4.0, 1.0: 0.0}
 	var enemies := {}
 	var y := -80.0
@@ -109,7 +109,7 @@ func test_data_tiers_grunt_standard_warden_boss() -> void:
 
 
 func test_one_hit_pushes_exactly_once() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var enemy := _spawn_enemy(Vector2(24, 0))
 	await wait_physics(2)
 	var start := enemy.global_position.x
@@ -123,7 +123,7 @@ func test_one_hit_pushes_exactly_once() -> void:
 
 
 func test_overlapping_hits_add_distances_not_speeds() -> void:
-	spawn_player(Vector2(-200, 0))
+	spawn_legacy_player(Vector2(-200, 0))
 	var enemy := _spawn_enemy(Vector2(0, 0))
 	await wait_physics(2)
 	enemy.hurtbox.receive_hit(_hit(Vector2(10, 0)))
@@ -134,7 +134,7 @@ func test_overlapping_hits_add_distances_not_speeds() -> void:
 
 
 func test_wall_absorbs_knockback_without_storing_it() -> void:
-	spawn_player(Vector2(-200, 0))
+	spawn_legacy_player(Vector2(-200, 0))
 	add_wall(Vector2(40, 0), Vector2(16, 120))   # face at x = 32
 	var enemy := _spawn_enemy(Vector2(16, 0))
 	await wait_physics(2)
@@ -150,7 +150,7 @@ func test_wall_absorbs_knockback_without_storing_it() -> void:
 
 
 func test_knockback_does_not_push_other_enemies() -> void:
-	spawn_player(Vector2(-200, 0))
+	spawn_legacy_player(Vector2(-200, 0))
 	var front := _spawn_enemy(Vector2(0, 0))
 	var behind := _spawn_enemy(Vector2(16, 0))
 	await wait_physics(2)
@@ -162,7 +162,7 @@ func test_knockback_does_not_push_other_enemies() -> void:
 
 
 func test_enemy_ai_does_not_cancel_the_push() -> void:
-	spawn_player(Vector2(-30, 0))
+	spawn_legacy_player(Vector2(-30, 0))
 	var enemy: Enemy = GRUNT_SCENE.instantiate()   # real chasing grunt
 	enemy.position = Vector2(0, 0)
 	enemy.target = player
@@ -178,7 +178,7 @@ func test_enemy_ai_does_not_cancel_the_push() -> void:
 
 
 func test_player_receives_enemy_knockback_once() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var hit := _hit(Vector2(-13, 0))
 	hit.reaction = HitReaction.Type.KNOCKBACK

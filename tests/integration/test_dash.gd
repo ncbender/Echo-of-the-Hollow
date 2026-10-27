@@ -75,7 +75,7 @@ func test_iframes_cover_first_180ms_only() -> void:
 # --- Dash direction: WASD first, else facing (mouse), UI/UX Polish 1.1 --------
 
 func _dash_with(move: Vector2, aim: Vector2) -> InputFrame:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var f := frame(move, aim)
 	await tick(dash_press(f))
@@ -144,7 +144,7 @@ func test_dash_direction_stays_fixed_when_aim_moves() -> void:
 
 
 func test_invalid_aim_uses_last_valid_facing() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	await tick(frame(Vector2.ZERO, Vector2.UP))   # last valid facing: up
 	var f := frame(Vector2.ZERO, Vector2.ZERO)   # no WASD, cursor on the character -> no aim
@@ -155,7 +155,7 @@ func test_invalid_aim_uses_last_valid_facing() -> void:
 
 
 func test_dash_cancels_light_attack() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var cancelled: Array[StringName] = []
 	player.combat.attack_cancelled.connect(func(_a: AttackDefinition, reason: StringName) -> void: cancelled.append(reason))
@@ -171,7 +171,7 @@ func test_dash_cancels_light_attack() -> void:
 
 
 func test_dash_cancels_heavy_charge() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var reasons: Array[StringName] = []
 	player.combat.charge_cancelled.connect(func(reason: StringName) -> void: reasons.append(reason))
@@ -188,7 +188,7 @@ func test_dash_cancels_heavy_charge() -> void:
 
 
 func test_player_without_charges_cannot_dash() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	player.dash.charges = 0
 	await tick(dash_press(frame(Vector2.ZERO, Vector2.RIGHT)))
@@ -197,7 +197,7 @@ func test_player_without_charges_cannot_dash() -> void:
 
 
 func test_dash_into_wall_stops_at_the_wall() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_wall(Vector2(60, 0), Vector2(16, 120))   # face at x = 52
 	await wait_physics(2)
 	var f := frame(Vector2.RIGHT, Vector2.LEFT)   # WASD towards the wall, mouse away
@@ -207,7 +207,7 @@ func test_dash_into_wall_stops_at_the_wall() -> void:
 
 
 func test_player_dash_buffered_but_not_infinite() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var f := frame(Vector2.RIGHT)
 	f.dash_pressed = true

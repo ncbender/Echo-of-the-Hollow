@@ -34,7 +34,7 @@ func test_enemy_data_is_valid() -> void:
 
 
 func test_enemy_chases_player() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(150, 0))
 	await _idle(2)
 	var start := enemy.global_position.distance_to(player.global_position)
@@ -44,7 +44,7 @@ func test_enemy_chases_player() -> void:
 
 
 func test_telegraph_precedes_damage() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(40, 0))
 	check(await _until_enemy_state(Enemy.State.TELEGRAPH), "enemy telegraphs")
 	var hp := player.health.health
@@ -60,7 +60,7 @@ func test_telegraph_precedes_damage() -> void:
 
 
 func test_dash_iframes_avoid_enemy_attack() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(40, 0))
 	check(await _until_enemy_state(Enemy.State.TELEGRAPH), "enemy telegraphs")
 	while enemy.combat.phase == CombatComponent.Phase.STARTUP and \
@@ -73,7 +73,7 @@ func test_dash_iframes_avoid_enemy_attack() -> void:
 
 
 func test_enemy_takes_damage_and_dies() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(24, 0))
 	enemy.config = enemy.config.duplicate()
 	enemy.config.attack_range = 0.0   # keep it passive for this test
@@ -96,7 +96,7 @@ func test_enemy_takes_damage_and_dies() -> void:
 
 
 func test_hit_reaction_knockback() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(24, 0))
 	enemy.config = enemy.config.duplicate()
 	enemy.config.attack_range = 0.0
@@ -115,7 +115,7 @@ func test_hit_reaction_knockback() -> void:
 
 
 func test_poise_break_cancels_telegraph_without_ghost_hit() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	_spawn_enemy(Vector2(30, 0))
 	check(await _until_enemy_state(Enemy.State.TELEGRAPH), "enemy telegraphs")
 	var hp := player.health.health

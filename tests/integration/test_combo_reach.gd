@@ -3,7 +3,7 @@ extends GameplayTestCase
 ## keep reaching a standard enemy without walking; finishers may push it away.
 
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
-const GREATSWORD: WeaponFamily = preload("res://data/weapons/two_handed_sword.tres")
+const GREATSWORD: WeaponFamily = LEGACY_GREATSWORD
 
 var hit_ids: Array[StringName] = []
 
@@ -45,7 +45,7 @@ func _chain(inputs: String, f: InputFrame) -> void:
 
 
 func _combo_against_standard_enemy(weapon: WeaponFamily, inputs: String, start_distance: float) -> Enemy:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(weapon)
 	var enemy := _spawn_enemy(Vector2(start_distance, 0))
 	await wait_physics(2)
@@ -85,7 +85,7 @@ func test_greatsword_lh_connects() -> void:
 
 
 func test_charged_heavy_hits_with_heavy_knockback() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var enemy := _spawn_enemy(Vector2(26, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -100,7 +100,7 @@ func test_charged_heavy_hits_with_heavy_knockback() -> void:
 
 
 func test_dash_cancel_then_new_combo_hits() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var enemy := _spawn_enemy(Vector2(24, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -122,7 +122,7 @@ func test_dash_cancel_then_new_combo_hits() -> void:
 
 
 func test_weapon_switch_changes_knockback_profile() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var enemy := _spawn_enemy(Vector2(30, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -135,7 +135,7 @@ func test_weapon_switch_changes_knockback_profile() -> void:
 
 
 func test_one_swing_pushes_two_enemies_once_each() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var upper := _spawn_enemy(Vector2(20, -12))
 	var lower := _spawn_enemy(Vector2(20, 12))
 	await wait_physics(2)
@@ -149,7 +149,7 @@ func test_one_swing_pushes_two_enemies_once_each() -> void:
 
 
 func test_standing_light_combos_kill_an_active_grunt() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	var enemy := _spawn_enemy(Vector2(26, 0), false)   # real AI: chases and attacks
 	await wait_physics(2)
 	var f := frame()

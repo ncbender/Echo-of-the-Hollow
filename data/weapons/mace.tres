@@ -1,0 +1,378 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_77rdy"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_82e43"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="3_0011l"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_b4yph"]
+
+[sub_resource type="Resource" id="Resource_o3kcl"]
+script = ExtResource("1_77rdy")
+id = &"mace_h"
+display_name = "Heavy Attack"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_06i2f"]
+script = ExtResource("1_77rdy")
+id = &"mace_l"
+display_name = "Quick Attack"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_3qp0m"]
+script = ExtResource("1_77rdy")
+id = &"mace_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_gafhm"]
+script = ExtResource("1_77rdy")
+id = &"mace_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_o5q50"]
+script = ExtResource("1_77rdy")
+id = &"mace_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_1ctmh"]
+script = ExtResource("1_77rdy")
+id = &"mace_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_w061l"]
+script = ExtResource("1_77rdy")
+id = &"mace_hhh"
+display_name = "Shatterpoint"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_7jqo3"]
+script = ExtResource("1_77rdy")
+id = &"mace_hhl"
+display_name = "Shatterfall"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_03mx5"]
+script = ExtResource("1_77rdy")
+id = &"mace_hlh"
+display_name = "Anvil Turn"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_80djg"]
+script = ExtResource("1_77rdy")
+id = &"mace_hll"
+display_name = "Hammer March"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+lunge_distance = 22.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_t187y"]
+script = ExtResource("1_77rdy")
+id = &"mace_lhh"
+display_name = "Crushing Follow-Through"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_lrxn5"]
+script = ExtResource("1_77rdy")
+id = &"mace_lhl"
+display_name = "Counterweight"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_uycjy"]
+script = ExtResource("1_77rdy")
+id = &"mace_llh"
+display_name = "Breaker Strike"
+weapon_family_id = &"mace"
+input_type = 1
+startup = 0.4
+active = 0.16
+recovery = 0.56
+damage = 34.0
+poise_damage = 40.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 120.0
+move_multiplier = 0.45
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.45
+active_move = 0.3
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_kmj71"]
+script = ExtResource("1_77rdy")
+id = &"mace_lll"
+display_name = "Iron Rhythm"
+weapon_family_id = &"mace"
+startup = 0.22
+active = 0.12
+recovery = 0.36
+damage = 15.0
+reach = 32.0
+arc_degrees = 110.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_0im2f"]
+script = ExtResource("2_82e43")
+inputs = "LLL"
+display_name = "Iron Rhythm"
+description = "L-L-L: Iron Rhythm."
+
+[sub_resource type="Resource" id="Resource_eh0wr"]
+script = ExtResource("2_82e43")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Breaker Strike"
+description = "L-L-H: Breaker Strike."
+
+[sub_resource type="Resource" id="Resource_cq3x2"]
+script = ExtResource("2_82e43")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Counterweight"
+description = "L-H-L: Counterweight."
+
+[sub_resource type="Resource" id="Resource_ymbca"]
+script = ExtResource("2_82e43")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Hammer March"
+description = "H-L-L: Hammer March."
+
+[sub_resource type="Resource" id="Resource_kyakd"]
+script = ExtResource("2_82e43")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Crushing Follow-Through"
+description = "L-H-H: Crushing Follow-Through."
+
+[sub_resource type="Resource" id="Resource_byot3"]
+script = ExtResource("2_82e43")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Anvil Turn"
+description = "H-L-H: Anvil Turn."
+
+[sub_resource type="Resource" id="Resource_5n4jc"]
+script = ExtResource("2_82e43")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Shatterfall"
+description = "H-H-L: Shatterfall."
+
+[sub_resource type="Resource" id="Resource_geroq"]
+script = ExtResource("2_82e43")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Shatterpoint"
+description = "H-H-H: Shatterpoint."
+
+[resource]
+script = ExtResource("4_b4yph")
+id = &"mace"
+display_name = "Mace / Hammer"
+root_light = &"mace_l"
+root_heavy = &"mace_h"
+attacks = Array[ExtResource("1_77rdy")]([SubResource("Resource_o3kcl"), SubResource("Resource_06i2f"), SubResource("Resource_3qp0m"), SubResource("Resource_gafhm"), SubResource("Resource_o5q50"), SubResource("Resource_1ctmh"), SubResource("Resource_w061l"), SubResource("Resource_7jqo3"), SubResource("Resource_03mx5"), SubResource("Resource_80djg"), SubResource("Resource_t187y"), SubResource("Resource_lrxn5"), SubResource("Resource_uycjy"), SubResource("Resource_kmj71")])
+combo_paths = Array[ExtResource("2_82e43")]([SubResource("Resource_0im2f"), SubResource("Resource_eh0wr"), SubResource("Resource_cq3x2"), SubResource("Resource_ymbca"), SubResource("Resource_kyakd"), SubResource("Resource_byot3"), SubResource("Resource_5n4jc"), SubResource("Resource_geroq")])
+display_color = Color(0.75, 0.75, 0.8, 1)
+visual_blade_length = 12.0
+defense_profile = ExtResource("3_0011l")

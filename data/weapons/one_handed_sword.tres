@@ -1,186 +1,379 @@
 [gd_resource type="Resource" script_class="WeaponFamily" format=3]
 
-[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
-[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
-[ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
-[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="4_defense"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_jlp7t"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_j8vgm"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="3_pf7cw"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_ms46t"]
 
-[sub_resource type="Resource" id="Charge_sword"]
-script = ExtResource("3_charge")
-tier_names = PackedStringArray("Normal", "Empowered", "Full")
-tier_thresholds = PackedFloat32Array(0.25, 0.7)
-damage_multipliers = PackedFloat32Array(1.0, 1.35, 1.9)
-poise_multipliers = PackedFloat32Array(1.0, 1.5, 2.5)
-reach_multipliers = PackedFloat32Array(1.0, 1.1, 1.25)
-hitstop_multipliers = PackedFloat32Array(1.0, 1.3, 1.8)
-move_multiplier = 0.55
-
-[sub_resource type="Resource" id="Attack_l1"]
-script = ExtResource("2_attack")
-id = &"sword_light_1"
-display_name = "Slash"
-weapon_family_id = &"one_handed_sword"
-input_type = 0
-startup = 0.08
-active = 0.08
-recovery = 0.22
-chain_delay = 0.0
-combo_window = 0.35
-damage = 12.0
-poise_damage = 8.0
-knockback = 6.0
-reach = 30.0
-arc_degrees = 110.0
-move_multiplier = 0.85
-lunge_distance = 6.0
-next_light = &"sword_light_2"
-next_heavy = &"sword_lh_thrust"
-dash_cancel_phases = 7
-
-[sub_resource type="Resource" id="Attack_l2"]
-script = ExtResource("2_attack")
-id = &"sword_light_2"
-display_name = "Backhand"
-weapon_family_id = &"one_handed_sword"
-input_type = 0
-startup = 0.07
-active = 0.08
-recovery = 0.22
-chain_delay = 0.0
-combo_window = 0.35
-damage = 12.0
-poise_damage = 8.0
-knockback = 6.0
-reach = 30.0
-arc_degrees = 120.0
-move_multiplier = 0.85
-lunge_distance = 12.0
-next_light = &"sword_light_3"
-next_heavy = &"sword_llh_crush"
-dash_cancel_phases = 7
-
-[sub_resource type="Resource" id="Attack_l3"]
-script = ExtResource("2_attack")
-id = &"sword_light_3"
-display_name = "Wide Sweep"
-weapon_family_id = &"one_handed_sword"
-input_type = 0
-startup = 0.14
-active = 0.12
-recovery = 0.34
-chain_delay = 0.08
-combo_window = 0.3
-damage = 20.0
-poise_damage = 22.0
-knockback = 10.0
-hitstop = 0.04
-reach = 36.0
-arc_degrees = 160.0
-move_multiplier = 0.85
-lunge_distance = 14.0
-next_light = &"sword_light_4_mastery"
-dash_cancel_phases = 7
-effect_tags = Array[StringName]([&"finisher"])
-
-[sub_resource type="Resource" id="Attack_l4"]
-script = ExtResource("2_attack")
-id = &"sword_light_4_mastery"
-display_name = "Riposte Spin (Mastery)"
-weapon_family_id = &"one_handed_sword"
-input_type = 0
-startup = 0.1
-active = 0.1
-recovery = 0.4
-chain_delay = 0.1
-combo_window = 0.25
-damage = 28.0
-poise_damage = 30.0
-knockback = 22.0
-hitstop = 0.05
-reach = 40.0
-arc_degrees = 180.0
-move_multiplier = 0.85
-lunge_distance = 22.0
-dash_cancel_phases = 7
-unlock_requirement = &"mastery.one_handed_sword.1"
-effect_tags = Array[StringName]([&"finisher", &"mastery"])
-
-[sub_resource type="Resource" id="Attack_heavy"]
-script = ExtResource("2_attack")
+[sub_resource type="Resource" id="Resource_3r1ys"]
+script = ExtResource("1_jlp7t")
 id = &"sword_heavy"
 display_name = "Heavy Cleave"
 weapon_family_id = &"one_handed_sword"
 input_type = 1
-startup = 0.16
-active = 0.1
-recovery = 0.4
-chain_delay = 0.12
-combo_window = 0.3
+startup = 0.27
+active = 0.14
+recovery = 0.44
 damage = 26.0
 poise_damage = 30.0
 knockback = 18.0
 hitstop = 0.06
 reach = 38.0
 arc_degrees = 130.0
-move_multiplier = 0.4
-lunge_distance = 8.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_sword")
+move_multiplier = 0.65
+dash_cancel_phases = 4
 effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
 
-[sub_resource type="Resource" id="Attack_lh"]
-script = ExtResource("2_attack")
+[sub_resource type="Resource" id="Resource_xa0st"]
+script = ExtResource("1_jlp7t")
+id = &"sword_light_1"
+display_name = "Slash"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_ou7n0"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_7y70f"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_0sy6h"]
+script = ExtResource("1_jlp7t")
 id = &"sword_lh_thrust"
 display_name = "Lunging Thrust"
 weapon_family_id = &"one_handed_sword"
 input_type = 1
-startup = 0.14
-active = 0.1
-recovery = 0.38
-chain_delay = 0.12
-combo_window = 0.3
-damage = 24.0
-poise_damage = 20.0
-knockback = 14.0
-hitstop = 0.05
-reach = 58.0
-arc_degrees = 36.0
-move_multiplier = 0.3
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
 lunge_distance = 36.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_sword")
-effect_tags = Array[StringName]([&"heavy", &"thrust"])
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
 
-[sub_resource type="Resource" id="Attack_llh"]
-script = ExtResource("2_attack")
-id = &"sword_llh_crush"
-display_name = "Crushing Arc"
+[sub_resource type="Resource" id="Resource_u8hmi"]
+script = ExtResource("1_jlp7t")
+id = &"sword_light_2"
+display_name = "Backhand"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+lunge_distance = 12.0
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_esh5t"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hhh"
+display_name = "Final Oath"
 weapon_family_id = &"one_handed_sword"
 input_type = 1
-startup = 0.24
-active = 0.12
-recovery = 0.5
-chain_delay = 0.15
-combo_window = 0.3
-damage = 32.0
-poise_damage = 55.0
-knockback = 30.0
-hitstop = 0.08
-reach = 42.0
-arc_degrees = 180.0
-move_multiplier = 0.2
-lunge_distance = 10.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_sword")
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
 effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_wbe05"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hhl"
+display_name = "Steel Tempest"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_3m2kg"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hlh"
+display_name = "Flowing Reversal"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_w37v1"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_hll"
+display_name = "Duelist's Advance"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+lunge_distance = 24.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_oyxm5"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_lhh"
+display_name = "Twin Crescent"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_eilho"]
+script = ExtResource("1_jlp7t")
+id = &"one_handed_sword_lhl"
+display_name = "Crosscut"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_rerif"]
+script = ExtResource("1_jlp7t")
+id = &"sword_llh_crush"
+display_name = "Guard Splitter"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.27
+active = 0.14
+recovery = 0.44
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.65
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.65
+active_move = 0.5
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_62wxd"]
+script = ExtResource("1_jlp7t")
+id = &"sword_light_3"
+display_name = "Threefold Edge"
+weapon_family_id = &"one_handed_sword"
+startup = 0.14
+active = 0.11
+recovery = 0.3
+damage = 12.0
+poise_damage = 8.0
+arc_degrees = 110.0
+move_multiplier = 0.8
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.8
+active_move = 0.7
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_twt5p"]
+script = ExtResource("2_j8vgm")
+inputs = "LLL"
+display_name = "Threefold Edge"
+description = "L-L-L: Threefold Edge."
+
+[sub_resource type="Resource" id="Resource_5tkvx"]
+script = ExtResource("2_j8vgm")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Guard Splitter"
+description = "L-L-H: Guard Splitter."
+
+[sub_resource type="Resource" id="Resource_2uowy"]
+script = ExtResource("2_j8vgm")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Crosscut"
+description = "L-H-L: Crosscut."
+
+[sub_resource type="Resource" id="Resource_c0d7m"]
+script = ExtResource("2_j8vgm")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Duelist's Advance"
+description = "H-L-L: Duelist's Advance."
+
+[sub_resource type="Resource" id="Resource_0y284"]
+script = ExtResource("2_j8vgm")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Twin Crescent"
+description = "L-H-H: Twin Crescent."
+
+[sub_resource type="Resource" id="Resource_s6kqf"]
+script = ExtResource("2_j8vgm")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Flowing Reversal"
+description = "H-L-H: Flowing Reversal."
+
+[sub_resource type="Resource" id="Resource_pre2t"]
+script = ExtResource("2_j8vgm")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Steel Tempest"
+description = "H-H-L: Steel Tempest."
+
+[sub_resource type="Resource" id="Resource_cdyby"]
+script = ExtResource("2_j8vgm")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Final Oath"
+description = "H-H-H: Final Oath."
 
 [resource]
-script = ExtResource("1_family")
+script = ExtResource("4_ms46t")
 id = &"one_handed_sword"
 display_name = "One-Handed Sword"
-display_color = Color(0.91, 0.89, 0.82, 1)
-visual_blade_length = 14.0
-defense_profile = ExtResource("4_defense")
 root_light = &"sword_light_1"
 root_heavy = &"sword_heavy"
-attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_l4"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])
+attacks = Array[ExtResource("1_jlp7t")]([SubResource("Resource_3r1ys"), SubResource("Resource_xa0st"), SubResource("Resource_ou7n0"), SubResource("Resource_7y70f"), SubResource("Resource_0sy6h"), SubResource("Resource_u8hmi"), SubResource("Resource_esh5t"), SubResource("Resource_wbe05"), SubResource("Resource_3m2kg"), SubResource("Resource_w37v1"), SubResource("Resource_oyxm5"), SubResource("Resource_eilho"), SubResource("Resource_rerif"), SubResource("Resource_62wxd")])
+combo_paths = Array[ExtResource("2_j8vgm")]([SubResource("Resource_twt5p"), SubResource("Resource_5tkvx"), SubResource("Resource_2uowy"), SubResource("Resource_c0d7m"), SubResource("Resource_0y284"), SubResource("Resource_s6kqf"), SubResource("Resource_pre2t"), SubResource("Resource_cdyby")])
+display_color = Color(0.91, 0.89, 0.82, 1)
+defense_profile = ExtResource("3_pf7cw")

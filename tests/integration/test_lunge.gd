@@ -19,7 +19,7 @@ func _attack_duration_ticks(attack: AttackDefinition) -> int:
 
 
 func test_lunge_moves_along_attack_direction_by_its_distance() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var attack := SWORD.get_attack(&"sword_light_1")
 	var f := frame(Vector2.ZERO, Vector2.UP)
@@ -29,7 +29,7 @@ func test_lunge_moves_along_attack_direction_by_its_distance() -> void:
 
 
 func test_lunge_distance_is_configurable() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(20.0))
 	await wait_physics(1)
 	await tick(light(frame(Vector2.ZERO, Vector2.RIGHT)), _attack_duration_ticks(SWORD.get_attack(&"sword_light_1")))
@@ -37,7 +37,7 @@ func test_lunge_distance_is_configurable() -> void:
 
 
 func test_zero_lunge_is_stationary() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(0.0))
 	await wait_physics(1)
 	await tick(light(frame(Vector2.ZERO, Vector2.RIGHT)), _attack_duration_ticks(SWORD.get_attack(&"sword_light_1")))
@@ -45,7 +45,7 @@ func test_zero_lunge_is_stationary() -> void:
 
 
 func test_lunge_direction_fixed_at_attack_start() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(20.0))
 	await wait_physics(1)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -57,7 +57,7 @@ func test_lunge_direction_fixed_at_attack_start() -> void:
 
 
 func test_no_motion_after_the_attack_ends() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	await tick(light(f), _attack_duration_ticks(SWORD.get_attack(&"sword_light_1")))
@@ -68,7 +68,7 @@ func test_no_motion_after_the_attack_ends() -> void:
 
 
 func test_hit_reaction_cancel_stops_lunge() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(30.0))
 	await wait_physics(1)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -83,7 +83,7 @@ func test_hit_reaction_cancel_stops_lunge() -> void:
 
 
 func test_dash_cancel_replaces_lunge_with_dash() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(30.0))
 	await wait_physics(1)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -96,7 +96,7 @@ func test_dash_cancel_replaces_lunge_with_dash() -> void:
 
 
 func test_lunge_does_not_pass_walls() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	player.set_weapon_family(_sword_with_lunge(40.0))
 	add_wall(Vector2(24, 0), Vector2(16, 120))   # face at x = 16
 	await wait_physics(2)

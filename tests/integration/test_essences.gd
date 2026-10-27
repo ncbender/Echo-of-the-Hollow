@@ -31,6 +31,7 @@ func _bind() -> void:
 	bridge = PlayerProgressionBridge.new()
 	bridge.name = "ProgressionBridge"
 	player.add_child(bridge)
+	character.mastery.add_xp(&"one_handed_sword", 400)   # Combat Flow: mastery 4 unlocks L-L-H
 	bridge.bind(player, character)
 	player.combat.hit_landed.connect(func(hit: HitData) -> void: landed.append(hit))
 
@@ -60,15 +61,9 @@ func _dummy(at: Vector2) -> TrainingDummy:
 	return dummy
 
 
-## L-L-H with the heavy held for `hold` ticks (50 = full charge at 0.7 s).
-func _llh(f: InputFrame, hold: int) -> void:
-	await tick(light(f))
-	await tick(f, 12)
-	await tick(light(f))
-	await tick(f, 12)
-	await tick(heavy_down(f), hold)
-	await tick(heavy_up(f))
-	await tick(f, 40)
+## Combat Flow L-L-H (heavies are instant; a heavy finisher counts as full power).
+func _llh(_f: InputFrame, _hold: int = 0) -> void:
+	await perform_path("LLH", Vector2.RIGHT, 20)
 
 
 func _count(effect_id: StringName) -> int:
@@ -206,12 +201,13 @@ func test_stone_golem_boosts_fully_charged_finishers_only() -> void:
 	var with_golem := _last_hit(&"sword_llh_crush")
 	if not check(without != null and with_golem != null, "both finishers landed"):
 		return
-	check_eq(with_golem.charge_tier, 2, "fully charged")
-	check_near(with_golem.poise_damage / without.poise_damage, 1.6, 0.01, "+60 % poise on full charge")
+	check(with_golem.is_full_power(), "heavy finisher = full power (no charging in Combat Flow)")
+	check_near(with_golem.poise_damage / without.poise_damage, 1.6, 0.01, "+60 % poise on the heavy finisher")
 	await tick(f, 60)
-	await _llh(f, 1)
-	var uncharged := _last_hit(&"sword_llh_crush")
-	check(not &"stone_golem_crush" in uncharged.tags, "uncharged finisher not boosted")
+	await perform_path("H", Vector2.RIGHT, 20)
+	var plain_heavy := _last_hit(&"sword_heavy")
+	if check(plain_heavy != null, "base heavy landed"):
+		check(not &"stone_golem_crush" in plain_heavy.tags, "a heavy that is no finisher is not boosted")
 
 
 func test_thunderquake_resonance_changes_combat() -> void:
@@ -223,19 +219,16 @@ func test_thunderquake_resonance_changes_combat() -> void:
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	await _llh(f, 1)   # discharge charges the target
 	check(bridge.effects.has_mark(target, &"charged"), "target charged by the finisher's discharge")
-	await tick(f, 20)
-	await tick(light(f))
-	await tick(f, 20)
+	await perform_path("L", Vector2.RIGHT, 5)
 	var follow_up := _last_hit(&"sword_light_1")
 	if not check(follow_up != null, "follow-up landed"):
 		return
 	check(&"thunder_quake" in follow_up.tags, "resonance applied to the next hit")
-	var base := SWORD.get_attack(&"sword_light_1").poise_damage * (1.0 + character.get_stat(Stats.POISE_DAMAGE) / 100.0)
+	var base := (db.weapons[&"one_handed_sword"] as WeaponFamily).get_attack(&"sword_light_1").poise_damage * (1.0 + character.get_stat(Stats.POISE_DAMAGE) / 100.0)
 	check_near(follow_up.poise_damage, base * 1.5, 0.01, "+50 % poise")
 	check(not bridge.effects.has_mark(target, &"charged"), "mark consumed once")
-	await tick(light(f))
-	await tick(f, 20)
-	check(not &"thunder_quake" in _last_hit(&"sword_light_2").tags, "no second bonus without a new discharge")
+	await perform_path("L", Vector2.RIGHT, 5)
+	check(not &"thunder_quake" in _last_hit(&"sword_light_1").tags, "no second bonus without a new discharge")
 
 
 func test_essences_survive_save_load_and_rebuild_once() -> void:

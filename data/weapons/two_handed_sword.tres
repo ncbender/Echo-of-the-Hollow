@@ -1,186 +1,392 @@
 [gd_resource type="Resource" script_class="WeaponFamily" format=3]
 
-[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
-[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
-[ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
-[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="4_defense"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_2djka"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_i1anj"]
+[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="3_uhu4n"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_yn6j2"]
 
-[sub_resource type="Resource" id="Charge_greatsword"]
-script = ExtResource("3_charge")
-tier_names = PackedStringArray("Normal", "Empowered", "Full")
-tier_thresholds = PackedFloat32Array(0.25, 0.7)
-damage_multipliers = PackedFloat32Array(1.0, 1.5, 2.3)
-poise_multipliers = PackedFloat32Array(1.0, 1.8, 3.0)
-reach_multipliers = PackedFloat32Array(1.0, 1.15, 1.35)
-hitstop_multipliers = PackedFloat32Array(1.0, 1.4, 2.0)
-move_multiplier = 0.45
-
-[sub_resource type="Resource" id="Attack_l1"]
-script = ExtResource("2_attack")
-id = &"greatsword_light_1"
-display_name = "Heavy Swing"
-weapon_family_id = &"two_handed_sword"
-input_type = 0
-startup = 0.16
-active = 0.1
-recovery = 0.32
-chain_delay = 0.04
-combo_window = 0.4
-damage = 22.0
-poise_damage = 16.0
-knockback = 12.0
-reach = 44.0
-arc_degrees = 130.0
-move_multiplier = 0.7
-lunge_distance = 8.0
-next_light = &"greatsword_light_2"
-next_heavy = &"greatsword_lh_overhead"
-dash_cancel_phases = 7
-
-[sub_resource type="Resource" id="Attack_l2"]
-script = ExtResource("2_attack")
-id = &"greatsword_light_2"
-display_name = "Return Swing"
-weapon_family_id = &"two_handed_sword"
-input_type = 0
-startup = 0.14
-active = 0.1
-recovery = 0.34
-chain_delay = 0.04
-combo_window = 0.4
-damage = 22.0
-poise_damage = 18.0
-knockback = 12.0
-reach = 44.0
-arc_degrees = 140.0
-move_multiplier = 0.7
-lunge_distance = 12.0
-next_light = &"greatsword_light_3"
-next_heavy = &"greatsword_llh_whirl"
-dash_cancel_phases = 7
-
-[sub_resource type="Resource" id="Attack_l3"]
-script = ExtResource("2_attack")
-id = &"greatsword_light_3"
-display_name = "Reaping Arc"
-weapon_family_id = &"two_handed_sword"
-input_type = 0
-startup = 0.22
-active = 0.14
-recovery = 0.45
-chain_delay = 0.12
-combo_window = 0.3
-damage = 34.0
-poise_damage = 34.0
-knockback = 18.0
-hitstop = 0.06
-reach = 50.0
-arc_degrees = 180.0
-move_multiplier = 0.7
-lunge_distance = 16.0
-next_light = &"greatsword_light_4_mastery"
-dash_cancel_phases = 7
-effect_tags = Array[StringName]([&"finisher"])
-
-[sub_resource type="Resource" id="Attack_heavy"]
-script = ExtResource("2_attack")
+[sub_resource type="Resource" id="Resource_h4sr5"]
+script = ExtResource("1_2djka")
 id = &"greatsword_heavy"
 display_name = "Sundering Blow"
 weapon_family_id = &"two_handed_sword"
 input_type = 1
-startup = 0.26
-active = 0.12
-recovery = 0.55
-chain_delay = 0.2
-combo_window = 0.3
+startup = 0.44
+active = 0.18
+recovery = 0.6
 damage = 48.0
 poise_damage = 50.0
 knockback = 35.0
 hitstop = 0.09
 reach = 52.0
 arc_degrees = 150.0
-move_multiplier = 0.25
-lunge_distance = 10.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_greatsword")
+move_multiplier = 0.4
+dash_cancel_phases = 4
 effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
 
-[sub_resource type="Resource" id="Attack_lh"]
-script = ExtResource("2_attack")
+[sub_resource type="Resource" id="Resource_827ma"]
+script = ExtResource("1_2djka")
+id = &"greatsword_light_1"
+display_name = "Heavy Swing"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_sntkq"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.44
+active = 0.18
+recovery = 0.6
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_6b6u5"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_5na5y"]
+script = ExtResource("1_2djka")
 id = &"greatsword_lh_overhead"
 display_name = "Overhead Slam"
 weapon_family_id = &"two_handed_sword"
 input_type = 1
-startup = 0.3
-active = 0.1
-recovery = 0.55
-chain_delay = 0.2
-combo_window = 0.3
-damage = 55.0
-poise_damage = 60.0
-knockback = 28.0
-hitstop = 0.1
-reach = 58.0
-arc_degrees = 60.0
-move_multiplier = 0.2
-lunge_distance = 20.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_greatsword")
+startup = 0.44
+active = 0.18
+recovery = 0.6
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
 effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
 
-[sub_resource type="Resource" id="Attack_llh"]
-script = ExtResource("2_attack")
-id = &"greatsword_llh_whirl"
-display_name = "Whirlwind Cleave"
+[sub_resource type="Resource" id="Resource_7d1v5"]
+script = ExtResource("1_2djka")
+id = &"greatsword_light_2"
+display_name = "Return Swing"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_ickup"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hhh"
+display_name = "Executioner's Sequence"
 weapon_family_id = &"two_handed_sword"
 input_type = 1
-startup = 0.28
-active = 0.2
+startup = 0.44
+active = 0.18
 recovery = 0.6
-chain_delay = 0.25
-combo_window = 0.3
-damage = 60.0
-poise_damage = 70.0
-knockback = 45.0
-hitstop = 0.11
-reach = 56.0
-arc_degrees = 180.0
-move_multiplier = 0.3
-lunge_distance = 24.0
-dash_cancel_phases = 5
-charge_profile = SubResource("Charge_greatsword")
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
 effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
 
-[sub_resource type="Resource" id="Attack_l4"]
-script = ExtResource("2_attack")
-id = &"greatsword_light_4_mastery"
-display_name = "Cleaving Echo (Mastery)"
+[sub_resource type="Resource" id="Resource_v5526"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hhl"
+display_name = "Broken Horizon"
 weapon_family_id = &"two_handed_sword"
-input_type = 0
-startup = 0.2
-active = 0.14
-recovery = 0.55
-chain_delay = 0.15
-combo_window = 0.25
-damage = 40.0
-poise_damage = 40.0
-knockback = 30.0
-hitstop = 0.07
-reach = 54.0
-arc_degrees = 180.0
-move_multiplier = 0.7
-lunge_distance = 20.0
-dash_cancel_phases = 7
-unlock_requirement = &"mastery.two_handed_sword.1"
-effect_tags = Array[StringName]([&"finisher", &"mastery"])
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_4bbf6"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hlh"
+display_name = "Iron Reversal"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.44
+active = 0.18
+recovery = 0.6
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_7lnrg"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_hll"
+display_name = "March of Iron"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+lunge_distance = 24.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_suv5d"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_lhh"
+display_name = "Relentless Swing"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.44
+active = 0.18
+recovery = 0.6
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_nqu32"]
+script = ExtResource("1_2djka")
+id = &"two_handed_sword_lhl"
+display_name = "Rising Cleave"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_hgf27"]
+script = ExtResource("1_2djka")
+id = &"greatsword_llh_whirl"
+display_name = "Falling Judgment"
+weapon_family_id = &"two_handed_sword"
+input_type = 1
+startup = 0.44
+active = 0.18
+recovery = 0.6
+damage = 48.0
+poise_damage = 50.0
+knockback = 35.0
+hitstop = 0.09
+reach = 52.0
+arc_degrees = 150.0
+move_multiplier = 0.4
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.4
+active_move = 0.25
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_mxr6m"]
+script = ExtResource("1_2djka")
+id = &"greatsword_light_3"
+display_name = "Broadsteel Sequence"
+weapon_family_id = &"two_handed_sword"
+startup = 0.25
+active = 0.15
+recovery = 0.36
+damage = 22.0
+poise_damage = 16.0
+knockback = 12.0
+reach = 44.0
+arc_degrees = 130.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_kx1i8"]
+script = ExtResource("2_i1anj")
+inputs = "LLL"
+display_name = "Broadsteel Sequence"
+description = "L-L-L: Broadsteel Sequence."
+
+[sub_resource type="Resource" id="Resource_udn3h"]
+script = ExtResource("2_i1anj")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Falling Judgment"
+description = "L-L-H: Falling Judgment."
+
+[sub_resource type="Resource" id="Resource_jx1yh"]
+script = ExtResource("2_i1anj")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Rising Cleave"
+description = "L-H-L: Rising Cleave."
+
+[sub_resource type="Resource" id="Resource_ymnh0"]
+script = ExtResource("2_i1anj")
+inputs = "HLL"
+unlock_level = 9
+display_name = "March of Iron"
+description = "H-L-L: March of Iron."
+
+[sub_resource type="Resource" id="Resource_nbq4v"]
+script = ExtResource("2_i1anj")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Relentless Swing"
+description = "L-H-H: Relentless Swing."
+
+[sub_resource type="Resource" id="Resource_xuc3p"]
+script = ExtResource("2_i1anj")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Iron Reversal"
+description = "H-L-H: Iron Reversal."
+
+[sub_resource type="Resource" id="Resource_w7rk6"]
+script = ExtResource("2_i1anj")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Broken Horizon"
+description = "H-H-L: Broken Horizon."
+
+[sub_resource type="Resource" id="Resource_xy6kp"]
+script = ExtResource("2_i1anj")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Executioner's Sequence"
+description = "H-H-H: Executioner's Sequence."
 
 [resource]
-script = ExtResource("1_family")
+script = ExtResource("4_yn6j2")
 id = &"two_handed_sword"
 display_name = "Two-Handed Sword"
-display_color = Color(0.72, 0.84, 1, 1)
-visual_blade_length = 22.0
-defense_profile = ExtResource("4_defense")
 root_light = &"greatsword_light_1"
 root_heavy = &"greatsword_heavy"
-attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_l4"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])
+attacks = Array[ExtResource("1_2djka")]([SubResource("Resource_h4sr5"), SubResource("Resource_827ma"), SubResource("Resource_sntkq"), SubResource("Resource_6b6u5"), SubResource("Resource_5na5y"), SubResource("Resource_7d1v5"), SubResource("Resource_ickup"), SubResource("Resource_v5526"), SubResource("Resource_4bbf6"), SubResource("Resource_7lnrg"), SubResource("Resource_suv5d"), SubResource("Resource_nqu32"), SubResource("Resource_hgf27"), SubResource("Resource_mxr6m")])
+combo_paths = Array[ExtResource("2_i1anj")]([SubResource("Resource_kx1i8"), SubResource("Resource_udn3h"), SubResource("Resource_jx1yh"), SubResource("Resource_ymnh0"), SubResource("Resource_nbq4v"), SubResource("Resource_xuc3p"), SubResource("Resource_w7rk6"), SubResource("Resource_xy6kp")])
+display_color = Color(0.72, 0.84, 1, 1)
+visual_blade_length = 22.0
+defense_profile = ExtResource("3_uhu4n")

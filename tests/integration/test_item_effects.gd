@@ -31,6 +31,12 @@ func _bind() -> void:
 	bridge.bind(player, character)
 
 
+## Combat Flow: sword mastery 4 unlocks L-L-L and L-L-H (the finishers these effects need).
+func _unlock_finishers() -> void:
+	character.mastery.add_xp(&"one_handed_sword", 400)
+	check(character.mastery.get_level(&"one_handed_sword") >= 4, "sword mastery 4")
+
+
 func _equip_new(item_id: StringName, slot: int = -1) -> String:
 	var instance_id := character.inventory.add_item(item_id)[0].instance_id
 	var error := character.equipment.equip(instance_id, slot)
@@ -47,14 +53,8 @@ func _dummy(at: Vector2) -> TrainingDummy:
 	return dummy
 
 
-func _llh(f: InputFrame) -> void:
-	await tick(light(f))
-	await tick(f, 12)
-	await tick(light(f))
-	await tick(f, 12)
-	f.heavy_pressed = true
-	await tick(f)
-	await tick(f, 40)
+func _llh(_f: InputFrame) -> void:
+	await perform_path("LLH", Vector2.RIGHT, 10)
 
 
 func _triggers(effect_id: StringName) -> int:
@@ -73,6 +73,7 @@ func test_effect_data_loads_with_subclasses() -> void:
 
 func test_legendary_triggers_on_heavy_finisher_once_per_swing() -> void:
 	_bind()
+	_unlock_finishers()
 	var blade := _equip_new(&"echo_blade")
 	check(bridge.effects.has_effect(&"echo_shockwave"), "effect active when equipped")
 	var first := _dummy(Vector2(24, -8))
@@ -85,10 +86,7 @@ func test_legendary_triggers_on_heavy_finisher_once_per_swing() -> void:
 	check(bystander.hits_taken == 1, "shockwave hit the bystander (hits %d)" % bystander.hits_taken)
 	check(first.hits_taken >= 3 and second.hits_taken >= 3, "both crush targets hit")
 	# L-L-L ends with a light finisher: not heavy -> no trigger.
-	await tick(f, 40)
-	for i in 3:
-		await tick(light(f))
-		await tick(f, 22)
+	await perform_path("LLL", Vector2.RIGHT, 10)
 	check_eq(_triggers(&"echo_shockwave"), 1, "light finisher does not trigger")
 	character.equipment.unequip(S.MAIN_HAND)
 	check(not bridge.effects.has_effect(&"echo_shockwave"), "effect removed on unequip")
@@ -105,13 +103,16 @@ func test_effects_cannot_recurse() -> void:
 
 func test_unique_modifies_only_its_finisher() -> void:
 	_bind()
-	var crush := SWORD.get_attack(&"sword_llh_crush")
+	_unlock_finishers()
+	var sword: WeaponFamily = db.weapons[&"one_handed_sword"]
+	var crush := sword.get_attack(&"sword_llh_crush")
+	var data_reach := crush.reach
 	var base_reach := player.combat.get_reach(crush, 0)
-	var light_reach := player.combat.get_reach(SWORD.get_attack(&"sword_light_1"), 0)
+	var light_reach := player.combat.get_reach(sword.get_attack(&"sword_light_1"), 0)
 	_equip_new(&"crushing_oath")
 	check_near(player.combat.get_reach(crush, 0), base_reach * 1.25, 0.001, "crush reach +25%")
-	check_near(player.combat.get_reach(SWORD.get_attack(&"sword_light_1"), 0), light_reach, 0.001, "other attacks unchanged")
-	check_eq(crush.reach, 42.0, "shared AttackDefinition data untouched")
+	check_near(player.combat.get_reach(sword.get_attack(&"sword_light_1"), 0), light_reach, 0.001, "other attacks unchanged")
+	check_eq(crush.reach, data_reach, "shared AttackDefinition data untouched")
 	var target := _dummy(Vector2(24, 0))
 	await wait_physics(2)
 	var hits_seen: Array[HitData] = []
@@ -157,15 +158,13 @@ func test_set_thresholds_and_removal() -> void:
 
 func test_set_heal_effect_is_rate_limited() -> void:
 	_bind()
+	_unlock_finishers()
 	for item_id: StringName in [&"warden_helm", &"warden_mail", &"warden_greaves"]:
 		_equip_new(item_id)
 	_dummy(Vector2(22, 0))
 	await wait_physics(2)
 	player.health.health = 50.0
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	for i in 3:
-		await tick(light(f))
-		await tick(f, 22)
+	await perform_path("LLL", Vector2.RIGHT, 10)
 	check_eq(_triggers(&"wardens_resolve"), 1, "light finisher healed once")
 	check_near(player.health.health, 53.0, 0.01, "healed 3 HP")
 

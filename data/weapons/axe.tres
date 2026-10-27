@@ -1,0 +1,378 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_p05tj"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_iweyj"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="3_8uo3e"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_pnrmo"]
+
+[sub_resource type="Resource" id="Resource_ktmgr"]
+script = ExtResource("1_p05tj")
+id = &"axe_h"
+display_name = "Heavy Attack"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_araax"]
+script = ExtResource("1_p05tj")
+id = &"axe_l"
+display_name = "Quick Attack"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_iuy05"]
+script = ExtResource("1_p05tj")
+id = &"axe_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_n0apy"]
+script = ExtResource("1_p05tj")
+id = &"axe_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_wt3ap"]
+script = ExtResource("1_p05tj")
+id = &"axe_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_wuixp"]
+script = ExtResource("1_p05tj")
+id = &"axe_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_786v1"]
+script = ExtResource("1_p05tj")
+id = &"axe_hhh"
+display_name = "Reaver's Crown"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_2c5cn"]
+script = ExtResource("1_p05tj")
+id = &"axe_hhl"
+display_name = "Splintering Arc"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_5dea2"]
+script = ExtResource("1_p05tj")
+id = &"axe_hlh"
+display_name = "Reaper's Turn"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_j8p5j"]
+script = ExtResource("1_p05tj")
+id = &"axe_hll"
+display_name = "Ravager's Step"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+lunge_distance = 20.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_clsjn"]
+script = ExtResource("1_p05tj")
+id = &"axe_lhh"
+display_name = "Double Cleave"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_2ymwc"]
+script = ExtResource("1_p05tj")
+id = &"axe_lhl"
+display_name = "Hooking Chop"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_q6tn6"]
+script = ExtResource("1_p05tj")
+id = &"axe_llh"
+display_name = "Splitting Strike"
+weapon_family_id = &"axe"
+input_type = 1
+startup = 0.36
+active = 0.15
+recovery = 0.54
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 40.0
+arc_degrees = 140.0
+move_multiplier = 0.5
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.5
+active_move = 0.35
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_lguwb"]
+script = ExtResource("1_p05tj")
+id = &"axe_lll"
+display_name = "Rough Hewing"
+weapon_family_id = &"axe"
+startup = 0.19
+active = 0.12
+recovery = 0.35
+damage = 14.0
+reach = 34.0
+arc_degrees = 120.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.7
+active_move = 0.55
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_aq0nu"]
+script = ExtResource("2_iweyj")
+inputs = "LLL"
+display_name = "Rough Hewing"
+description = "L-L-L: Rough Hewing."
+
+[sub_resource type="Resource" id="Resource_2nfdy"]
+script = ExtResource("2_iweyj")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Splitting Strike"
+description = "L-L-H: Splitting Strike."
+
+[sub_resource type="Resource" id="Resource_3uhu1"]
+script = ExtResource("2_iweyj")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Hooking Chop"
+description = "L-H-L: Hooking Chop."
+
+[sub_resource type="Resource" id="Resource_eqf62"]
+script = ExtResource("2_iweyj")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Ravager's Step"
+description = "H-L-L: Ravager's Step."
+
+[sub_resource type="Resource" id="Resource_kggja"]
+script = ExtResource("2_iweyj")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Double Cleave"
+description = "L-H-H: Double Cleave."
+
+[sub_resource type="Resource" id="Resource_mghxi"]
+script = ExtResource("2_iweyj")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Reaper's Turn"
+description = "H-L-H: Reaper's Turn."
+
+[sub_resource type="Resource" id="Resource_dw5os"]
+script = ExtResource("2_iweyj")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Splintering Arc"
+description = "H-H-L: Splintering Arc."
+
+[sub_resource type="Resource" id="Resource_l356m"]
+script = ExtResource("2_iweyj")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Reaver's Crown"
+description = "H-H-H: Reaver's Crown."
+
+[resource]
+script = ExtResource("4_pnrmo")
+id = &"axe"
+display_name = "Axe"
+root_light = &"axe_l"
+root_heavy = &"axe_h"
+attacks = Array[ExtResource("1_p05tj")]([SubResource("Resource_ktmgr"), SubResource("Resource_araax"), SubResource("Resource_iuy05"), SubResource("Resource_n0apy"), SubResource("Resource_wt3ap"), SubResource("Resource_wuixp"), SubResource("Resource_786v1"), SubResource("Resource_2c5cn"), SubResource("Resource_5dea2"), SubResource("Resource_j8p5j"), SubResource("Resource_clsjn"), SubResource("Resource_2ymwc"), SubResource("Resource_q6tn6"), SubResource("Resource_lguwb")])
+combo_paths = Array[ExtResource("2_iweyj")]([SubResource("Resource_aq0nu"), SubResource("Resource_2nfdy"), SubResource("Resource_3uhu1"), SubResource("Resource_eqf62"), SubResource("Resource_kggja"), SubResource("Resource_mghxi"), SubResource("Resource_dw5os"), SubResource("Resource_l356m")])
+display_color = Color(0.85, 0.7, 0.55, 1)
+visual_blade_length = 13.0
+defense_profile = ExtResource("3_8uo3e")

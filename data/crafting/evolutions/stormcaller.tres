@@ -71,7 +71,7 @@ script = ExtResource("7_q6iag")
 full_charge_only = true
 poise_multiplier = 1.4
 effect_id = &"steadfast"
-description = "+40 Armor. Fully charged heavy attacks: +40% poise damage."
+description = "+40 Armor. Heavy finishers: +40% poise damage."
 
 [sub_resource type="Resource" id="Resource_4ldui"]
 script = ExtResource("5_kh4p2")
@@ -82,7 +82,7 @@ flat = 40.0
 script = ExtResource("6_5b5mu")
 id = &"steadfast"
 display_name = "Path B - Steadfast"
-description = "+40 Armor. Fully charged heavy attacks: +40% poise damage."
+description = "+40 Armor. Heavy finishers: +40% poise damage."
 modifiers = Array[ExtResource("5_kh4p2")]([SubResource("Resource_4ldui")])
 effects = Array[ExtResource("4_d82ne")]([SubResource("Resource_sufej")])
 

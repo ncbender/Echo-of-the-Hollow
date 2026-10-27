@@ -16,10 +16,11 @@ func before_each() -> void:
 
 
 func _bind() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	bridge = PlayerProgressionBridge.new()
 	player.add_child(bridge)
 	bridge.bind(player, character)
+	player.set_weapon_family(SWORD)   # the bridge synced the Combat Flow sword; this suite tests the legacy engine
 
 
 func _speed_buff(percent: float) -> void:

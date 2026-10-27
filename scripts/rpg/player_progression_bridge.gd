@@ -109,11 +109,14 @@ func is_bound() -> bool:
 	return character != null and player != null
 
 
-## Re-applies all mastery techniques to the combo tree (after load, level-up ...).
+## Mastery level of the wielded family -> Combat Flow path gates (after load,
+## level-up, weapon change). Legacy requirement unlocks are re-applied too.
 func refresh_unlocks() -> void:
 	player.combat.combo.unlocks.clear()
 	for requirement in character.mastery.unlocked_requirements():
 		player.combat.set_unlocked(requirement, true)
+	var family := player.combat.weapon
+	player.combat.mastery_level = character.mastery.get_level(family.id) if family != null else 1
 
 
 ## Pushes freshly resolved stats into the scene (never additive).
@@ -214,6 +217,7 @@ func _apply_pending_weapon() -> void:
 		return
 	if player.combat.weapon == _pending_weapon or player.set_weapon_family(_pending_weapon):
 		_pending_weapon = null
+		refresh_unlocks()
 
 
 func _track(sig: Signal, callable: Callable) -> void:
@@ -246,6 +250,7 @@ func _grant_item_xp(hit: HitData) -> void:
 
 
 func _on_mastery_leveled_up(family_id: StringName, level: int) -> void:
+	refresh_unlocks()
 	message.emit("%s mastery reached level %d" % [_family_name(family_id), level])
 
 

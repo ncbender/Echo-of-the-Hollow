@@ -29,10 +29,8 @@ class TagModifier:
 		for tag in effect.required_tags:
 			if not tag in hit.tags:
 				return
-		if effect.full_charge_only:
-			var profile := hit.attack.charge_profile if hit.attack != null else null
-			if profile == null or profile.max_tier() <= 0 or hit.charge_tier < profile.max_tier():
-				return
+		if effect.full_charge_only and not hit.is_full_power():
+			return
 		hit.damage *= effect.damage_multiplier
 		hit.poise_damage *= effect.poise_multiplier
 		hit.knockback *= effect.knockback_multiplier

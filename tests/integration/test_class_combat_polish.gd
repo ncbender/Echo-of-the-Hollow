@@ -38,6 +38,7 @@ func _bind() -> void:
 	bridge = PlayerProgressionBridge.new()
 	player.add_child(bridge)
 	bridge.bind(player, character)
+	player.set_weapon_family(SWORD)   # legacy engine: these class / effect checks use the pre-1.5 sword timings (Combat Flow: test_flow_integration)
 	bridge.stat_modifier.rng.seed = 5
 	bridge.effects.rng.seed = 5
 	bridge.effects.hit_dispatched.connect(func(hit: HitData) -> void: dispatched.append(hit))

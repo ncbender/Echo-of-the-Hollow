@@ -1,0 +1,376 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_flht2"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_pk4n0"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="3_pwbcu"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_oe7bt"]
+
+[sub_resource type="Resource" id="Resource_goo82"]
+script = ExtResource("1_flht2")
+id = &"dagger_h"
+display_name = "Heavy Attack"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_mwuc6"]
+script = ExtResource("1_flht2")
+id = &"dagger_l"
+display_name = "Quick Attack"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.9
+active_move = 0.8
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_3e3nb"]
+script = ExtResource("1_flht2")
+id = &"dagger_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_ne8pd"]
+script = ExtResource("1_flht2")
+id = &"dagger_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.9
+active_move = 0.8
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_vetet"]
+script = ExtResource("1_flht2")
+id = &"dagger_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_djv8g"]
+script = ExtResource("1_flht2")
+id = &"dagger_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.9
+active_move = 0.8
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_ks0tv"]
+script = ExtResource("1_flht2")
+id = &"dagger_hhh"
+display_name = "Thousand Cuts"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 7.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.75
+active_move = 0.65
+max_hits_per_target = 3
+rehit_interval = 0.04
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_pt8u7"]
+script = ExtResource("1_flht2")
+id = &"dagger_hhl"
+display_name = "Serpent's Dance"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+lunge_distance = 28.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.9
+active_move = 0.8
+lunge_angle = -90.0
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_87ywo"]
+script = ExtResource("1_flht2")
+id = &"dagger_hlh"
+display_name = "Crossed Blades"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_mwxvn"]
+script = ExtResource("1_flht2")
+id = &"dagger_hll"
+display_name = "Hunter's Opening"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.9
+active_move = 0.8
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_8ts1o"]
+script = ExtResource("1_flht2")
+id = &"dagger_lhh"
+display_name = "Serpent's Bite"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_oh0lx"]
+script = ExtResource("1_flht2")
+id = &"dagger_lhl"
+display_name = "Shadow Rhythm"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+lunge_distance = 28.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.9
+active_move = 0.8
+lunge_angle = 90.0
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_w3jva"]
+script = ExtResource("1_flht2")
+id = &"dagger_llh"
+display_name = "Twin Fang"
+weapon_family_id = &"dagger"
+input_type = 1
+startup = 0.19
+active = 0.12
+recovery = 0.37
+damage = 21.0
+poise_damage = 24.0
+knockback = 18.0
+hitstop = 0.06
+reach = 28.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_8af6l"]
+script = ExtResource("1_flht2")
+id = &"dagger_lll"
+display_name = "Quick Fangs"
+weapon_family_id = &"dagger"
+active = 0.09
+recovery = 0.23
+damage = 9.0
+poise_damage = 6.0
+reach = 24.0
+arc_degrees = 90.0
+move_multiplier = 0.9
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.9
+active_move = 0.8
+animation_ref = &"placeholder.swing"
+
+[sub_resource type="Resource" id="Resource_bidjk"]
+script = ExtResource("2_pk4n0")
+inputs = "LLL"
+display_name = "Quick Fangs"
+description = "L-L-L: Quick Fangs."
+
+[sub_resource type="Resource" id="Resource_a1d0f"]
+script = ExtResource("2_pk4n0")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Twin Fang"
+description = "L-L-H: Twin Fang."
+
+[sub_resource type="Resource" id="Resource_kwpto"]
+script = ExtResource("2_pk4n0")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Shadow Rhythm"
+description = "L-H-L: Shadow Rhythm."
+
+[sub_resource type="Resource" id="Resource_1k8kk"]
+script = ExtResource("2_pk4n0")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Hunter's Opening"
+description = "H-L-L: Hunter's Opening."
+
+[sub_resource type="Resource" id="Resource_slio3"]
+script = ExtResource("2_pk4n0")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Serpent's Bite"
+description = "L-H-H: Serpent's Bite."
+
+[sub_resource type="Resource" id="Resource_n18oh"]
+script = ExtResource("2_pk4n0")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Crossed Blades"
+description = "H-L-H: Crossed Blades."
+
+[sub_resource type="Resource" id="Resource_xkbav"]
+script = ExtResource("2_pk4n0")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Serpent's Dance"
+description = "H-H-L: Serpent's Dance."
+
+[sub_resource type="Resource" id="Resource_60bjg"]
+script = ExtResource("2_pk4n0")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Thousand Cuts"
+description = "H-H-H: Thousand Cuts."
+
+[resource]
+script = ExtResource("4_oe7bt")
+id = &"dagger"
+display_name = "Dagger"
+root_light = &"dagger_l"
+root_heavy = &"dagger_h"
+attacks = Array[ExtResource("1_flht2")]([SubResource("Resource_goo82"), SubResource("Resource_mwuc6"), SubResource("Resource_3e3nb"), SubResource("Resource_ne8pd"), SubResource("Resource_vetet"), SubResource("Resource_djv8g"), SubResource("Resource_ks0tv"), SubResource("Resource_pt8u7"), SubResource("Resource_87ywo"), SubResource("Resource_mwxvn"), SubResource("Resource_8ts1o"), SubResource("Resource_oh0lx"), SubResource("Resource_w3jva"), SubResource("Resource_8af6l")])
+combo_paths = Array[ExtResource("2_pk4n0")]([SubResource("Resource_bidjk"), SubResource("Resource_a1d0f"), SubResource("Resource_kwpto"), SubResource("Resource_1k8kk"), SubResource("Resource_slio3"), SubResource("Resource_n18oh"), SubResource("Resource_xkbav"), SubResource("Resource_60bjg")])
+display_color = Color(0.8, 0.86, 0.9, 1)
+visual_blade_length = 9.0
+defense_profile = ExtResource("3_pwbcu")

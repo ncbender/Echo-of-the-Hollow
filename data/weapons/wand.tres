@@ -1,0 +1,411 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_yuxax"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_vuk1u"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="3_5x021"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_4f0kg"]
+
+[sub_resource type="Resource" id="Resource_03m4y"]
+script = ExtResource("1_yuxax")
+id = &"wand_h"
+display_name = "Heavy Spell"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_gwuma"]
+script = ExtResource("1_yuxax")
+id = &"wand_l"
+display_name = "Quick Spell"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_yyk6c"]
+script = ExtResource("1_yuxax")
+id = &"wand_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_beutb"]
+script = ExtResource("1_yuxax")
+id = &"wand_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_j30uy"]
+script = ExtResource("1_yuxax")
+id = &"wand_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_c54mb"]
+script = ExtResource("1_yuxax")
+id = &"wand_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_sv4h0"]
+script = ExtResource("1_yuxax")
+id = &"wand_hhh"
+display_name = "Spellweaver's Finale"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_vspg0"]
+script = ExtResource("1_yuxax")
+id = &"wand_hhl"
+display_name = "Forked Current"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+damage = 5.0
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+projectile_count = 2
+projectile_spread = 20.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_dburg"]
+script = ExtResource("1_yuxax")
+id = &"wand_hlh"
+display_name = "Prismatic Weave"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_voh5h"]
+script = ExtResource("1_yuxax")
+id = &"wand_hll"
+display_name = "Guided Sequence"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_vgvcg"]
+script = ExtResource("1_yuxax")
+id = &"wand_lhh"
+display_name = "Arcane Cadence"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_w06vl"]
+script = ExtResource("1_yuxax")
+id = &"wand_lhl"
+display_name = "Twin Spark"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+damage = 5.0
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+projectile_count = 2
+projectile_spread = 12.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_ukdws"]
+script = ExtResource("1_yuxax")
+id = &"wand_llh"
+display_name = "Focused Bolt"
+weapon_family_id = &"wand"
+input_type = 1
+startup = 0.24
+active = 0.1
+recovery = 0.42
+damage = 23.0
+poise_damage = 27.0
+knockback = 18.0
+hitstop = 0.06
+reach = 240.0
+arc_degrees = 10.0
+move_multiplier = 0.7
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.7
+active_move = 0.6
+projectile_speed = 300.0
+projectile_range = 240.0
+projectile_radius = 5.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_fqh2b"]
+script = ExtResource("1_yuxax")
+id = &"wand_lll"
+display_name = "Spark Pattern"
+weapon_family_id = &"wand"
+startup = 0.13
+active = 0.07
+recovery = 0.28
+poise_damage = 7.0
+reach = 220.0
+arc_degrees = 10.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.85
+active_move = 0.75
+projectile_speed = 360.0
+projectile_range = 220.0
+animation_ref = &"placeholder.bolt"
+
+[sub_resource type="Resource" id="Resource_lavtu"]
+script = ExtResource("2_vuk1u")
+inputs = "LLL"
+display_name = "Spark Pattern"
+description = "L-L-L: Spark Pattern."
+
+[sub_resource type="Resource" id="Resource_dsa0q"]
+script = ExtResource("2_vuk1u")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Focused Bolt"
+description = "L-L-H: Focused Bolt."
+
+[sub_resource type="Resource" id="Resource_wyj74"]
+script = ExtResource("2_vuk1u")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Twin Spark"
+description = "L-H-L: Twin Spark."
+
+[sub_resource type="Resource" id="Resource_np81f"]
+script = ExtResource("2_vuk1u")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Guided Sequence"
+description = "H-L-L: Guided Sequence."
+
+[sub_resource type="Resource" id="Resource_tgv4h"]
+script = ExtResource("2_vuk1u")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Arcane Cadence"
+description = "L-H-H: Arcane Cadence."
+
+[sub_resource type="Resource" id="Resource_2340r"]
+script = ExtResource("2_vuk1u")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Prismatic Weave"
+description = "H-L-H: Prismatic Weave."
+
+[sub_resource type="Resource" id="Resource_lpnqd"]
+script = ExtResource("2_vuk1u")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Forked Current"
+description = "H-H-L: Forked Current."
+
+[sub_resource type="Resource" id="Resource_dtvi3"]
+script = ExtResource("2_vuk1u")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Spellweaver's Finale"
+description = "H-H-H: Spellweaver's Finale."
+
+[resource]
+script = ExtResource("4_4f0kg")
+id = &"wand"
+display_name = "Scepter / Wand"
+root_light = &"wand_l"
+root_heavy = &"wand_h"
+attacks = Array[ExtResource("1_yuxax")]([SubResource("Resource_03m4y"), SubResource("Resource_gwuma"), SubResource("Resource_yyk6c"), SubResource("Resource_beutb"), SubResource("Resource_j30uy"), SubResource("Resource_c54mb"), SubResource("Resource_sv4h0"), SubResource("Resource_vspg0"), SubResource("Resource_dburg"), SubResource("Resource_voh5h"), SubResource("Resource_vgvcg"), SubResource("Resource_w06vl"), SubResource("Resource_ukdws"), SubResource("Resource_fqh2b")])
+combo_paths = Array[ExtResource("2_vuk1u")]([SubResource("Resource_lavtu"), SubResource("Resource_dsa0q"), SubResource("Resource_wyj74"), SubResource("Resource_np81f"), SubResource("Resource_tgv4h"), SubResource("Resource_2340r"), SubResource("Resource_lpnqd"), SubResource("Resource_dtvi3")])
+display_color = Color(0.78, 0.66, 1, 1)
+visual_blade_length = 10.0
+defense_profile = ExtResource("3_5x021")

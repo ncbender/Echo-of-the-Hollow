@@ -30,6 +30,7 @@ func _bind() -> void:
 	spawn_player()
 	bridge = PlayerProgressionBridge.new()
 	player.add_child(bridge)
+	character.mastery.add_xp(&"one_handed_sword", 400)   # Combat Flow: mastery 4 unlocks L-L-H
 	bridge.bind(player, character)
 	player.combat.hit_landed.connect(func(hit: HitData) -> void: landed.append(hit))
 
@@ -62,10 +63,8 @@ func _evolve(item: ItemInstance, mutation: StringName = &"") -> CraftingService.
 
 
 func _swing_lights(count: int) -> void:
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	for i in count:
-		await tick(light(f))
-		await tick(f, 30)
+		await perform_path("L", Vector2.RIGHT, 2)
 
 
 func test_only_marked_items_evolve() -> void:
@@ -88,9 +87,7 @@ func test_item_xp_from_real_enemies_only_and_separate_from_mastery() -> void:
 	dummy.position = Vector2(-24, 0)
 	add_child(dummy)
 	await wait_physics(2)
-	var f := frame(Vector2.ZERO, Vector2.LEFT)
-	await tick(light(f))
-	await tick(f, 30)
+	await perform_path("L", Vector2.LEFT, 2)
 	check_eq(fang.evolution_xp(), 3, "training dummy gives no item XP")
 
 
@@ -144,13 +141,7 @@ func test_storm_charge_changes_combat() -> void:
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	var finisher := func() -> HitData:
-		await tick(light(f))
-		await tick(f, 12)
-		await tick(light(f))
-		await tick(f, 12)
-		f.heavy_pressed = true
-		await tick(f)
-		await tick(f, 50)
+		await perform_path("LLH", Vector2.RIGHT, 20)
 		for index in range(landed.size() - 1, -1, -1):
 			if landed[index].attack.id == &"sword_llh_crush":
 				return landed[index]

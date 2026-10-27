@@ -47,7 +47,11 @@ func seconds_to_ticks(seconds: float) -> int:
 
 # --- Combat helpers ---------------------------------------------------------
 
-const SWORD: WeaponFamily = preload("res://data/weapons/one_handed_sword.tres")
+## Legacy combo engine (still used by enemies): the pre-1.5 sword and greatsword
+## trees with RMB charge, kept as fixtures for the engine tests. The player's
+## families in data/weapons use Combat Flow 1.5 (perform_path below).
+const SWORD: WeaponFamily = preload("res://tests/fixtures/legacy_sword.tres")
+const LEGACY_GREATSWORD: WeaponFamily = preload("res://tests/fixtures/legacy_greatsword.tres")
 
 ## Hits received by targets created with add_target().
 var hits: Array[HitData] = []
@@ -115,3 +119,38 @@ static func heavy_up(f: InputFrame) -> InputFrame:
 static func dash_press(f: InputFrame) -> InputFrame:
 	f.dash_pressed = true
 	return f
+
+
+## Legacy-engine tests: the spawned player wields a legacy fixture family.
+func spawn_legacy_player(at: Vector2 = Vector2.ZERO, family: WeaponFamily = SWORD) -> Player:
+	spawn_player(at)
+	player.set_weapon_family(family)
+	return player
+
+
+## Combat Flow: presses `path` ("LLH"; bows "LP") on the player, each input as
+## soon as the running step accepts it, then waits until the chain is over.
+## `aim` per tick; returns when the player is neutral again.
+func perform_path(path: String, aim: Vector2 = Vector2.RIGHT, settle_ticks: int = 0) -> void:
+	var idle := frame(Vector2.ZERO, aim)
+	for index in path.length():
+		var guard := 0
+		while index > 0 and (player.combat.chain.length() != index or player.combat.attack_clock() < player.combat.accept_from()) and guard < 240:
+			await tick(idle)
+			guard += 1
+		var press := frame(Vector2.ZERO, aim)
+		match path[index]:
+			"L":
+				press.light_pressed = true
+			"H":
+				press.heavy_pressed = true
+			"P":
+				press.light_pressed = true
+				press.heavy_held = true
+		await tick(press)
+	var wait := 0
+	while player.combat.is_busy() and wait < 300:
+		await tick(idle)
+		wait += 1
+	if settle_ticks > 0:
+		await tick(idle, settle_ticks)

@@ -32,8 +32,7 @@ class FullChargeModifier:
 		for tag in effect.required_tags:
 			if not tag in hit.tags:
 				return
-		var profile := hit.attack.charge_profile if hit.attack != null else null
-		if profile == null or profile.max_tier() <= 0 or hit.charge_tier < profile.max_tier():
+		if not hit.is_full_power():
 			return
 		var shared := runner.shared_state(effect.effect_id)
 		if shared.get("last_swing", -1) == hit.attack_instance_id and shared.get("last_target", 0) == hit.target.get_instance_id():

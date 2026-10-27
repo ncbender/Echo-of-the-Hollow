@@ -44,7 +44,7 @@ func test_tap_gives_normal_heavy() -> void:
 
 
 func test_charge_reduces_movement() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	var f := frame(Vector2.DOWN, Vector2.RIGHT)
 	await tick(heavy_down(f), 10)
@@ -52,7 +52,7 @@ func test_charge_reduces_movement() -> void:
 
 
 func test_tier_scales_damage() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(24, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -68,7 +68,7 @@ func test_tier_scales_damage() -> void:
 
 
 func test_dash_cancels_charge_and_loses_it() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	track_player_attacks()
 	add_target(Vector2(24, 0))
 	await wait_physics(2)
@@ -86,7 +86,7 @@ func test_dash_cancels_charge_and_loses_it() -> void:
 
 
 func test_dash_in_light_startup_prevents_ghost_hit() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(22, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -100,7 +100,7 @@ func test_dash_in_light_startup_prevents_ghost_hit() -> void:
 
 
 func test_heavy_startup_cancel_prevents_ghost_hit() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(24, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -114,7 +114,7 @@ func test_heavy_startup_cancel_prevents_ghost_hit() -> void:
 
 
 func test_heavy_active_phase_not_cancelable_dash_buffered() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(24, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -131,7 +131,7 @@ func test_heavy_active_phase_not_cancelable_dash_buffered() -> void:
 
 
 func test_damage_before_cancel_persists_and_no_repeat() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	track_player_attacks()
 	add_target(Vector2(22, 0))
 	await wait_physics(2)

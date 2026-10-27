@@ -8,13 +8,13 @@ const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const GRUNT_ATTACKS: WeaponFamily = preload("res://data/enemies/grunt_attacks.tres")
 const WARDEN_ATTACKS: WeaponFamily = preload("res://data/enemies/grove_warden_attacks.tres")
 const BOSS_CONFIG: EnemyConfig = preload("res://data/enemies/grove_warden_config.tres")
-const GREATSWORD: WeaponFamily = preload("res://data/weapons/two_handed_sword.tres")
+const GREATSWORD: WeaponFamily = LEGACY_GREATSWORD
 
 var enemy: Enemy
 
 
 func _setup(enemy_at: Vector2 = Vector2(24, 0), config: EnemyConfig = null) -> void:
-	spawn_player()
+	spawn_legacy_player()
 	enemy = GRUNT_SCENE.instantiate()
 	if config != null:
 		enemy.config = config
@@ -58,7 +58,7 @@ func _swipe() -> AttackDefinition:
 
 
 func test_profiles_follow_weapon_and_shield() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	check_eq(player.defense.profile().id, &"sword_guard", "one-handed sword: Sword Guard")
 	player.set_weapon_family(GREATSWORD)
@@ -272,7 +272,7 @@ func test_real_grunt_swipe_parried_and_interrupted() -> void:
 
 
 func test_combo_timings_unchanged_with_defense_present() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	track_player_attacks()
 	await wait_physics(1)
 	var f := frame()

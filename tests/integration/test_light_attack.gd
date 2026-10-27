@@ -42,7 +42,7 @@ func test_multiple_clicks_never_queue_more_than_one() -> void:
 
 
 func test_hitbox_only_active_in_active_phase_and_hits_once() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	track_player_attacks()
 	add_target(Vector2(22, 0))
 	await wait_physics(2)
@@ -63,7 +63,7 @@ func test_hitbox_only_active_in_active_phase_and_hits_once() -> void:
 
 
 func test_each_swing_hits_again() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(22, 0))
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -76,7 +76,7 @@ func test_each_swing_hits_again() -> void:
 
 
 func test_no_hit_outside_arc() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	add_target(Vector2(-22, 0))   # behind the player
 	await wait_physics(2)
 	var f := frame(Vector2.ZERO, Vector2.RIGHT)
@@ -86,7 +86,7 @@ func test_no_hit_outside_arc() -> void:
 
 
 func test_light_attack_reduces_movement() -> void:
-	spawn_player()
+	spawn_legacy_player()
 	await wait_physics(1)
 	# Move down, attack right: the lunge is perpendicular, so velocity.y shows the multiplier.
 	var f := frame(Vector2.DOWN, Vector2.RIGHT)

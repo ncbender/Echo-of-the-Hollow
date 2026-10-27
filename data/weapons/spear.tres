@@ -1,0 +1,386 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_23sov"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_wipgh"]
+[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="3_mkper"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_amhf3"]
+
+[sub_resource type="Resource" id="Resource_vdoww"]
+script = ExtResource("1_23sov")
+id = &"spear_h"
+display_name = "Heavy Attack"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_4kn2f"]
+script = ExtResource("1_23sov")
+id = &"spear_l"
+display_name = "Quick Attack"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 30.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_5r0xx"]
+script = ExtResource("1_23sov")
+id = &"spear_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_gv2q6"]
+script = ExtResource("1_23sov")
+id = &"spear_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 30.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_k84wq"]
+script = ExtResource("1_23sov")
+id = &"spear_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_ly6g0"]
+script = ExtResource("1_23sov")
+id = &"spear_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 30.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_0x22r"]
+script = ExtResource("1_23sov")
+id = &"spear_hhh"
+display_name = "Unbroken Reach"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_u4b81"]
+script = ExtResource("1_23sov")
+id = &"spear_hhl"
+display_name = "Spearwheel"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 160.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_tefgd"]
+script = ExtResource("1_23sov")
+id = &"spear_hlh"
+display_name = "Measured Reversal"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_wfwdu"]
+script = ExtResource("1_23sov")
+id = &"spear_hll"
+display_name = "Advancing Spear"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 30.0
+move_multiplier = 0.75
+lunge_distance = 26.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_oyles"]
+script = ExtResource("1_23sov")
+id = &"spear_lhh"
+display_name = "Iron Reach"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_ppb3g"]
+script = ExtResource("1_23sov")
+id = &"spear_lhl"
+display_name = "Sweeping Point"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 160.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_e7y61"]
+script = ExtResource("1_23sov")
+id = &"spear_llh"
+display_name = "Driving Thrust"
+weapon_family_id = &"spear"
+input_type = 1
+startup = 0.32
+active = 0.14
+recovery = 0.52
+damage = 30.0
+poise_damage = 35.0
+knockback = 18.0
+hitstop = 0.06
+reach = 56.0
+arc_degrees = 40.0
+move_multiplier = 0.55
+lunge_distance = 32.0
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.55
+active_move = 0.4
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_7dvm1"]
+script = ExtResource("1_23sov")
+id = &"spear_lll"
+display_name = "Sentinel's Rhythm"
+weapon_family_id = &"spear"
+startup = 0.17
+active = 0.1
+recovery = 0.34
+damage = 13.0
+poise_damage = 9.0
+reach = 50.0
+arc_degrees = 30.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+animation_ref = &"placeholder.thrust"
+
+[sub_resource type="Resource" id="Resource_3dhek"]
+script = ExtResource("2_wipgh")
+inputs = "LLL"
+display_name = "Sentinel's Rhythm"
+description = "L-L-L: Sentinel's Rhythm."
+
+[sub_resource type="Resource" id="Resource_b7w0e"]
+script = ExtResource("2_wipgh")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Driving Thrust"
+description = "L-L-H: Driving Thrust."
+
+[sub_resource type="Resource" id="Resource_eexqs"]
+script = ExtResource("2_wipgh")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Sweeping Point"
+description = "L-H-L: Sweeping Point."
+
+[sub_resource type="Resource" id="Resource_8mc83"]
+script = ExtResource("2_wipgh")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Advancing Spear"
+description = "H-L-L: Advancing Spear."
+
+[sub_resource type="Resource" id="Resource_csmqw"]
+script = ExtResource("2_wipgh")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Iron Reach"
+description = "L-H-H: Iron Reach."
+
+[sub_resource type="Resource" id="Resource_lkcsm"]
+script = ExtResource("2_wipgh")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Measured Reversal"
+description = "H-L-H: Measured Reversal."
+
+[sub_resource type="Resource" id="Resource_aoj1t"]
+script = ExtResource("2_wipgh")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Spearwheel"
+description = "H-H-L: Spearwheel."
+
+[sub_resource type="Resource" id="Resource_x4g11"]
+script = ExtResource("2_wipgh")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Unbroken Reach"
+description = "H-H-H: Unbroken Reach."
+
+[resource]
+script = ExtResource("4_amhf3")
+id = &"spear"
+display_name = "Spear"
+root_light = &"spear_l"
+root_heavy = &"spear_h"
+attacks = Array[ExtResource("1_23sov")]([SubResource("Resource_vdoww"), SubResource("Resource_4kn2f"), SubResource("Resource_5r0xx"), SubResource("Resource_gv2q6"), SubResource("Resource_k84wq"), SubResource("Resource_ly6g0"), SubResource("Resource_0x22r"), SubResource("Resource_u4b81"), SubResource("Resource_tefgd"), SubResource("Resource_wfwdu"), SubResource("Resource_oyles"), SubResource("Resource_ppb3g"), SubResource("Resource_e7y61"), SubResource("Resource_7dvm1")])
+combo_paths = Array[ExtResource("2_wipgh")]([SubResource("Resource_3dhek"), SubResource("Resource_b7w0e"), SubResource("Resource_eexqs"), SubResource("Resource_8mc83"), SubResource("Resource_csmqw"), SubResource("Resource_lkcsm"), SubResource("Resource_aoj1t"), SubResource("Resource_x4g11")])
+display_color = Color(0.86, 0.8, 0.62, 1)
+visual_blade_length = 24.0
+defense_profile = ExtResource("3_mkper")

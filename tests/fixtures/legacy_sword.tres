@@ -1,0 +1,186 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
+[ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
+[ext_resource type="Resource" path="res://data/combat/defense/sword_guard.tres" id="4_defense"]
+
+[sub_resource type="Resource" id="Charge_sword"]
+script = ExtResource("3_charge")
+tier_names = PackedStringArray("Normal", "Empowered", "Full")
+tier_thresholds = PackedFloat32Array(0.25, 0.7)
+damage_multipliers = PackedFloat32Array(1.0, 1.35, 1.9)
+poise_multipliers = PackedFloat32Array(1.0, 1.5, 2.5)
+reach_multipliers = PackedFloat32Array(1.0, 1.1, 1.25)
+hitstop_multipliers = PackedFloat32Array(1.0, 1.3, 1.8)
+move_multiplier = 0.55
+
+[sub_resource type="Resource" id="Attack_l1"]
+script = ExtResource("2_attack")
+id = &"sword_light_1"
+display_name = "Slash"
+weapon_family_id = &"one_handed_sword"
+input_type = 0
+startup = 0.08
+active = 0.08
+recovery = 0.22
+chain_delay = 0.0
+combo_window = 0.35
+damage = 12.0
+poise_damage = 8.0
+knockback = 6.0
+reach = 30.0
+arc_degrees = 110.0
+move_multiplier = 0.85
+lunge_distance = 6.0
+next_light = &"sword_light_2"
+next_heavy = &"sword_lh_thrust"
+dash_cancel_phases = 7
+
+[sub_resource type="Resource" id="Attack_l2"]
+script = ExtResource("2_attack")
+id = &"sword_light_2"
+display_name = "Backhand"
+weapon_family_id = &"one_handed_sword"
+input_type = 0
+startup = 0.07
+active = 0.08
+recovery = 0.22
+chain_delay = 0.0
+combo_window = 0.35
+damage = 12.0
+poise_damage = 8.0
+knockback = 6.0
+reach = 30.0
+arc_degrees = 120.0
+move_multiplier = 0.85
+lunge_distance = 12.0
+next_light = &"sword_light_3"
+next_heavy = &"sword_llh_crush"
+dash_cancel_phases = 7
+
+[sub_resource type="Resource" id="Attack_l3"]
+script = ExtResource("2_attack")
+id = &"sword_light_3"
+display_name = "Wide Sweep"
+weapon_family_id = &"one_handed_sword"
+input_type = 0
+startup = 0.14
+active = 0.12
+recovery = 0.34
+chain_delay = 0.08
+combo_window = 0.3
+damage = 20.0
+poise_damage = 22.0
+knockback = 10.0
+hitstop = 0.04
+reach = 36.0
+arc_degrees = 160.0
+move_multiplier = 0.85
+lunge_distance = 14.0
+next_light = &"sword_light_4_mastery"
+dash_cancel_phases = 7
+effect_tags = Array[StringName]([&"finisher"])
+
+[sub_resource type="Resource" id="Attack_l4"]
+script = ExtResource("2_attack")
+id = &"sword_light_4_mastery"
+display_name = "Riposte Spin (Mastery)"
+weapon_family_id = &"one_handed_sword"
+input_type = 0
+startup = 0.1
+active = 0.1
+recovery = 0.4
+chain_delay = 0.1
+combo_window = 0.25
+damage = 28.0
+poise_damage = 30.0
+knockback = 22.0
+hitstop = 0.05
+reach = 40.0
+arc_degrees = 180.0
+move_multiplier = 0.85
+lunge_distance = 22.0
+dash_cancel_phases = 7
+unlock_requirement = &"mastery.one_handed_sword.1"
+effect_tags = Array[StringName]([&"finisher", &"mastery"])
+
+[sub_resource type="Resource" id="Attack_heavy"]
+script = ExtResource("2_attack")
+id = &"sword_heavy"
+display_name = "Heavy Cleave"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.16
+active = 0.1
+recovery = 0.4
+chain_delay = 0.12
+combo_window = 0.3
+damage = 26.0
+poise_damage = 30.0
+knockback = 18.0
+hitstop = 0.06
+reach = 38.0
+arc_degrees = 130.0
+move_multiplier = 0.4
+lunge_distance = 8.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_sword")
+effect_tags = Array[StringName]([&"heavy"])
+
+[sub_resource type="Resource" id="Attack_lh"]
+script = ExtResource("2_attack")
+id = &"sword_lh_thrust"
+display_name = "Lunging Thrust"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.14
+active = 0.1
+recovery = 0.38
+chain_delay = 0.12
+combo_window = 0.3
+damage = 24.0
+poise_damage = 20.0
+knockback = 14.0
+hitstop = 0.05
+reach = 58.0
+arc_degrees = 36.0
+move_multiplier = 0.3
+lunge_distance = 36.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_sword")
+effect_tags = Array[StringName]([&"heavy", &"thrust"])
+
+[sub_resource type="Resource" id="Attack_llh"]
+script = ExtResource("2_attack")
+id = &"sword_llh_crush"
+display_name = "Crushing Arc"
+weapon_family_id = &"one_handed_sword"
+input_type = 1
+startup = 0.24
+active = 0.12
+recovery = 0.5
+chain_delay = 0.15
+combo_window = 0.3
+damage = 32.0
+poise_damage = 55.0
+knockback = 30.0
+hitstop = 0.08
+reach = 42.0
+arc_degrees = 180.0
+move_multiplier = 0.2
+lunge_distance = 10.0
+dash_cancel_phases = 5
+charge_profile = SubResource("Charge_sword")
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+
+[resource]
+script = ExtResource("1_family")
+id = &"one_handed_sword"
+display_name = "One-Handed Sword"
+display_color = Color(0.91, 0.89, 0.82, 1)
+visual_blade_length = 14.0
+defense_profile = ExtResource("4_defense")
+root_light = &"sword_light_1"
+root_heavy = &"sword_heavy"
+attacks = Array[ExtResource("2_attack")]([SubResource("Attack_l1"), SubResource("Attack_l2"), SubResource("Attack_l3"), SubResource("Attack_l4"), SubResource("Attack_heavy"), SubResource("Attack_lh"), SubResource("Attack_llh")])

@@ -6,13 +6,13 @@
 [sub_resource type="Resource" id="Resource_dhwsu"]
 script = ExtResource("1_2gqfh")
 effect_id = &"stone_golem_crush"
-description = "Fully charged heavy finishers deal +60% poise damage."
+description = "Heavy finishers deal +60% poise damage."
 
 [resource]
 script = ExtResource("2_bkilx")
 id = &"stone_golem"
 display_name = "Essence of the Stone Golem"
-description = "Fully charged heavy finishers deal +60% poise damage."
+description = "Heavy finishers deal +60% poise damage."
 item_id = &"stone_golem_essence"
 effect = SubResource("Resource_dhwsu")
 allowed_slot_kinds = Array[int]([10, 11])

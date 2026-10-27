@@ -1,0 +1,384 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_h47v6"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_kbqd2"]
+[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="3_gsqcx"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_tv44u"]
+
+[sub_resource type="Resource" id="Resource_onsiw"]
+script = ExtResource("1_h47v6")
+id = &"staff_h"
+display_name = "Heavy Spell"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "H"
+flow_role = 1
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_ylm60"]
+script = ExtResource("1_h47v6")
+id = &"staff_l"
+display_name = "Quick Spell"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_mjem7"]
+script = ExtResource("1_h47v6")
+id = &"staff_hh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "HH"
+flow_role = 2
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_bv1gs"]
+script = ExtResource("1_h47v6")
+id = &"staff_hl"
+display_name = "Quick Follow-up"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "HL"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_u40oa"]
+script = ExtResource("1_h47v6")
+id = &"staff_lh"
+display_name = "Heavy Follow-up"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy"])
+combo_input = "LH"
+flow_role = 2
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_u0064"]
+script = ExtResource("1_h47v6")
+id = &"staff_ll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "LL"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_vqfmf"]
+script = ExtResource("1_h47v6")
+id = &"staff_hhh"
+display_name = "Astral Convergence"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HHH"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_gooet"]
+script = ExtResource("1_h47v6")
+id = &"staff_hhl"
+display_name = "Resonant Spiral"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HHL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_kpch1"]
+script = ExtResource("1_h47v6")
+id = &"staff_hlh"
+display_name = "Crossing Echoes"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "HLH"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_wh8jt"]
+script = ExtResource("1_h47v6")
+id = &"staff_hll"
+display_name = "Channeler's Reach"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "HLL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_a28tn"]
+script = ExtResource("1_h47v6")
+id = &"staff_lhh"
+display_name = "Resonant Current"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LHH"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_72x28"]
+script = ExtResource("1_h47v6")
+id = &"staff_lhl"
+display_name = "Echo Reversal"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LHL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_grghx"]
+script = ExtResource("1_h47v6")
+id = &"staff_llh"
+display_name = "Arcane Sweep"
+weapon_family_id = &"staff"
+input_type = 1
+startup = 0.3
+active = 0.14
+recovery = 0.48
+damage = 28.0
+poise_damage = 32.0
+knockback = 18.0
+hitstop = 0.06
+reach = 48.0
+arc_degrees = 110.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"heavy", &"finisher"])
+combo_input = "LLH"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_332ha"]
+script = ExtResource("1_h47v6")
+id = &"staff_lll"
+display_name = "Ember Sequence"
+weapon_family_id = &"staff"
+startup = 0.16
+active = 0.1
+recovery = 0.32
+damage = 13.0
+poise_damage = 8.0
+reach = 40.0
+arc_degrees = 90.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LLL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.65
+animation_ref = &"placeholder.arcane_strike"
+
+[sub_resource type="Resource" id="Resource_mrcpu"]
+script = ExtResource("2_kbqd2")
+inputs = "LLL"
+display_name = "Ember Sequence"
+description = "L-L-L: Ember Sequence."
+
+[sub_resource type="Resource" id="Resource_wvmb7"]
+script = ExtResource("2_kbqd2")
+inputs = "LLH"
+unlock_level = 4
+display_name = "Arcane Sweep"
+description = "L-L-H: Arcane Sweep."
+
+[sub_resource type="Resource" id="Resource_jf371"]
+script = ExtResource("2_kbqd2")
+inputs = "LHL"
+unlock_level = 6
+display_name = "Echo Reversal"
+description = "L-H-L: Echo Reversal."
+
+[sub_resource type="Resource" id="Resource_qbhfx"]
+script = ExtResource("2_kbqd2")
+inputs = "HLL"
+unlock_level = 9
+display_name = "Channeler's Reach"
+description = "H-L-L: Channeler's Reach."
+
+[sub_resource type="Resource" id="Resource_hq8du"]
+script = ExtResource("2_kbqd2")
+inputs = "LHH"
+unlock_level = 11
+display_name = "Resonant Current"
+description = "L-H-H: Resonant Current."
+
+[sub_resource type="Resource" id="Resource_b5klh"]
+script = ExtResource("2_kbqd2")
+inputs = "HLH"
+unlock_level = 14
+display_name = "Crossing Echoes"
+description = "H-L-H: Crossing Echoes."
+
+[sub_resource type="Resource" id="Resource_s3jqc"]
+script = ExtResource("2_kbqd2")
+inputs = "HHL"
+unlock_level = 17
+display_name = "Resonant Spiral"
+description = "H-H-L: Resonant Spiral."
+
+[sub_resource type="Resource" id="Resource_grtv5"]
+script = ExtResource("2_kbqd2")
+inputs = "HHH"
+unlock_level = 20
+display_name = "Astral Convergence"
+description = "H-H-H: Astral Convergence."
+
+[resource]
+script = ExtResource("4_tv44u")
+id = &"staff"
+display_name = "Staff"
+root_light = &"staff_l"
+root_heavy = &"staff_h"
+attacks = Array[ExtResource("1_h47v6")]([SubResource("Resource_onsiw"), SubResource("Resource_ylm60"), SubResource("Resource_mjem7"), SubResource("Resource_bv1gs"), SubResource("Resource_u40oa"), SubResource("Resource_u0064"), SubResource("Resource_vqfmf"), SubResource("Resource_gooet"), SubResource("Resource_kpch1"), SubResource("Resource_wh8jt"), SubResource("Resource_a28tn"), SubResource("Resource_72x28"), SubResource("Resource_grghx"), SubResource("Resource_332ha")])
+combo_paths = Array[ExtResource("2_kbqd2")]([SubResource("Resource_mrcpu"), SubResource("Resource_wvmb7"), SubResource("Resource_jf371"), SubResource("Resource_qbhfx"), SubResource("Resource_hq8du"), SubResource("Resource_b5klh"), SubResource("Resource_s3jqc"), SubResource("Resource_grtv5")])
+display_color = Color(0.55, 0.85, 1, 1)
+visual_blade_length = 18.0
+defense_profile = ExtResource("3_gsqcx")

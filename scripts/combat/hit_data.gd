@@ -61,3 +61,15 @@ func snapshot_target() -> void:
 
 func is_direct() -> bool:
 	return source == Source.DIRECT
+
+
+## Effects written for "fully charged" heavies (talents, essences, evolutions):
+## a legacy heavy at its top charge tier, or - Combat Flow 1.5 has no charging -
+## a heavy finisher (provisional mapping, docs/WEAPON_MASTERY_COMBAT_FLOW.md).
+func is_full_power() -> bool:
+	if attack == null:
+		return false
+	if attack.is_flow():
+		return attack.flow_role == AttackDefinition.FlowRole.HEAVY_FINISHER
+	var profile := attack.charge_profile
+	return profile != null and profile.max_tier() > 0 and charge_tier >= profile.max_tier()

@@ -1,0 +1,326 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="1_fw177"]
+[ext_resource type="Script" path="res://scripts/combat/combo_path_definition.gd" id="2_0l383"]
+[ext_resource type="Resource" path="res://data/combat/defense/heavy_guard.tres" id="3_redla"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="4_2hkv3"]
+
+[sub_resource type="Resource" id="Resource_fxw16"]
+script = ExtResource("1_fw177")
+id = &"bow_l"
+display_name = "Quick Shot"
+weapon_family_id = &"bow"
+startup = 0.18
+active = 0.04
+recovery = 0.38
+damage = 13.0
+poise_damage = 9.0
+reach = 300.0
+arc_degrees = 10.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "L"
+windup_move = 0.75
+active_move = 0.6
+projectile_speed = 520.0
+projectile_range = 300.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_gm5bu"]
+script = ExtResource("1_fw177")
+id = &"bow_p"
+display_name = "Precision Shot"
+weapon_family_id = &"bow"
+input_type = 1
+startup = 0.38
+active = 0.05
+recovery = 0.62
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 380.0
+arc_degrees = 10.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"precision"])
+combo_input = "P"
+flow_role = 1
+windup_move = 0.6
+active_move = 0.45
+projectile_speed = 700.0
+projectile_range = 380.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_vk2m4"]
+script = ExtResource("1_fw177")
+id = &"bow_ll"
+display_name = "Twin Arrow"
+weapon_family_id = &"bow"
+startup = 0.18
+active = 0.04
+recovery = 0.38
+damage = 13.0
+poise_damage = 9.0
+reach = 300.0
+arc_degrees = 10.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+projectile_speed = 520.0
+projectile_range = 300.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_du8kl"]
+script = ExtResource("1_fw177")
+id = &"bow_lp"
+display_name = "Finishing Aim"
+weapon_family_id = &"bow"
+input_type = 1
+startup = 0.38
+active = 0.05
+recovery = 0.62
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 380.0
+arc_degrees = 10.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"precision", &"finisher"])
+combo_input = "LP"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+projectile_speed = 700.0
+projectile_range = 380.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_luy5p"]
+script = ExtResource("1_fw177")
+id = &"bow_pl"
+display_name = "Rapid Recovery"
+weapon_family_id = &"bow"
+startup = 0.18
+active = 0.04
+recovery = 0.38
+damage = 13.0
+poise_damage = 9.0
+reach = 300.0
+arc_degrees = 10.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "PL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+projectile_speed = 520.0
+projectile_range = 300.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_gypkq"]
+script = ExtResource("1_fw177")
+id = &"bow_llp"
+display_name = "Hunter's Rhythm"
+weapon_family_id = &"bow"
+input_type = 1
+startup = 0.38
+active = 0.05
+recovery = 0.62
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 380.0
+arc_degrees = 10.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"precision", &"finisher"])
+combo_input = "LLP"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+projectile_speed = 700.0
+projectile_range = 380.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_7a5vc"]
+script = ExtResource("1_fw177")
+id = &"bow_lpl"
+display_name = "Split Volley"
+weapon_family_id = &"bow"
+startup = 0.18
+active = 0.04
+recovery = 0.38
+damage = 13.0
+poise_damage = 9.0
+reach = 300.0
+arc_degrees = 10.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"finisher"])
+combo_input = "LPL"
+flow_role = 3
+windup_move = 0.75
+active_move = 0.6
+projectile_speed = 520.0
+projectile_range = 300.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_f3cf4"]
+script = ExtResource("1_fw177")
+id = &"bow_pll"
+display_name = "Quick Follow-up"
+weapon_family_id = &"bow"
+startup = 0.18
+active = 0.04
+recovery = 0.38
+damage = 13.0
+poise_damage = 9.0
+reach = 300.0
+arc_degrees = 10.0
+move_multiplier = 0.75
+dash_cancel_phases = 4
+combo_input = "PLL"
+flow_role = 2
+windup_move = 0.75
+active_move = 0.6
+projectile_speed = 520.0
+projectile_range = 300.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_86vyh"]
+script = ExtResource("1_fw177")
+id = &"bow_plp"
+display_name = "Piercing Sequence"
+weapon_family_id = &"bow"
+input_type = 1
+startup = 0.38
+active = 0.05
+recovery = 0.62
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 380.0
+arc_degrees = 10.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"precision", &"finisher"])
+combo_input = "PLP"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+projectile_speed = 700.0
+projectile_range = 380.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_ouajk"]
+script = ExtResource("1_fw177")
+id = &"bow_pllp"
+display_name = "Master's Volley"
+weapon_family_id = &"bow"
+input_type = 1
+startup = 0.38
+active = 0.05
+recovery = 0.62
+damage = 32.0
+poise_damage = 37.0
+knockback = 18.0
+hitstop = 0.06
+reach = 380.0
+arc_degrees = 10.0
+move_multiplier = 0.6
+dash_cancel_phases = 4
+effect_tags = Array[StringName]([&"precision", &"finisher"])
+combo_input = "PLLP"
+flow_role = 4
+windup_move = 0.6
+active_move = 0.45
+projectile_speed = 700.0
+projectile_range = 380.0
+projectile_shape = 2
+animation_ref = &"placeholder.shot"
+
+[sub_resource type="Resource" id="Resource_nty4j"]
+script = ExtResource("2_0l383")
+inputs = "LL"
+display_name = "Twin Arrow"
+description = "L-L: Twin Arrow."
+
+[sub_resource type="Resource" id="Resource_2n544"]
+script = ExtResource("2_0l383")
+inputs = "LP"
+unlock_level = 4
+display_name = "Finishing Aim"
+description = "L-P: Finishing Aim."
+
+[sub_resource type="Resource" id="Resource_vvjjl"]
+script = ExtResource("2_0l383")
+inputs = "PL"
+unlock_level = 6
+display_name = "Rapid Recovery"
+description = "P-L: Rapid Recovery."
+
+[sub_resource type="Resource" id="Resource_wle4e"]
+script = ExtResource("2_0l383")
+inputs = "LLP"
+unlock_level = 9
+display_name = "Hunter's Rhythm"
+description = "L-L-P: Hunter's Rhythm."
+
+[sub_resource type="Resource" id="Resource_b7vjf"]
+script = ExtResource("2_0l383")
+inputs = "PLP"
+unlock_level = 14
+display_name = "Piercing Sequence"
+description = "P-L-P: Piercing Sequence."
+
+[sub_resource type="Resource" id="Resource_glb8d"]
+script = ExtResource("2_0l383")
+inputs = "LPL"
+unlock_level = 17
+display_name = "Split Volley"
+description = "L-P-L: Split Volley."
+
+[sub_resource type="Resource" id="Resource_amdtr"]
+script = ExtResource("2_0l383")
+inputs = "PLLP"
+unlock_level = 20
+display_name = "Master's Volley"
+description = "P-L-L-P: Master's Volley."
+
+[sub_resource type="Resource" id="Resource_su2w5"]
+script = ExtResource("2_0l383")
+unlock_level = 10
+display_name = "Flowing Draw"
+description = "Hold LMB: an automatic sequence of three Quick Shots, then a full recovery."
+kind = 1
+
+[resource]
+script = ExtResource("4_2hkv3")
+id = &"bow"
+display_name = "Bow"
+root_light = &"bow_l"
+root_heavy = &"bow_p"
+attacks = Array[ExtResource("1_fw177")]([SubResource("Resource_fxw16"), SubResource("Resource_gm5bu"), SubResource("Resource_vk2m4"), SubResource("Resource_du8kl"), SubResource("Resource_luy5p"), SubResource("Resource_gypkq"), SubResource("Resource_7a5vc"), SubResource("Resource_f3cf4"), SubResource("Resource_86vyh"), SubResource("Resource_ouajk")])
+input_scheme = 1
+combo_paths = Array[ExtResource("2_0l383")]([SubResource("Resource_nty4j"), SubResource("Resource_2n544"), SubResource("Resource_vvjjl"), SubResource("Resource_wle4e"), SubResource("Resource_b7vjf"), SubResource("Resource_glb8d"), SubResource("Resource_amdtr"), SubResource("Resource_su2w5")])
+display_color = Color(0.8, 0.72, 0.5, 1)
+visual_blade_length = 12.0
+defense_profile = ExtResource("3_redla")

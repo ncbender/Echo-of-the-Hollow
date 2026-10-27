@@ -1,37 +1,8 @@
 [gd_resource type="Resource" script_class="MasteryTrack" format=3]
 
-[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_track.gd" id="1_track"]
-[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_unlock.gd" id="2_unlock"]
-
-[sub_resource type="Resource" id="Unlock_technique"]
-script = ExtResource("2_unlock")
-level = 3
-requirement_id = &"mastery.two_handed_sword.1"
-display_name = "Cleaving Echo"
-description = "L-L-L-L: a fourth light attack, wide 180° greatsword sweep."
-
-[sub_resource type="Resource" id="Unlock_m5"]
-script = ExtResource("2_unlock")
-level = 5
-display_name = "Greatsword Adept"
-description = "Milestone (no gameplay effect yet)."
-
-[sub_resource type="Resource" id="Unlock_m10"]
-script = ExtResource("2_unlock")
-level = 10
-display_name = "Greatsword Master"
-description = "Milestone (no gameplay effect yet)."
-
-[sub_resource type="Resource" id="Unlock_m20"]
-script = ExtResource("2_unlock")
-level = 20
-display_name = "Greatsword Paragon"
-description = "Milestone: maximum mastery."
+[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_track.gd" id="1_k8s8v"]
+[ext_resource type="Script" path="res://scripts/rpg/progression/mastery_unlock.gd" id="2_cve4v"]
 
 [resource]
-script = ExtResource("1_track")
+script = ExtResource("1_k8s8v")
 family_id = &"two_handed_sword"
-max_level = 20
-xp_base = 100
-xp_growth = 1.15
-unlocks = Array[ExtResource("2_unlock")]([SubResource("Unlock_technique"), SubResource("Unlock_m5"), SubResource("Unlock_m10"), SubResource("Unlock_m20")])
