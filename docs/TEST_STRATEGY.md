@@ -287,3 +287,8 @@ Zustände ohne Belohnung), `gathering_hold` (G halten mit Schritt-Timing, Loslas
 Unterbrechungen, geblockter Treffer ohne Schaden, nur neutral, echter ResourceNode mit Spieler). Direkt betroffen:
 professions, hollowwood, input. Sichtprüfung isoliert: `tests/playtest/gathering_visual_check.gd`.
 `test_loop` nutzt `ResourceNode.gather()` (Ernte aller Schritte) und wurde mit Teststrategie 1.1 nicht ausgeführt.
+
+Gathering Final Guarantee: `gathering_steps` (erste/letzte Einheit garantiert für alle Knoten über 25 Zyklen, ein und mehrere
+Schritte, Mindest- und ungültige Budgets, Unterbrechung nach Schritt 1, Save/Load vor dem letzten Schritt, einmaliger
+Bonus), `gathering_hold` (erster Hieb am echten Knoten gibt Holz). Combat-Feel-Umgebung:
+`tests/playtest/combat_feel_test.gd -- --selftest` (Start, Waffenwechsel, Mastery-Umschalter, echte Treffer; `docs/COMBAT_FEEL_TEST.md`).
