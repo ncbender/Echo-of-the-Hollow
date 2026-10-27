@@ -35,6 +35,8 @@ Frost nutzt Kontrolle über Haltung und Knockback (Combat-Polish-Modell).
 
 ## Affixe (`data/crafting/affixes/`, 12)
 Tiers: T3 ab Itemlevel 1 (Gewicht 100), T2 ab 10 (60), T1 ab 20 (25). Affix-Grundgewicht 100.
+Das ist der Dreistufen-Prototyp (`tier_model = 3`). Zielmodell ist T5–T1 ab ilvl 1/10/25/45/70 (`AffixTiers`,
+`docs/ITEM_FOUNDATION_1_0.md`); die Werte dafür sind noch nicht entworfen. Alle 12 Affixe sind GLOBAL.
 | Affix | Stat | Tags | Gruppe / Ausschluss | Slots | T3 / T2 / T1 |
 |---|---|---|---|---|---|
 | Sharpened | Physical Damage % | physical, attack | – | Waffen | 4-7 / 8-12 / 13-18 |
@@ -76,7 +78,7 @@ Die Wahrscheinlichkeiten werden normalisiert. Ziehung: ein `rng.randf()` über d
 | Extract Essence | 1 Essence Siphon | Essenz zurück ins Inventar |
 | Open Socket | 1 Socket Chisel | +1 offener Sockel (Limit je Item) |
 | Insert / Remove Gem/Rune | Einlage selbst / kostenlos | Entnehmen gibt die Einlage zurück |
-| Upgrade Quality | 1 Forge Crystal | Qualität +1 (max. 20), Basiswerte +1 % je Punkt |
+| Upgrade Quality | 1 Forge Crystal | Qualität +1 (max. 20), Basiswerte +0,5 % je Punkt |
 | Evolve | Stufenkosten (+ Awakening Stone für Stufe 3) | nächste Evolutionsstufe |
 
 Transaktion (`CraftingService`): validieren → Pool → Kosten prüfen → einmal würfeln → Kosten
@@ -99,7 +101,8 @@ Resonanz muss man nachsetzen, denn die Markierung hält nur 2 s.
 - Garnet (Edelstein): +20 Max Health. Rune of Impact (Rune, nur Waffen): Heavy-Treffer +25 %
   Knockback, +15 % Haltung (`TaggedHitModifierEffect`).
 - Sockelgrenzen: Forged Blade/Greatsword 2, Crushing Oath 1. Sockel werden einzeln geöffnet.
-- Qualität 0–20: +1 % auf die Basiswerte (oder `quality_stats`), nie auf Affixe/Effekte.
+- Qualität 0–20: +0,5 % je Stufe (max. +10 %) auf die Basiswerte (oder `quality_stats`), nie auf Affixe/Effekte
+  (Item Foundation 1.0, `ItemStats.quality_factor`; vorher +1 %).
   Itemlevel ist unabhängig.
 
 ## Evolution (`data/crafting/evolutions/stormcaller.tres`)

@@ -10,6 +10,7 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Overnight Systems 02 (Item Integrity + Salvaging, Hearth Flask + Tränke, Armor Mastery, Loot-Economy-Grundlage; Save v10).
 + Combat Rework / Weapon Mastery 1.4–1.5 (Combat Flow für Spielerwaffen, neun Familien, Pfad-Mastery, ein Waffen-Slot; Save v10).
 + Gathering Rework 1.1 (Sammeln in Schritten mit gehaltenem G, feste Budgets, Teilzustand im Save).
++ Pre-Alpha Item Foundation 1.0 (max. 5 reguläre Affixe, Affix-Kategorien, Fünf-Tier-Modell, Local/Global, Quality 0,5 %; Save v11).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -62,6 +63,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - Crafting: Item-Beiträge nur über `ItemStats`, Änderungen nur über `CraftingService` (Transaktion,
   Revision); gewürfelte Werte nie neu berechnen; Uniques nur über `CraftingProfile.allowed_operations`;
   Combat-Wirkung nur als `ItemEffect`/`AttackModifier`. Design: `docs/CRAFTING_DESIGN.md`.
+  Item Foundation 1.0 (`docs/ITEM_FOUNDATION_1_0.md`): max. `CraftingProfile.MAX_AFFIX_SLOTS` (5) reguläre Affixe, Essenzen
+  getrennt (max. 2); Tier-Schwellen nur aus `AffixTiers`, Tier-Nummern nur im eigenen `tier_model` lesen (`tier_of`);
+  Ringe/Amulette nur GLOBAL; Quality nur über `ItemStats.quality_factor`.
 - Klassen (`docs/CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`): Talent-/Skill-/
   Preset-/Prolog-/Quest-Regeln nur in `TalentService`, `SkillBook`, `PresetService`, `PrologueService`,
   `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).
