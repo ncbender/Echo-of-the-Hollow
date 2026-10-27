@@ -24,7 +24,7 @@ const _BY_KIND := {
 	ItemDefinition.SlotKind.BELT: [Slot.BELT],
 	ItemDefinition.SlotKind.LEGS: [Slot.LEGS],
 	ItemDefinition.SlotKind.FEET: [Slot.FEET],
-	ItemDefinition.SlotKind.ONE_HAND_WEAPON: [Slot.MAIN_HAND, Slot.OFF_HAND],
+	ItemDefinition.SlotKind.ONE_HAND_WEAPON: [Slot.MAIN_HAND],   # one weapon slot (Weapon Mastery 1.4): no weapon in the off hand
 	ItemDefinition.SlotKind.TWO_HAND_WEAPON: [Slot.MAIN_HAND],
 	ItemDefinition.SlotKind.OFF_HAND: [Slot.OFF_HAND],
 	ItemDefinition.SlotKind.SHIELD: [Slot.OFF_HAND],

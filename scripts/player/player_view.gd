@@ -122,6 +122,9 @@ func _draw_charge(combat: CombatComponent) -> void:
 
 func _draw_swing(combat: CombatComponent) -> void:
 	var attack := combat.current_attack
+	if attack.is_projectile():
+		_draw_shot(combat)
+		return
 	var direction := combat.attack_direction
 	var reach := combat.get_reach(attack, combat.charge_tier)
 	var half := deg_to_rad(attack.arc_degrees) * 0.5
@@ -146,6 +149,27 @@ func _draw_swing(combat: CombatComponent) -> void:
 			var fade := 1.0 - combat.phase_progress()
 			_draw_wedge(from, to, reach, Color(color, 0.25 * fade))
 			draw_line(Vector2.ZERO, Vector2.from_angle(to) * reach * 0.6, Color(color, 0.8), 2.0)
+
+
+## Placeholder for ranged attacks (bow, wand): a drawn string / gathering focus
+## during the windup, a flash at the fire event, a fading recoil afterwards.
+## No final animation exists yet (AttackDefinition.placeholder_animation).
+func _draw_shot(combat: CombatComponent) -> void:
+	var direction := combat.attack_direction
+	var color := _weapon_color()
+	var hand := direction * 8.0 + Vector2(0, -2)
+	var side := direction.orthogonal()
+	match combat.phase:
+		CombatComponent.Phase.STARTUP:
+			var draw := combat.phase_progress()
+			draw_arc(hand, 6.0, direction.angle() - 1.2, direction.angle() + 1.2, 10, Color(color, 0.9), 2.0)
+			draw_line(hand + side * 5.0, hand - direction * (2.0 + 5.0 * draw), Color(1, 1, 1, 0.7), 1.0)
+			draw_line(hand - side * 5.0, hand - direction * (2.0 + 5.0 * draw), Color(1, 1, 1, 0.7), 1.0)
+		CombatComponent.Phase.ACTIVE:
+			draw_circle(hand + direction * 4.0, 4.0, Color(1, 1, 1, 0.85))
+		CombatComponent.Phase.RECOVERY:
+			var fade := 1.0 - combat.phase_progress()
+			draw_arc(hand, 6.0, direction.angle() - 1.2, direction.angle() + 1.2, 10, Color(color, 0.4 + 0.5 * fade), 2.0)
 
 
 func _draw_wedge(from: float, to: float, radius: float, color: Color) -> void:

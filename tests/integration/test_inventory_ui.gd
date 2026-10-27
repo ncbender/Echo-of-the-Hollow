@@ -147,7 +147,7 @@ func test_right_click_equips_and_unequips_with_predictable_slots() -> void:
 	# right click on an equipped item in the bag unequips it too
 	await _right_click(_bag_cell(third))
 	check(not character.equipment.is_equipped(third.instance_id), "bag right click on equipped item unequips")
-	# one-handers (hands emptied first): main hand, then the off hand (dual wield), then main hand replaced
+	# one weapon slot (Weapon Mastery 1.4): every one-hander goes to the main hand and replaces the previous one
 	for hand: int in [EquipSlot.Slot.MAIN_HAND, EquipSlot.Slot.OFF_HAND]:
 		character.equipment.unequip(hand)
 	var swords: Array[ItemInstance] = []
@@ -156,8 +156,8 @@ func test_right_click_equips_and_unequips_with_predictable_slots() -> void:
 	for sword in swords:
 		panel.rebuild()
 		await _right_click(_bag_cell(sword))
-	check(character.equipment.get_item(EquipSlot.Slot.MAIN_HAND) == swords[2] and character.equipment.get_item(EquipSlot.Slot.OFF_HAND) == swords[1],
-		"main hand, then off hand, then main hand replaced")
+	check(character.equipment.get_item(EquipSlot.Slot.MAIN_HAND) == swords[2] and character.equipment.get_item(EquipSlot.Slot.OFF_HAND) == null,
+		"each sword replaced the previous one in the main hand; the off hand stays free")
 	# non-equippable: nothing happens, item kept
 	var ore := _instance(&"iron_ore")
 	await _right_click(_bag_cell(ore))

@@ -15,8 +15,6 @@ var dash_pressed: bool = false
 ## Flowing Draw and RMB for the Precision Stance).
 var light_held: bool = false
 var heavy_held: bool = false
-## Weapon loadout slot requested this tick, -1 = none.
-var weapon_slot: int = -1
 ## Active skill slot (Q/E/R/F = 0..3) pressed this tick, -1 = none.
 var ability_slot: int = -1
 ## Shift (defensive): pressed this tick (edge) and currently held (level).
@@ -33,7 +31,6 @@ func clear_edges() -> void:
 	heavy_pressed = false
 	heavy_released = false
 	dash_pressed = false
-	weapon_slot = -1
 	ability_slot = -1
 	defend_pressed = false
 	flask_pressed = false

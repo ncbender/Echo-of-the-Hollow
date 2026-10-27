@@ -72,7 +72,12 @@ func test_two_rings_and_ring_moves() -> void:
 
 func test_two_hander_displaces_off_hand_without_loss() -> void:
 	var second_sword := _add(&"militia_sword")
-	check_eq(equipment.equip(second_sword, S.OFF_HAND), "", "dual wield one-handers")
+	check(equipment.equip(second_sword, S.OFF_HAND) != "", "one weapon slot: no weapon in the off hand (Weapon Mastery 1.4)")
+	var offhand := _add(&"oak_shield")
+	character.classes.unlock(WARRIOR)
+	character.switch_class(WARRIOR, true)
+	check_eq(equipment.equip(offhand, S.OFF_HAND), "", "a shield still goes into the off hand")
+	second_sword = offhand
 	var greatsword := _first(&"steel_greatsword")
 	check_eq(equipment.equip(greatsword), "", "equip two-hander")
 	check_eq(equipment.get_item(S.MAIN_HAND).instance_id, greatsword, "two-hander in main hand")
@@ -86,12 +91,16 @@ func test_two_hander_displaces_off_hand_without_loss() -> void:
 	_consistent("hand rules")
 
 
-func test_same_weapon_moves_between_hands() -> void:
+func test_one_weapon_slot_for_every_family_and_class() -> void:
 	var sword := _first(&"iron_sword")
-	check_eq(equipment.equip(sword, S.OFF_HAND), "", "move main-hand sword to off hand")
-	check_eq(equipment.get_item(S.MAIN_HAND), null, "main hand freed")
-	check_eq(equipment.get_item(S.OFF_HAND).instance_id, sword, "same instance in off hand")
-	_consistent("move")
+	check(equipment.equip(sword, S.OFF_HAND) != "", "a weapon never goes to the off hand")
+	check_eq(equipment.get_item(S.MAIN_HAND).instance_id, sword, "sword stays in the main hand")
+	for item_id: StringName in [&"iron_dagger", &"iron_axe", &"iron_mace", &"oak_wand", &"ash_spear", &"oak_staff", &"hunting_bow", &"steel_greatsword"]:
+		var item := _add(item_id)
+		check_eq(equipment.quick_slot(character.inventory.find(item)), S.MAIN_HAND, "%s: right click goes to the main hand" % item_id)
+		for class_id: StringName in [&"basic_adventurer", &"warrior", &"arcanist", &"shadowrunner"]:
+			check_eq(equipment.can_equip(item, S.MAIN_HAND, class_id), "", "%s may wield %s" % [class_id, item_id])
+	_consistent("one weapon slot")
 
 
 func test_shield_and_class_restrictions() -> void:
@@ -180,7 +189,7 @@ func test_random_equipment_operations_keep_invariants() -> void:
 	check_eq(character.inventory.used_slots(), total_items, "no item lost or created")
 
 
-func test_weapon_follows_main_hand_and_quick_keys() -> void:
+func test_weapon_follows_main_hand() -> void:
 	spawn_player()
 	var bridge := PlayerProgressionBridge.new()
 	bridge.name = "ProgressionBridge"
@@ -193,11 +202,9 @@ func test_weapon_follows_main_hand_and_quick_keys() -> void:
 	check_eq(player.combat.weapon.id, &"one_handed_sword", "no weapon swap mid-attack")
 	await tick(f, 40)
 	check_eq(player.combat.weapon.id, &"two_handed_sword", "switched once idle")
-	f.weapon_slot = 0
-	await tick(f)
+	equipment.equip(_add(&"hunting_bow"))
 	await tick(frame(), 2)
-	check_eq(equipment.main_hand_family(), &"one_handed_sword", "key 1 equips a sword")
-	check_eq(player.combat.weapon.id, &"one_handed_sword", "combat follows")
+	check_eq(player.combat.weapon.id, &"bow", "the bow from the inventory replaces the greatsword (no quick swap)")
 	equipment.unequip(S.MAIN_HAND)
 	await tick(frame(), 2)
 	check_eq(player.combat.weapon.id, db.rules.fallback_weapon_family, "fallback without weapon")

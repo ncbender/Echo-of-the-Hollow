@@ -82,7 +82,7 @@ func test_item_xp_from_real_enemies_only_and_separate_from_mastery() -> void:
 	var mastery_before := character.mastery.get_xp(&"one_handed_sword") + character.mastery.get_level(&"one_handed_sword") * 1000
 	await _swing_lights(3)
 	check_eq(fang.evolution_xp(), 3, "1 item XP per accepted hit on an enemy")
-	check(character.mastery.get_xp(&"one_handed_sword") + character.mastery.get_level(&"one_handed_sword") * 1000 > mastery_before, "weapon mastery still progresses normally")
+	check_eq(character.mastery.get_xp(&"one_handed_sword") + character.mastery.get_level(&"one_handed_sword") * 1000, mastery_before, "item XP is separate: weapon mastery pays only on kills (Weapon Mastery 1.4)")
 	var dummy: TrainingDummy = DUMMY_SCENE.instantiate()
 	dummy.position = Vector2(-24, 0)
 	add_child(dummy)

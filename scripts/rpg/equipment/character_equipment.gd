@@ -87,8 +87,7 @@ func auto_slot(item: ItemInstance, class_id: StringName = &"") -> int:
 
 ## Slot for a quick equip (right click), predictable for the player:
 ## the first EMPTY allowed slot that accepts the item (Ring 1 before Ring 2,
-## Main Hand before Off Hand - a one-hander goes to the off hand only if the
-## main hand is taken, the off hand is free and the class may dual wield);
+## Main Hand for every weapon - there is exactly one weapon slot);
 ## if none is empty, the first allowed slot is replaced (Ring 1 / Main Hand).
 ## -1 if the item cannot be equipped by the class at all.
 func quick_slot(item: ItemInstance, class_id: StringName = &"") -> int:
@@ -129,9 +128,6 @@ func can_equip(instance_id: String, slot: int, class_id: StringName = &"") -> St
 		return "%s cannot use this weapon family" % class_def.display_name
 	if definition.slot_kind == ItemDefinition.SlotKind.SHIELD and not class_def.can_use_shields:
 		return "%s cannot use shields" % class_def.display_name
-	if definition.slot_kind == ItemDefinition.SlotKind.ONE_HAND_WEAPON and slot == EquipSlot.Slot.OFF_HAND \
-			and not class_def.can_dual_wield:
-		return "%s cannot dual wield" % class_def.display_name
 	return ""
 
 
@@ -311,6 +307,11 @@ func apply_loadout(class_id: StringName, slots: Dictionary) -> String:
 	target.from_dict(slots, warnings)
 	if not warnings.is_empty():
 		return warnings[0]
+	# One weapon slot (Weapon Mastery 1.4): an older preset's off-hand weapon is left out.
+	var off_item := _inventory.find(target.get_id(EquipSlot.Slot.OFF_HAND))
+	var off_def := _db.get_item(off_item.definition_id) if off_item != null else null
+	if off_def != null and off_def.is_weapon():
+		target.set_id(EquipSlot.Slot.OFF_HAND, "")
 	for slot: int in target.slots:
 		var error := can_equip(target.slots[slot], slot, class_id)
 		if error != "":

@@ -90,7 +90,8 @@ func test_effects_rebuilt_and_class_switch_after_load() -> void:
 	check(bridge.effects.has_effect(&"wardens_resolve"), "set effect active after load")
 	check_eq(player.combat.weapon.id, &"one_handed_sword", "combat weapon from loaded main hand")
 	check_near(player.health.max_health, loaded.get_stat(Stats.MAX_HEALTH), 0.001, "player health from loaded stats")
-	check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "mastery technique restored")
+	check_eq(player.combat.mastery_level, loaded.mastery.get_level(&"one_handed_sword"), "mastery gates restored (sword level 4: L-L-L and L-L-H)")
+	check(player.combat.chain == "" and player.combat.buffered == "" and not player.combat.is_busy(), "no attack chain, buffer or held key revives after load")
 	check_eq(loaded.switch_class(&"basic_adventurer", true), "", "class switch works after load")
 	check(not bridge.effects.has_effect(&"echo_shockwave"), "adventurer loadout has no legendary")
 	check_eq(loaded.equipment.main_hand_family(), &"one_handed_sword", "adventurer weapon")
@@ -181,3 +182,24 @@ func test_session_save_path_is_separate_from_user_slot() -> void:
 	check(session != null, "session autoload present")
 	check_eq(SessionState.DEFAULT_SAVE_PATH, "user://saves/slot_1.save.json", "player slot path")
 	check(not path.begins_with("user://saves/"), "tests never touch the player slot")
+
+
+## Weapon Mastery 1.4 (one weapon slot): an older save with a weapon in the off
+## hand loads with that reference dropped - the weapon stays in the bag, the
+## save schema is unchanged; all nine families' mastery survives the round trip.
+func test_off_hand_weapon_from_older_save_and_nine_families() -> void:
+	var character := CharacterFactory.create_new(db)
+	var spare := character.inventory.add_item(&"militia_sword")[0]
+	character.equipment.active_loadout().set_id(S.OFF_HAND, spare.instance_id)   # as dual wield allowed before
+	for family_id: StringName in db.weapons:
+		character.mastery.add_xp(family_id, 150)
+	check_eq(SaveSystem.save_to(character, path), OK, "saved")
+	var result := _load()
+	check(result.ok(), "loaded")
+	var loaded := result.character
+	check_eq(loaded.equipment.get_item(S.OFF_HAND), null, "the off-hand weapon reference is dropped")
+	check(loaded.inventory.has(spare.instance_id), "the weapon itself stays in the bag")
+	check(loaded.equipment.get_item(S.MAIN_HAND) != null, "the main hand is untouched")
+	for family_id: StringName in db.weapons:
+		check_eq(loaded.mastery.get_level(family_id), 2, "%s mastery level kept" % family_id)
+	check_eq(SaveSystem.VERSION, 10, "no schema change: save version stays 10")

@@ -1,7 +1,9 @@
 extends GameplayTestCase
-## Weapon mastery: XP, level ups, max level, combo locks/unlocks, XP exploit guards.
+## Weapon Mastery 1.4: XP curve, level ups, max level; levels unlock combo
+## paths (never passive stats); XP only from kills, split by the weapon damage
+## each family contributed (not per hit, not only the last hit); no XP from
+## whiffs or training targets; progress per family survives class changes.
 
-const GREATSWORD: WeaponFamily = preload("res://data/weapons/two_handed_sword.tres")
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const DUMMY_SCENE: PackedScene = preload("res://scenes/dummy/training_dummy.tscn")
 const SWORD_ID := &"one_handed_sword"
@@ -13,8 +15,10 @@ var bridge: PlayerProgressionBridge
 
 
 func before_each() -> void:
+	super.before_each()
 	db = GameDatabase.get_default()
 	character = Character.new(db)
+	started_attacks.clear()
 
 
 func _bind() -> void:
@@ -32,10 +36,32 @@ func _xp_to_level(family: StringName, level: int) -> int:
 	return total
 
 
+func _grunt(at: Vector2) -> Enemy:
+	var enemy: Enemy = GRUNT_SCENE.instantiate()
+	enemy.position = at
+	enemy.target = player
+	add_child(enemy)
+	enemy.config = enemy.config.duplicate()
+	enemy.config.attack_range = 0.0
+	enemy.config.move_speed = 0.0
+	return enemy
+
+
+func _hit(family_id: StringName, target: Node, damage: float, instance: int) -> HitData:
+	var hit := HitData.new()
+	hit.attack = (db.weapons[family_id] as WeaponFamily).node("L")
+	hit.target = target
+	hit.damage = damage
+	hit.attack_instance_id = instance
+	return hit
+
+
 func test_database_loads_without_errors() -> void:
 	check(db.load_errors.is_empty(), "database errors: %s" % [db.load_errors])
-	check(db.get_track(SWORD_ID) != null and db.get_track(GREAT_ID) != null, "tracks for both families")
-	check_eq(db.get_track(SWORD_ID).max_level, 20, "max level 20")
+	for family_id: StringName in db.weapons:
+		check(db.get_track(family_id) != null, "mastery track for %s" % family_id)
+		check_eq(db.get_track(family_id).max_level, 20, "%s: levels 1-20" % family_id)
+	check_eq(db.weapons.size(), 9, "nine weapon families")
 
 
 func test_level_up_and_carry_over() -> void:
@@ -65,134 +91,133 @@ func test_invalid_xp_ignored() -> void:
 	check_eq(character.mastery.get_xp(SWORD_ID), 0, "nothing stored")
 
 
-func test_technique_locked_until_mastery_level() -> void:
+func test_levels_unlock_paths_through_the_bridge() -> void:
 	_bind()
 	track_player_attacks()
-	var f := frame()
-	for i in 4:
-		await tick(light(f))
-		await tick(f, 22)
-	check_eq(started_attacks[3], &"sword_light_1", "locked: 4th light restarts the combo")
+	var unlocked: Array[String] = []
+	character.mastery.path_unlocked.connect(func(_f: StringName, path: ComboPathDefinition) -> void: unlocked.append(path.inputs))
+	check_eq(player.combat.mastery_level, 1, "level 1 at start")
+	await perform_path("LLL")
+	check_eq(started_attacks.size(), 1, "level 1: L-L-L does not exist yet (one base attack)")
 	started_attacks.clear()
-	check(not player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "locked at level 1")
-	character.mastery.add_xp(SWORD_ID, _xp_to_level(SWORD_ID, 3))
-	check(player.combat.combo.unlocks.has(&"mastery.one_handed_sword.1"), "unlocked via signal at level 3")
-	await tick(f, 60)
-	for i in 4:
-		await tick(light(f))
-		await tick(f, 22)
-	check_eq(started_attacks, [&"sword_light_1", &"sword_light_2", &"sword_light_3", &"sword_light_4_mastery"] as Array[StringName], "fourth light is the mastery technique")
-
-
-func test_locked_node_not_executable_and_base_combos_intact() -> void:
-	var combat := new_combat(GREATSWORD)
-	var f := frame()
-	for i in 4:
-		step_combat(combat, light(f))
-		step_combat(combat, f, 30)
-	check_eq(started_attacks, [&"greatsword_light_1", &"greatsword_light_2", &"greatsword_light_3", &"greatsword_light_1"] as Array[StringName], "locked 4th node restarts the combo")
-	combat.set_unlocked(&"mastery.two_handed_sword.1", true)
+	character.mastery.add_xp(SWORD_ID, _xp_to_level(SWORD_ID, 4))
+	check_eq(unlocked, ["LLL", "LLH"], "level 2 and 4 announce their paths")
+	check_eq(player.combat.mastery_level, 4, "combat gates follow the level")
+	await perform_path("LLH")
+	check_eq(started_attacks.back(), &"sword_llh_crush", "L-L-H (Guard Splitter) runs at level 4")
 	started_attacks.clear()
-	step_combat(combat, f, 60)
-	for i in 4:
-		step_combat(combat, light(f))
-		step_combat(combat, f, 30)
-	check_eq(started_attacks[3], &"greatsword_light_4_mastery", "unlocked greatsword technique")
+	await perform_path("LHL")
+	check_eq(started_attacks.size(), 1, "L-H-L still locked (level 6)")
 
 
-func test_hits_give_mastery_xp_once_per_swing() -> void:
+func test_mastery_gives_no_passive_stats() -> void:
 	_bind()
-	var enemy: Enemy = GRUNT_SCENE.instantiate()
-	enemy.position = Vector2(22, 0)
-	enemy.target = player
-	add_child(enemy)
-	enemy.config = enemy.config.duplicate()
-	enemy.config.attack_range = 0.0
-	enemy.config.move_speed = 0.0
+	var before := character.get_stats().duplicate()
+	var attack := (db.weapons[SWORD_ID] as WeaponFamily).node("L")
+	var damage := attack.damage
+	character.mastery.add_xp(SWORD_ID, 10_000_000)
+	check_eq(character.mastery.get_level(SWORD_ID), 20, "level 20")
+	check_eq(character.get_stats(), before, "no stat changes at all from mastery")
+	check_eq(attack.damage, damage, "attack data unchanged")
+	check_near(player.combat.attack_speed, 1.0, 0.0001, "no attack speed bonus")
+	check_near(player.combat.recovery_multiplier, 1.0, 0.0001, "no recovery bonus")
+
+
+func test_hits_and_whiffs_give_no_mastery_xp() -> void:
+	_bind()
+	var enemy := _grunt(Vector2(22, 0))
 	var landed: Array[HitData] = []
 	player.combat.hit_landed.connect(func(h: HitData) -> void: landed.append(h))
 	await wait_physics(2)
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	await tick(light(f))
-	await tick(f, 24)
+	await perform_path("L")
 	check_eq(landed.size(), 1, "one hit")
-	check_eq(character.mastery.get_xp(SWORD_ID), db.rules.mastery_xp_per_hit, "per-hit XP")
-	# The same event delivered twice (e.g. duplicate callback) must not pay twice.
-	player.combat.hit_landed.emit(landed[0])
-	check_eq(character.mastery.get_xp(SWORD_ID), db.rules.mastery_xp_per_hit, "duplicate event ignored")
-
-
-func test_clicks_without_hits_give_nothing() -> void:
-	_bind()
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	for i in 6:
-		await tick(light(f))
-		await tick(f, 20)
+	check(not enemy.health.is_dead(), "enemy alive")
+	check_eq(character.mastery.get_xp(SWORD_ID), 0, "no XP per hit")
+	check(bridge.rewards.contribution(enemy, SWORD_ID) > 0.0, "the hit counts as contribution")
+	enemy.queue_free()
+	for i in 4:
+		await perform_path("L")
 	check_eq(character.mastery.get_xp(SWORD_ID), 0, "no XP for whiffs")
-	check_eq(character.mastery.get_level(SWORD_ID), 1, "still level 1")
 
 
-func test_training_dummy_xp_is_reduced_and_capped() -> void:
+func test_training_dummy_gives_no_mastery_xp() -> void:
 	_bind()
 	var dummy: TrainingDummy = DUMMY_SCENE.instantiate()
 	dummy.position = Vector2(22, 0)
 	add_child(dummy)
-	dummy.health.max_health = 100000.0
+	dummy.health.max_health = 30.0
 	dummy.health.reset()
 	await wait_physics(2)
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
-	await tick(light(f))
-	await tick(f, 24)
-	check_eq(character.mastery.get_xp(SWORD_ID), floori(db.rules.mastery_xp_per_hit * db.rules.training_xp_multiplier), "reduced XP")
-	for i in 60:
-		await tick(light(f))
-		await tick(f, 24)
-	check(dummy.hits_taken >= 60, "many hits landed (%d)" % dummy.hits_taken)
-	check_eq(_total_xp(SWORD_ID), db.rules.training_xp_cap_per_target, "capped per training target")
+	for i in 6:
+		await perform_path("L")
+	check(dummy.hits_taken >= 3, "hits landed (%d)" % dummy.hits_taken)
+	check_eq(character.mastery.get_xp(SWORD_ID) + character.mastery.get_level(SWORD_ID), 1, "no mastery XP from training")
 
 
-func test_kill_rewards_once_and_switch_keeps_progress() -> void:
+func test_kill_reward_once_for_the_participating_family() -> void:
 	_bind()
-	var enemy: Enemy = GRUNT_SCENE.instantiate()
-	enemy.position = Vector2(22, 0)
-	enemy.target = player
-	add_child(enemy)
-	enemy.config = enemy.config.duplicate()
-	enemy.config.attack_range = 0.0
-	enemy.config.move_speed = 0.0
+	var enemy := _grunt(Vector2(22, 0))
 	await wait_physics(2)
-	var f := frame(Vector2.ZERO, Vector2.RIGHT)
 	var guard := 0
 	while not enemy.health.is_dead() and guard < 40:
 		guard += 1
-		f.aim_direction = (enemy.global_position - player.global_position).normalized()
-		await tick(light(f))
-		await tick(f, 24)
-	var sword_xp := _total_xp(SWORD_ID)
+		var to_enemy := enemy.global_position - player.global_position
+		if to_enemy.length() > 22.0:
+			await tick(frame(to_enemy.normalized(), to_enemy.normalized()), 4)   # knockback pushed it away: step closer
+			continue
+		await perform_path("L", to_enemy.normalized())
 	check(enemy.health.is_dead(), "enemy killed")
-	check(sword_xp >= enemy.config.mastery_xp_reward, "kill reward included (%d XP)" % sword_xp)
-	# Switching weapons keeps sword progress and routes new XP to the greatsword.
-	player.set_weapon_family(GREATSWORD)
-	check_eq(_total_xp(SWORD_ID), sword_xp, "sword progress kept after switch")
-	bridge.debug_add_mastery_xp(30)
-	check_eq(character.mastery.get_xp(GREAT_ID), 30, "XP goes to the equipped family")
-	check_eq(_total_xp(SWORD_ID), sword_xp, "sword progress still unchanged")
+	check_eq(character.mastery.get_xp(SWORD_ID), enemy.config.mastery_xp_reward, "exactly the kill reward")
+	player.combat.hit_landed.emit(_hit(SWORD_ID, enemy, 5.0, 999))
+	check_eq(character.mastery.get_xp(SWORD_ID), enemy.config.mastery_xp_reward, "a dead enemy never pays twice")
+
+
+func test_kill_reward_split_by_contribution_and_skill_kills() -> void:
+	_bind()
+	var enemy := _grunt(Vector2(200, 0))
+	await wait_physics(2)
+	player.combat.hit_landed.emit(_hit(SWORD_ID, enemy, 30.0, 1))
+	player.combat.hit_landed.emit(_hit(GREAT_ID, enemy, 10.0, 2))
+	var lethal := HitData.new()
+	lethal.damage = 100000.0
+	lethal.target = enemy
+	lethal.source = HitData.Source.SKILL
+	enemy.health.apply_hit(lethal)
+	bridge.rewards.reward_kill(lethal)   # a skill landed the killing blow
+	var reward := enemy.config.mastery_xp_reward
+	check_eq(character.mastery.get_xp(SWORD_ID), reward * 3 / 4, "sword dealt 75 %% of the weapon damage: %d XP" % (reward * 3 / 4))
+	check_eq(character.mastery.get_xp(GREAT_ID), reward / 4, "greatsword 25 %%: %d XP" % (reward / 4))
+	var none := _grunt(Vector2(-200, 0))
+	await wait_physics(1)
+	none.health.apply_hit(lethal)
+	lethal.target = none
+	bridge.rewards.reward_kill(lethal)
+	check_eq(character.mastery.get_xp(SWORD_ID) + character.mastery.get_xp(GREAT_ID), reward, "no weapon took part: no mastery XP")
+
+
+func test_progress_survives_class_change() -> void:
+	_bind()
+	character.mastery.add_xp(&"dagger", _xp_to_level(&"dagger", 9))
+	character.mastery.add_xp(SWORD_ID, _xp_to_level(SWORD_ID, 2))
+	character.classes.unlock(&"warrior")
+	character.switch_class(&"warrior", true)
+	check_eq(character.mastery.get_level(&"dagger"), 9, "dagger mastery kept for the warrior")
+	check_eq(character.mastery.get_level(SWORD_ID), 2, "sword mastery kept")
+	check_eq(player.combat.chain, "", "class change ended any combo")
 
 
 func test_mastery_serialization_roundtrip_and_clamping() -> void:
 	character.mastery.add_xp(SWORD_ID, _xp_to_level(SWORD_ID, 4) + 12)
+	character.mastery.add_xp(&"bow", _xp_to_level(&"bow", 10))
 	var data := character.mastery.to_dict()
 	var restored := WeaponMastery.new(db)
 	var warnings: PackedStringArray = []
 	restored.from_dict(data, warnings)
 	check_eq(restored.get_level(SWORD_ID), 4, "level restored")
 	check_eq(restored.get_xp(SWORD_ID), 12, "xp restored")
+	check_eq(restored.get_level(&"bow"), 10, "bow level restored")
 	var broken := {"one_handed_sword": {"level": 999, "xp": -5}, "spears": {"level": 3, "xp": 1}}
 	restored.from_dict(broken, warnings)
 	check_eq(restored.get_level(SWORD_ID), 20, "level clamped to max")
 	check_eq(restored.get_xp(SWORD_ID), 0, "xp clamped")
 	check(restored.to_dict().has("spears"), "unknown family preserved for re-save")
-
-
-func _total_xp(family: StringName) -> int:
-	return _xp_to_level(family, character.mastery.get_level(family)) + character.mastery.get_xp(family)

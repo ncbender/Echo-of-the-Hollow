@@ -13,8 +13,9 @@ signal use_finished(completed: bool)
 const DASH_BUFFER_ACTION := &"dash"
 
 @export var input_buffer_time: float = 0.12
-## Weapon loadout; slot keys 1/2 switch between entries (when no character
-## progression controls the weapon, see weapon_slot_handler).
+## Weapon family wielded at start when no character progression controls the
+## weapon (arena); the first entry is equipped. There is no weapon quick swap
+## (Weapon Mastery 1.4: one weapon slot, changed in the inventory).
 @export var weapons: Array[WeaponFamily] = []
 ## Prototype: seconds until the player stands up again at the spawn point after dying.
 @export var respawn_delay: float = 1.5
@@ -25,8 +26,6 @@ const DASH_BUFFER_ACTION := &"dash"
 ## (used by tests and scripted playtests).
 var use_external_input: bool = false
 var aim_direction: Vector2 = Vector2.RIGHT
-## Optional override for weapon slot keys (1/2). Receives the slot index.
-var weapon_slot_handler: Callable
 ## Active skills (Q/E/R/F): receives the slot index, returns true when a skill
 ## was cast (set by the progression bridge; the player knows no skills itself).
 var ability_handler: Callable
@@ -131,7 +130,7 @@ func feed_input(frame: InputFrame) -> void:
 	_external_frame = frame
 
 
-## Switches to a loadout slot. Only possible while no action is running.
+## Equips entry `slot` of `weapons` (start weapon without progression). Only while idle.
 func equip_weapon(slot: int) -> bool:
 	if slot < 0 or slot >= weapons.size():
 		return false
@@ -172,12 +171,6 @@ func physics_step(frame: InputFrame, delta: float) -> void:
 	if hitstop_left > 0.0:
 		_step_frozen(frame, delta)
 		return
-	if frame.weapon_slot >= 0 and not dash.is_dashing():
-		if weapon_slot_handler.is_valid():
-			weapon_slot_handler.call(frame.weapon_slot)
-		else:
-			equip_weapon(frame.weapon_slot)
-
 	reaction.step(delta)
 	dash.step(delta)
 	_dash_buffer.step(delta)

@@ -52,6 +52,7 @@ func bind(target_player: Player, target_character: Character) -> void:
 		player.combat.modifiers.append(stat_modifier)
 	_track(character.mastery.leveled_up, _on_mastery_leveled_up)
 	_track(character.mastery.unlocked, _on_mastery_unlocked)
+	_track(character.mastery.path_unlocked, _on_path_unlocked)
 	_track(character.stats_changed, apply_stats)
 	_track(character.classes.active_class_changed, _on_active_class_changed)
 	_track(character.classes.leveled_up, _on_class_leveled_up)
@@ -75,7 +76,6 @@ func bind(target_player: Player, target_character: Character) -> void:
 	effects.status_applier = apply_status
 	effects.cooldown_reducer = class_runtime.reduce_cooldown
 	effects.player = player
-	player.weapon_slot_handler = quick_equip_weapon
 	player.ability_handler = class_runtime.try_cast
 	player.consumable_handler = try_use
 	class_runtime.setup(character, player, effects, apply_status)
@@ -98,7 +98,6 @@ func unbind() -> void:
 		class_runtime.clear_buffs()
 	if player != null and is_instance_valid(player):
 		player.combat.modifiers.erase(stat_modifier)
-		player.weapon_slot_handler = Callable()
 		player.ability_handler = Callable()
 		player.consumable_handler = Callable()
 		player.cancel_use()
@@ -176,23 +175,6 @@ func sync_weapon() -> void:
 	_apply_pending_weapon()
 
 
-## Keys 1/2: equip the first inventory weapon of the sword / greatsword family
-## into the main hand of the active loadout.
-func quick_equip_weapon(slot: int) -> void:
-	var families: Array[StringName] = [&"one_handed_sword", &"two_handed_sword"]
-	if slot < 0 or slot >= families.size():
-		return
-	for item in character.inventory.items():
-		var definition := character.database.get_item(item.definition_id)
-		if definition.is_weapon() and definition.weapon_family_id == families[slot]:
-			if character.equipment.is_equipped(item.instance_id):
-				return
-			var error := character.equipment.equip(item.instance_id, EquipSlot.Slot.MAIN_HAND)
-			message.emit(error if error != "" else "Equipped %s" % definition.display_name)
-			return
-	message.emit("No weapon of that family in the inventory")
-
-
 func current_family_id() -> StringName:
 	return player.combat.weapon.id if player.combat.weapon != null else &""
 
@@ -258,6 +240,12 @@ func _on_mastery_unlocked(family_id: StringName, unlock: MasteryUnlock) -> void:
 	refresh_unlocks()
 	var kind := "Technique" if unlock.is_technique() else "Milestone"
 	message.emit("%s unlocked: %s (%s)" % [kind, unlock.display_name, _family_name(family_id)])
+
+
+## A mastery level unlocked a real combo path (Weapon Mastery 1.4).
+func _on_path_unlocked(family_id: StringName, path: ComboPathDefinition) -> void:
+	refresh_unlocks()
+	message.emit("Combo unlocked: %s (%s, %s)" % [path.display_name, path.input_label(), _family_name(family_id)])
 
 
 func _on_active_class_changed(class_id: StringName) -> void:

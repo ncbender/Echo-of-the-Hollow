@@ -24,6 +24,7 @@ extends Resource
 @export_group("Equipment Rules")
 ## Weapon families this class may equip (empty = all).
 @export var allowed_weapon_families: Array[StringName] = []
+## Unused since Weapon Mastery 1.4 (exactly one weapon slot); kept so class data loads.
 @export var can_dual_wield: bool = true
 @export var can_use_shields: bool = true
 

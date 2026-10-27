@@ -136,8 +136,12 @@ func perform_path(path: String, aim: Vector2 = Vector2.RIGHT, settle_ticks: int 
 	for index in path.length():
 		var guard := 0
 		while index > 0 and (player.combat.chain.length() != index or player.combat.attack_clock() < player.combat.accept_from()) and guard < 240:
+			if not player.combat.is_busy():
+				break   # the previous input was not accepted (locked path): the chain is over
 			await tick(idle)
 			guard += 1
+		if index > 0 and player.combat.chain.length() != index:
+			break
 		var press := frame(Vector2.ZERO, aim)
 		match path[index]:
 			"L":

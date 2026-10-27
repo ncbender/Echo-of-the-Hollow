@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/item_definition.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"iron_dagger"
+display_name = "Iron Dagger"
+description = "A plain one-handed dagger."
+category = 0
+rarity = 0
+max_stack = 1
+slot_kind = 10
+weapon_family_id = &"dagger"

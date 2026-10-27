@@ -36,7 +36,6 @@ xp_base = 100
 xp_growth = 1.07
 base_stats = Array[ExtResource("1_qejp0")]([SubResource("Resource_1xdjx")])
 stats_per_level = Array[ExtResource("1_qejp0")]([SubResource("Resource_tocgc")])
-allowed_weapon_families = Array[StringName]([&"one_handed_sword"])
 can_dual_wield = false
 can_use_shields = false
 unlock_condition = &"prologue.choice"

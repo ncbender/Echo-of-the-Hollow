@@ -66,8 +66,8 @@ func test_quick_use_keys() -> void:
 	var input: PlayerInput = nodes[1]
 	input._unhandled_input(_key(KEY_1, true))
 	var first := input.poll(character)
-	check(first.flask_pressed and not first.potion_pressed and first.weapon_slot == -1, "key 1 -> flask, no weapon switch")
+	check(first.flask_pressed and not first.potion_pressed and not "weapon_slot" in first, "key 1 -> flask; there is no weapon switch input")
 	check(not input.poll(character).flask_pressed, "flask edge consumed")
 	input._unhandled_input(_key(KEY_2, true))
 	var second := input.poll(character)
-	check(second.potion_pressed and second.weapon_slot == -1, "key 2 -> potion, no weapon switch")
+	check(second.potion_pressed, "key 2 -> potion")

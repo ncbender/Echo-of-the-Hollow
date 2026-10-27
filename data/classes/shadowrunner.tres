@@ -73,7 +73,6 @@ xp_base = 100
 xp_growth = 1.07
 base_stats = Array[ExtResource("1_u13vy")]([SubResource("Resource_6n3kg"), SubResource("Resource_bfiup")])
 stats_per_level = Array[ExtResource("1_u13vy")]([SubResource("Resource_t54em")])
-allowed_weapon_families = Array[StringName]([&"one_handed_sword"])
 can_use_shields = false
 unlock_condition = &"prologue.choice"
 resource = SubResource("Resource_c2je7")

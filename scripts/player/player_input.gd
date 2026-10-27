@@ -31,12 +31,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_pending.flask_pressed = true
 	elif event.is_action_pressed(&"use_potion"):
 		_pending.potion_pressed = true
-	elif event.is_action_pressed(&"weapon_slot_1"):
-		_pending.weapon_slot = 0
 	elif event.is_action_pressed(&"defensive"):
 		_pending.defend_pressed = true
-	elif event.is_action_pressed(&"weapon_slot_2"):
-		_pending.weapon_slot = 1
 	else:
 		for index in ABILITY_ACTIONS.size():
 			if event.is_action_pressed(ABILITY_ACTIONS[index]):
@@ -55,7 +51,6 @@ func poll(character: Node2D) -> InputFrame:
 	frame.heavy_pressed = _pending.heavy_pressed
 	frame.heavy_released = _pending.heavy_released
 	frame.dash_pressed = _pending.dash_pressed
-	frame.weapon_slot = _pending.weapon_slot
 	frame.ability_slot = _pending.ability_slot
 	frame.defend_pressed = _pending.defend_pressed
 	frame.flask_pressed = _pending.flask_pressed

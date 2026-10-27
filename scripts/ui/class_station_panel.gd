@@ -1,13 +1,15 @@
 class_name ClassStationPanel
 extends UiWindow
 ## Class station / character window (docs/CLASS_DESIGN.md): classes, talents,
-## skills and mods, build presets and class quests in five pages.
+## skills and mods, build presets, class quests, armour and weapon mastery.
 ## Opened with G at a class station (everything allowed) or with C anywhere
 ## (overview + learning talents; rearranging, respecs, presets, class changes
 ## and quests need a class station). Pure presentation over TalentService,
 ## SkillBook, PresetService, QuestService and Character.switch_class.
 
-const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests", "Armor"]
+const PAGES := ["Classes", "Talents", "Skills", "Presets", "Quests", "Armor", "Weapons"]
+## Weapons page: family order of the Weapon Mastery design.
+const WEAPON_ORDER: Array[StringName] = [&"one_handed_sword", &"two_handed_sword", &"axe", &"dagger", &"spear", &"staff", &"wand", &"mace", &"bow"]
 const FORM := SkillModDefinition.Slot.FORM
 const RESONANCE := SkillModDefinition.Slot.RESONANCE
 const CONTENT_WIDTH := 900
@@ -131,6 +133,8 @@ func rebuild() -> void:
 			_build_quests()
 		"Armor":
 			_build_armor()
+		"Weapons":
+			_build_weapons()
 		_:
 			_build_classes()
 	queue_fit()
@@ -962,3 +966,67 @@ func _restore_tree_scroll() -> void:
 	_keep_scroll = Vector2i(-1, -1)
 	if talent_tooltip.visible:
 		talent_tooltip._place.call_deferred()
+
+
+# --- Weapon Mastery ---------------------------------------------------------------
+
+## Weapon Mastery 1.4: the nine families with level, XP and their combo paths
+## (unlock level, inputs, name). Character-wide, shared by every class; a level
+## only unlocks attacks, never a passive bonus. Read-only over WeaponMastery.
+func _build_weapons() -> void:
+	var head := UiTheme.card(&"CardPanel")
+	head.name = "WeaponMastery"
+	var box := head.get_node("Box") as VBoxContainer
+	box.add_child(UiTheme.styled("Weapon Mastery", &"SubheadingLabel"))
+	box.add_child(UiTheme.wrapped("Each weapon family levels from 1 to 20 for this character, whatever the class. Level 1 offers one quick and one heavy attack; higher levels unlock new combo paths only - never passive bonuses. Mastery XP comes from defeated enemies, shared by the weapons that fought them.", UiTheme.TEXT_SECONDARY, CONTENT_WIDTH - 40))
+	_content.add_child(head)
+	var grid := GridContainer.new()
+	grid.name = "Families"
+	grid.columns = 2
+	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP)
+	grid.add_theme_constant_override(&"v_separation", UiTheme.GAP)
+	var wielded := character.equipment.main_hand_family()
+	if wielded == &"":
+		wielded = character.database.rules.fallback_weapon_family
+	for family_id in WEAPON_ORDER:
+		var family: WeaponFamily = character.database.weapons.get(family_id)
+		if family != null:
+			grid.add_child(_weapon_track(family, family_id == wielded))
+	_content.add_child(grid)
+
+
+func _weapon_track(family: WeaponFamily, wielded: bool) -> Control:
+	var card := UiTheme.card(&"InsetPanel")
+	card.name = "Family_%s" % family.id
+	card.custom_minimum_size = Vector2((CONTENT_WIDTH - UiTheme.GAP) * 0.5, 0)
+	var box := card.get_node("Box") as VBoxContainer
+	var mastery := character.mastery
+	var level := mastery.get_level(family.id)
+	var head := HBoxContainer.new()
+	var name_label := UiTheme.styled(family.display_name + ("  ·  wielded" if wielded else ""), &"SubheadingLabel")
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(name_label)
+	var level_label := UiTheme.styled("Level %d / 20" % level, &"SmallLabel")
+	level_label.name = "Level"
+	head.add_child(level_label)
+	box.add_child(head)
+	var need := mastery.xp_to_next(family.id)
+	var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.BRONZE)
+	bar.max_value = maxf(1.0, need)
+	bar.value = mastery.get_xp(family.id) if need > 0 else bar.max_value
+	box.add_child(bar)
+	box.add_child(UiTheme.styled("XP %d / %d" % [mastery.get_xp(family.id), need] if need > 0 else "Mastered", &"CaptionLabel"))
+	var base := "Lv 1  %s  %s  ·  %s" % ["L / P" if family.is_bow() else "L / H", family.node("L").display_name,
+		family.node("P" if family.is_bow() else "H").display_name]
+	var base_line := UiTheme.styled(base, &"SmallLabel")
+	base_line.add_theme_color_override(&"font_color", UiTheme.TEXT_SECONDARY)
+	box.add_child(base_line)
+	var paths := family.combo_paths.duplicate()
+	paths.sort_custom(func(a: ComboPathDefinition, b: ComboPathDefinition) -> bool: return a.unlock_level < b.unlock_level)
+	for path: ComboPathDefinition in paths:
+		var reached := level >= path.unlock_level
+		var line := UiTheme.styled("Lv %d  %s  %s" % [path.unlock_level, path.input_label(), path.display_name], &"SmallLabel")
+		line.name = "Path_%s" % (path.inputs if path.inputs != "" else "flowing_draw")
+		line.add_theme_color_override(&"font_color", UiTheme.SUCCESS if reached else UiTheme.TEXT_MUTED)
+		box.add_child(line)
+	return card

@@ -44,7 +44,7 @@ func _lines() -> PackedStringArray:
 	var dash := player.dash
 	var lines: PackedStringArray = []
 	var weapon_name := combat.weapon.display_name if combat.weapon != null else "-"
-	lines.append("Weapon   %s  [%d/%d]" % [weapon_name, player.weapons.find(combat.weapon) + 1, player.weapons.size()])
+	lines.append("Weapon   %s  mastery %d" % [weapon_name, combat.mastery_level])
 	lines.append("HP       %.0f / %.0f%s" % [player.health.health, player.health.max_health, "  (DOWN)" if player.health.is_dead() else ""])
 	var reacting := player.reaction.is_reacting()
 	lines.append("Reaction %s%s" % [HitReaction.name_of(player.reaction.current) if reacting else "-", "  (hitstop)" if player.hitstop_left > 0.0 else ""])
@@ -58,7 +58,10 @@ func _lines() -> PackedStringArray:
 
 	var path := " > ".join(PackedStringArray(combat.combo.path)) if not combat.combo.path.is_empty() else "-"
 	var window := ""
-	if combat.combo.paused:
+	if combat.uses_flow():
+		window = "  [%s]%s%s" % [combat.chain if combat.chain != "" else "-", "  buffered " + combat.buffered if combat.buffered != "" else "",
+			"  FLOWING DRAW %d" % combat.flowing_shot if combat.flowing_draw else ""]
+	elif combat.combo.paused:
 		window = "  (timer paused)"
 	elif combat.combo.window_open:
 		window = "  (window %.2fs)" % combat.combo.window_left
