@@ -10,5 +10,5 @@ display_name = "The Tangled Wood"
 scene_path = "res://scenes/maps/tangled_wood.tscn"
 default_spawn_id = &"default"
 map_cell = Vector2i(2, 1)
-neighbors = Array[StringName]([&"whisper_forest"])
+neighbors = Array[StringName]([&"whisper_forest", &"chapel"])
 show_on_map = true

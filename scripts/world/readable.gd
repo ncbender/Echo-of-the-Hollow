@@ -3,7 +3,7 @@ extends Interactable
 ## A sign, note or inscription read with G. The first reading can hand out a
 ## small reward (once per character: "read.<id>") and report a story event.
 
-enum Look { SIGNPOST, NOTE, STONE, ROOTS }
+enum Look { SIGNPOST, NOTE, STONE, ROOTS, WAYSTONE }
 
 @export var persistent_id: StringName
 @export var title: String = "Note"
@@ -73,6 +73,20 @@ func _draw() -> void:
 			draw_rect(Rect2(-16, -18, 32, 24), glow, false, 1.0)
 			if not is_read():
 				WorldText.draw(self, Vector2(-2, -21), "?", 8, Color(1, 0.9, 0.5), 2, Color.BLACK)
+		Look.WAYSTONE:   # a dormant waystone (same silhouette as a silent Waystone), roots wound around its foot
+			draw_set_transform(Vector2(0, 2), 0.0, Vector2(1.0, 0.5))
+			draw_circle(Vector2.ZERO, 16.0, Color(0, 0, 0, 0.3))
+			draw_set_transform(Vector2.ZERO)
+			draw_colored_polygon(PackedVector2Array([Vector2(-7, 0), Vector2(-6, -26), Vector2(0, -32), Vector2(6, -26), Vector2(7, 0)]), Color(0.36, 0.36, 0.38))
+			draw_polyline(PackedVector2Array([Vector2(-3, -28), Vector2(1, -20), Vector2(-2, -14), Vector2(3, -6)]), Color(0.15, 0.15, 0.16), 1.0)
+			var bark := Color(0.36, 0.26, 0.16)
+			draw_polyline(PackedVector2Array([Vector2(-16, 2), Vector2(-8, -3), Vector2(-6, -10), Vector2(2, -8), Vector2(7, -4), Vector2(16, -6)]), bark, 2.5)
+			draw_polyline(PackedVector2Array([Vector2(-12, 4), Vector2(-4, 0), Vector2(5, -14), Vector2(8, -16), Vector2(18, -10)]), bark.darkened(0.2), 2.0)
+			draw_rect(Rect2(-18, -34, 36, 40), glow, false, 1.0)
+			var label := "%s (silent)" % title
+			WorldText.draw(self, Vector2(-WorldText.width(label, 6) * 0.5, -40), label, 6, Color(0.7, 0.7, 0.72), 2, Color.BLACK)
+			if not is_read():
+				WorldText.draw(self, Vector2(-2, -48), "?", 8, Color(1, 0.9, 0.5), 2, Color.BLACK)
 		_:
 			draw_rect(Rect2(-5, -8, 10, 8), Color(0.88, 0.82, 0.66))
 			draw_line(Vector2(-3, -6), Vector2(3, -6), Color(0.4, 0.35, 0.3), 1.0)

@@ -143,7 +143,7 @@ func test_quest_data_extends_the_existing_stub() -> void:
 	check(db.load_errors.is_empty(), "database errors: %s" % [db.load_errors])
 	var quest: StoryQuestDefinition = db.story_quests[QUEST]
 	check_eq([quest.display_name, quest.chapter], ["The First Signs", "The Roots Remember"], "same quest, same chapter")
-	check_eq(quest.steps.size(), 3, "reach, examine, M2 placeholder")
+	check(quest.steps.size() >= 3, "reach, examine, then later milestones (M2 extends from index 2)")
 	check(quest.open_ended, "still open-ended: M1 never completes the quest")
 	check(quest.next_quest_ids.is_empty(), "no successor quest")
 	check(not QuestRewardService.has_reward(quest), "no turn-in reward")
@@ -153,7 +153,7 @@ func test_quest_data_extends_the_existing_stub() -> void:
 	var second := quest.steps[1].objectives
 	check(second.size() == 1 and second[0].event_id == EXAMINE and second[0].cumulative and second[0].amount == 1,
 		"step 1: the one-time examination (new id, cumulative)")
-	check(quest.steps[2].objectives.is_empty(), "step 2: placeholder without objective")
+	check(quest.steps[-1].objectives.is_empty(), "last step: placeholder without objective")
 	check_eq([quest.steps[0].completion_flag, quest.steps[1].completion_flag],
 		[&"chapter1.tangled_wood_reached", &"chapter1.roots_examined"], "step flags")
 	# the new ids belong to M1 alone: no other quest waits for them
@@ -223,7 +223,7 @@ func test_steps_advance_once_on_their_own_events() -> void:
 	StoryService.notify(character, EXAMINE)
 	check(StoryService.at_step(character, QUEST, 2), "examined")
 	check(character.world.has_flag(&"chapter1.roots_examined"), "examination flag")
-	check(_step_text(character).contains("future update"), "M2 placeholder visible: %s" % _step_text(character))
+	check(_step_text(character).contains("east"), "the trail leads on east: %s" % _step_text(character))
 	for event: StringName in [ENTER, EXAMINE, &"enter:home_base", &"talk:edrin_threat"]:
 		StoryService.notify(character, event)
 	check(StoryService.at_step(character, QUEST, 2) and not StoryService.is_completed(character, QUEST), "never completes in M1")

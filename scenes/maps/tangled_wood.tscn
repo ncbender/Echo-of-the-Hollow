@@ -120,10 +120,17 @@ size = Vector2(168, 16)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="EastRoots" type="StaticBody2D" parent="Walls"]
-position = Vector2(328, 0)
+[node name="EastRootsNorth" type="StaticBody2D" parent="Walls"]
+position = Vector2(328, -90)
 script = ExtResource("3_wall")
-size = Vector2(16, 392)
+size = Vector2(16, 212)
+color = Color(0.3, 0.21, 0.13, 1)
+top_color = Color(0.42, 0.3, 0.18, 1)
+
+[node name="EastRootsSouth" type="StaticBody2D" parent="Walls"]
+position = Vector2(328, 130)
+script = ExtResource("3_wall")
+size = Vector2(16, 132)
 color = Color(0.3, 0.21, 0.13, 1)
 top_color = Color(0.42, 0.3, 0.18, 1)
 
@@ -361,6 +368,16 @@ label = "Whisper Forest"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToWhisperForest"]
 shape = SubResource("Rect_door")
 
+[node name="ToChapel" type="Area2D" parent="."]
+position = Vector2(332, 40)
+script = ExtResource("9_transition")
+target_map_id = &"chapel"
+target_spawn_id = &"from_tangled"
+label = "The Chapel"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToChapel"]
+shape = SubResource("Rect_door")
+
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true
 
@@ -372,6 +389,11 @@ script = ExtResource("8_spawn")
 position = Vector2(-280, 0)
 script = ExtResource("8_spawn")
 spawn_id = &"from_forest"
+
+[node name="SpawnFromChapel" type="Marker2D" parent="."]
+position = Vector2(286, 40)
+script = ExtResource("8_spawn")
+spawn_id = &"from_chapel"
 
 [node name="Player" parent="." instance=ExtResource("4_player")]
 position = Vector2(-280, 0)

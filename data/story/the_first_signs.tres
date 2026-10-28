@@ -27,9 +27,21 @@ description = "The roots grow wild in the Tangled Wood. Search it for a sign of 
 objectives = Array[ExtResource("3_obj")]([SubResource("O_roots")])
 completion_flag = &"chapter1.roots_examined"
 
+[sub_resource type="Resource" id="O_chapel"]
+script = ExtResource("3_obj")
+event_id = &"interact:chapel_waystone"
+description = "Examine the old waystone at the chapel"
+cumulative = true
+
 [sub_resource type="Resource" id="S_deeper"]
 script = ExtResource("2_step")
-description = "The roots all bend the same way, deeper into the woods. Your journey continues in a future update."
+description = "The roots all bend the same way, east past the Tangled Wood. Follow them and find what they are pulling toward."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_chapel")])
+completion_flag = &"chapter1.chapel_waystone_examined"
+
+[sub_resource type="Resource" id="S_beyond"]
+script = ExtResource("2_step")
+description = "Even the roots around the old waystone pull further east, toward a way choked with stone. Your journey continues in a future update."
 
 [resource]
 script = ExtResource("1_quest")
@@ -37,5 +49,5 @@ id = &"the_first_signs"
 display_name = "The First Signs"
 chapter = "The Roots Remember"
 description = "Main quest, chapter one. Whatever walks the woods is drawing closer to Haven."
-steps = Array[ExtResource("2_step")]([SubResource("S_east"), SubResource("S_roots"), SubResource("S_deeper")])
+steps = Array[ExtResource("2_step")]([SubResource("S_east"), SubResource("S_roots"), SubResource("S_deeper"), SubResource("S_beyond")])
 open_ended = true
