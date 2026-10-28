@@ -116,6 +116,8 @@ static func assign_potion(character: Character, item_id: StringName) -> String:
 ## "" if the slotted potion may be drunk now, otherwise why not.
 static func potion_error(character: Character) -> String:
 	var state := character.consumables
+	if character.classes.in_trial():
+		return "Potions stay sealed during a class trial; the Hearth Flask still answers."   # no item use (M3)
 	if state.potion_slot == &"" or potion_effect(character, state.potion_slot) == null:
 		return "No potion on the potion slot. Right-click a potion in your bag."
 	if character.inventory.count(state.potion_slot) <= 0:

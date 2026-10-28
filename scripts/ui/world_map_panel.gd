@@ -44,7 +44,7 @@ static func known_maps(target: Character) -> Array[StringName]:
 	for map_def: MapDefinition in target.database.maps.values():
 		if not map_def.show_on_map:
 			continue
-		if map_def.id == target.world.map_id or int(target.world.get_map_value(map_def.id, "visits", 0)) > 0:
+		if map_def.id == target.world.here() or int(target.world.get_map_value(map_def.id, "visits", 0)) > 0:
 			result.append(map_def.id)
 	return result
 
@@ -113,7 +113,7 @@ class MapGraph:
 		for map_id in _known:
 			var map_def: MapDefinition = db.maps[map_id]
 			var rect := Rect2(_origin + Vector2(map_def.map_cell) * CELL, NODE)
-			var here := map_id == character.world.map_id
+			var here := map_id == character.world.here()
 			draw_rect(rect, UiTheme.PANEL_ELEVATED if here else UiTheme.PANEL_INSET)
 			draw_rect(rect, UiTheme.BRONZE if here else UiTheme.BRONZE_DARK, false, 2.0)
 			draw_string(font, rect.position + Vector2(8, 22), map_def.display_name, HORIZONTAL_ALIGNMENT_LEFT, NODE.x - 16, UiTheme.FONT_SMALL, UiTheme.PARCHMENT)

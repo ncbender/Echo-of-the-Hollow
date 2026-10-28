@@ -144,6 +144,9 @@ func invalidate_stats() -> void:
 ## Serializable source data only. Derived values (stats, health, class
 ## resource, active effects) are rebuilt after loading.
 func to_dict() -> Dictionary:
+	var consumable_data := consumables.to_dict()
+	if prologue.trial_flask_charges >= 0:
+		consumable_data["charges"] = prologue.trial_flask_charges   # a running trial saves the state before it (M3)
 	return {
 		"id": id,
 		"name": display_name,
@@ -153,7 +156,7 @@ func to_dict() -> Dictionary:
 		"inventory": inventory.to_array(),
 		"stash": {"items": stash.to_array()},
 		"professions": professions.to_dict(),
-		"consumables": consumables.to_dict(),
+		"consumables": consumable_data,
 		"armor_mastery": armor_mastery.to_dict(),
 		"orphaned_items": orphaned_items.duplicate(true),
 		"loadouts": equipment.to_dict(),

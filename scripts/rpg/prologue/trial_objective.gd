@@ -24,6 +24,9 @@ enum Kind {
 @export var target_id: StringName
 @export var amount: float = 1.0
 @export var description: String
+## Class Trials 2.0 M3: a goal of the trial area (mini-boss). Every other goal is
+## training; the trial gate opens once all training goals are met.
+@export var finale: bool = false
 
 
 func is_counter() -> bool:

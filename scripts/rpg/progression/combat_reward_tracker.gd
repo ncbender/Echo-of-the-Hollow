@@ -50,7 +50,7 @@ func contribution(target: Node, family_id: StringName) -> float:
 
 
 func _on_hit_landed(hit: HitData) -> void:
-	if hit.attack == null or hit.target == null or not is_instance_valid(hit.target):
+	if hit.attack == null or hit.target == null or not is_instance_valid(hit.target) or PrologueService.rewards_blocked(character):
 		return
 	var target_id := hit.target.get_instance_id()
 	var training := hit.target.is_in_group(&"training_target")
@@ -81,7 +81,7 @@ func _on_hit_landed(hit: HitData) -> void:
 ## share its mastery XP.
 func reward_kill(hit: HitData) -> void:
 	var target := hit.target
-	if target == null or not is_instance_valid(target) or target.is_in_group(&"training_target"):
+	if target == null or not is_instance_valid(target) or target.is_in_group(&"training_target") or PrologueService.rewards_blocked(character):
 		return
 	var target_id := target.get_instance_id()
 	if _killed.has(target_id) or not _is_dead(target) or not target.has_method(&"get_kill_reward"):

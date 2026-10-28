@@ -237,6 +237,8 @@ func _on_player_hit_landed(hit: HitData) -> void:
 
 ## Evolving main-hand items learn from real fights (separate from weapon mastery).
 func _grant_item_xp(hit: HitData) -> void:
+	if PrologueService.rewards_blocked(character):
+		return   # no evolution XP inside a trial (Class Trials 2.0 M3)
 	var item := character.equipment.get_item(EquipSlot.Slot.MAIN_HAND)
 	if item == null:
 		return
@@ -320,7 +322,8 @@ func _on_hit_dispatched(hit: HitData) -> void:
 	if hit.source == HitData.Source.SKILL:
 		PrologueService.record(character, TrialObjective.Kind.SKILL_HITS, hit.skill_id, 1.0)
 	if hit.killed and hit.target != null and is_instance_valid(hit.target) and not hit.target.is_in_group(&"training_target"):
-		PrologueService.record(character, TrialObjective.Kind.KILLS, &"", 1.0)
+		var variant: StringName = (hit.target as Enemy).config.id if hit.target is Enemy else &""
+		PrologueService.record(character, TrialObjective.Kind.KILLS, variant, 1.0)   # variant id: trial bosses (M3)
 	if hit.broke_poise and hit.target is Enemy and is_instance_valid(hit.target):
 		PrologueService.record(character, TrialObjective.Kind.POISE_BREAKS, (hit.target as Enemy).config.id, 1.0)
 	for tag in hit.tags:
@@ -395,7 +398,8 @@ func _on_potion_done() -> void:
 ## once per attack instance, capped per enemy so one weak enemy cannot be farmed.
 func _on_defended(hit: HitData) -> void:
 	var attacker := hit.attacker
-	if attacker == null or not is_instance_valid(attacker) or attacker.is_in_group(&"training_target") or attacker.is_in_group(&"player"):
+	if attacker == null or not is_instance_valid(attacker) or attacker.is_in_group(&"training_target") or attacker.is_in_group(&"player") \
+			or PrologueService.rewards_blocked(character):   # no trial farming (Class Trials 2.0 M3)
 		return
 	var key := "%d:%d" % [attacker.get_instance_id(), hit.attack_instance_id]
 	if _defended.has(key):

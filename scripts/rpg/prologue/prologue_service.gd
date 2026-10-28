@@ -9,6 +9,10 @@ extends RefCounted
 ##    (further trials stay optional until then). That class is unlocked
 ##    permanently and activated, the others stay locked (later class quests
 ##    unlock them), and the choice can never run again
+##  * Class Trials 2.0 M3 (docs/CLASS_TRIALS_2_0_M3.md): trials run on their own
+##    grounds (TrialDefinition.map_id, TrialGrounds); training goals open the
+##    trial gate, finale goals (mini-boss variant) complete the trial. A trial
+##    never costs Hearth Flask charges and blocks every reward (rewards_blocked)
 
 
 static func trial_for_class(db: GameDatabase, class_id: StringName) -> TrialDefinition:
@@ -58,6 +62,7 @@ static func begin_trial(character: Character, trial_id: StringName) -> String:
 	prologue.stage = PrologueState.Stage.IN_PROGRESS
 	prologue.active_trial = trial_id
 	prologue.trial_progress.clear()
+	prologue.trial_flask_charges = character.consumables.charges   # restored when the trial ends (M3)
 	character.equipment.begin_trial(trial.class_id, character.classes.active_class_id)
 	character.builds.begin_trial_build(trial.make_build(character.database.rules.talent_rules().skill_slots))
 	character.classes.begin_trial(trial.class_id, trial.trial_level)
@@ -74,6 +79,10 @@ static func end_trial(character: Character, completed: bool) -> void:
 		return
 	prologue.active_trial = &""
 	prologue.trial_progress.clear()
+	if prologue.trial_flask_charges >= 0:   # the trial never costs (nor gains) Hearth Flask charges
+		character.consumables.charges = mini(prologue.trial_flask_charges, ConsumableService.max_charges(character))
+		prologue.trial_flask_charges = -1
+		character.consumables.changed.emit()
 	var first_completion := completed and not trial_id in prologue.completed_trials
 	if first_completion:
 		prologue.completed_trials.append(trial_id)
@@ -91,6 +100,38 @@ static func objectives_done(character: Character, trial: TrialDefinition) -> boo
 		if float(character.prologue.trial_progress.get(index, 0.0)) + 0.0001 < trial.objectives[index].amount:
 			return false
 	return true
+
+
+## Class Trials 2.0 M3: every training (non-finale) goal of the RUNNING trial
+## `trial_id` is met - the trial gate opens. False without that running trial.
+static func training_done(character: Character, trial_id: StringName) -> bool:
+	if character.prologue.active_trial != trial_id or trial_id == &"":
+		return false
+	var trial: TrialDefinition = character.database.trials.get(trial_id)
+	if trial == null:
+		return false
+	for index in trial.objectives.size():
+		var objective := trial.objectives[index]
+		if not objective.finale and float(character.prologue.trial_progress.get(index, 0.0)) + 0.0001 < objective.amount:
+			return false
+	return true
+
+
+## The trial whose grounds are `map_id` (null: not trial grounds).
+static func trial_for_map(db: GameDatabase, map_id: StringName) -> TrialDefinition:
+	if map_id == &"":
+		return null
+	for trial: TrialDefinition in db.trials.values():
+		if trial.map_id == map_id:
+			return trial
+	return null
+
+
+## Class Trials 2.0 M3: no permanent progress from fights inside a trial or on
+## trial grounds (drops, class/weapon/armor mastery XP, item evolution XP). The
+## one source every reward pipeline asks; regular fights are never affected.
+static func rewards_blocked(character: Character) -> bool:
+	return character.classes.in_trial() or trial_for_map(character.database, character.world.current_map_id) != null
 
 
 ## Counts a combat event for the running trial (and active class quests). The

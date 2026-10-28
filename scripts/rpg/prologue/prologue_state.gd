@@ -19,6 +19,9 @@ var chosen_class: StringName
 var active_trial: StringName
 ## Objective index -> amount of the running trial (transient).
 var trial_progress: Dictionary = {}
+## Hearth Flask charges when the running trial began (transient): restored when
+## it ends and written instead of the live value while it runs.
+var trial_flask_charges: int = -1
 
 
 func is_completed() -> bool:
@@ -48,3 +51,4 @@ func from_dict(data: Dictionary, warnings: PackedStringArray) -> void:
 	chosen_class = StringName(str(data.get("chosen_class", "")))
 	active_trial = &""
 	trial_progress.clear()
+	trial_flask_charges = -1

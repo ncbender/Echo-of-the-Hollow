@@ -75,7 +75,8 @@ func show_page(name: String) -> void:
 func _build_main() -> void:
 	var where := ""
 	if session != null and session.character != null:
-		var map_def: MapDefinition = session.database.maps.get(session.character.world.map_id)
+		var world := session.character.world
+		var map_def: MapDefinition = session.database.maps.get(world.here())
 		where = map_def.display_name if map_def != null else ""
 	if where != "":
 		_content.add_child(UiTheme.styled(where, &"SmallLabel"))

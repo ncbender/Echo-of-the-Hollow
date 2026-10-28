@@ -6,8 +6,12 @@ signal flag_changed(flag: StringName, value: Variant)
 ## A Haven ruin changed its stage (RestorationService). Milestone save.
 signal restoration_changed(ruin_id: StringName, stage: StringName)
 
+## Saved location (where a save resumes; trial grounds point to the altar).
 var map_id: StringName = &"home_base"
 var spawn_id: StringName = &"default"
+## The map the player physically stands on right now (Class Trials 2.0 M3):
+## location displays, trial reward rules. Transient - never saved.
+var current_map_id: StringName
 ## Simple persistent flags (bool / int / String values only).
 var flags: Dictionary = {}
 ## Home base: build plot id -> building id (Phase 9).
@@ -33,6 +37,11 @@ func set_flag(flag: StringName, value: Variant = true) -> void:
 
 func get_flag(flag: StringName, default: Variant = false) -> Variant:
 	return flags.get(flag, default)
+
+
+## Where the player is now: the physical map once one is running, else the saved one.
+func here() -> StringName:
+	return current_map_id if current_map_id != &"" else map_id
 
 
 func has_flag(flag: StringName) -> bool:
