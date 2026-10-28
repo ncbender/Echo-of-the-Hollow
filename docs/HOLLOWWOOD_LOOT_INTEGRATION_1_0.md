@@ -47,7 +47,7 @@ Transiente Drops bleiben – wie bisher Gold/Material – nur bis zum Kartenwech
 | Tiers | `hollowwood_early_tiers`: ilvl 1–9 nur T5; 10–24 T5 75 / T4 25 | dto. |
 
 Affixe/Eligibility unverändert aus Loot Foundation 1.0 (Gewichte 100/90/80/30, LOCAL 100, Armored aus, Rüstung/Schild nur
-Furious/Guarded/Vital, Bogen ohne Executioner). Magic 1/2/3 = 40/40/20; Normal 0 Affixe.
+Furious/Guarded/Vital, seit Grove Warden Rare R1 zusätzlich Keen, Bogen ohne Executioner). Magic 1/2/3 = 40/40/20; Normal 0 Affixe.
 
 ## 4. Tests (Phase D)
 

@@ -198,12 +198,12 @@ func test_affix_count_follows_rarity() -> void:
 
 
 func test_short_pools_end_with_a_documented_shortfall() -> void:
-	# Armour has exactly three eligible global affixes (furious, guarded, vital).
+	# Armour has exactly four eligible global affixes (furious, guarded, keen, vital; Grove Warden Rare R1).
 	var legendary := _generate(&"leather_cap", R.LEGENDARY, 5, _rng(2))
 	check(legendary.ok(), "controlled return, no refusal")
-	check_eq(legendary.item.affixes.size(), 3, "all three eligible affixes, nothing invented")
-	check_eq(legendary.shortfall, 2, "two affixes short")
-	check(legendary.note.contains("only 3 of 5"), "shortfall documented: %s" % legendary.note)
+	check_eq(legendary.item.affixes.size(), 4, "all four eligible affixes, nothing invented")
+	check_eq(legendary.shortfall, 1, "one affix short")
+	check(legendary.note.contains("only 4 of 5"), "shortfall documented: %s" % legendary.note)
 	# Synthetic: only two mutually exclusive affixes allowed -> one affix at most.
 	var narrow := db.get_item(&"iron_sword").duplicate() as ItemDefinition
 	narrow.generation_affixes = [&"bloodthirsty", &"thundering"] as Array[StringName]

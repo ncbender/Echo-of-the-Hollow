@@ -25,4 +25,4 @@ rarity = 1
 max_stack = 1
 slot_kind = 4
 base_stats = Array[ExtResource("2_mod")]([SubResource("Mod_1"), SubResource("Mod_2")])
-generation_affixes = Array[StringName]([&"furious", &"guarded", &"vital"])
+generation_affixes = Array[StringName]([&"furious", &"guarded", &"keen", &"vital"])

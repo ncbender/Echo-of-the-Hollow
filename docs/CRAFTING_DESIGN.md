@@ -41,7 +41,7 @@ Das ist der Dreistufen-Prototyp (`tier_model = 3`). Zielmodell ist T5–T1 ab il
 |---|---|---|---|---|---|
 | Sharpened | Physical Damage % | physical, attack | – | Waffen | 4-7 / 8-12 / 13-18 |
 | Swift | Attack Speed % (vorbereitet¹) | speed | – | Waffen | 3-5 / 6-8 / 9-12 |
-| Keen | Crit Chance % | crit | – | Waffen, Ring, Hals | 2-3 / 4-5 / 6-8 |
+| Keen | Crit Chance % | crit | – | Waffen, Kopf, Brust, Schild, Ring, Hals | 2-3 / 4-5 / 6-8 |
 | Cruel | Crit Damage % | crit, physical | – | Waffen | 10-15 / 16-25 / 26-35 |
 | Crushing | Poise Damage % | poise, control | control_core | Waffen | 6-10 / 11-16 / 17-24 |
 | Vital | Max Health | defense, life | – | alle | 8-14 / 15-24 / 25-36 |
