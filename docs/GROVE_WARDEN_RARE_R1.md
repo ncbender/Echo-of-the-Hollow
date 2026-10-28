@@ -94,7 +94,7 @@ Exclusion-Verstöße, keine Essenzen/Sockel, kein Essenz-Slot an den Definitione
 - `furious` wirkt erst nach der Klassenwahl (Audit §2). `wanderer_coat` hat die Definitions-Rarity Magic; Verkauf, Salvage und
   Loot-Feed lesen die Definitions-Rarity (Audit §4.2, offener Punkt der Loot Foundation).
 
-## 6. Phase D – Thundering: offener Gameplay-Eligibility-Blocker
+## 6. Phase D – Thundering: offener Gameplay-Eligibility-Blocker (behoben in R1.1, `docs/GROVE_WARDEN_RARE_R11.md`)
 
 **Befund (Code + Test):**
 - `shock_damage` wird nur von `EssenceDischargeEffect` gelesen (`scripts/rpg/effects/essence_discharge_effect.gd:37`, einziger
