@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AffixTierWeights" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/crafting/affix_tier_weights.gd" id="1_weights"]
+
+[resource]
+script = ExtResource("1_weights")
+id = &"grove_warden_rare"
+bands = Array[Dictionary]([{
+"max_level": 20,
+"min_level": 20,
+"weights": {
+4: 25.0,
+5: 75.0
+}
+}])

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EquipmentLootTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/items/equipment_loot_table.gd" id="1_table"]
+[ext_resource type="Resource" path="res://data/loot/grove_warden_rare_tiers.tres" id="2_tiers"]
+
+[resource]
+script = ExtResource("1_table")
+id = &"grove_warden_rare_reward"
+chance = 1.0
+item_ids = Array[StringName]([&"iron_sword", &"steel_greatsword", &"iron_axe", &"iron_dagger", &"iron_mace", &"ash_spear", &"oak_staff", &"oak_wand", &"hunting_bow", &"leather_cap", &"wanderer_coat", &"oak_shield"])
+rarity_weights = {
+2: 100.0
+}
+source_level = 20
+level_spread = 0
+tier_weights = ExtResource("2_tiers")
