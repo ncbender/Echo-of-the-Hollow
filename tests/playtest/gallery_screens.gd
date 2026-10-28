@@ -9,7 +9,14 @@ const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory"
 	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
 	"hud_artisan_stages", "restoration_revitalize", "hud_consumables", "flask_upgrades", "quest_rewards",
 	"quest_rewards_claimed", "quest_rewards_none", "hud_edrin_reward", "hud_edrin_story", "journal_reward",
+	"flask_quest_rewards", "mara_rewards", "mara_rewards_claimed", "mara_rewards_none", "mara_rewards_full",
+	"hud_mara_reward", "hud_both_rewards", "hud_mara_story", "journal_cart_reward", "journal_cart_claimed",
 	"pause", "save", "load", "options", "confirm"]
+
+## Bag-full screen fillers and the "!" screen's hidden mara_welcome, undone by reset().
+static var _fillers: Array[String] = []
+static var _topped: Dictionary = {}
+static var _welcome_hidden: bool = false
 
 
 static func open(gallery: Object, screen: String) -> String:
@@ -267,6 +274,48 @@ static func open(gallery: Object, screen: String) -> String:
 		"journal_reward":   # completed quest card with the pending reward line
 			_binding_reward(character, "")
 			hud.toggle_journal()
+		# NPC Quest Turn-ins 1.1 M3: Mara's mixed reward (The Broken Cart, 30 Gold + 3 Timber + 2 Stone)
+		"flask_quest_rewards":   # Hearth Flask window with the Quest Rewards button
+			_cart_reward(character, "")
+			var mara := map.get_node("Mara") as StoryNpc
+			await _stand_at(gallery, mara)
+			hud.open_npc_service(&"hearth_flask", mara)
+			await gallery.frames(3)
+		"mara_rewards", "mara_rewards_claimed", "mara_rewards_none", "mara_rewards_full":
+			var state := screen.trim_prefix("mara_rewards").trim_prefix("_")
+			_cart_reward(character, "" if state == "full" else state)
+			if state == "full":   # no free slot, the kit's timber/stone stacks full: BAG_FULL
+				while character.inventory.free_slots() > 0:
+					_fillers.append(character.inventory.add_item(&"iron_sword", 1, ItemInstance.ORIGIN_FOUND)[0].instance_id)
+				for item_id: StringName in [&"timber", &"stone"]:
+					var room := character.inventory.room_for(item_id)   # stack room only (no free slot left)
+					if room > 0 and not character.inventory.add_item(item_id, room).is_empty():
+						_topped[item_id] = room
+			var mara := map.get_node("Mara") as StoryNpc
+			await _stand_at(gallery, mara)
+			if state == "none":   # no button without a reward: the window itself, opened directly
+				hud.open_npc_service(&"quest_rewards", mara)
+			else:   # the player's way: Hearth Flask -> Quest Rewards
+				hud.open_npc_service(&"hearth_flask", mara)
+				await gallery.frames(2)
+				hud.flask_panel.open_quest_rewards()
+			await gallery.frames(3)
+		"hud_mara_reward":   # "?" over Mara and the tracker hint "Collect your reward from Mara in Haven."
+			_cart_reward(character, "")
+			await _stand_at(gallery, map.get_node("Mara") as StoryNpc)
+		"hud_both_rewards":   # both rewards pending: two tracker hints, "?" over Mara
+			_cart_reward(character, "")
+			_binding_reward(character, "")
+			await _stand_at(gallery, map.get_node("Mara") as StoryNpc)
+		"hud_mara_story":   # "!" over Mara: mara_welcome not heard yet, reward pending
+			_cart_reward(character, "")
+			character.quests.entries[&"shelter_among_the_trees"]["step"] = 1
+			character.world.flags.erase(&"dialogue.mara_welcome")
+			_welcome_hidden = true
+			await _stand_at(gallery, map.get_node("Mara") as StoryNpc)
+		"journal_cart_reward", "journal_cart_claimed":
+			_cart_reward(character, "claimed" if screen.ends_with("claimed") else "")
+			hud.toggle_journal()
 		"restoration_revitalize":
 			character.world.set_restoration(&"tanners_lodge", RestorationService.RESTORED)
 			var lodge := map.get_node("Ruins/TannersLodge") as RuinSite
@@ -296,6 +345,17 @@ static func open(gallery: Object, screen: String) -> String:
 ## alive again (otherwise stations would not open after "hud_death").
 static func reset(gallery: Object) -> void:
 	var map: GameMap = gallery.map
+	var character: Character = gallery.session.character
+	for instance_id: String in _fillers:   # the bag-full screen's swords
+		character.inventory.remove_instance(instance_id)
+	_fillers.clear()
+	for item_id: StringName in _topped:
+		character.inventory.remove_quantity(item_id, int(_topped[item_id]))
+	_topped.clear()
+	if _welcome_hidden:   # the "!" screen: mara_welcome heard again (Shelter Among the Trees, step 2)
+		character.quests.entries[&"shelter_among_the_trees"]["step"] = 2
+		character.world.set_flag(&"dialogue.mara_welcome")
+		_welcome_hidden = false
 	for enemy in map.find_children("*", "Enemy", true, false):
 		enemy.queue_free()
 	for i in 240:
@@ -316,6 +376,17 @@ static func _binding_reward(character: Character, state: String) -> void:
 		character.world.set_flag(QuestRewardService.entitled_flag(&"the_first_binding"))
 	if state == "claimed":
 		character.world.set_flag(QuestRewardService.claimed_flag(&"the_first_binding"))
+
+
+## The Broken Cart (completed live by the gallery character) with Mara's reward "" = pending,
+## "claimed" or "none" (no entitlement, like a save from before M2).
+static func _cart_reward(character: Character, state: String) -> void:
+	for flag in [QuestRewardService.entitled_flag(&"the_broken_cart"), QuestRewardService.claimed_flag(&"the_broken_cart")]:
+		character.world.flags.erase(flag)
+	if state != "none":
+		character.world.set_flag(QuestRewardService.entitled_flag(&"the_broken_cart"))
+	if state == "claimed":
+		character.world.set_flag(QuestRewardService.claimed_flag(&"the_broken_cart"))
 
 
 ## Puts the player into the interaction area of `node` (stations close their
