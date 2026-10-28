@@ -1,7 +1,7 @@
 extends TestCase
 ## Grove Warden Rare Reward R1 (docs/GROVE_WARDEN_RARE_R1.md): the reward source table
 ## (twelve models, Rare, item level 20, T5 75 / T4 25), the eligibility of every model,
-## Keen on head/chest/shield and the open Thundering finding. Data and roller only: no boss,
+## Keen on head/chest/shield and (R1.1) Thundering only with a working shock source. Data and roller only: no boss,
 ## no claim, no inventory grant. Fixed seeds; reachability is proven by exhaustive search,
 ## not by hoping a roll shows four affixes.
 
@@ -327,37 +327,76 @@ func test_old_instances_stay_unchanged() -> void:
 	check_near(crit, 0.0, 0.0, "an old cap without keen gives no crit")
 
 
-# --- 20: the open Thundering finding ----------------------------------------------------------------
+# --- R1.1: Thundering only with a working shock source ---------------------------------------------
 
-func test_thundering_rolls_on_all_nine_weapons_without_a_shock_source() -> void:
-	# Open gameplay eligibility blocker (docs/GROVE_WARDEN_RARE_R1.md §6): shock_damage is only read
-	# by EssenceDischargeEffect (storm wolf essence), essences only sit on weapons with essence slots,
-	# and there is exactly one weapon slot - so Thundering on these nine models never acts.
+## shock_damage is read only by EssenceDischargeEffect (storm wolf essence); essences only act on
+## items with essence slots. R1.1 (docs/GROVE_WARDEN_RARE_R11.md) removed Thundering from the
+## generation pools of the nine standard weapons, which can never hold an essence.
+func test_standard_weapons_never_roll_thundering() -> void:
 	var present: Array[Dictionary] = []
 	for model: StringName in WEAPONS:
 		var definition := db.get_item(model)
-		var ids: Array = []
+		check(not &"thundering" in definition.generation_affixes, "%s: no thundering in the generation pool" % model)
 		for affix in AffixRoller.eligible(definition, 20, present, db, definition.generation_affixes, true):
-			ids.append(affix.id)
-		check(&"thundering" in ids, "%s: thundering eligible in the reward pool" % model)
-		var item := ItemCreation.create(definition, 1, db, 20)
-		item.affixes.append(db.affixes[&"thundering"].roll(db.affixes[&"thundering"].get_tier(5), _rng(20)))
-		for effect in ItemStats.effects(item, definition, db):
-			if effect.effect is EssenceDischargeEffect:
-				fail("%s carries a shock source" % model)
-	for model: StringName in ARMOUR:
-		check(not &"thundering" in db.get_item(model).generation_affixes, "%s: no thundering" % model)
+			check(affix.id != &"thundering", "%s: thundering not eligible for generation" % model)
+		var profile := definition.crafting
+		check(profile == null or (profile.essence_slots == 0 and not &"essence_insert" in profile.allowed_operations),
+			"%s: can never hold an essence later" % model)
+	var rng := _rng(2021)
+	for i in 2400:
+		for entry in EquipmentLoot.roll(table, db, rng).affixes:
+			if entry.affix == "thundering":
+				fail("a Grove Warden Rare rolled thundering")
+				return
+	for path: String in [GRUNT_LOOT, WOLF_LOOT]:
+		var regular := (load(path) as EquipmentLootTable).duplicate() as EquipmentLootTable
+		regular.chance = 1.0
+		for i in 1500:
+			for entry in EquipmentLoot.roll(regular, db, rng).affixes:
+				if entry.affix == "thundering":
+					fail("regular drop of %s rolled thundering" % path)
+					return
+
+
+func test_storm_wolf_weapons_keep_thundering() -> void:
 	var thundering: AffixDefinition = db.affixes[&"thundering"]
 	var slots: Array = []
 	slots.assign(thundering.allowed_slot_kinds)
-	check_eq(slots, [10, 11], "thundering only on weapon slots")
-	var rng := _rng(2021)
-	var with_thundering := 0
-	var weapons := 0
-	for i in 2400:
-		var item := EquipmentLoot.roll(table, db, rng)
-		if item.definition_id in WEAPONS:
-			weapons += 1
-			for entry in item.affixes:
-				with_thundering += 1 if entry.affix == "thundering" else 0
-	check(with_thundering > 0, "the reward pool does roll thundering on weapons (%d of %d)" % [with_thundering, weapons])
+	check_eq(slots, [10, 11], "global rule unchanged: weapon slots")
+	check_near(thundering.weight, 30.0, 0.0, "weight unchanged")
+	check_eq([thundering.get_tier(5).min_value, thundering.get_tier(5).max_value, thundering.get_tier(4).min_value, thundering.get_tier(4).max_value],
+		[8.0, 12.0, 13.0, 18.0], "T5/T4 values unchanged")
+	for model: StringName in [&"forged_blade", &"forged_greatsword", &"stormcaller_fang"]:
+		var definition := db.get_item(model)
+		check(definition.crafting != null and definition.crafting.essence_slots > 0, "%s has essence slots" % model)
+		var item := ItemCreation.create(definition, 1, db)
+		var ids: Array = []
+		for affix in AffixRoller.eligible(definition, item.item_level, item.affixes, db):
+			ids.append(affix.id)
+		check(&"thundering" in ids, "%s: thundering stays eligible under the global rules" % model)
+		item.essences = [&"storm_wolf"] as Array[StringName]
+		var discharge := false
+		for effect in ItemStats.effects(item, definition, db):
+			discharge = discharge or effect.effect is EssenceDischargeEffect
+		check(discharge, "%s: storm wolf essence is a working shock source" % model)
+	for model: StringName in [&"forged_blade", &"forged_greatsword"]:
+		var definition := db.get_item(model)
+		var offered := {}
+		for entry in AffixPool.compute(ItemCreation.create(definition, 1, db), definition, null, db):
+			offered[(entry.affix as AffixDefinition).id] = true
+		check(offered.has(&"thundering"), "%s: crafting still offers thundering" % model)
+
+
+func test_saved_thundering_rolls_stay_unchanged() -> void:
+	var entry := {"affix": "thundering", "tier": 4, "tier_model": 5, "stat": "shock_damage", "flat": 15.0, "percent": 0.0}
+	var saved := {"id": "old_sword", "def": "iron_sword", "qty": 1, "ilvl": 12, "base_damage": 13.632, "rarity": 1,
+		"affixes": [entry.duplicate(), {"affix": "vital", "tier": 5, "tier_model": 5, "stat": "max_health", "flat": 5.0, "percent": 0.0}]}
+	var item := ItemInstance.from_dict(saved)
+	check_eq(item.affixes.size(), 2, "both saved affixes kept")
+	check_eq(item.affixes[0], entry, "saved thundering roll unchanged")
+	check_near(item.base_weapon_damage, 13.632, 0.0, "stored base unchanged")
+	check_eq(ItemInstance.from_dict(item.to_dict()).to_dict(), item.to_dict(), "round trip unchanged")
+	var shock := 0.0
+	for modifier in ItemStats.modifiers(item, db.get_item(&"iron_sword"), db):
+		shock += modifier.flat if modifier.stat == Stats.SHOCK_DAMAGE else 0.0
+	check_near(shock, 15.0, 0.0, "the stored value still contributes its stat")
