@@ -281,6 +281,9 @@ label = "Warden's Cache"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WardensCache"]
 shape = SubResource("Circle_pack")
 
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(-280, 0)
+
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true
 
@@ -302,9 +305,6 @@ scale = Vector2(1.3, 1.3)
 config = ExtResource("13_warden_cfg")
 attacks = ExtResource("14_warden_attacks")
 persistent_id = &"whisper_forest_grove_warden"
-
-[node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(-280, 0)
 
 [node name="HitstopController" type="Node" parent="."]
 script = ExtResource("6_hitstop")
