@@ -261,5 +261,5 @@ func test_reward_data_is_validated() -> void:
 	quest.turn_in_npc_id = &"edrin"
 	check(not errors.is_empty(), "unknown turn-in npc reported")
 	for other: StoryQuestDefinition in db.story_quests.values():
-		if other.id != QUEST:
+		if other.id != QUEST and other.id != &"the_broken_cart":   # 1.1 M2: Mara's mixed reward (quest_turnin_mara)
 			check_eq(other.turn_in_gold, 0, "%s has no reward" % other.id)

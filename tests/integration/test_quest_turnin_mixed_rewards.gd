@@ -395,13 +395,14 @@ func test_invalid_material_data_never_pays_partially() -> void:
 	check(QuestRewardService.validate_quest(db, quest).is_empty(), "valid mixed data: %s" % [QuestRewardService.validate_quest(db, quest)])
 
 
-func test_shipped_data_have_no_material_rewards_yet() -> void:
+func test_shipped_data_have_materials_only_at_the_broken_cart() -> void:
 	check(StoryService.validate_data(db).is_empty(), "story data valid: %s" % [StoryService.validate_data(db)])
 	for other: StoryQuestDefinition in db.story_quests.values():
-		check(other.turn_in_items.is_empty(), "%s has no material reward (M1)" % other.id)
+		if other.id == &"the_broken_cart":
+			continue   # 1.1 M2: 30 gold + 3 timber + 2 stone at Mara (test_quest_turnin_mara)
+		check(other.turn_in_items.is_empty(), "%s has no material reward" % other.id)
 		if other.id != QUEST:
 			check(not QuestRewardService.has_reward(other), "%s has no reward" % other.id)
-	check(not QuestRewardService.has_reward(db.story_quests[&"the_broken_cart"]), "the_broken_cart not active yet")
 
 
 # --- entitlement, trial, story contract ---------------------------------------------------------

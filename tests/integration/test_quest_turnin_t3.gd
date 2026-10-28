@@ -59,6 +59,8 @@ func _to_edrins_talk() -> void:
 	StoryService.notify(character, &"waystone:whispering_stone")
 	StoryService.notify(character, &"enter:home_base")
 	StoryService.notify(character, &"talk:mara_return")
+	# 1.1 M2: the chain also earns Mara's reward (The Broken Cart); taken here, so only Edrin's remains
+	check_eq(QuestRewardService.claim(character, &"the_broken_cart"), "", "Mara's reward taken")
 	check(StoryService.at_step(character, QUEST, 2), "The First Binding waits for Edrin")
 
 
@@ -113,7 +115,7 @@ func test_story_mark_first_then_question_mark_until_the_claim() -> void:
 	check_eq(QuestRewardService.claim(character, QUEST), "", "claimed")
 	check_eq(edrin.marker(), "", "claimed: no marker")
 	var mara := map.get_node("Mara") as StoryNpc
-	check(mara.marker() != "?", "Mara never shows the reward ?")
+	check(mara.marker() != "?", "Mara shows no reward ? (hers was taken)")
 
 
 func test_marker_after_save_load_and_map_change() -> void:
