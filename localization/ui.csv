@@ -17,3 +17,5 @@ UI_CHOOSE_CLASS_TITLE,Choose Your Path
 UI_PROLOGUE,Prologue
 UI_CLASS_QUESTS,Class quests
 UI_LEAVE_TRIAL_HINT,G at the pedestal: leave the trial
+UI_TRIAL_VISIT,Visit the trial grounds
+UI_TRIAL_VISIT_HINT,"Travel to this path's trial grounds. This is not the final choice: no trial starts and nothing is chosen."

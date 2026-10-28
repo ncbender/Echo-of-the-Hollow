@@ -41,3 +41,4 @@ skill_slots = Array[StringName]([&"furious_strike", &"battle_cry", &"blade_rush"
 objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_break")])
 enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("4_husk"), ExtResource("4_husk"), ExtResource("5_hardened")])
 choice_text = "A relentless fighter who builds Rage through aggression and overwhelms enemies with powerful strikes."
+map_id = &"broken_bastion"

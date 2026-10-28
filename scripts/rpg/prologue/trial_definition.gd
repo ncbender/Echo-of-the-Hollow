@@ -20,6 +20,10 @@ extends Resource
 @export var enemy_configs: Array[EnemyConfig] = []
 ## Text of this path on the class choice at the Whispering Stone.
 @export_multiline var choice_text: String
+## Class Trials 2.0: the trial grounds (own GameMap) reached from the Heart of
+## the Stone, and the spawn there. &"" = no grounds yet.
+@export var map_id: StringName
+@export var entry_spawn_id: StringName = &"default"
 
 
 func make_build(slot_count: int) -> ClassBuild:

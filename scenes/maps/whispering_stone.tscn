@@ -293,6 +293,11 @@ position = Vector2(150, -258)
 script = ExtResource("8_spawn")
 spawn_id = &"waystone"
 
+[node name="SpawnHeart" type="Marker2D" parent="."]
+position = Vector2(0, -228)
+script = ExtResource("8_spawn")
+spawn_id = &"heart"
+
 [node name="MemoryFragment" type="Area2D" parent="."]
 position = Vector2(490, 0)
 script = ExtResource("15_read")

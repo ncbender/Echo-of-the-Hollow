@@ -34,6 +34,19 @@ static func can_begin_trial(character: Character, trial_id: StringName) -> Strin
 	return ""
 
 
+## "" if the trial grounds of `trial_id` may be visited from the Heart of the
+## Stone now (Class Trials 2.0 M2). Same gate as starting a trial; visiting
+## alone starts no trial, chooses no class and completes nothing.
+static func can_visit_grounds(character: Character, trial_id: StringName) -> String:
+	var error := can_begin_trial(character, trial_id)
+	if error != "":
+		return error
+	var trial: TrialDefinition = character.database.trials[trial_id]
+	if trial.map_id == &"" or not character.database.maps.has(trial.map_id):
+		return "This echo has no grounds yet."
+	return ""
+
+
 ## Starts a temporary trial: the trial class is played at the trial level with
 ## the trial's build and a reference copy of the current loadout.
 static func begin_trial(character: Character, trial_id: StringName) -> String:

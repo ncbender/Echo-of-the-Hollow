@@ -46,3 +46,4 @@ skill_slots = Array[StringName]([&"arcane_bolt", &"mana_pulse", &"frostbind", &"
 objectives = Array[ExtResource("1_7a0d5")]([SubResource("Resource_mana"), SubResource("Resource_yik4n"), SubResource("Resource_tafdw"), SubResource("Resource_4a5v6")])
 enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("4_husk"), ExtResource("4_husk"), ExtResource("4_husk")])
 choice_text = "A wielder of arcane power who combines spells, builds magical marks, and unleashes devastating detonations."
+map_id = &"shattered_sanctum"

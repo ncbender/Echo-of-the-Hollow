@@ -53,6 +53,7 @@ func _ready() -> void:
 	_remove_taken_pickups(character)
 	character.world.map_id = map_id
 	character.world.spawn_id = spawn_id
+	MapDefinition.resolve_saved_location(session.database, character.world)   # trial grounds save as the altar
 	character.world.set_map_value(map_id, "visits", int(character.world.get_map_value(map_id, "visits", 0)) + 1)
 	bridge = session.bind_player(player)
 	hud.setup(bridge)

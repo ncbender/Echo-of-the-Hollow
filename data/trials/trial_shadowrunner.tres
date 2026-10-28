@@ -48,3 +48,4 @@ skill_slots = Array[StringName]([&"shadow_strike", &"expose_weakness", &"shadows
 objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_focus"), SubResource("Resource_step"), SubResource("Resource_0sif0"), SubResource("Resource_exec")])
 enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("5_wolf"), ExtResource("4_husk"), ExtResource("5_wolf")])
 choice_text = "A swift and precise fighter who exploits weak points and strikes when the moment is right."
+map_id = &"veiled_passage"
