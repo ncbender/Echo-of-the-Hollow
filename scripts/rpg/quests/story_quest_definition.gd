@@ -20,3 +20,6 @@ extends Resource
 ## Completion itself never waits for it; QuestRewardService holds the claim rules.
 @export var turn_in_gold: int = 0
 @export var turn_in_npc_id: StringName
+## NPC Quest Turn-ins 1.1 M1 (docs/NPC_QUEST_TURNINS_1_1_M1.md): stackable materials handed
+## out together with the gold, all or nothing (empty = gold-only reward, as T1).
+@export var turn_in_items: Array[ItemCost] = []
