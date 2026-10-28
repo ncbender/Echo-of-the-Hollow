@@ -324,7 +324,7 @@ script = ExtResource("11_cond_node")
 condition = SubResource("C_sentinel_defeated")
 
 [node name="SplitWatchstone" type="Area2D" parent="AfterSentinel"]
-position = Vector2(110, -94)
+position = Vector2(110, -84)
 script = ExtResource("10_read")
 persistent_id = &"wardens_rest_watchstone"
 title = "Split Watchstone"
