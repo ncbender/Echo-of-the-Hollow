@@ -17,23 +17,27 @@ func _ready() -> void:
 	add_theme_constant_override(&"separation", 4)
 
 
-func push(item_id: StringName, quantity: int) -> void:
+## `item` (optional): the received instance - its own rarity is shown (a Rare instance of a
+## Magic definition reads Rare); without one the definition's rarity.
+func push(item_id: StringName, quantity: int, item: ItemInstance = null) -> void:
 	var definition := bridge.character.database.get_item(item_id) if bridge != null else null
 	if definition == null:
 		return
+	var rarity := item.effective_rarity(definition) if item != null else definition.rarity
 	var row := PanelContainer.new()
 	row.theme_type_variation = &"HudPanel"
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var box := HBoxContainer.new()
 	row.add_child(box)
 	var icon := ItemIcon.new().setup(definition, quantity)
+	icon.rarity = rarity
 	icon.custom_minimum_size = Vector2(30, 30)
 	box.add_child(icon)
 	var name_label := UiTheme.styled("%s%s" % [definition.display_name, "  x%d" % quantity if quantity > 1 else ""], &"SmallLabel")
-	name_label.add_theme_color_override(&"font_color", UiTheme.rarity_color(definition.rarity))
+	name_label.add_theme_color_override(&"font_color", UiTheme.rarity_color(rarity))
 	box.add_child(name_label)
-	if definition.rarity != ItemDefinition.Rarity.NORMAL:
-		box.add_child(UiTheme.styled(UiTheme.rarity_name(definition.rarity), &"CaptionLabel"))
+	if rarity != ItemDefinition.Rarity.NORMAL:
+		box.add_child(UiTheme.styled(UiTheme.rarity_name(rarity), &"CaptionLabel"))
 	row.set_meta(&"age", 0.0)
 	add_child(row)
 	_trim()
