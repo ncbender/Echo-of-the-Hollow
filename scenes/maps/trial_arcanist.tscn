@@ -15,7 +15,6 @@
 [ext_resource type="Script" path="res://scripts/world/trial_grounds.gd" id="13_grounds"]
 [ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="20_husk"]
 [ext_resource type="Resource" path="res://data/enemies/sanctum_warden.tres" id="21_boss"]
-[ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="22_claws"]
 
 [sub_resource type="RectangleShape2D" id="Rect_exit"]
 size = Vector2(56, 12)
@@ -134,7 +133,6 @@ persistent = false
 position = Vector2(0, -60)
 script = ExtResource("11_espawn")
 config = ExtResource("21_boss")
-attacks = ExtResource("22_claws")
 
 [node name="TrialGrounds" type="Node" parent="." node_paths=PackedStringArray("training", "finale", "gate")]
 script = ExtResource("13_grounds")

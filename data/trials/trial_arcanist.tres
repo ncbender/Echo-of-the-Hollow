@@ -35,7 +35,7 @@ description = "Detonate the marks with Mana Pulse (E)"
 [sub_resource type="Resource" id="Resource_boss"]
 script = ExtResource("1_7a0d5")
 target_id = &"sanctum_warden"
-description = "Defeat the Sanctum Warden (keep your distance: its slam cannot be blocked)"
+description = "Defeat the Sanctum Warden"
 finale = true
 
 [resource]

@@ -189,7 +189,7 @@ func test_each_trial_runs_on_its_grounds() -> void:
 		var bosses := _enemies(TRIALS[class_id].boss)
 		check_eq(bosses.size(), 1, "%s: mini-boss %s in the trial area" % [class_id, TRIALS[class_id].boss])
 		if class_id == &"arcanist" and not bosses.is_empty():
-			check_eq((bosses[0] as Enemy).attacks.id, &"warden_claws", "arcanist boss fights with the Warden's claws")
+			check_eq((bosses[0] as Enemy).attacks.id, &"grunt_claws", "arcanist boss fights like the Hardened Husk (M3.1)")
 		for enemy: Enemy in _enemies():   # the wrong enemies: training variants, escorts
 			if enemy.config.id != TRIALS[class_id].boss:
 				_player_hit(enemy, true, true)
