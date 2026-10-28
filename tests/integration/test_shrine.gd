@@ -1,6 +1,7 @@
 extends TestCase
-## Whispering Stone & class choice: the three echoes (data, real map, enemy
-## variants, waves, abort/death/restart, nothing permanent), the choice only
+## Whispering Stone & class choice: the three echoes (data; since Class Trials
+## 2.0 M3 they begin at the Heart of the Stone on their own grounds - no pedestals,
+## a trial still running ends at the stone), the choice only
 ## after its own echo (Class Trials 2.0 M1) with confirmation and a milestone save (success shown only
 ## after the write, failure reported), the waystones (exactly four planned, two
 ## working, activation line, free travel, never in combat), the return to Haven
@@ -88,7 +89,7 @@ func test_echo_and_waystone_data() -> void:
 	for trial_id: StringName in expected:
 		var trial: TrialDefinition = db.trials[trial_id]
 		check_eq([trial.display_name, trial.description, trial.choice_text], expected[trial_id], "texts of %s" % trial_id)
-		check_eq(trial.enemy_configs.size(), 3, "%s spawns three variants" % trial_id)
+		check_eq(trial.enemy_configs.size(), 3, "%s keeps its three variants (developer pedestals)" % trial_id)
 	var warrior_kinds: Array = (db.trials[&"trial_warrior"] as TrialDefinition).objectives.map(func(o: TrialObjective) -> int: return o.kind)
 	check(TrialObjective.Kind.POISE_BREAKS in warrior_kinds and TrialObjective.Kind.RESOURCE_AT_LEAST in warrior_kinds, "warrior: rage + poise break")
 	var shadow_targets: Array = (db.trials[&"trial_shadowrunner"] as TrialDefinition).objectives.map(func(o: TrialObjective) -> StringName: return o.target_id)
@@ -101,56 +102,32 @@ func test_echo_and_waystone_data() -> void:
 	check_eq(character.world.waystones, [&"haven"] as Array[StringName], "Haven waystone active from the start")
 
 
-func test_echo_in_the_shrine_is_temporary_and_restartable() -> void:
+func test_trials_begin_only_at_the_heart_of_the_stone() -> void:
 	if await _open(&"whispering_stone", &"from_haven") == null:
 		return
 	check(StoryService.at_step(character, &"the_whispering_stone", 1), "the stone reached")
-	var items := character.inventory.to_array()
-	var builds := character.builds.to_dict()
-	var station := map.get_node("TrialWarrior") as TrialStation
-	map.player.global_position = station.global_position
+	check(map.find_children("*", "TrialStation", true, false).is_empty(), "no pedestals at the stone any more (Class Trials 2.0 M3)")
+	check(not &"whispering_stone" in db.rules.trial_map_ids, "no trial runs at the stone itself")
+	var stone := map.get_node("TheStone") as ClassChoiceStation
+	map.player.global_position = stone.global_position
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	station.interact(map.hud)
-	check(character.classes.in_trial() and character.classes.active_class_id == &"warrior", "Echo of the Warrior started")
-	await get_tree().process_frame
-	var spawned: Array = map.find_children("*", "Enemy", true, false)
-	var variants: Array = spawned.map(func(e: Enemy) -> StringName: return e.config.id)
-	check(variants.count(&"hardened_husk") == 1 and variants.count(&"rootbound_husk") == 2, "echo variants %s" % [variants])
-	for enemy: Enemy in spawned:   # all fall before the goals are met: a new wave, never a dead end
-		var hit := HitData.new()
-		hit.damage = 9999.0
-		enemy.hurtbox.receive_hit(hit)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var alive := map.find_children("*", "Enemy", true, false).filter(func(e: Enemy) -> bool: return e.state != Enemy.State.DEAD)
-	check_eq(alive.size(), 3, "new wave")
-	map.player.health.died.emit()
-	check(not character.classes.in_trial(), "falling ends the echo")
-	await get_tree().process_frame
-	station.interact(map.hud)
-	check(character.classes.in_trial(), "restarted")
-	station.interact(map.hud)
-	check(not character.classes.in_trial(), "stepped out (abort)")
-	station.interact(map.hud)
-	var hardened: Enemy = null
-	await get_tree().process_frame
-	for node in map.find_children("*", "Enemy", true, false):
-		if (node as Enemy).config.id == &"hardened_husk" and (node as Enemy).state != Enemy.State.DEAD:
-			hardened = node
-	var trial: TrialDefinition = db.trials[&"trial_warrior"]
-	PrologueService.record(character, trial.objectives[0].kind, &"rage", 50.0)
-	PrologueService.record(character, trial.objectives[1].kind, &"furious_strike", 2.0)
-	var breaker := HitData.new()
-	breaker.broke_poise = true
-	breaker.target = hardened
-	map.bridge._on_hit_dispatched(breaker)   # the same path a real poise break takes
-	check(character.prologue.has_completed_trial(&"trial_warrior"), "echo walked")
-	check_eq(character.classes.active_class_id, &"basic_adventurer", "back to Basic Adventurer")
-	check(not character.classes.is_unlocked(&"warrior"), "nothing permanent: class still locked")
-	check_eq(character.inventory.to_array(), items, "nothing permanent: inventory")
-	check_eq(character.builds.to_dict(), builds, "nothing permanent: builds")
-	check(StoryService.at_step(character, &"the_whispering_stone", 2), "one echo is enough: on to the choice")
+	stone.interact(map.hud)
+	var panel := map.hud.class_choice_panel
+	for class_id: StringName in [&"warrior", &"arcanist", &"shadowrunner"]:
+		var begin := panel.find_child("Begin_%s" % class_id, true, false) as Button
+		check(begin != null and not begin.disabled, "%s trial begins at the Heart of the Stone" % class_id)
+	# a trial still running when the player is back at the stone ends without passing
+	PrologueService.begin_trial(character, &"trial_warrior")
+	session.travel(&"whispering_stone", &"heart", false)
+	for i in 240:
+		await get_tree().process_frame
+		var current := get_tree().current_scene as GameMap
+		if current != null and current != map and current.is_node_ready() and not session.is_traveling():
+			break
+	check(not character.classes.in_trial(), "back at the stone: the trial ended")
+	check(not character.prologue.has_completed_trial(&"trial_warrior"), "and did not pass")
+	check_eq(character.classes.active_class_id, &"basic_adventurer", "Basic Adventurer again")
 
 
 func test_choice_only_after_its_own_echo_and_success_after_save() -> void:

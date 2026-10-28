@@ -3,8 +3,8 @@ extends TestCase
 ## the trial hub - three trial paths to their own placeholder grounds (real scene
 ## changes through SessionState.travel), the return to the altar, saves on the
 ## grounds resolving to the altar, and that travelling alone never chooses a
-## class, completes a trial, starts a trial or hands out anything. The old
-## pedestals keep working. Saves only under user://test_saves/.
+## class, completes a trial, starts a trial or hands out anything. Since M3 the
+## grounds host real trials (test_class_trials_m3). Saves only under user://test_saves/.
 
 const DIR := "user://test_saves/class_trials_m2"
 const PROFILE := DIR + "/slot_1.save.json"
@@ -111,8 +111,10 @@ func test_trial_grounds_data() -> void:
 		check(exits.size() == 1 and exits[0].target_map_id == &"whispering_stone" and exits[0].target_spawn_id == &"heart",
 			"%s: one way back to the Heart of the Stone" % map_def.id)
 		check(scene.get_node_or_null("TrainingArea") != null and scene.get_node_or_null("TrialArea") != null, "%s: room for M3" % map_def.id)
-		for type: String in ["Enemy", "Encounter", "ResourceNode", "Readable", "ItemPickup", "TrialStation", "Waystone", "Checkpoint"]:
-			check(scene.find_children("*", type, true, false).is_empty(), "%s: no %s (no enemies, loot or progress)" % [map_def.id, type])
+		for type: String in ["Enemy", "ResourceNode", "Readable", "ItemPickup", "TrialStation", "Waystone", "Checkpoint"]:
+			check(scene.find_children("*", type, true, false).is_empty(), "%s: no placed %s (no loot or progress sources)" % [map_def.id, type])
+		for encounter: Encounter in scene.find_children("*", "Encounter", true, false):   # M3: trial fights only
+			check(not encounter.persistent and encounter.completion_loot == null, "%s: %s leaves no trace and drops nothing" % [map_def.id, encounter.encounter_id])
 		scene.free()
 
 
@@ -175,25 +177,23 @@ func test_save_on_trial_grounds_loads_at_the_altar() -> void:
 		check_eq(stone.player.global_position, stone.find_spawn(&"heart").global_position, "loaded at the Heart of the Stone")
 
 
-func test_paths_closed_during_a_pedestal_trial_and_after_the_choice() -> void:
+func test_paths_closed_during_a_trial_and_after_the_choice() -> void:
 	if await _open(&"whispering_stone", &"from_haven") == null:
 		return
-	check_eq(PrologueService.begin_trial(character, &"trial_warrior"), "", "old pedestal trial")
+	check_eq(PrologueService.begin_trial(character, &"trial_warrior"), "", "a running trial")
 	for class_id: StringName in GROUNDS:
 		check(PrologueService.can_visit_grounds(character, PrologueService.trial_for_class(db, class_id).id) != "", "%s path closed during a trial" % class_id)
 	var panel := await _open_altar()
 	check((panel.find_child("Visit_arcanist", true, false) as Button).disabled, "button disabled during a trial")
 	check(panel.visit(&"arcanist") != "", "panel refuses during a trial")
 	check(map.map_id == &"whispering_stone" and not session.is_traveling(), "no transition")
-	# a running trial never follows the player onto the grounds (not a trial map)
-	session.travel(&"broken_bastion", &"default", false)
-	if await _await_map(&"broken_bastion") == null:
+	# M3: another trial's grounds never host the running trial - it ends without passing
+	session.travel(&"shattered_sanctum", &"default", false)
+	if await _await_map(&"whispering_stone") == null:   # ended on arrival and carried straight back to the altar
 		return
-	check(not character.classes.in_trial(), "trial ended on the grounds (nothing permanent)")
+	check(not character.classes.in_trial(), "a foreign trial ends on these grounds (nothing permanent)")
 	check(character.prologue.completed_trials.is_empty(), "left trial does not count")
-	session.travel(&"whispering_stone", &"heart", false)
-	if await _await_map(&"whispering_stone") == null:
-		return
+	check_eq(map.player.global_position, map.find_spawn(&"heart").global_position, "back at the Heart of the Stone")
 	_walk(&"trial_warrior")
 	check_eq(PrologueService.choose_starting_class(character, &"warrior"), "", "warrior chosen at the altar")
 	panel = await _open_altar()
@@ -201,14 +201,13 @@ func test_paths_closed_during_a_pedestal_trial_and_after_the_choice() -> void:
 	check(PrologueService.can_visit_grounds(character, &"trial_arcanist") != "", "service refuses too")
 
 
-func test_old_pedestals_and_m1_rules_unchanged() -> void:
+func test_m3_hub_contract_and_m1_rules() -> void:
 	if await _open(&"whispering_stone", &"from_haven") == null:
 		return
-	for node_name: String in ["TrialWarrior", "TrialArcanist", "TrialShadowrunner"]:
-		check(map.get_node_or_null(node_name) is TrialStation, "%s pedestal still there" % node_name)
-	check(&"whispering_stone" in db.rules.trial_map_ids, "pedestal trials still run at the stone")
+	check(map.find_children("*", "TrialStation", true, false).is_empty(), "M3: the regular pedestals are gone")
+	check(not &"whispering_stone" in db.rules.trial_map_ids, "M3: no trial runs at the stone")
 	for class_id: StringName in GROUNDS:
-		check(not GROUNDS[class_id] in db.rules.trial_map_ids, "%s grounds are not a trial map yet (M3)" % class_id)
+		check(GROUNDS[class_id] in db.rules.trial_map_ids, "M3: %s grounds host the trial" % class_id)
 	_walk(&"trial_arcanist")
 	check_eq(PrologueService.can_choose(character, &"arcanist"), "", "own trial opens arcanist")
 	check(PrologueService.can_choose(character, &"warrior") != "", "warrior stays locked")

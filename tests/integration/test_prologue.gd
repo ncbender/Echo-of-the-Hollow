@@ -141,7 +141,10 @@ func test_trial_objectives_from_real_combat() -> void:
 	pulse.ability_slot = 1   # Mana Pulse detonates the marks
 	await tick(pulse)
 	await tick(frame(), 10)
-	check(character.prologue.has_completed_trial(&"trial_arcanist"), "trial completed through real combat")
+	check(PrologueService.training_done(character, &"trial_arcanist"), "training goals met through real combat")
+	check(not character.prologue.has_completed_trial(&"trial_arcanist"), "training alone never completes the trial (M3)")
+	PrologueService.record(character, TrialObjective.Kind.KILLS, &"sanctum_warden", 1.0)   # the mini-boss of the grounds
+	check(character.prologue.has_completed_trial(&"trial_arcanist"), "trial completed with the finale")
 	check_eq(character.classes.active_class_id, &"basic_adventurer", "back to the adventurer")
 	check(bridge.class_runtime.pool == null, "trial mana gone (adventurer has no resource)")
 
