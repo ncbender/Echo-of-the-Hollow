@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/world/trial_grounds.gd" id="13_grounds"]
 [ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="20_husk"]
 [ext_resource type="Resource" path="res://data/enemies/sanctum_warden.tres" id="21_boss"]
+[ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="22_wolf"]
 
 [sub_resource type="RectangleShape2D" id="Rect_exit"]
 size = Vector2(56, 12)
@@ -134,12 +135,29 @@ position = Vector2(0, -60)
 script = ExtResource("11_espawn")
 config = ExtResource("21_boss")
 
-[node name="TrialGrounds" type="Node" parent="." node_paths=PackedStringArray("training", "finale", "gate")]
+[node name="Vanguard" type="Node2D" parent="."]
+position = Vector2(0, -190)
+script = ExtResource("10_enc")
+encounter_id = &"trial_arcanist_vanguard"
+trigger_radius = 130.0
+persistent = false
+
+[node name="WolfA" type="Marker2D" parent="Vanguard"]
+position = Vector2(-70, -30)
+script = ExtResource("11_espawn")
+config = ExtResource("22_wolf")
+[node name="WolfB" type="Marker2D" parent="Vanguard"]
+position = Vector2(70, -30)
+script = ExtResource("11_espawn")
+config = ExtResource("22_wolf")
+
+[node name="TrialGrounds" type="Node" parent="." node_paths=PackedStringArray("training", "finale", "gate", "vanguard")]
 script = ExtResource("13_grounds")
 trial_id = &"trial_arcanist"
 training = NodePath("../Training")
 finale = NodePath("../Finale")
 gate = NodePath("../TrialGate")
+vanguard = NodePath("../Vanguard")
 [node name="ToHeart" type="Area2D" parent="."]
 position = Vector2(0, 300)
 script = ExtResource("9_transition")

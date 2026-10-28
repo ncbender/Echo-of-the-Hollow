@@ -8,6 +8,10 @@ extends Node
 ##  * trial area: the `finale` encounter (mini-boss) starts once the gate is
 ##    open (training done) and the player comes within its trigger radius; it
 ##    comes back if it falls before the finale goals are met (never a dead end)
+##  * optional `vanguard` (M3.1b, Arcanist): a first encounter of the trial area
+##    that starts in place of the finale; the finale follows once, when the
+##    vanguard is cleared. Both are plain Encounters - leaving or a new visit
+##    starts again with the vanguard (nothing of either is saved)
 ##  * the end: success (all goals, PrologueService.record), death (the bridge)
 ##    or leaving (the exit; the altar map ends the trial) - after success or
 ##    death the player is carried back to the Heart of the Stone, once.
@@ -16,6 +20,8 @@ extends Node
 @export var trial_id: StringName
 @export var training: Encounter
 @export var finale: Encounter
+## Optional first wave of the trial area (null: the finale starts directly).
+@export var vanguard: Encounter
 @export var gate: TrialGate
 
 var character: Character
@@ -24,9 +30,11 @@ var returning: bool = false
 
 
 func _ready() -> void:
-	for encounter: Encounter in [training, finale]:
+	for encounter: Encounter in [training, finale, vanguard]:
 		if encounter != null:
 			encounter.set_physics_process(false)   # never by proximity alone: this node decides
+	if vanguard != null:
+		vanguard.cleared.connect(_on_vanguard_cleared)
 	_setup.call_deferred()   # after GameMap._ready bound the character
 
 
@@ -62,8 +70,19 @@ func _physics_process(_delta: float) -> void:
 	if finale == null or not trained or finale.running:
 		return
 	var player := get_tree().get_first_node_in_group(&"player") as Node2D
-	if player != null and player.global_position.distance_to(finale.global_position) <= finale.trigger_radius:
-		finale.start()   # first time, or again after it fell before the finale goals were met
+	if player == null or player.global_position.distance_to(finale.global_position) > finale.trigger_radius:
+		return
+	if vanguard != null and not vanguard.done:
+		if not vanguard.running:
+			vanguard.start()   # the first wave; the finale waits for it
+		return
+	finale.start()   # first time, or again after it fell before the finale goals were met
+
+
+## The vanguard is down: the finale enemies appear (once per vanguard clear).
+func _on_vanguard_cleared() -> void:
+	if is_active() and not returning and finale != null and not finale.running:
+		finale.start()
 
 
 func _on_trial_finished(_finished_id: StringName, _completed: bool) -> void:

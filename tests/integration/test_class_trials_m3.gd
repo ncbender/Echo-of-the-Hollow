@@ -186,6 +186,14 @@ func test_each_trial_runs_on_its_grounds() -> void:
 		check(map.player.global_position.y < gate_y - 60.0, "%s: through the open gate" % class_id)
 		for i in 4:
 			await get_tree().physics_frame
+		var vanguard := (map.get_node("TrialGrounds") as TrialGrounds).vanguard   # M3.1b: arcanist wolves first
+		if vanguard != null:
+			check(_enemies(TRIALS[class_id].boss).is_empty(), "%s: no boss while the vanguard fights" % class_id)
+			check_eq(vanguard.enemies.size(), 2, "%s: the vanguard is up" % class_id)
+			for enemy: Enemy in vanguard.enemies:
+				_kill(enemy)
+			for i in 4:
+				await get_tree().physics_frame
 		var bosses := _enemies(TRIALS[class_id].boss)
 		check_eq(bosses.size(), 1, "%s: mini-boss %s in the trial area" % [class_id, TRIALS[class_id].boss])
 		if class_id == &"arcanist" and not bosses.is_empty():

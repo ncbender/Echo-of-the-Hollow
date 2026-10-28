@@ -5,7 +5,10 @@ extends TestCase
 ## player's own skill pipeline - no objective is set by hand), Passage Alpha
 ## unchanged, sealed inventory potions inside a trial only, and Hearth Flask
 ## charges restored after success, death and leaving and never saved while
-## spent. Real scene changes; saves only under user://test_saves/.
+## spent. M3.1b: the Arcanist finale in two steps - two Hollowfang Wolves
+## (the vanguard encounter), then the Sanctum Warden alone - on the real enemy
+## death / encounter path, with leaving, death and saving mid-fight.
+## Real scene changes; saves only under user://test_saves/.
 
 const DIR := "user://test_saves/class_trials_m31"
 const PROFILE := DIR + "/slot_1.save.json"
@@ -170,9 +173,20 @@ func test_sanctum_warden_follows_the_hardened_husk_reference() -> void:
 	check(warden.drops.is_empty() and warden.mastery_xp_reward == 0 and warden.class_xp_reward == 0, "no drops, no XP")
 	var scene: GameMap = load("res://scenes/maps/trial_arcanist.tscn").instantiate()
 	var spawns: Array = scene.get_node("Finale").find_children("*", "EncounterSpawn", false, false)
-	check_eq(spawns.map(func(s: EncounterSpawn) -> StringName: return s.config.id), [&"sanctum_warden"], "arcanist finale: the warden alone (as in M3)")
+	check_eq(spawns.map(func(s: EncounterSpawn) -> StringName: return s.config.id), [&"sanctum_warden"], "arcanist finale: the warden alone")
 	check(spawns.all(func(s: EncounterSpawn) -> bool: return s.attacks == null), "no own attack family: the grunt claws of the husk")
+	var vanguard: Array = scene.get_node("Vanguard").find_children("*", "EncounterSpawn", false, false)
+	check_eq(vanguard.map(func(s: EncounterSpawn) -> StringName: return s.config.id), [&"hollowfang_wolf", &"hollowfang_wolf"],
+		"arcanist vanguard: exactly two Hollowfang Wolves (M3.1b)")
+	check(vanguard.all(func(s: EncounterSpawn) -> bool: return s.config == load("res://data/enemies/hollowfang_wolf.tres") and s.attacks == null),
+		"the plain wolf config, no own attacks")
+	check_eq((scene.get_node("TrialGrounds") as TrialGrounds).vanguard, scene.get_node("Vanguard"), "the grounds run the vanguard first")
 	scene.free()
+	for path: String in ["res://scenes/maps/trial_warrior.tscn", "res://scenes/maps/trial_shadowrunner.tscn"]:
+		var other: GameMap = load(path).instantiate()
+		check((other.get_node("TrialGrounds") as TrialGrounds).vanguard == null and other.get_node_or_null("Vanguard") == null,
+			"%s: no vanguard, the finale as before" % path)
+		other.free()
 	var grove: EnemyConfig = load("res://data/enemies/grove_warden_config.tres")
 	check(grove.id == &"grove_warden" and grove.rank == 2 and grove.move_speed == 70.0 and grove.knockback_resistance == 1.0 \
 		and not grove.parry_interrupts and grove.parry_poise_multiplier == 0.3 and grove.drops.size() == 3 \
@@ -197,6 +211,10 @@ func test_arcanist_finale_only_by_a_real_warden_kill_and_flask_restored() -> voi
 	if check(husk != null, "a training husk") and check(await _bolt_kill(husk), "a husk falls to Arcane Bolt"):
 		check(character.classes.in_trial() and not character.prologue.has_completed_trial(&"trial_arcanist"), "the wrong enemy completes nothing")
 	await _to_trial_area()
+	for wolf: Enemy in _enemies(&"hollowfang_wolf"):   # M3.1b: the vanguard first
+		check(await _bolt_kill(wolf), "a vanguard wolf falls to Arcane Bolt")
+	for i in 4:
+		await get_tree().physics_frame
 	var wardens := _enemies(&"sanctum_warden")
 	if not check_eq(wardens.size(), 1, "one Sanctum Warden in the trial area"):
 		return
@@ -290,3 +308,144 @@ func test_flask_restored_after_death_and_leaving_and_never_saved_spent() -> void
 		return
 	check_eq(character.consumables.charges, charges, "restored after leaving")
 	check(character.prologue.completed_trials.is_empty(), "no trial passed by dying or leaving")
+
+
+# --- M3.1b: Arcanist finale = vanguard (two wolves), then the warden alone ----------
+
+## Kills `enemy` on the real enemy death path (hurtbox -> health -> defeated -> encounter).
+func _kill(enemy: Enemy) -> void:
+	var hit := HitData.new()
+	hit.damage = 99999.0
+	enemy.hurtbox.receive_hit(hit)
+
+
+func _settle(frames: int = 6) -> void:
+	for i in frames:
+		await get_tree().physics_frame
+
+
+func _rewards() -> Dictionary:
+	var data := character.to_dict()
+	return {"classes": data.classes, "mastery": data.mastery, "armor_mastery": data.armor_mastery, "inventory": data.inventory}
+
+
+## Nothing of the two finale encounters survives in a save: no cleared flag (both
+## are non-persistent). The story's plain event counter ("count.encounter:...")
+## is written for every encounter, the training waves too, and restores nothing.
+func _no_finale_state(saved: Character) -> bool:
+	return not saved.world.has_flag(&"encounter.trial_arcanist_vanguard") and not saved.world.has_flag(&"encounter.trial_arcanist_finale")
+
+
+## Through the gate into the trial area: phase 1 (two wolves, no warden).
+func _phase_one() -> Array:
+	_training_goals(&"trial_arcanist")
+	await _to_trial_area()
+	var wolves := _enemies(&"hollowfang_wolf")
+	check_eq(wolves.size(), 2, "phase 1: exactly two wolves")
+	check(_enemies(&"sanctum_warden").is_empty(), "phase 1: no warden yet")
+	return wolves
+
+
+func test_arcanist_finale_wolves_first_then_the_warden_alone() -> void:
+	if await _open_stone() == null:
+		return
+	var before := _rewards()
+	if await _begin(&"arcanist", &"shattered_sanctum") == null:
+		return
+	var finale := map.get_node("Finale") as Encounter
+	var vanguard := map.get_node("Vanguard") as Encounter
+	var starts := {"finale": 0, "vanguard": 0}
+	finale.started.connect(func() -> void: starts.finale += 1)
+	vanguard.started.connect(func() -> void: starts.vanguard += 1)
+	var wolves := await _phase_one()
+	if wolves.size() != 2:
+		return
+	var wolf_config: EnemyConfig = load("res://data/enemies/hollowfang_wolf.tres")
+	for wolf: Enemy in wolves:
+		check(wolf.config == wolf_config and wolf.health.max_health == 50.0 and wolf.health.max_poise == 20.0,
+			"the wolves keep every wolf value (50/20)")
+	check(not finale.running and starts.finale == 0, "the finale encounter is not running")
+	check(await _bolt_kill(wolves[0]), "the first wolf falls to Arcane Bolt")
+	await _settle()
+	check(_enemies(&"sanctum_warden").is_empty() and starts.finale == 0, "one wolf down: still no warden")
+	check_eq(_enemies(&"hollowfang_wolf").size(), 1, "the other wolf still fights")
+	check(character.classes.in_trial() and not character.prologue.has_completed_trial(&"trial_arcanist"), "a wolf kill completes nothing")
+	check(await _bolt_kill(wolves[1]), "the second wolf falls to Arcane Bolt")
+	await _settle()
+	check(vanguard.done and not vanguard.running, "the vanguard is cleared")
+	var wardens := _enemies(&"sanctum_warden")
+	check_eq(wardens.size(), 1, "both wolves down: the warden appears")
+	check_eq(starts.finale, 1, "phase 2 starts once")
+	check(character.classes.in_trial() and not character.prologue.has_completed_trial(&"trial_arcanist"), "wolf kills never complete the trial")
+	map.player.global_position = finale.global_position + Vector2(0, 60)
+	await _settle(90)   # the player stays in the trigger radius
+	check_eq(_enemies(&"sanctum_warden").size(), 1, "still exactly one warden")
+	check(_enemies(&"hollowfang_wolf").is_empty(), "no further wolves in phase 2")
+	check_eq(starts, {"finale": 1, "vanguard": 1}, "no wave starts again")
+	check_eq(finale.enemies.size(), 1, "the finale encounter is the warden alone")
+	if wardens.is_empty():
+		return
+	check(await _bolt_kill(wardens[0]), "the warden falls to Arcane Bolt")
+	check(character.prologue.has_completed_trial(&"trial_arcanist"), "the real warden kill passes the trial")
+	check_eq(_finished.filter(func(f: Array) -> bool: return f[0] == &"trial_arcanist" and f[1]).size(), 1, "exactly one completion")
+	check_eq(StoryService.counter(character, &"trial_complete"), 1, "one trial_complete event")
+	check(map.find_children("*", "ItemPickup", true, false).is_empty(), "no drops on the trial grounds")
+	check_eq(character.prologue.chosen_class, &"", "passing never chooses the class")
+	if await _await_map(&"whispering_stone") == null:
+		return
+	check_eq(_finished.size(), 1, "no further trial signal on the way home")
+	check_eq(_rewards(), before, "no class/mastery XP, no items from the trial")
+
+
+func test_arcanist_finale_leaving_death_and_saving_mid_fight() -> void:
+	if await _open_stone() == null:
+		return
+	# leaving in phase 1, with a save taken in the fight
+	if await _begin(&"arcanist", &"shattered_sanctum") == null:
+		return
+	var wolves := await _phase_one()
+	check_eq(SaveSystem.save_to(character, SAVE), OK, "saved in phase 1 (test path)")
+	var loaded := SaveSystem.load_from(SAVE, db)
+	check(loaded.ok() and not loaded.character.classes.in_trial() and loaded.character.prologue.active_trial == &"",
+		"the loaded save holds no running trial (no orphaned finale)")
+	check(loaded.ok() and _no_finale_state(loaded.character), "no cleared vanguard/finale in the save")
+	(map.get_node("ToHeart") as MapTransition)._on_body_entered(map.player)   # leaving = abort
+	if await _await_map(&"whispering_stone") == null:
+		return
+	check(wolves.all(func(w: Variant) -> bool: return not is_instance_valid(w)), "phase 1 wolves gone after leaving")
+	check(not character.classes.in_trial() and character.prologue.completed_trials.is_empty(), "leaving passes nothing")
+	# again: a clean phase 1, then leaving in phase 2
+	if await _begin(&"arcanist", &"shattered_sanctum") == null:
+		return
+	check(not PrologueService.training_done(character, &"trial_arcanist"), "the retry starts with the training")
+	check(_enemies(&"hollowfang_wolf").is_empty() and _enemies(&"sanctum_warden").is_empty(), "no finale enemies before the gate")
+	wolves = await _phase_one()
+	for wolf: Enemy in wolves:
+		_kill(wolf)
+	await _settle()
+	var wardens := _enemies(&"sanctum_warden")
+	check_eq(wardens.size(), 1, "phase 2 after both wolves (real death path)")
+	check(character.classes.in_trial() and not character.prologue.has_completed_trial(&"trial_arcanist"), "wolf deaths complete nothing")
+	check_eq(SaveSystem.save_to(character, SAVE), OK, "saved in phase 2 (test path)")
+	loaded = SaveSystem.load_from(SAVE, db)
+	check(loaded.ok() and loaded.character.prologue.active_trial == &"", "no running trial or finale in the save")
+	check(loaded.ok() and _no_finale_state(loaded.character), "the cleared vanguard is not saved as cleared")
+	(map.get_node("ToHeart") as MapTransition)._on_body_entered(map.player)
+	if await _await_map(&"whispering_stone") == null:
+		return
+	check(wardens.all(func(w: Variant) -> bool: return not is_instance_valid(w)), "the warden is gone after leaving")
+	# again: phase 1 from the start, then death in phase 2
+	if await _begin(&"arcanist", &"shattered_sanctum") == null:
+		return
+	wolves = await _phase_one()
+	for wolf: Enemy in wolves:
+		_kill(wolf)
+	await _settle()
+	check_eq(_enemies(&"sanctum_warden").size(), 1, "phase 2 again")
+	map.player.health.died.emit()   # death
+	check(not character.classes.in_trial(), "death ends the trial")
+	if await _await_map(&"whispering_stone") == null:
+		return
+	check(character.prologue.completed_trials.is_empty() and _finished.all(func(f: Array) -> bool: return not f[1]),
+		"no completion by leaving or dying")
+	check_eq(character.classes.active_class_id, &"basic_adventurer", "Basic Adventurer again")
