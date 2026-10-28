@@ -15,4 +15,4 @@ slot_kind = 11
 weapon_family_id = &"two_handed_sword"
 base_weapon_damage = 22.0
 base_item_level = 1
-generation_affixes = Array[StringName]([&"bloodthirsty", &"cruel", &"crushing", &"executioner", &"furious", &"impactful", &"keen", &"sharpened", &"striking", &"swift", &"tempered_blade", &"thundering", &"vital"])
+generation_affixes = Array[StringName]([&"bloodthirsty", &"cruel", &"crushing", &"executioner", &"furious", &"impactful", &"keen", &"sharpened", &"striking", &"swift", &"tempered_blade", &"vital"])

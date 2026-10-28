@@ -139,8 +139,8 @@ Kopf–Füße), in keinem Pool, keiner Itemliste und ohne Berechnung. Ringe/Amul
 ### Vorbereitete Itemdefinitionen (`generation_affixes`)
 | Items | Affixe |
 |---|---|
-| iron_sword, iron_axe, iron_dagger, iron_mace, ash_spear, steel_greatsword, oak_staff, oak_wand | 11 GLOBAL-Waffenaffixe + Striking + Tempered Blade (13) |
-| hunting_bow | wie oben ohne Executioner (12) |
+| iron_sword, iron_axe, iron_dagger, iron_mace, ash_spear, steel_greatsword, oak_staff, oak_wand | 11 GLOBAL-Waffenaffixe + Striking + Tempered Blade (13); seit Grove Warden Rare R1.1 ohne Thundering (12, `docs/GROVE_WARDEN_RARE_R11.md`) |
+| hunting_bow | wie oben ohne Executioner (12; seit R1.1 ohne Thundering: 11) |
 | leather_cap, wanderer_coat, oak_shield | Furious, Guarded, Vital (die nach bestehenden Slot-Regeln zulässigen GLOBAL-Affixe); seit Grove Warden Rare R1 zusätzlich Keen (`docs/GROVE_WARDEN_RARE_R1.md`) |
 
 Keine CraftingProfile ergänzt (sonst wären die Items schmiedbar), keine neuen Items, keine neuen Basiswerte.

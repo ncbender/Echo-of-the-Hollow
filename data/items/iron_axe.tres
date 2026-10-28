@@ -14,4 +14,4 @@ slot_kind = 10
 weapon_family_id = &"axe"
 base_weapon_damage = 14.0
 base_item_level = 1
-generation_affixes = Array[StringName]([&"bloodthirsty", &"cruel", &"crushing", &"executioner", &"furious", &"impactful", &"keen", &"sharpened", &"striking", &"swift", &"tempered_blade", &"thundering", &"vital"])
+generation_affixes = Array[StringName]([&"bloodthirsty", &"cruel", &"crushing", &"executioner", &"furious", &"impactful", &"keen", &"sharpened", &"striking", &"swift", &"tempered_blade", &"vital"])
