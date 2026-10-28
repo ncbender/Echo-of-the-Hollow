@@ -115,7 +115,7 @@ func _story_card(quest: StoryQuestDefinition, current: bool) -> Control:
 ## Reward line of a story quest from QuestRewardService (never QuestLog alone):
 ## pending -> where to collect it, claimed -> received, none -> "".
 static func reward_text(target: Character, quest: StoryQuestDefinition) -> String:
-	if quest.turn_in_gold <= 0:
+	if not QuestRewardService.has_reward(quest):
 		return ""
 	match QuestRewardService.state(target, quest.id):
 		QuestRewardService.PENDING:

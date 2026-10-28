@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
 [ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
 [ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="4_cost"]
 
 [sub_resource type="Resource" id="O_attack"]
 script = ExtResource("3_obj")
@@ -59,6 +60,16 @@ script = ExtResource("2_step")
 description = "Talk to Mara."
 objectives = Array[ExtResource("3_obj")]([SubResource("O_haven")])
 
+[sub_resource type="Resource" id="Reward_timber"]
+script = ExtResource("4_cost")
+item_id = &"timber"
+quantity = 3
+
+[sub_resource type="Resource" id="Reward_stone"]
+script = ExtResource("4_cost")
+item_id = &"stone"
+quantity = 2
+
 [resource]
 script = ExtResource("1_quest")
 id = &"the_broken_cart"
@@ -68,3 +79,6 @@ description = "A supply cart lies broken across the road, and its owner is not g
 steps = Array[ExtResource("2_step")]([SubResource("S_attack"), SubResource("S_talk"), SubResource("S_crates"), SubResource("S_wave"), SubResource("S_haven")])
 completion_flag = &"prologue.cart_done"
 next_quest_ids = Array[StringName]([&"shelter_among_the_trees"])
+turn_in_gold = 30
+turn_in_npc_id = &"mara"
+turn_in_items = Array[ExtResource("4_cost")]([SubResource("Reward_timber"), SubResource("Reward_stone")])

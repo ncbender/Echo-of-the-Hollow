@@ -6,8 +6,14 @@ extends UiWindow
 ## QuestRewardService - never from QuestLog alone. The footer action calls
 ## QuestRewardService.claim, the only source of success or refusal; the window keeps no
 ## state of its own and rebuilds from the service on open and after every claim.
+## 1.1 M2 (docs/NPC_QUEST_TURNINS_1_1_M2.md): mixed rewards (gold + materials) as one line per
+## part; opened directly (Edrin, service &"quest_rewards") or from Mara's Hearth Flask window.
+## Always scoped to the NPC of `site`: it never lists or claims another NPC's reward.
 
 const WIDTH := 520
+## The NPC services whose window reaches this one (the "?" marker needs a way to claim):
+## the window itself, and the Hearth Flask window's "Quest Rewards" button.
+const REWARD_SERVICES: Array[StringName] = [&"quest_rewards", &"hearth_flask"]
 
 var character: Character
 ## The NPC that opened the window (closes when the player walks away).
@@ -37,11 +43,26 @@ func _ready() -> void:
 
 
 func open(target_character: Character, target_site: Node2D = null) -> void:
+	if character != null and character.inventory.changed.is_connected(_on_inventory_changed):
+		character.inventory.changed.disconnect(_on_inventory_changed)
 	character = target_character
 	site = target_site
 	last_message = ""
+	character.inventory.changed.connect(_on_inventory_changed)   # room made elsewhere: the claim unlocks
 	show()
 	rebuild()
+
+
+func _exit_tree() -> void:
+	if character != null and character.inventory.changed.is_connected(_on_inventory_changed):
+		character.inventory.changed.disconnect(_on_inventory_changed)
+
+
+func _on_inventory_changed() -> void:
+	if visible:
+		if not last_ok:
+			last_message = ""   # an old refusal (full bag) gives way to the current state
+		rebuild()
 
 
 ## Keyboard focus on "Claim Reward" when a reward can be taken (it sits in the footer,
@@ -65,14 +86,53 @@ func npc_id() -> StringName:
 
 ## The story quests whose reward this NPC hands out (data order).
 func quests() -> Array[StoryQuestDefinition]:
+	return quests_for(character, npc_id())
+
+
+## The story quests with a reward (QuestRewardService.has_reward) handed out by `npc`, by id.
+static func quests_for(target: Character, npc: StringName) -> Array[StoryQuestDefinition]:
 	var result: Array[StoryQuestDefinition] = []
-	if character == null:
+	if target == null or npc == &"":
 		return result
-	for quest: StoryQuestDefinition in character.database.story_quests.values():
-		if quest.turn_in_gold > 0 and quest.turn_in_npc_id == npc_id():
+	for quest: StoryQuestDefinition in target.database.story_quests.values():
+		if QuestRewardService.has_reward(quest) and quest.turn_in_npc_id == npc:
 			result.append(quest)
 	result.sort_custom(func(a: StoryQuestDefinition, b: StoryQuestDefinition) -> bool: return String(a.id) < String(b.id))
 	return result
+
+
+## True while `npc` has a pending or claimed reward to show (Mara's "Quest Rewards" button).
+static func has_rewards_for(target: Character, npc: StringName) -> bool:
+	for quest in quests_for(target, npc):
+		if QuestRewardService.state(target, quest.id) != QuestRewardService.NONE:
+			return true
+	return false
+
+
+## The reward as display parts: "30 Gold", "3 Timber", "2 Stone" (gold first, data order).
+static func reward_parts(db: GameDatabase, quest: StoryQuestDefinition) -> PackedStringArray:
+	var parts: PackedStringArray = []
+	if quest.turn_in_gold > 0:
+		parts.append(TranslationServer.translate("UI_QUEST_REWARD_GOLD") % quest.turn_in_gold)
+	var items := QuestRewardService.reward_items(quest)
+	for item_id: StringName in items:
+		var definition := db.get_item(item_id)
+		parts.append(TranslationServer.translate("UI_QUEST_REWARD_ITEM") % [int(items[item_id]),
+				definition.display_name if definition != null else String(item_id)])
+	return parts
+
+
+## "30 Gold, 3 Timber and 2 Stone" (one part alone: "60 Gold").
+static func reward_summary(db: GameDatabase, quest: StoryQuestDefinition) -> String:
+	var parts := reward_parts(db, quest)
+	if parts.size() <= 1:
+		return "".join(parts)
+	return TranslationServer.translate("UI_QUEST_REWARD_AND") % [", ".join(parts.slice(0, parts.size() - 1)), parts[parts.size() - 1]]
+
+
+## The player-facing text of a QuestRewardService answer (BAG_FULL has its own UI line).
+static func reason_text(error: String) -> String:
+	return TranslationServer.translate("UI_QUEST_REWARD_BAG_FULL") if error == QuestRewardService.BAG_FULL else error
 
 
 ## The first quest with a pending reward (the footer action), or null.
@@ -106,7 +166,7 @@ func rebuild() -> void:
 		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_list.add_child(button)
 	var pending := pending_quest()
-	var error := QuestRewardService.can_claim(character, pending.id) if pending != null else ""
+	var error := reason_text(QuestRewardService.can_claim(character, pending.id)) if pending != null else ""
 	footer.visible = pending != null or last_message != ""
 	_claim_button.visible = pending != null
 	_claim_button.disabled = pending == null or error != ""
@@ -125,9 +185,13 @@ func _quest_card(quest: StoryQuestDefinition, state: StringName) -> Control:
 	card.name = "Reward_%s" % quest.id
 	var box := card.get_node("Box") as VBoxContainer
 	box.add_child(UiTheme.styled(quest.display_name, &"SubheadingLabel"))
-	var reward := UiTheme.stat_row("Reward", tr("UI_QUEST_REWARD_GOLD") % quest.turn_in_gold, UiTheme.PARCHMENT)
-	reward.name = "Gold"
-	box.add_child(reward)
+	var parts := reward_parts(character.database, quest)
+	var items := QuestRewardService.reward_items(quest).keys()
+	var offset := 1 if quest.turn_in_gold > 0 else 0
+	for index in parts.size():
+		var reward := UiTheme.stat_row("Reward" if index == 0 else "", parts[index], UiTheme.PARCHMENT)
+		reward.name = "Gold" if index < offset else "Item_%s" % items[index - offset]
+		box.add_child(reward)
 	if state == QuestRewardService.CLAIMED:
 		var received := UiTheme.label(tr("UI_QUEST_REWARD_RECEIVED"), UiTheme.SUCCESS)
 		received.name = "Received"
@@ -146,6 +210,6 @@ func claim() -> String:
 	var session := SessionState.find(get_tree()) if is_inside_tree() else null
 	var error := QuestRewardService.claim(character, quest.id, session)
 	last_ok = error == ""
-	last_message = error if error != "" else tr("UI_QUEST_REWARD_SUCCESS") % quest.turn_in_gold
+	last_message = reason_text(error) if error != "" else tr("UI_QUEST_REWARD_SUCCESS") % reward_summary(character.database, quest)
 	rebuild()
 	return error

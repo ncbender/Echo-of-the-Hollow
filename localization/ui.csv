@@ -30,7 +30,10 @@ UI_TRIAL_VISIT_HINT,"Look around this path's trial grounds. This is not the tria
 UI_QUEST_REWARDS,Quest Rewards
 UI_QUEST_REWARD_CLAIM,Claim Reward
 UI_QUEST_REWARD_GOLD,%d Gold
-UI_QUEST_REWARD_SUCCESS,Received %d Gold.
+UI_QUEST_REWARD_ITEM,%d %s
+UI_QUEST_REWARD_AND,%s and %s
+UI_QUEST_REWARD_BAG_FULL,Not enough inventory space. Make room to claim the full reward.
+UI_QUEST_REWARD_SUCCESS,Received %s.
 UI_QUEST_REWARD_RECEIVED,Reward received.
 UI_QUEST_REWARDS_NONE,No rewards available.
 UI_QUEST_REWARD_JOURNAL_PENDING,Reward available: Return to %s (%d Gold).

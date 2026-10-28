@@ -98,7 +98,7 @@ func refresh() -> void:
 static func reward_lines(character: Character) -> PackedStringArray:
 	var lines: PackedStringArray = []
 	for quest: StoryQuestDefinition in character.database.story_quests.values():
-		if quest.turn_in_gold > 0 and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
+		if QuestRewardService.has_reward(quest) and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
 			var npc: NpcDefinition = character.database.npcs.get(quest.turn_in_npc_id)
 			lines.append(TranslationServer.translate("UI_QUEST_REWARD_TRACKER") % (npc.display_name if npc != null else String(quest.turn_in_npc_id)))
 	return lines

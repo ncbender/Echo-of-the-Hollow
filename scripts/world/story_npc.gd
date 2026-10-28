@@ -72,12 +72,15 @@ func interact(hud: GameHud) -> void:
 
 ## NPC Quest Turn-ins T3: a quest reward of this NPC is pending (QuestRewardService) and
 ## can be taken here (service window) - the gold "?" marker; "!" (story) comes first.
+## 1.1 M2: only where this node's service window reaches the reward window
+## (QuestRewardPanel.REWARD_SERVICES) - never a "?" without a way to claim.
 ## Read every frame, so a new entitlement, a claim or a load shows at once.
 func has_pending_reward() -> bool:
-	if not offers_service:
+	var npc := definition()
+	if not offers_service or npc == null or not npc.service in QuestRewardPanel.REWARD_SERVICES:
 		return false
 	for quest: StoryQuestDefinition in character.database.story_quests.values():
-		if quest.turn_in_gold > 0 and quest.turn_in_npc_id == npc_id \
+		if QuestRewardService.has_reward(quest) and quest.turn_in_npc_id == npc_id \
 				and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
 			return true
 	return false

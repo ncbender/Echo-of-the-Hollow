@@ -66,6 +66,12 @@ func rebuild() -> void:
 		button.name = "Talk"
 		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_list.add_child(button)
+	# NPC Quest Turn-ins 1.1 M2: Mara's quest rewards (The Broken Cart) in the unchanged reward window
+	if npc != null and hud != null and QuestRewardPanel.has_rewards_for(character, npc.npc_id):
+		var rewards := UiTheme.button(tr("UI_QUEST_REWARDS"), &"", open_quest_rewards)
+		rewards.name = "QuestRewards"
+		rewards.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_list.add_child(rewards)
 	var result := UiTheme.wrapped(last_message, UiTheme.SUCCESS if last_ok else UiTheme.DANGER, WIDTH)
 	result.name = "Result"
 	result.visible = last_message != ""
@@ -100,6 +106,11 @@ func _path_card(path: StringName, title: String, now: String, next: String, info
 	button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	box.add_child(button)
 	return card
+
+
+## "Quest Rewards" button (UI and tests): the quest reward window for this NPC.
+func open_quest_rewards() -> bool:
+	return hud != null and hud.open_npc_service(&"quest_rewards", site)
 
 
 ## Upgrade button (UI and tests): one level of `path`, paid in gold.
