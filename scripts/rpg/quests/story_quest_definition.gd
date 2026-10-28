@@ -15,3 +15,8 @@ extends Resource
 @export var next_quest_ids: Array[StringName] = []
 ## Stub quests (the story continues in a later update) never complete.
 @export var open_ended: bool = false
+## NPC Quest Turn-ins 1.0 (docs/NPC_QUEST_TURNINS_1_0_T1.md): gold handed out once by
+## `turn_in_npc_id` after the quest was completed under the reward system (0 = no reward).
+## Completion itself never waits for it; QuestRewardService holds the claim rules.
+@export var turn_in_gold: int = 0
+@export var turn_in_npc_id: StringName

@@ -43,3 +43,5 @@ description = "A path has taken root within you. Haven should hear of it."
 steps = Array[ExtResource("2_step")]([SubResource("S_return"), SubResource("S_mara"), SubResource("S_edrin")])
 completion_flag = &"prologue.completed"
 next_quest_ids = Array[StringName]([&"the_first_signs"])
+turn_in_gold = 60
+turn_in_npc_id = &"edrin"

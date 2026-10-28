@@ -135,6 +135,8 @@ static func _settle(character: Character, quest: StoryQuestDefinition, announce:
 			entry.state = "completed"
 			if quest.completion_flag != &"":
 				character.world.set_flag(quest.completion_flag)
+			if announce:   # live completion only - resettle's load-time reconstruction earns no reward (R-B)
+				QuestRewardService.register_completion(character, quest)
 		if announce:
 			character.quests.story_progressed.emit(quest.id, int(entry.step), finished)
 		if finished:
@@ -181,4 +183,5 @@ static func validate_data(db: GameDatabase) -> PackedStringArray:
 			for objective in step.objectives:
 				if objective == null or objective.event_id == &"" or objective.amount < 1:
 					errors.append("story quest %s: invalid objective in step %d" % [quest.id, index])
+		errors.append_array(QuestRewardService.validate_quest(db, quest))
 	return errors
