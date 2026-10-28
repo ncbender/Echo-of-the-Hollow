@@ -364,6 +364,11 @@ func _validate_classes() -> PackedStringArray:
 	for class_id in rules.prologue_class_ids:
 		if get_class_def(class_id) == null:
 			errors.append("prologue class %s unknown" % class_id)
+		var reward := get_item(StringName(str(rules.class_reward_items.get(class_id, ""))))
+		if reward == null or reward.generation_affixes.is_empty():
+			errors.append("prologue class %s: class reward item missing or not prepared for generation" % class_id)
+	if rules.class_reward_tier_weights == null or not rules.class_reward_tier_weights.covers(rules.class_reward_item_level):
+		errors.append("class reward: tier weights do not cover item level %d" % rules.class_reward_item_level)
 	for trial: TrialDefinition in trials.values():
 		if not trial.class_id in rules.prologue_class_ids:
 			errors.append("trial %s is not for a prologue class" % trial.id)

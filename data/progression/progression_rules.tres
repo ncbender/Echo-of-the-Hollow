@@ -34,3 +34,4 @@ starting_items = Array[ExtResource("2_cost")]([SubResource("Start_sword"), SubRe
 class_xp_per_hit = 1
 talents = ExtResource("3_talents")
 crafting_tier_weights = ExtResource("4_tiers")
+class_reward_tier_weights = ExtResource("4_tiers")

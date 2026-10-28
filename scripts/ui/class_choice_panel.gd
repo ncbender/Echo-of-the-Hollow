@@ -10,6 +10,9 @@ extends UiWindow
 ## clicks (choose -> confirm) because it is permanent. After the choice a
 ## milestone save is written, and success is shown only once that save really
 ## succeeded - a failed save is reported.
+## Class Trials 2.0 M4: after the choice the footer offers the class reward
+## (PrologueService.claim_class_reward) - a separate action, never part of the
+## choice. A full bag keeps the claim pending and says so.
 
 const INTRO := "Three paths linger within the stone. Only a path you have walked can take root within you, and only one of them. The others may yet be learned."
 
@@ -22,6 +25,8 @@ var _intro: Label
 var _cards: HFlowContainer
 var _status: Label
 var _pending: StringName
+var _reward_button: Button
+var _reward_status: Label
 var _save_id: int = -1
 var _session: SessionState
 
@@ -35,6 +40,11 @@ func _ready() -> void:
 	body.add_child(_status)
 	_cards = HFlowContainer.new()
 	body.add_child(_cards)
+	_reward_status = UiTheme.wrapped("", UiTheme.COLOR_DIM, 900)
+	footer.add_child(_reward_status)
+	_reward_button = UiTheme.button(tr("UI_CLASS_REWARD_CLAIM"), &"PrimaryButton", claim_reward)
+	_reward_button.name = "ClaimReward"
+	footer.add_child(_reward_button)
 
 
 func open(target_character: Character, target_station: ClassChoiceStation) -> void:
@@ -88,6 +98,7 @@ func choose(class_id: StringName) -> String:
 		save_state = "saved"
 		_status.text = _success_text()
 	rebuild_cards()
+	rebuild_reward()
 	return ""
 
 
@@ -119,6 +130,38 @@ func rebuild() -> void:
 	else:
 		_status.text = ""
 	rebuild_cards()
+	rebuild_reward()
+
+
+## Class Trials 2.0 M4: the reward footer (only once a claim exists).
+func rebuild_reward() -> void:
+	var reward := character.prologue.class_reward
+	footer.visible = reward != PrologueState.ClassReward.NONE
+	var error := PrologueService.can_claim_class_reward(character)
+	var definition := PrologueService.class_reward_item(character)
+	_reward_button.text = tr("UI_CLASS_REWARD_CLAIMED") if reward == PrologueState.ClassReward.CLAIMED else tr("UI_CLASS_REWARD_CLAIM")
+	_reward_button.disabled = error != ""
+	_reward_button.tooltip_text = error
+	if reward == PrologueState.ClassReward.PENDING:
+		_reward_status.text = error if error != "" else "The stone offers a gift for the path of the %s: %s." \
+				% [_class_name(character.prologue.chosen_class), definition.display_name if definition != null else "-"]
+
+
+## Takes the pending class reward (separate from the choice). Returns "" or the reason;
+## a refusal (full bag) keeps the claim pending. Success asks for a milestone save.
+func claim_reward() -> String:
+	var claimed: Array[ItemInstance] = []
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var error := PrologueService.claim_class_reward(character, rng, claimed)
+	rebuild_reward()
+	if error != "":
+		_reward_status.text = error
+		return error
+	_reward_status.text = "The stone's gift rests in your bag: %s." % character.database.get_item(claimed[0].definition_id).display_name
+	if _session != null:
+		_session.request_critical_save("class reward %s" % character.prologue.chosen_class)
+	return ""
 
 
 func rebuild_cards() -> void:

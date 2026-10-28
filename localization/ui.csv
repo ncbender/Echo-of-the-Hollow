@@ -18,6 +18,8 @@ UI_PROLOGUE,Prologue
 UI_CLASS_QUESTS,Class quests
 UI_LEAVE_TRIAL_HINT,G at the pedestal: leave the trial
 UI_LEAVE_TRIAL_GROUNDS_HINT,Leave by the path to the Heart of the Stone: the trial ends without passing.
+UI_CLASS_REWARD_CLAIM,Receive the stone's gift
+UI_CLASS_REWARD_CLAIMED,Gift received
 UI_TRIAL_BEGIN,Begin the trial
 UI_TRIAL_CLASS,Trial class: %s (temporary)
 UI_TRIAL_GATE_SEALED,Gate: sealed until the training is done

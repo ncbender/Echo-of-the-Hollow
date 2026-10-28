@@ -25,6 +25,7 @@ static func _steps() -> Dictionary:
 		11: _v11_to_v12,
 		12: _v12_to_v13,
 		13: _v13_to_v14,
+		14: _v14_to_v15,
 	}
 
 
@@ -327,6 +328,10 @@ static func _v12_reference(family_base: float, item_level: int) -> float:
 	return family_base * (1.0 + 0.012 * (item_level - 1))
 
 
+## The three prologue classes at v15, frozen like the item tables.
+const V15_PROLOGUE_CLASSES := ["warrior", "arcanist", "shadowrunner"]
+
+
 ## Rarity of every equippable item definition at v14 (ItemDefinition.Rarity as int), frozen
 ## like V12_WEAPON_MODELS: a migration never reads the live item data.
 const V14_EQUIPMENT_RARITY := {
@@ -355,4 +360,27 @@ static func _v13_to_v14(data: Dictionary) -> Dictionary:
 		for entry: Variant in list:
 			if entry is Dictionary and not entry.has("rarity") and V14_EQUIPMENT_RARITY.has(str(entry.get("def", ""))):
 				entry["rarity"] = V14_EQUIPMENT_RARITY[str(entry["def"])]
+	return data
+
+
+## v15 (Class Trials 2.0 M4): the class reward state of the prologue choice. A claim
+## is only ever derived from proof of a REAL choice at the altar: the story counter
+## "count.class_chosen", which only PrologueService.choose_starting_class writes (no
+## migration sets it). A class derived from old unlocks (v3 -> v4) or chosen before
+## the story counters (v4) cannot be told apart from it and gets no claim. Proven
+## choice of a prologue class -> "pending"; everything else -> "none". Items, classes,
+## quests and flags are not touched.
+static func _v14_to_v15(data: Dictionary) -> Dictionary:
+	if not data.get("prologue") is Dictionary:
+		return data
+	var prologue: Dictionary = data["prologue"]
+	if prologue.has("class_reward"):
+		return data
+	var world: Dictionary = data.get("world", {}) if data.get("world") is Dictionary else {}
+	var flags: Dictionary = world.get("flags", {}) if world.get("flags") is Dictionary else {}
+	var counter: Variant = flags.get("count.class_chosen", 0)
+	var proven := (counter is int or counter is float) and int(counter) >= 1 \
+			and str(prologue.get("stage", "")) == "completed" \
+			and str(prologue.get("chosen_class", "")) in V15_PROLOGUE_CLASSES
+	prologue["class_reward"] = "pending" if proven else "none"
 	return data

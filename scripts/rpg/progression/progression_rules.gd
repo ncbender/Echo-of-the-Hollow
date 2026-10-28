@@ -36,6 +36,13 @@ extends Resource
 ## Trials 2.0 M3: the three trial grounds (+ the developer grounds), no longer the
 ## Whispering Stone - returning to the altar ends a trial that is still running.
 @export var trial_map_ids: Array[StringName] = [&"broken_bastion", &"shattered_sanctum", &"veiled_passage", &"prologue"]
+## Class Trials 2.0 M4 (docs/CLASS_TRIALS_2_0_M4.md): the class reward of the one
+## prologue choice - prologue class id -> weapon model (item id), generated once
+## through ItemCreation.generate with this rarity, item level and tier table.
+@export var class_reward_items: Dictionary = {&"warrior": &"steel_greatsword", &"arcanist": &"oak_staff", &"shadowrunner": &"iron_dagger"}
+@export var class_reward_rarity: ItemDefinition.Rarity = ItemDefinition.Rarity.MAGIC
+@export var class_reward_item_level: int = 5
+@export var class_reward_tier_weights: AffixTierWeights
 ## Where a new journey begins (the Old Road south of Haven).
 @export var new_game_map_id: StringName = &"old_road"
 @export var new_game_spawn_id: StringName = &"default"

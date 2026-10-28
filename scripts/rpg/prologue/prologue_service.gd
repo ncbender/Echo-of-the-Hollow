@@ -180,6 +180,59 @@ static func choose_starting_class(character: Character, class_id: StringName) ->
 	var prologue := character.prologue
 	prologue.chosen_class = class_id
 	prologue.stage = PrologueState.Stage.COMPLETED
+	if prologue.class_reward == PrologueState.ClassReward.NONE:
+		prologue.class_reward = PrologueState.ClassReward.PENDING   # the one claim (M4), never a second
 	prologue.changed.emit()
 	StoryService.notify(character, &"class_chosen")
+	return ""
+
+
+## Class Trials 2.0 M4 (docs/CLASS_TRIALS_2_0_M4.md): the weapon model of the class
+## reward - only ever from prologue.chosen_class (never the active class or the
+## equipped weapon). Null without a valid choice or reward data.
+static func class_reward_item(character: Character) -> ItemDefinition:
+	var prologue := character.prologue
+	var rules := character.database.rules
+	if not prologue.is_completed() or not prologue.chosen_class in prologue_classes(character.database):
+		return null
+	return character.database.get_item(StringName(str(rules.class_reward_items.get(prologue.chosen_class, ""))))
+
+
+## "" if the pending class reward can be taken now, else the reason (also for UI).
+static func can_claim_class_reward(character: Character) -> String:
+	var prologue := character.prologue
+	if prologue.class_reward == PrologueState.ClassReward.CLAIMED:
+		return "The stone's gift was already taken."
+	if prologue.class_reward != PrologueState.ClassReward.PENDING:
+		return "The stone holds no gift for you."
+	if character.classes.in_trial():
+		return "Finish or leave the current trial first."
+	var definition := class_reward_item(character)
+	if definition == null:
+		return "The stone cannot shape a gift for this path."
+	if character.inventory.room_for(definition.id) < 1:
+		return "Your bag is full. Make room to receive the stone's gift."
+	return ""
+
+
+## Takes the pending class reward: one new Magic instance of the chosen class's weapon
+## model (ItemCreation.generate, regular affix rolls) into the bag, then CLAIMED. All
+## checks run before the item is generated; a refusal changes nothing (stays PENDING).
+## Bag and claim state change in the same call, so every save sees both or neither.
+## Returns "" or the reason; `claimed` receives the new item on success.
+static func claim_class_reward(character: Character, rng: RandomNumberGenerator, claimed: Array[ItemInstance] = []) -> String:
+	var error := can_claim_class_reward(character)
+	if error != "":
+		return error
+	var rules := character.database.rules
+	var result := ItemCreation.generate(class_reward_item(character), rules.class_reward_rarity, character.database, rng,
+			rules.class_reward_tier_weights, rules.class_reward_item_level, ItemInstance.ORIGIN_QUEST)
+	if not result.ok():
+		return "The stone cannot shape a gift for this path."
+	error = character.inventory.add_instance(result.item)
+	if error != "":
+		return "Your bag is full. Make room to receive the stone's gift."
+	character.prologue.class_reward = PrologueState.ClassReward.CLAIMED
+	character.prologue.changed.emit()
+	claimed.append(result.item)
 	return ""
