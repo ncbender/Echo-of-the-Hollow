@@ -22,16 +22,33 @@ static func definition(character: Character, quest_id: StringName) -> StoryQuest
 
 
 ## Starts a quest (no-op if it is known already). Returns false for unknown ids.
-static func start(character: Character, quest_id: StringName) -> bool:
+## `announce` = false: no signals (used by resettle while a save is loaded).
+static func start(character: Character, quest_id: StringName, announce: bool = true) -> bool:
 	var quest := definition(character, quest_id)
 	if quest == null:
 		return false
 	if character.quests.state(quest_id) != "":
 		return true
 	character.quests.entries[quest_id] = {"state": "active", "step": 0, "progress": {}}
-	_settle(character, quest)
-	character.quests.changed.emit()
+	_settle(character, quest, announce)
+	if announce:
+		character.quests.changed.emit()
 	return true
+
+
+## Re-evaluates every active story quest against the saved counters and flags
+## (after loading): steps whose objectives are already met - cumulative goals
+## whose amount was lowered, or a cumulative event that arrived while an earlier
+## step was still waiting - are completed silently. Idempotent; emits no signal,
+## so no milestone save, toast or HUD event is triggered. Class quests are
+## skipped (no story definition). Returns the quests that moved on.
+static func resettle(character: Character) -> Array[StringName]:
+	var moved: Array[StringName] = []
+	for quest_id in character.quests.active_ids():
+		var quest := definition(character, quest_id)
+		if quest != null and _settle(character, quest, false):
+			moved.append(quest_id)
+	return moved
 
 
 static func is_active(character: Character, quest_id: StringName) -> bool:
@@ -103,7 +120,7 @@ static func step_done(character: Character, quest_id: StringName) -> bool:
 
 ## Advances through every finished step (several when cumulative objectives are
 ## already met). Returns true when at least one step was completed.
-static func _settle(character: Character, quest: StoryQuestDefinition) -> bool:
+static func _settle(character: Character, quest: StoryQuestDefinition, announce: bool = true) -> bool:
 	var advanced := false
 	while is_active(character, quest.id) and step_done(character, quest.id):
 		var entry: Dictionary = character.quests.entries[quest.id]
@@ -118,10 +135,11 @@ static func _settle(character: Character, quest: StoryQuestDefinition) -> bool:
 			entry.state = "completed"
 			if quest.completion_flag != &"":
 				character.world.set_flag(quest.completion_flag)
-		character.quests.story_progressed.emit(quest.id, int(entry.step), finished)
+		if announce:
+			character.quests.story_progressed.emit(quest.id, int(entry.step), finished)
 		if finished:
 			for next_id in quest.next_quest_ids:
-				start(character, next_id)
+				start(character, next_id, announce)
 	return advanced
 
 

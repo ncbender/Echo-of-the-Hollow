@@ -192,6 +192,7 @@ static func from_dict(data: Dictionary, db: GameDatabase, warnings: PackedString
 		if character.builds.has_build(class_id):
 			warnings.append_array(TalentService.sanitize_build(character, class_id))
 	character.world.from_dict(_dict(data, "world"), warnings)
+	StoryService.resettle(character)   # steps already met by saved counters (Class Trials 2.0 M1)
 	character.professions.from_dict(_dict(data, "professions"), warnings)
 	character.consumables.from_dict(_dict(data, "consumables"))
 	character.armor_mastery.from_dict(_dict(data, "armor_mastery"), db.rules.armor_rules(), warnings)
