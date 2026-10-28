@@ -54,7 +54,7 @@ Payload (nur Quelldaten):
 | `stash` | Haven-Lager (v6): `{"items": [...]}`, Iteminstanzen im selben Format wie `inventory`; die Kategorien werden nicht gespeichert, sondern aus der Definition abgeleitet (`docs/STASH.md`) |
 | `orphaned_items` | nicht wiederherstellbare Items (Rohdaten, werden weitergespeichert) |
 | `loadouts` | pro Klasse Slot → Instanz-ID |
-| `world` | Map-ID, Spawnpunkt-ID, Flags (inkl. Story-Flags `prologue.*`, `haven.*`, Zähler `count.<event>`), Gebäude, `waystones` (v5), `restoration` Ruine → ruined/restored/revitalized (v5) |
+| `world` | Map-ID, Spawnpunkt-ID, Flags (inkl. Story-Flags `prologue.*`, `haven.*`, Zähler `count.<event>`, Boss-Flags `defeated.<id>` und `boss_reward.<id>` (Grove Warden Rare R2, ohne Versionswechsel, `docs/GROVE_WARDEN_RARE_R2.md`)), Gebäude, `waystones` (v5), `restoration` Ruine → ruined/restored/revitalized (v5) |
 | `play_time` | aktive Spielzeit in Sekunden (v5) |
 | `class_builds` | pro freigeschalteter Klasse: Talentränge, 4 Skill-Slots, Mods je Skill, Sonder-Freischaltungen, Respec-Zähler, 5 Presets (v4) |
 | `prologue` | Stufe (not_started/in_progress/completed), abgeschlossene Trials, gewählte Klasse (v4), `class_reward` none/pending/claimed (v15, `docs/CLASS_TRIALS_2_0_M4.md`) |
