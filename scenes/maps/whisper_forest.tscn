@@ -24,12 +24,26 @@
 [ext_resource type="Resource" path="res://data/loot/hollow_grunt_equipment.tres" id="90_grunt_loot"]
 [ext_resource type="Script" path="res://scripts/world/boss_reward_cache.gd" id="91_cache"]
 [ext_resource type="Resource" path="res://data/loot/grove_warden_rare_reward.tres" id="92_warden_rare"]
+[ext_resource type="Script" path="res://scripts/world/story_conditional.gd" id="93_cond_node"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="94_cond"]
+[ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="95_trigger"]
 
 [sub_resource type="CircleShape2D" id="Circle_pack"]
 radius = 18.0
 
 [sub_resource type="RectangleShape2D" id="Rect_door_west"]
 size = Vector2(12, 48)
+
+[sub_resource type="RectangleShape2D" id="Rect_roots_hint"]
+size = Vector2(32, 48)
+
+[sub_resource type="Resource" id="C_roots_closed"]
+script = ExtResource("94_cond")
+forbidden_flags = Array[StringName]([&"prologue.completed"])
+
+[sub_resource type="Resource" id="C_roots_open"]
+script = ExtResource("94_cond")
+required_flags = Array[StringName]([&"prologue.completed"])
 
 [node name="WhisperForest" type="Node2D"]
 y_sort_enabled = true
@@ -74,10 +88,10 @@ size = Vector2(672, 16)
 color = Color(0.17, 0.26, 0.18, 1)
 top_color = Color(0.24, 0.36, 0.25, 1)
 
-[node name="East" type="StaticBody2D" parent="Walls"]
-position = Vector2(328, 0)
+[node name="EastBottom" type="StaticBody2D" parent="Walls"]
+position = Vector2(328, 32)
 script = ExtResource("3_wall")
-size = Vector2(16, 392)
+size = Vector2(16, 328)
 color = Color(0.17, 0.26, 0.18, 1)
 top_color = Color(0.24, 0.36, 0.25, 1)
 
@@ -112,6 +126,46 @@ target_spawn_id = &"from_forest"
 label = "Haven"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToHomeBase"]
+shape = SubResource("Rect_door_west")
+
+[node name="SpawnFromTangled" type="Marker2D" parent="."]
+position = Vector2(296, -166)
+script = ExtResource("9_spawn")
+spawn_id = &"from_tangled"
+
+[node name="EastRoots" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("93_cond_node")
+condition = SubResource("C_roots_closed")
+
+[node name="Bar" type="StaticBody2D" parent="EastRoots"]
+position = Vector2(328, -156)
+script = ExtResource("3_wall")
+size = Vector2(16, 48)
+color = Color(0.3, 0.21, 0.13, 1)
+top_color = Color(0.42, 0.3, 0.18, 1)
+
+[node name="RootsHint" type="Area2D" parent="EastRoots"]
+position = Vector2(300, -156)
+script = ExtResource("95_trigger")
+hint = "A knot of roots has grown across the way east. There is no way through - not yet."
+hint_id = &"east_roots"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastRoots/RootsHint"]
+shape = SubResource("Rect_roots_hint")
+
+[node name="EastPath" type="Node2D" parent="."]
+script = ExtResource("93_cond_node")
+condition = SubResource("C_roots_open")
+
+[node name="ToTangledWood" type="Area2D" parent="EastPath"]
+position = Vector2(332, -156)
+script = ExtResource("10_transition")
+target_map_id = &"tangled_wood"
+target_spawn_id = &"from_forest"
+label = "Tangled Wood"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastPath/ToTangledWood"]
 shape = SubResource("Rect_door_west")
 
 [node name="Resources" type="Node2D" parent="."]

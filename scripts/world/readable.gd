@@ -3,10 +3,12 @@ extends Interactable
 ## A sign, note or inscription read with G. The first reading can hand out a
 ## small reward (once per character: "read.<id>") and report a story event.
 
-enum Look { SIGNPOST, NOTE, STONE }
+enum Look { SIGNPOST, NOTE, STONE, ROOTS }
 
 @export var persistent_id: StringName
 @export var title: String = "Note"
+## Prompt verb: "Read Old Signpost", "Examine Twisted Roots".
+@export var verb: String = "Read"
 @export_multiline var text: String
 @export var look: Look = Look.NOTE
 @export var rewards: Array[ItemCost] = []
@@ -17,7 +19,7 @@ var character: Character
 
 func _ready() -> void:
 	super._ready()
-	prompt = "Read %s" % title
+	prompt = "%s %s" % [verb, title]
 	var session := SessionState.find(get_tree())
 	if session != null:
 		character = session.get_character()
@@ -63,6 +65,14 @@ func _draw() -> void:
 		Look.STONE:
 			draw_colored_polygon(PackedVector2Array([Vector2(-8, 0), Vector2(-7, -14), Vector2(0, -18), Vector2(7, -13), Vector2(8, 0)]), Color(0.45, 0.45, 0.5))
 			draw_rect(Rect2(-9, -19, 18, 20), glow, false, 1.0)
+		Look.ROOTS:
+			var bark := Color(0.36, 0.26, 0.16)
+			draw_polyline(PackedVector2Array([Vector2(-14, 2), Vector2(-6, -6), Vector2(2, -4), Vector2(12, -12)]), bark, 3.0)
+			draw_polyline(PackedVector2Array([Vector2(-12, -10), Vector2(-4, -3), Vector2(6, 0), Vector2(14, -2)]), bark, 3.0)
+			draw_polyline(PackedVector2Array([Vector2(-6, 4), Vector2(0, -2), Vector2(8, -8), Vector2(14, -16)]), bark.darkened(0.2), 3.0)
+			draw_rect(Rect2(-16, -18, 32, 24), glow, false, 1.0)
+			if not is_read():
+				WorldText.draw(self, Vector2(-2, -21), "?", 8, Color(1, 0.9, 0.5), 2, Color.BLACK)
 		_:
 			draw_rect(Rect2(-5, -8, 10, 8), Color(0.88, 0.82, 0.66))
 			draw_line(Vector2(-3, -6), Vector2(3, -6), Color(0.4, 0.35, 0.3), 1.0)
