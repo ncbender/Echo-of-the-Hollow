@@ -1,7 +1,7 @@
 extends TestCase
 ## Whispering Stone & class choice: the three echoes (data, real map, enemy
 ## variants, waves, abort/death/restart, nothing permanent), the choice only
-## after all three with confirmation and a milestone save (success shown only
+## after its own echo (Class Trials 2.0 M1) with confirmation and a milestone save (success shown only
 ## after the write, failure reported), the waystones (exactly four planned, two
 ## working, activation line, free travel, never in combat), the return to Haven
 ## and the main quest stub. Guardian and Soulbinder never appear.
@@ -150,10 +150,10 @@ func test_echo_in_the_shrine_is_temporary_and_restartable() -> void:
 	check(not character.classes.is_unlocked(&"warrior"), "nothing permanent: class still locked")
 	check_eq(character.inventory.to_array(), items, "nothing permanent: inventory")
 	check_eq(character.builds.to_dict(), builds, "nothing permanent: builds")
-	check_eq(StoryService.objective_value(character, &"the_whispering_stone", 0), 1, "one echo of three")
+	check(StoryService.at_step(character, &"the_whispering_stone", 2), "one echo is enough: on to the choice")
 
 
-func test_choice_only_after_all_echoes_and_success_after_save() -> void:
+func test_choice_only_after_its_own_echo_and_success_after_save() -> void:
 	if await _open(&"whispering_stone", &"from_haven") == null:
 		return
 	var stone := map.get_node("TheStone") as ClassChoiceStation
@@ -163,7 +163,7 @@ func test_choice_only_after_all_echoes_and_success_after_save() -> void:
 	stone.interact(map.hud)
 	var panel := map.hud.class_choice_panel
 	check(panel.visible, "the stone answers")
-	check_eq(panel.choose(&"arcanist"), "Walk all three echoes first.", "not before all three echoes")
+	check_eq(panel.choose(&"arcanist"), "Walk the echo of this path first.", "not before its own echo")
 	var cards: Array = panel.find_children("Choose_*", "Button", true, false).map(func(b: Button) -> String: return b.name)
 	check_eq(cards, ["Choose_warrior", "Choose_arcanist", "Choose_shadowrunner"], "exactly three paths (no Guardian, no Soulbinder)")
 	_complete_all_trials()

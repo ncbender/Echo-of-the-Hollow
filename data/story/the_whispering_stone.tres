@@ -18,13 +18,12 @@ completion_flag = &"prologue.shrine_reached"
 [sub_resource type="Resource" id="O_echoes"]
 script = ExtResource("3_obj")
 event_id = &"trial_complete"
-amount = 3
 description = "Echoes walked"
 cumulative = true
 
 [sub_resource type="Resource" id="S_echoes"]
 script = ExtResource("2_step")
-description = "Walk the three echoes within the stone, in any order."
+description = "Walk an echo within the stone. Only a path you have walked can take root."
 objectives = Array[ExtResource("3_obj")]([SubResource("O_echoes")])
 
 [sub_resource type="Resource" id="O_choice"]

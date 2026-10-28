@@ -4,9 +4,11 @@ extends RefCounted
 ##  * the player starts as Basic Adventurer and may try Warrior, Arcanist and
 ##    Shadowrunner in temporary trials - a trial never unlocks the class, never
 ##    grants talent points, skills or items, and leaves no trace when it ends
-##  * after completing all three trials the player chooses EXACTLY ONE of them;
-##    that class is unlocked permanently and activated, the others stay locked
-##    (later class quests unlock them), and the choice can never run again
+##  * Class Trials 2.0 (docs/CLASS_TRIALS_2_0_M1.md): one completed trial is
+##    enough; the player chooses EXACTLY ONE class whose OWN trial was completed
+##    (further trials stay optional until then). That class is unlocked
+##    permanently and activated, the others stay locked (later class quests
+##    unlock them), and the choice can never run again
 
 
 static func trial_for_class(db: GameDatabase, class_id: StringName) -> TrialDefinition:
@@ -108,10 +110,9 @@ static func can_choose(character: Character, class_id: StringName) -> String:
 		return "Finish or leave the current trial first."
 	if not class_id in prologue_classes(character.database):
 		return "This class cannot be chosen in the prologue."
-	for other in prologue_classes(character.database):
-		var trial := trial_for_class(character.database, other)
-		if trial != null and not prologue.has_completed_trial(trial.id):
-			return "Walk all three echoes first."
+	var trial := trial_for_class(character.database, class_id)
+	if trial == null or not prologue.has_completed_trial(trial.id):
+		return "Walk the echo of this path first."   # only its OWN trial opens a class
 	return ""
 
 

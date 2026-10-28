@@ -1,12 +1,14 @@
 class_name ClassChoicePanel
 extends UiWindow
 ## The one-time choice of the first class at the Whispering Stone (exactly
-## three paths: Warrior, Arcanist, Shadowrunner). Offered only after all three
-## echoes were walked; it needs two clicks (choose -> confirm) because it is
-## permanent. After the choice a milestone save is written, and success is
-## shown only once that save really succeeded - a failed save is reported.
+## three paths: Warrior, Arcanist, Shadowrunner). All three stay visible; a path
+## can be chosen only once its OWN echo was walked (PrologueService.can_choose,
+## Class Trials 2.0 M1), the others show a locked state. The choice needs two
+## clicks (choose -> confirm) because it is permanent. After the choice a
+## milestone save is written, and success is shown only once that save really
+## succeeded - a failed save is reported.
 
-const INTRO := "Three paths linger within the stone. You have walked each of them, but only one can take root within you. The others may yet be learned."
+const INTRO := "Three paths linger within the stone. Only a path you have walked can take root within you, and only one of them. The others may yet be learned."
 
 var character: Character
 var station: ClassChoiceStation
@@ -109,8 +111,8 @@ func rebuild() -> void:
 		pass   # keep the save message visible
 	elif prologue.is_completed():
 		_status.text = "The path of the %s has taken root within you. The other paths may yet be learned." % _class_name(prologue.chosen_class)
-	elif PrologueService.can_choose(character, PrologueService.prologue_classes(character.database)[0]) != "":
-		_status.text = "Walk all three echoes first. Each path waits at its own stone."
+	elif choosable_classes().is_empty():
+		_status.text = "Walk an echo first. Each path waits at its own stone."
 	else:
 		_status.text = ""
 	rebuild_cards()
@@ -147,6 +149,10 @@ func _card(class_id: StringName) -> Control:
 	if character.prologue.is_completed():
 		button.text = "Chosen" if chosen else "Locked (learn later)"
 		button.disabled = true
+	elif not done:
+		button.text = "Locked (walk its echo)"
+		button.disabled = true
+		button.tooltip_text = PrologueService.can_choose(character, class_id)
 	else:
 		button.text = "Confirm %s" % definition.display_name if _pending == class_id else "Choose %s" % definition.display_name
 		button.disabled = PrologueService.can_choose(character, class_id) != ""
@@ -154,6 +160,15 @@ func _card(class_id: StringName) -> Control:
 	button.pressed.connect(choose.bind(class_id))
 	box.add_child(button)
 	return panel
+
+
+## Classes the service lets the player choose right now (UI and tests).
+func choosable_classes() -> Array[StringName]:
+	var result: Array[StringName] = []
+	for class_id in PrologueService.prologue_classes(character.database):
+		if PrologueService.can_choose(character, class_id) == "":
+			result.append(class_id)
+	return result
 
 
 func _class_name(class_id: StringName) -> String:

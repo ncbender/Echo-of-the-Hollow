@@ -52,7 +52,7 @@ func refresh() -> void:
 	elif show_prologue_hint and not prologue.is_completed():
 		_title.text = tr("UI_PROLOGUE")
 		var done := prologue.completed_trials.size()
-		lines.append("Try the three class trials (%d/3 done)." % done)
+		lines.append("Walk a class trial to choose your path (%d/3 walked)." % done)
 		lines.append("Then choose your starting class at the Altar of Choice.")
 	else:
 		_title.text = ""

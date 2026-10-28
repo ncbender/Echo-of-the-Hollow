@@ -1,7 +1,7 @@
 class_name ClassChoiceStation
 extends Interactable
 ## The heart of the Whispering Stone: opens the one-time choice of the first
-## class (ClassChoicePanel) once all three echoes were walked.
+## class (ClassChoicePanel); a path is chosen once its own echo was walked.
 
 @export var title: String = "Altar of Choice"
 

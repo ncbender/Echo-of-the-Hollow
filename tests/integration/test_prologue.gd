@@ -84,7 +84,8 @@ func test_trial_is_temporary() -> void:
 
 func test_completing_trials_and_choosing_exactly_one() -> void:
 	_complete(&"trial_warrior")
-	check(PrologueService.choose_starting_class(character, &"warrior") != "", "choice needs all three trials")
+	check(PrologueService.choose_starting_class(character, &"arcanist") != "", "a class needs its own trial")
+	check_eq(PrologueService.can_choose(character, &"warrior"), "", "the walked path is choosable")
 	_complete(&"trial_arcanist")
 	_complete(&"trial_shadowrunner")
 	check_eq(character.prologue.completed_trials.size(), 3, "three trials done")
