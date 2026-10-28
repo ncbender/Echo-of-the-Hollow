@@ -336,6 +336,9 @@ event_id = &"interact:wardens_rest_watchstone"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterSentinel/SplitWatchstone"]
 shape = SubResource("Circle_use")
 
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(-280, 0)
+
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true
 
@@ -364,9 +367,6 @@ script = ExtResource("8_spawn")
 position = Vector2(-280, 0)
 script = ExtResource("8_spawn")
 spawn_id = &"from_chapel"
-
-[node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(-280, 0)
 
 [node name="HitstopController" type="Node" parent="."]
 script = ExtResource("6_hitstop")
