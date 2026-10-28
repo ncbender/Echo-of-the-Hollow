@@ -10,5 +10,5 @@ display_name = "The Chapel"
 scene_path = "res://scenes/maps/chapel.tscn"
 default_spawn_id = &"default"
 map_cell = Vector2i(3, 1)
-neighbors = Array[StringName]([&"tangled_wood"])
+neighbors = Array[StringName]([&"tangled_wood", &"wardens_rest"])
 show_on_map = true

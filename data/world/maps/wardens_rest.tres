@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/world/map_definition.gd" id="1_map"]
+
+[resource]
+script = ExtResource("1_map")
+id = &"wardens_rest"
+region_id = &"hollow_outskirts"
+display_name = "Warden's Rest"
+scene_path = "res://scenes/maps/wardens_rest.tscn"
+default_spawn_id = &"default"
+map_cell = Vector2i(4, 1)
+neighbors = Array[StringName]([&"chapel"])
+show_on_map = true

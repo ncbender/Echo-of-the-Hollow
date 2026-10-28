@@ -39,9 +39,32 @@ description = "The roots all bend the same way, east past the Tangled Wood. Foll
 objectives = Array[ExtResource("3_obj")]([SubResource("O_chapel")])
 completion_flag = &"chapter1.chapel_waystone_examined"
 
+[sub_resource type="Resource" id="O_rest"]
+script = ExtResource("3_obj")
+event_id = &"enter:wardens_rest"
+description = "Find a way through to the east"
+
 [sub_resource type="Resource" id="S_beyond"]
 script = ExtResource("2_step")
-description = "Even the roots around the old waystone pull further east, toward a way choked with stone. Your journey continues in a future update."
+description = "Even the roots around the old waystone pull further east, toward a way choked with stone. Find a way through."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_rest")])
+completion_flag = &"chapter1.wardens_rest_reached"
+
+[sub_resource type="Resource" id="O_watchstone"]
+script = ExtResource("3_obj")
+event_id = &"interact:wardens_rest_watchstone"
+description = "Examine the split watchstone"
+cumulative = true
+
+[sub_resource type="Resource" id="S_post"]
+script = ExtResource("2_step")
+description = "Something rooted still keeps watch over the old post at Warden's Rest. Get past it and search the post."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_watchstone")])
+completion_flag = &"chapter1.watchstone_examined"
+
+[sub_resource type="Resource" id="S_report"]
+script = ExtResource("2_step")
+description = "The roots have reached even the old watch post. Edrin should hear of this. Your journey continues in a future update."
 
 [resource]
 script = ExtResource("1_quest")
@@ -49,5 +72,5 @@ id = &"the_first_signs"
 display_name = "The First Signs"
 chapter = "The Roots Remember"
 description = "Main quest, chapter one. Whatever walks the woods is drawing closer to Haven."
-steps = Array[ExtResource("2_step")]([SubResource("S_east"), SubResource("S_roots"), SubResource("S_deeper"), SubResource("S_beyond")])
+steps = Array[ExtResource("2_step")]([SubResource("S_east"), SubResource("S_roots"), SubResource("S_deeper"), SubResource("S_beyond"), SubResource("S_post"), SubResource("S_report")])
 open_ended = true

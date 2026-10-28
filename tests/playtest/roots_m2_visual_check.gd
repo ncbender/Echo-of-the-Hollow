@@ -69,6 +69,12 @@ func _pass(resolution: Vector2i, scale: float) -> void:
 	await _shot("04_yard_encounter")
 	_kill_all()
 	await _frames(30)
+	# sealed way east (closed until the waystone is examined; M3 opens it afterwards)
+	await _walk_to(Vector2(270, -162), Vector2.RIGHT, 60)
+	await _frames(10)
+	_check(map.map_id == &"chapel" and map.player.global_position.x < 320.0, "the way east stays closed")
+	_check(Interactable.find_active(self) == null, "no prompt at the sealed way")
+	await _shot("09_sealed_way")
 	# the Chapel Waystone
 	map.player.global_position = Vector2(128, 0)
 	map.player.reset_physics_interpolation()
@@ -90,12 +96,6 @@ func _pass(resolution: Vector2i, scale: float) -> void:
 	await _frames(20)
 	_check(Interactable.find_active(self) == map.get_node("FadedNote"), "the faded note in the niche")
 	await _shot("08_niche_note")
-	# sealed way east
-	await _walk_to(Vector2(270, -162), Vector2.RIGHT, 60)
-	await _frames(10)
-	_check(map.map_id == &"chapel" and map.player.global_position.x < 320.0, "the way east stays closed")
-	_check(Interactable.find_active(self) == null, "no prompt at the sealed way")
-	await _shot("09_sealed_way")
 	# back west
 	await _walk_to(Vector2(-300, 0), Vector2.LEFT, 0)
 	await _await_map(&"tangled_wood")

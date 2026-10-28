@@ -96,8 +96,13 @@ static func defeat_flag(enemy: Enemy) -> StringName:
 
 
 func _on_persistent_enemy_defeated(enemy: Enemy) -> void:
-	if session != null:
-		session.get_character().world.set_flag(defeat_flag(enemy))
+	if session == null:
+		return
+	var world := session.get_character().world
+	var first := not world.has_flag(defeat_flag(enemy))
+	world.set_flag(defeat_flag(enemy))
+	if first and enemy.defeat_milestone:
+		session.request_critical_save("boss defeated %s" % enemy.persistent_id)
 
 
 ## Boss/quest enemies that were defeated before stay gone.

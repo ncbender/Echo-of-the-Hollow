@@ -17,6 +17,9 @@ enum State { CHASE, TELEGRAPH, ATTACKING, STAGGERED, DEAD }
 ## defeated across map changes and saves. Normal enemies leave it empty and
 ## respawn whenever the map is loaded again.
 @export var persistent_id: StringName
+## Persistent enemies without a reward cache (whose BossRewardCache would ask for it) request
+## the milestone save of their first defeat themselves (GameMap). Off for every other enemy.
+@export var defeat_milestone: bool = false
 ## Hollowwood Loot Integration 1.0: equipment roll of THIS placed enemy per real death
 ## (EquipmentLoot, once; GameMap._spawn_drops). Null = fixed drops only.
 @export var equipment_loot: EquipmentLootTable
@@ -144,7 +147,14 @@ func _move(to_target: Vector2, delta: float) -> void:
 
 func _on_hit_received(hit: HitData) -> void:
 	knockback.start(hit.knockback * config.knockback_taken())
+	if is_braced():
+		hit.poise_damage *= config.braced_poise_taken   # one scaling at the receiver, like parry poise
 	health.apply_hit(hit)
+
+
+## True while the running attack is in an uninterruptible phase and this enemy braces in it.
+func is_braced() -> bool:
+	return config.braced_poise_taken < 1.0 and not combat.is_interruptible()
 
 
 ## Called by the defender (DefenseComponent) after a successful parry.

@@ -6,4 +6,4 @@
 script = ExtResource("1_region")
 id = &"hollow_outskirts"
 display_name = "Hollow Outskirts"
-map_ids = Array[StringName]([&"home_base", &"whisper_forest", &"test_arena", &"prologue", &"old_road", &"whispering_stone", &"broken_bastion", &"shattered_sanctum", &"veiled_passage", &"tangled_wood", &"chapel"])
+map_ids = Array[StringName]([&"home_base", &"whisper_forest", &"test_arena", &"prologue", &"old_road", &"whispering_stone", &"broken_bastion", &"shattered_sanctum", &"veiled_passage", &"tangled_wood", &"chapel", &"wardens_rest"])

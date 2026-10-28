@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="WeaponFamily" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_family.gd" id="1_family"]
+[ext_resource type="Script" path="res://scripts/combat/attack_definition.gd" id="2_attack"]
+[ext_resource type="Script" path="res://scripts/combat/charge_profile.gd" id="3_charge"]
+
+[sub_resource type="Resource" id="Charge_none"]
+script = ExtResource("3_charge")
+tier_names = PackedStringArray("Normal")
+tier_thresholds = PackedFloat32Array()
+damage_multipliers = PackedFloat32Array(1.0)
+poise_multipliers = PackedFloat32Array(1.0)
+reach_multipliers = PackedFloat32Array(1.0)
+hitstop_multipliers = PackedFloat32Array(1.0)
+move_multiplier = 0.0
+
+[sub_resource type="Resource" id="Attack_strike"]
+script = ExtResource("2_attack")
+id = &"sentinel_strike"
+display_name = "Sentinel Strike"
+weapon_family_id = &"sentinel_roots"
+input_type = 0
+startup = 0.55
+active = 0.1
+recovery = 0.55
+chain_delay = 0.0
+combo_window = 0.0
+damage = 12.0
+poise_damage = 12.0
+knockback = 5.0
+hitstop = 0.05
+reach = 32.0
+arc_degrees = 90.0
+hit_reaction = 1
+move_multiplier = 0.0
+lunge_distance = 4.0
+dash_cancel_phases = 7
+effect_tags = Array[StringName]([&"enemy"])
+defense_flags = 3
+
+[sub_resource type="Resource" id="Attack_slam"]
+script = ExtResource("2_attack")
+id = &"sentinel_root_slam"
+display_name = "Sentinel Root Slam"
+weapon_family_id = &"sentinel_roots"
+input_type = 1
+startup = 1.0
+active = 0.12
+recovery = 1.3
+chain_delay = 0.0
+combo_window = 0.0
+damage = 22.0
+poise_damage = 25.0
+knockback = 14.0
+hitstop = 0.08
+reach = 38.0
+arc_degrees = 120.0
+hit_reaction = 3
+move_multiplier = 0.0
+lunge_distance = 6.0
+dash_cancel_phases = 7
+uninterruptible_phases = 1
+charge_profile = SubResource("Charge_none")
+effect_tags = Array[StringName]([&"enemy", &"heavy"])
+defense_flags = 1
+
+[resource]
+script = ExtResource("1_family")
+id = &"sentinel_roots"
+display_name = "Sentinel Roots"
+root_light = &"sentinel_strike"
+root_heavy = &"sentinel_root_slam"
+attacks = Array[ExtResource("2_attack")]([SubResource("Attack_strike"), SubResource("Attack_slam")])

@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="13_trigger"]
 [ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="14_husk"]
 [ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="15_wolf"]
+[ext_resource type="Script" path="res://scripts/world/story_conditional.gd" id="16_cond_node"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="17_cond"]
 
 [sub_resource type="RectangleShape2D" id="Rect_door"]
 size = Vector2(12, 48)
@@ -24,6 +26,14 @@ size = Vector2(40, 48)
 
 [sub_resource type="CircleShape2D" id="Circle_use"]
 radius = 20.0
+
+[sub_resource type="Resource" id="C_way_sealed"]
+script = ExtResource("17_cond")
+forbidden_flags = Array[StringName]([&"chapter1.chapel_waystone_examined"])
+
+[sub_resource type="Resource" id="C_way_open"]
+script = ExtResource("17_cond")
+required_flags = Array[StringName]([&"chapter1.chapel_waystone_examined"])
 
 [node name="Chapel" type="Node2D"]
 y_sort_enabled = true
@@ -162,13 +172,6 @@ script = ExtResource("3_wall")
 size = Vector2(16, 338)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
-
-[node name="SealedWay" type="StaticBody2D" parent="Walls"]
-position = Vector2(328, -162)
-script = ExtResource("3_wall")
-size = Vector2(16, 48)
-color = Color(0.3, 0.21, 0.13, 1)
-top_color = Color(0.42, 0.3, 0.18, 1)
 
 [node name="FallenStoneA" type="StaticBody2D" parent="Walls"]
 position = Vector2(308, -182)
@@ -515,14 +518,45 @@ text = "Kept the fire low and the door barred, as those before us did. Left what
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FadedNote"]
 shape = SubResource("Circle_use")
 
-[node name="SealedHint" type="Area2D" parent="."]
+[node name="SealedEast" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("16_cond_node")
+condition = SubResource("C_way_sealed")
+
+[node name="SealedWay" type="StaticBody2D" parent="SealedEast"]
+position = Vector2(328, -162)
+script = ExtResource("3_wall")
+size = Vector2(16, 48)
+color = Color(0.3, 0.21, 0.13, 1)
+top_color = Color(0.42, 0.3, 0.18, 1)
+
+[node name="SealedHint" type="Area2D" parent="SealedEast"]
 position = Vector2(286, -162)
 script = ExtResource("13_trigger")
 hint = "Roots and fallen stone choke the old way east. It will not open - not yet."
 hint_id = &"chapel_east_way"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SealedHint"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SealedEast/SealedHint"]
 shape = SubResource("Rect_sealed_hint")
+
+[node name="OpenEast" type="Node2D" parent="."]
+script = ExtResource("16_cond_node")
+condition = SubResource("C_way_open")
+
+[node name="ToWardensRest" type="Area2D" parent="OpenEast"]
+position = Vector2(332, -162)
+script = ExtResource("9_transition")
+target_map_id = &"wardens_rest"
+target_spawn_id = &"from_chapel"
+label = "Warden's Rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OpenEast/ToWardensRest"]
+shape = SubResource("Rect_door")
+
+[node name="SpawnFromWardensRest" type="Marker2D" parent="."]
+position = Vector2(282, -162)
+script = ExtResource("8_spawn")
+spawn_id = &"from_wardens_rest"
 
 [node name="Encounters" type="Node2D" parent="."]
 y_sort_enabled = true

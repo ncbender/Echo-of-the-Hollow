@@ -46,6 +46,15 @@ extends Resource
 ## Extra pause before the next attack after being parried.
 @export var parry_daze: float = 0.5
 
+@export_group("Bracing")
+## Poise damage taken while the running attack is in one of its uninterruptible phases
+## (AttackDefinition.uninterruptible_phases): a braced windup is harder to break, never
+## impossible. 1 = no bracing (every enemy before the Rootbound Sentinel, docs/ROOTS_REMEMBER_M3.md).
+@export_range(0.0, 1.0) var braced_poise_taken: float = 1.0
+## Presentation only: the body dims and shows a marker during the recovery of a heavy
+## attack, so the opening after it reads clearly.
+@export var recovery_cue: bool = false
+
 @export_group("Statuses")
 ## Status id -> resistance 0..1 (1 = immune), e.g. {&"bleeding": 0.5}. Shortens the
 ## duration and weakens the power of statuses applied to this enemy.

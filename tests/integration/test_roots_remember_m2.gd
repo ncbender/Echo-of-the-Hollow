@@ -157,7 +157,7 @@ func test_quest_extends_from_index_two() -> void:
 	check(StoryService.validate_data(db).is_empty(), "story data valid: %s" % [StoryService.validate_data(db)])
 	check(db.load_errors.is_empty(), "database errors: %s" % [db.load_errors])
 	var quest: StoryQuestDefinition = db.story_quests[QUEST]
-	check_eq(quest.steps.size(), 4, "reach, roots, chapel, M3 placeholder")
+	check(quest.steps.size() >= 4, "reach, roots, chapel, then later milestones (M3 extends from index 3)")
 	var steps := quest.steps
 	check(steps[0].objectives.size() == 1 and steps[0].objectives[0].event_id == ENTER and not steps[0].objectives[0].cumulative,
 		"step 0 unchanged")
@@ -169,8 +169,8 @@ func test_quest_extends_from_index_two() -> void:
 	check(chapel.size() == 1 and chapel[0].event_id == WAYSTONE and chapel[0].cumulative and chapel[0].amount == 1,
 		"step 2: one-time chapel examination (new id, cumulative)")
 	check_eq(steps[2].completion_flag, &"chapter1.chapel_waystone_examined", "step 2 flag")
-	check(steps[3].objectives.is_empty(), "step 3: placeholder without objective")
-	check(steps[3].description.contains("east") and steps[3].description.contains("future update"), "the trail leads on east")
+	check(steps[-1].objectives.is_empty(), "last step: placeholder without objective")
+	check(steps[3].description.contains("east") and steps[-1].description.contains("future update"), "the trail leads on east")
 	check(quest.open_ended and quest.next_quest_ids.is_empty(), "stays open, no successor")
 	check(not QuestRewardService.has_reward(quest), "no turn-in reward")
 	for other: StoryQuestDefinition in db.story_quests.values():
@@ -206,7 +206,8 @@ func test_map_data_waystones_and_route_topology() -> void:
 		for node in scene.find_children("*", "Waystone", true, false):
 			check(other.id != &"chapel", "no Waystone node in the chapel")
 		scene.free()
-	check_eq(into[&"chapel"], [[&"tangled_wood", false]], "the chapel is reached only from the Tangled Wood")
+	var chapel_ways: Array = into[&"chapel"]
+	check(chapel_ways.size() == 2 and [&"tangled_wood", false] in chapel_ways and [&"wardens_rest", false] in chapel_ways, "the chapel is reached only from the Tangled Wood (or from Warden's Rest beyond it)")
 	var wood_ways: Array = into[&"tangled_wood"]
 	wood_ways.sort()
 	check_eq(wood_ways, [[&"chapel", false], [&"whisper_forest", true]], "the wood is entered only behind the prologue gate (or from the chapel)")
@@ -225,7 +226,7 @@ func test_chapel_step_advances_once() -> void:
 	StoryService.notify(character, WAYSTONE)
 	check(StoryService.at_step(character, QUEST, 3), "step 3")
 	check(character.world.has_flag(&"chapter1.chapel_waystone_examined"), "flag")
-	check(_step_text(character).contains("future update"), "placeholder: %s" % _step_text(character))
+	check(_step_text(character).contains("east"), "the trail leads on east: %s" % _step_text(character))
 	for i in 3:
 		StoryService.notify(character, WAYSTONE)
 		check(StoryService.resettle(character).is_empty(), "resettle %d at the placeholder" % i)
@@ -350,8 +351,8 @@ func test_spawns_free_and_no_false_prompts() -> void:
 		check(_blocked_at(chapel, chapel.get_node(name).global_position).is_empty(), "%s reachable" % name)
 	check(chapel.find_children("*", "Checkpoint", true, false).is_empty(), "no rest point")
 	check(chapel.find_children("*", "StoryPickup", true, false).is_empty(), "no pickups")
-	var exits := chapel.find_children("*", "MapTransition", true, false)
-	check(exits.size() == 1 and (exits[0] as MapTransition).target_map_id == &"tangled_wood", "only exit: back west")
+	var exits := chapel.find_children("*", "MapTransition", true, false).filter(func(exit: MapTransition) -> bool: return exit.can_process())
+	check(exits.size() == 1 and (exits[0] as MapTransition).target_map_id == &"tangled_wood", "only active exit before the waystone: back west")
 	var wood := await _travel(&"tangled_wood", &"from_chapel")
 	if wood == null:
 		return
@@ -362,7 +363,7 @@ func test_spawns_free_and_no_false_prompts() -> void:
 
 
 func test_sealed_way_east_stays_closed() -> void:
-	var character := _character_at(3)
+	var character := _character_at(2)   # closed until the Chapel Waystone was examined (M3 opens it afterwards)
 	session.set_character(character)
 	var chapel := await _travel(&"chapel", &"from_tangled")
 	if chapel == null:

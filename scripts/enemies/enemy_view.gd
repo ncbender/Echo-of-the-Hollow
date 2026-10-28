@@ -8,6 +8,10 @@ const COLOR_STAGGER := Color("9fc8ff")
 ## Unblockable attacks (AttackDefinition.defense_flags = 0): own colour PLUS shape
 ## cues (zigzag outline, "!!" marker) so they never rely on colour alone.
 const COLOR_UNBLOCKABLE := Color(0.95, 0.35, 1.0)
+## Braced windup (EnemyConfig.braced_poise_taken): a heavy stone-coloured ring.
+const COLOR_BRACED := Color(0.85, 0.8, 0.62)
+## Opening after a heavy attack (EnemyConfig.recovery_cue): dimmed body and "...".
+const COLOR_EXPOSED := Color(0.5, 0.55, 0.5)
 
 @onready var enemy: Enemy = get_parent()
 @onready var fx: HitReactionFx = $"../HitReactionFx"
@@ -62,10 +66,16 @@ func _draw() -> void:
 		body = body.lerp(COLOR_STAGGER, 0.6)
 	elif enemy.state == Enemy.State.TELEGRAPH:
 		body = body.lerp(COLOR_TELEGRAPH, 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.04))
+	elif is_exposed():
+		body = body.lerp(COLOR_EXPOSED, 0.55)
 	body = body.lerp(Color.WHITE, fx.flash)
 	body.a = alpha
 	var o := fx.offset
 	draw_circle(o + Vector2(0, -4), enemy.config.body_radius, body)
+	if enemy.state != Enemy.State.DEAD and enemy.is_braced():
+		draw_arc(o + Vector2(0, -4), enemy.config.body_radius + 3.0, 0.0, TAU, 28, COLOR_BRACED, 2.5)
+	if is_exposed():
+		WorldText.draw(self, Vector2(-6, -enemy.config.body_radius - 14.0), "...", 9, COLOR_EXPOSED.lightened(0.4), 2, Color.BLACK)
 	var look := combat.attack_direction if combat.is_busy() else enemy.velocity.normalized()
 	if look == Vector2.ZERO:
 		look = Vector2.DOWN
@@ -87,6 +97,14 @@ func _draw() -> void:
 		DebugView.draw_vector(self, enemy.knockback.remaining(), DebugView.COLOR_KNOCKBACK)
 	if enemy.state == Enemy.State.STAGGERED:
 		WorldText.draw(self, Vector2(-2, -24), "!", 10, COLOR_STAGGER, 2, Color.BLACK)
+
+
+## Recovery of a heavy attack, shown only for enemies with EnemyConfig.recovery_cue.
+func is_exposed() -> bool:
+	var combat := enemy.combat
+	return enemy.config.recovery_cue and enemy.state == Enemy.State.ATTACKING \
+			and combat.phase == CombatComponent.Phase.RECOVERY \
+			and combat.current_attack.input_type == AttackDefinition.InputType.HEAVY
 
 
 func _draw_telegraph(combat: CombatComponent) -> void:
