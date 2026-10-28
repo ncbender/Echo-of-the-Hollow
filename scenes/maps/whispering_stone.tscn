@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="8_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="9_transition"]
-[ext_resource type="Script" path="res://scripts/world/trial_station.gd" id="10_trial"]
 [ext_resource type="Script" path="res://scripts/world/class_choice_station.gd" id="11_choice"]
 [ext_resource type="Script" path="res://scripts/world/waystone.gd" id="12_waystone"]
 [ext_resource type="Script" path="res://scripts/world/encounter.gd" id="13_enc"]
@@ -196,7 +195,7 @@ top_color = Color(0.18, 0.32, 0.16, 1)
 position = Vector2(0, -90)
 script = ExtResource("16_trigger")
 condition = SubResource("C_echoes")
-hint = "Each echo lets you walk a path for a while. Press G at a glowing stone to begin, and again to step out."
+hint = "Each echo lets you walk a path for a while. Listen at the Heart of the Stone (G) to begin a trial on its own grounds."
 hint_id = &"echoes"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EchoHint"]
@@ -210,66 +209,6 @@ spawn_id = &"stone_rest"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RestStone"]
 position = Vector2(-40, 0)
 shape = SubResource("Rect_band")
-
-[node name="TrialWarrior" type="Area2D" parent="."]
-position = Vector2(-170, -200)
-script = ExtResource("10_trial")
-trial_id = &"trial_warrior"
-color = Color(0.9, 0.4, 0.3, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialWarrior"]
-shape = SubResource("Circle_pad")
-
-[node name="Spawns" type="Node2D" parent="TrialWarrior"]
-
-[node name="A" type="Marker2D" parent="TrialWarrior/Spawns"]
-position = Vector2(-40, 60)
-
-[node name="B" type="Marker2D" parent="TrialWarrior/Spawns"]
-position = Vector2(50, 60)
-
-[node name="C" type="Marker2D" parent="TrialWarrior/Spawns"]
-position = Vector2(10, 90)
-
-[node name="TrialArcanist" type="Area2D" parent="."]
-position = Vector2(0, -160)
-script = ExtResource("10_trial")
-trial_id = &"trial_arcanist"
-color = Color(0.7, 0.5, 1, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialArcanist"]
-shape = SubResource("Circle_pad")
-
-[node name="Spawns" type="Node2D" parent="TrialArcanist"]
-
-[node name="A" type="Marker2D" parent="TrialArcanist/Spawns"]
-position = Vector2(-70, 80)
-
-[node name="B" type="Marker2D" parent="TrialArcanist/Spawns"]
-position = Vector2(70, 80)
-
-[node name="C" type="Marker2D" parent="TrialArcanist/Spawns"]
-position = Vector2(0, 110)
-
-[node name="TrialShadowrunner" type="Area2D" parent="."]
-position = Vector2(170, -200)
-script = ExtResource("10_trial")
-trial_id = &"trial_shadowrunner"
-color = Color(0.6, 0.5, 0.9, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialShadowrunner"]
-shape = SubResource("Circle_pad")
-
-[node name="Spawns" type="Node2D" parent="TrialShadowrunner"]
-
-[node name="A" type="Marker2D" parent="TrialShadowrunner/Spawns"]
-position = Vector2(-50, 60)
-
-[node name="B" type="Marker2D" parent="TrialShadowrunner/Spawns"]
-position = Vector2(40, 60)
-
-[node name="C" type="Marker2D" parent="TrialShadowrunner/Spawns"]
-position = Vector2(-5, 95)
 
 [node name="TheStone" type="Area2D" parent="."]
 position = Vector2(0, -262)

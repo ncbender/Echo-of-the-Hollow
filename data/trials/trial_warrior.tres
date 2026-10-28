@@ -23,9 +23,22 @@ description = "Hit enemies with Furious Strike (Q)"
 [sub_resource type="Resource" id="Resource_break"]
 script = ExtResource("1_cfrdq")
 kind = 6
-target_id = &"hardened_husk"
+target_id = &"bastion_guardian"
 amount = 1.0
-description = "Break the guard of the Hardened Husk (heavy attacks, Furious Strike)"
+description = "Break the guard of the Bastion Guardian (heavy attacks, Furious Strike)"
+finale = true
+
+[sub_resource type="Resource" id="Resource_kills"]
+script = ExtResource("1_cfrdq")
+target_id = &"rootbound_husk"
+amount = 3.0
+description = "Hold the bastion: defeat three Rootbound Husks"
+
+[sub_resource type="Resource" id="Resource_boss"]
+script = ExtResource("1_cfrdq")
+target_id = &"bastion_guardian"
+description = "Defeat the Bastion Guardian"
+finale = true
 
 [resource]
 script = ExtResource("2_rknk4")
@@ -38,7 +51,7 @@ talents = Dictionary[StringName, int]({
 &"war_wb_hands": 1
 })
 skill_slots = Array[StringName]([&"furious_strike", &"battle_cry", &"blade_rush", &"warbreaker"])
-objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_break")])
+objectives = Array[ExtResource("1_cfrdq")]([SubResource("Resource_6xp1e"), SubResource("Resource_khnw1"), SubResource("Resource_kills"), SubResource("Resource_break"), SubResource("Resource_boss")])
 enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("4_husk"), ExtResource("4_husk"), ExtResource("5_hardened")])
 choice_text = "A relentless fighter who builds Rage through aggression and overwhelms enemies with powerful strikes."
 map_id = &"broken_bastion"

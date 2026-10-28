@@ -9,6 +9,13 @@
 [ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="7_hud"]
 [ext_resource type="Script" path="res://scripts/world/spawn_point.gd" id="8_spawn"]
 [ext_resource type="Script" path="res://scripts/world/map_transition.gd" id="9_transition"]
+[ext_resource type="Script" path="res://scripts/world/encounter.gd" id="10_enc"]
+[ext_resource type="Script" path="res://scripts/world/encounter_spawn.gd" id="11_espawn"]
+[ext_resource type="Script" path="res://scripts/world/trial_gate.gd" id="12_gate"]
+[ext_resource type="Script" path="res://scripts/world/trial_grounds.gd" id="13_grounds"]
+[ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="20_husk"]
+[ext_resource type="Resource" path="res://data/enemies/sanctum_warden.tres" id="21_boss"]
+[ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="22_claws"]
 
 [sub_resource type="RectangleShape2D" id="Rect_exit"]
 size = Vector2(56, 12)
@@ -29,7 +36,7 @@ color_b = Color(0.17, 0.16, 0.22, 1)
 [node name="TrialFloor" type="Node2D" parent="."]
 z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-228, -328, 456, 288)
+area = Rect2(-228, -328, 456, 296)
 tile_size = 24.0
 color_a = Color(0.2, 0.17, 0.27, 1)
 color_b = Color(0.22, 0.19, 0.3, 1)
@@ -92,9 +99,49 @@ position = Vector2(0, 120)
 [node name="TrialArea" type="Marker2D" parent="."]
 position = Vector2(0, -190)
 
-[node name="TrialGate" type="Marker2D" parent="."]
+[node name="TrialGate" type="StaticBody2D" parent="."]
 position = Vector2(0, -40)
+script = ExtResource("12_gate")
+size = Vector2(56, 16)
+color = Color(0.3, 0.26, 0.4, 1)
+top_color = Color(0.62, 0.54, 0.85, 1)
+trial_id = &"trial_arcanist"
 
+[node name="Training" type="Node2D" parent="."]
+position = Vector2(0, 120)
+script = ExtResource("10_enc")
+encounter_id = &"trial_arcanist_training"
+trigger_radius = 0.0
+persistent = false
+
+[node name="A" type="Marker2D" parent="Training"]
+position = Vector2(-80, -50)
+script = ExtResource("11_espawn")
+config = ExtResource("20_husk")
+[node name="B" type="Marker2D" parent="Training"]
+position = Vector2(80, -50)
+script = ExtResource("11_espawn")
+config = ExtResource("20_husk")
+
+[node name="Finale" type="Node2D" parent="."]
+position = Vector2(0, -190)
+script = ExtResource("10_enc")
+encounter_id = &"trial_arcanist_finale"
+trigger_radius = 130.0
+persistent = false
+
+[node name="Boss" type="Marker2D" parent="Finale"]
+position = Vector2(0, -60)
+script = ExtResource("11_espawn")
+config = ExtResource("21_boss")
+attacks = ExtResource("22_claws")
+
+[node name="TrialGrounds" type="Node" parent="." node_paths=PackedStringArray("training", "finale", "gate")]
+script = ExtResource("13_grounds")
+trial_id = &"trial_arcanist"
+training = NodePath("../Training")
+finale = NodePath("../Finale")
+gate = NodePath("../TrialGate")
 [node name="ToHeart" type="Area2D" parent="."]
 position = Vector2(0, 300)
 script = ExtResource("9_transition")
@@ -109,11 +156,11 @@ shape = SubResource("Rect_exit")
 y_sort_enabled = true
 
 [node name="SpawnDefault" type="Marker2D" parent="."]
-position = Vector2(0, 250)
+position = Vector2(0, 220)
 script = ExtResource("8_spawn")
 
 [node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(0, 250)
+position = Vector2(0, 220)
 
 [node name="HitstopController" type="Node" parent="."]
 script = ExtResource("6_hitstop")

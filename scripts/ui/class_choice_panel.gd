@@ -4,7 +4,8 @@ extends UiWindow
 ## three paths: Warrior, Arcanist, Shadowrunner). All three stay visible; a path
 ## can be chosen only once its OWN echo was walked (PrologueService.can_choose,
 ## Class Trials 2.0 M1), the others show a locked state. Each card also offers
-## its trial path (visit: travel to the trial grounds, M2) - never the choice
+## its trial: Begin (a real trial on its own grounds, M3) and Visit (a preview
+## of the grounds, M2) - neither is the choice
 ## itself. The choice needs two
 ## clicks (choose -> confirm) because it is permanent. After the choice a
 ## milestone save is written, and success is shown only once that save really
@@ -114,7 +115,7 @@ func rebuild() -> void:
 	elif prologue.is_completed():
 		_status.text = "The path of the %s has taken root within you. The other paths may yet be learned." % _class_name(prologue.chosen_class)
 	elif choosable_classes().is_empty():
-		_status.text = "Walk an echo first. Each path waits at its own stone."
+		_status.text = "Walk an echo first: begin a trial below. Each path waits on its own grounds."
 	else:
 		_status.text = ""
 	rebuild_cards()
@@ -161,16 +162,47 @@ func _card(class_id: StringName) -> Control:
 		button.tooltip_text = PrologueService.can_choose(character, class_id)
 	button.pressed.connect(choose.bind(class_id))
 	if not character.prologue.is_completed() and trial != null:
+		var grounds_error := PrologueService.can_visit_grounds(character, trial.id)
+		var begin_button := Button.new()   # the real trial (M3): temporary class on its grounds
+		begin_button.name = "Begin_%s" % class_id
+		begin_button.text = tr("UI_TRIAL_BEGIN")
+		begin_button.disabled = grounds_error != ""
+		begin_button.tooltip_text = grounds_error if grounds_error != "" else tr("UI_TRIAL_BEGIN_HINT")
+		begin_button.pressed.connect(begin.bind(class_id))
+		box.add_child(begin_button)
 		var visit_button := Button.new()   # trial path: travel only, never the final choice
 		visit_button.name = "Visit_%s" % class_id
 		visit_button.text = tr("UI_TRIAL_VISIT")
-		var visit_error := PrologueService.can_visit_grounds(character, trial.id)
-		visit_button.disabled = visit_error != ""
-		visit_button.tooltip_text = visit_error if visit_error != "" else tr("UI_TRIAL_VISIT_HINT")
+		visit_button.disabled = grounds_error != ""
+		visit_button.tooltip_text = grounds_error if grounds_error != "" else tr("UI_TRIAL_VISIT_HINT")
 		visit_button.pressed.connect(visit.bind(class_id))
 		box.add_child(visit_button)
 	box.add_child(button)
 	return panel
+
+
+## Class Trials 2.0 M3: begins the trial of `class_id` (PrologueService: temporary
+## class, build and loadout copy) and travels to its grounds. Beginning is NOT
+## choosing: the final choice stays the Choose button. Returns "" or the reason;
+## if the journey cannot start, the trial is left again at once (no orphan).
+func begin(class_id: StringName) -> String:
+	var trial := PrologueService.trial_for_class(character.database, class_id)
+	var error := PrologueService.can_visit_grounds(character, trial.id) if trial != null else "Unknown trial."
+	if error == "" and _session == null:
+		error = "The stone cannot carry you now."
+	elif error == "" and _session.is_traveling():
+		error = "The stone is already carrying you."   # one transition at a time
+	if error == "":
+		error = PrologueService.begin_trial(character, trial.id)   # refuses a second running trial
+	if error != "":
+		_status.text = error
+		return error
+	if not _session.travel(trial.map_id, trial.entry_spawn_id):
+		PrologueService.end_trial(character, false)
+		return "The stone is already carrying you."
+	_pending = &""
+	hide()
+	return ""
 
 
 ## Trial path (Class Trials 2.0 M2): travels to the trial grounds of `class_id`.

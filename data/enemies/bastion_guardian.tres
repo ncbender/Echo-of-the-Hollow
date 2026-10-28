@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyConfig" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+id = &"bastion_guardian"
+display_name = "Bastion Guardian"
+rank = 2
+body_color = Color(0.36, 0.3, 0.2, 1)
+body_radius = 10.0
+max_health = 160.0
+max_poise = 70.0
+move_speed = 50.0
+aggro_range = 240.0
+attack_cooldown = 1.2
+heavy_attack_interval = 2
+knockback_resistance = 0.5
+mastery_xp_reward = 0
+class_xp_reward = 0

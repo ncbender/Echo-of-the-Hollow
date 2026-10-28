@@ -4,6 +4,8 @@ extends Marker2D
 ## Where one enemy of an Encounter appears, and which variant (EnemyConfig).
 
 @export var config: EnemyConfig
+## Optional own attack family (null: the grunt scene's), e.g. Grove Warden claws.
+@export var attacks: WeaponFamily
 
 
 func _draw() -> void:

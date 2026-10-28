@@ -32,8 +32,10 @@ extends Resource
 ## Classes tried in the prologue; exactly one of them is chosen permanently.
 @export var prologue_class_ids: Array[StringName] = [&"warrior", &"arcanist", &"shadowrunner"]
 @export var prologue_map_id: StringName = &"prologue"
-## Maps on which class trials (echoes) may run; leaving them ends a trial.
-@export var trial_map_ids: Array[StringName] = [&"whispering_stone", &"prologue"]
+## Maps on which class trials (echoes) may run; leaving them ends a trial. Class
+## Trials 2.0 M3: the three trial grounds (+ the developer grounds), no longer the
+## Whispering Stone - returning to the altar ends a trial that is still running.
+@export var trial_map_ids: Array[StringName] = [&"broken_bastion", &"shattered_sanctum", &"veiled_passage", &"prologue"]
 ## Where a new journey begins (the Old Road south of Haven).
 @export var new_game_map_id: StringName = &"old_road"
 @export var new_game_spawn_id: StringName = &"default"

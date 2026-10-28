@@ -17,5 +17,11 @@ UI_CHOOSE_CLASS_TITLE,Choose Your Path
 UI_PROLOGUE,Prologue
 UI_CLASS_QUESTS,Class quests
 UI_LEAVE_TRIAL_HINT,G at the pedestal: leave the trial
-UI_TRIAL_VISIT,Visit the trial grounds
-UI_TRIAL_VISIT_HINT,"Travel to this path's trial grounds. This is not the final choice: no trial starts and nothing is chosen."
+UI_LEAVE_TRIAL_GROUNDS_HINT,Leave by the path to the Heart of the Stone: the trial ends without passing.
+UI_TRIAL_BEGIN,Begin the trial
+UI_TRIAL_CLASS,Trial class: %s (temporary)
+UI_TRIAL_GATE_SEALED,Gate: sealed until the training is done
+UI_TRIAL_GATE_OPEN,"Gate: open - the trial awaits beyond it"
+UI_TRIAL_BEGIN_HINT,"Walk this path on its own grounds: you play the class for a while. Passing the trial opens its choice here; nothing is chosen yet."
+UI_TRIAL_VISIT,Visit the trial grounds (preview)
+UI_TRIAL_VISIT_HINT,"Look around this path's trial grounds. This is not the trial and not the final choice: nothing starts and nothing is chosen."

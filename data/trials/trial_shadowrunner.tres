@@ -34,6 +34,12 @@ target_id = &"weak_point"
 amount = 1.0
 description = "Execute a Weak Point (F)"
 
+[sub_resource type="Resource" id="Resource_boss"]
+script = ExtResource("1_pnsx4")
+target_id = &"passage_alpha"
+description = "Defeat the Passage Alpha"
+finale = true
+
 [resource]
 script = ExtResource("2_8qc0q")
 id = &"trial_shadowrunner"
@@ -45,7 +51,7 @@ talents = Dictionary[StringName, int]({
 &"sr_as_precision": 2
 })
 skill_slots = Array[StringName]([&"shadow_strike", &"expose_weakness", &"shadowstep", &"execution"])
-objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_focus"), SubResource("Resource_step"), SubResource("Resource_0sif0"), SubResource("Resource_exec")])
+objectives = Array[ExtResource("1_pnsx4")]([SubResource("Resource_focus"), SubResource("Resource_step"), SubResource("Resource_0sif0"), SubResource("Resource_exec"), SubResource("Resource_boss")])
 enemy_configs = Array[ExtResource("3_cfg")]([ExtResource("5_wolf"), ExtResource("4_husk"), ExtResource("5_wolf")])
 choice_text = "A swift and precise fighter who exploits weak points and strikes when the moment is right."
 map_id = &"veiled_passage"

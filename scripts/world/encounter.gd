@@ -74,7 +74,7 @@ func start() -> void:
 		var spawn := child as EncounterSpawn
 		if spawn == null:
 			continue
-		var enemy := map.spawn_enemy(spawn.global_position, spawn.config)
+		var enemy := map.spawn_enemy(spawn.global_position, spawn.config, spawn.attacks)
 		enemy.defeated.connect(_on_enemy_defeated)
 		enemies.append(enemy)
 	_remaining = enemies.size()

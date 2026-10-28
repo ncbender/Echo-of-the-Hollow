@@ -53,6 +53,7 @@ func _ready() -> void:
 	_remove_taken_pickups(character)
 	character.world.map_id = map_id
 	character.world.spawn_id = spawn_id
+	character.world.current_map_id = map_id
 	MapDefinition.resolve_saved_location(session.database, character.world)   # trial grounds save as the altar
 	character.world.set_map_value(map_id, "visits", int(character.world.get_map_value(map_id, "visits", 0)) + 1)
 	bridge = session.bind_player(player)
@@ -129,6 +130,8 @@ func spawn_item_pickup(item: ItemInstance, at: Vector2) -> ItemPickup:
 
 
 func _spawn_drops(enemy: Enemy) -> void:
+	if session != null and PrologueService.rewards_blocked(session.get_character()):
+		return   # trials drop nothing (Class Trials 2.0 M3)
 	var offset := 0.0
 	for drop in enemy.config.drops:
 		spawn_pickup(drop.item_id, drop.quantity, enemy.global_position + Vector2(offset - 6.0, 6.0))
@@ -217,11 +220,13 @@ func _handle_debug_input(event: InputEvent) -> bool:
 
 
 ## Spawns a grunt (F2, trials, encounters); `config` picks the variant
-## (Rootbound Husk, Hollowfang Wolf ...). Returns the spawned enemy.
-func spawn_enemy(at: Vector2, config: EnemyConfig = null) -> Enemy:
+## (Rootbound Husk, Hollowfang Wolf ...) and `attacks` an own attack family. Returns the spawned enemy.
+func spawn_enemy(at: Vector2, config: EnemyConfig = null, attacks: WeaponFamily = null) -> Enemy:
 	var enemy: Enemy = GRUNT_SCENE.instantiate()
 	if config != null:
 		enemy.config = config
+	if attacks != null:
+		enemy.attacks = attacks   # bosses with their own attack family (Grove Warden claws ...)
 	enemy.position = at
 	enemy.target = player
 	var parent := get_node_or_null("Enemies")

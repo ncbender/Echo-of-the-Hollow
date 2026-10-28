@@ -369,6 +369,8 @@ func _validate_classes() -> PackedStringArray:
 			errors.append("trial %s is not for a prologue class" % trial.id)
 		if trial.map_id != &"" and not maps.has(trial.map_id):
 			errors.append("trial %s leads to unknown map %s" % [trial.id, trial.map_id])
+		if trial.map_id != &"" and not trial.map_id in rules.trial_map_ids:
+			errors.append("trial %s: grounds %s are not a trial map" % [trial.id, trial.map_id])
 		for skill_id in trial.skill_slots:
 			var skill: SkillDefinition = skills.get(skill_id)
 			if skill == null or skill.class_id != trial.class_id:

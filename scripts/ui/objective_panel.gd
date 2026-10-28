@@ -44,11 +44,21 @@ func refresh() -> void:
 	var trial: TrialDefinition = character.database.trials.get(prologue.active_trial)
 	if trial != null:
 		_title.text = trial.display_name
-		for index in trial.objectives.size():
-			var objective := trial.objectives[index]
-			var value: float = prologue.trial_progress.get(index, 0.0)
-			lines.append(("[x] " if value + 0.0001 >= objective.amount else "[ ] ") + ObjectiveRules.text(objective, value))
-		lines.append(tr("UI_LEAVE_TRIAL_HINT"))
+		var class_def := character.database.get_class_def(trial.class_id)
+		lines.append(tr("UI_TRIAL_CLASS") % (class_def.display_name if class_def != null else String(trial.class_id)))
+		var on_grounds := PrologueService.trial_for_map(character.database, character.world.current_map_id) == trial
+		var has_finale := false
+		for finale: bool in [false, true]:   # training goals, then (behind the gate) the trial area
+			if finale and has_finale and on_grounds:
+				lines.append(tr("UI_TRIAL_GATE_OPEN") if PrologueService.training_done(character, trial.id) else tr("UI_TRIAL_GATE_SEALED"))
+			for index in trial.objectives.size():
+				var objective := trial.objectives[index]
+				has_finale = has_finale or objective.finale
+				if objective.finale != finale:
+					continue
+				var value: float = prologue.trial_progress.get(index, 0.0)
+				lines.append(("[x] " if value + 0.0001 >= objective.amount else "[ ] ") + ObjectiveRules.text(objective, value))
+		lines.append(tr("UI_LEAVE_TRIAL_GROUNDS_HINT") if on_grounds else tr("UI_LEAVE_TRIAL_HINT"))
 	elif show_prologue_hint and not prologue.is_completed():
 		_title.text = tr("UI_PROLOGUE")
 		var done := prologue.completed_trials.size()
