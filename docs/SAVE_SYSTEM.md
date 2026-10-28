@@ -32,7 +32,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 - Tod und Respawn speichern nie. Rastplätze (Respawn) und Saves sind getrennt.
 - Testhaken: `SaveSystem.fail_next_write` lässt den nächsten Schreibvorgang nach dem Temp-File scheitern.
 
-## Format (Version 14) ✅
+## Format (Version 15) ✅
 ```json
 { "format": "echoes_of_the_hollow_save", "version": 10, "saved_at": 1761460000, "order": 1761460000123,
   "checksum": "<sha256 of payload text>", "payload": "<exact JSON text>",
@@ -57,7 +57,7 @@ Payload (nur Quelldaten):
 | `world` | Map-ID, Spawnpunkt-ID, Flags (inkl. Story-Flags `prologue.*`, `haven.*`, Zähler `count.<event>`), Gebäude, `waystones` (v5), `restoration` Ruine → ruined/restored/revitalized (v5) |
 | `play_time` | aktive Spielzeit in Sekunden (v5) |
 | `class_builds` | pro freigeschalteter Klasse: Talentränge, 4 Skill-Slots, Mods je Skill, Sonder-Freischaltungen, Respec-Zähler, 5 Presets (v4) |
-| `prologue` | Stufe (not_started/in_progress/completed), abgeschlossene Trials, gewählte Klasse (v4) |
+| `prologue` | Stufe (not_started/in_progress/completed), abgeschlossene Trials, gewählte Klasse (v4), `class_reward` none/pending/claimed (v15, `docs/CLASS_TRIALS_2_0_M4.md`) |
 | `quests` | Klassen- und Storyquests: Zustand, `step` (v5), Zielfortschritt des aktuellen Schritts |
 | `professions` | Berufe (v7): `levels` Beruf → {level, xp}, `known_recipes` (dauerhaft gelernte Rezepte), `first_crafts` (Rezepte mit bereits vergebenem Erstherstellungsbonus); siehe `docs/PROFESSIONS.md` |
 
@@ -88,7 +88,7 @@ Alle Korrekturen landen als Warnungen in `SaveSystem.LoadResult.warnings`.
 `SaveMigrations._steps()` bildet `version → Funktion(payload) → payload(version+1)`. Ablauf bei
 Schemaänderung: `SaveSystem.VERSION` erhöhen, Schritt ergänzen, Test mit gespeicherter Alt-Payload.
 Alte Dateien werden nur im Speicher migriert und beim nächsten Speichern im neuen Format geschrieben.
-Aktuell: Version 13.
+Aktuell: Version 15.
 Weapon Mastery 1.4 / Combat Flow 1.5 ändert das Schema **nicht** (Mastery war schon pro Familie gespeichert,
 Angriffszustand/Puffer werden nie gespeichert). Eine Waffe in der Nebenhand aus älteren Ständen verwirft die
 Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test `save`).
@@ -144,6 +144,11 @@ Ladeprüfung mit Warnung (Ein-Waffen-Slot), die Waffe bleibt in der Tasche (Test
   (Unique/Set/Legendary bleiben, nichts wird gewürfelt oder aufgewertet). Stapel und unbekannte Items bleiben ohne `rarity`
   und folgen ihrer Definition. Affixe (auch `tier_model: 3`), Level, Basis, Quality, Sockel, Essenzen, Evolution, Schutz und
   Herkunft bleiben unverändert; Drei-Tier-Rolls behalten ihren Wert und werden nie als Fünf-Tier-Tier gelesen.
+- 14→15 (Class Trials 2.0 M4, `docs/CLASS_TRIALS_2_0_M4.md`): `prologue.class_reward` wird ergänzt. `"pending"` nur bei **nachweisbarer**
+  echter Klassenwahl: Story-Zähler `world.flags["count.class_chosen"]` ≥ 1 (schreibt nur `PrologueService.choose_starting_class`, keine
+  Migration), Stufe `completed` und gewählte Klasse eine der drei Prolog-Klassen (eingefroren `V15_PROLOGUE_CLASSES`). Alles andere,
+  auch eine aus Unlocks abgeleitete Klasse (3→4) oder eine Wahl aus der v4-Zeit ohne Zähler, wird `"none"`. Vorhandene Werte bleiben,
+  ohne `prologue` wird nichts ergänzt. Items, Klassen, Quests und Flags bleiben unverändert.
 
 Nach dem Laden repariert `ItemStats.sanitize` den Crafting-Zustand gegen die aktuellen Daten:
 - Qualität wird auf das Maximum begrenzt.
