@@ -356,6 +356,8 @@ func test_spawns_are_free_and_away_from_the_warden() -> void:
 		return
 	var spawn := forest.find_spawn(&"from_tangled").global_position
 	check(_blocked_at(forest, spawn).is_empty(), "forest east spawn is free of walls and nodes")
+	for node in forest.find_children("*", "ResourceNode", true, false):
+		check(spawn.distance_to((node as Node2D).global_position) > 22.0 + 7.0, "no gather prompt on arrival (%s)" % node.name)
 	var warden := forest.get_node("Enemies/GroveWarden") as Enemy
 	check(spawn.distance_to(warden.global_position) > warden.config.aggro_range,
 		"returning never wakes the Grove Warden (%.0f px)" % spawn.distance_to(warden.global_position))

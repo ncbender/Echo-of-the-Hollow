@@ -129,7 +129,7 @@ label = "Haven"
 shape = SubResource("Rect_door_west")
 
 [node name="SpawnFromTangled" type="Marker2D" parent="."]
-position = Vector2(296, -166)
+position = Vector2(262, -164)
 script = ExtResource("9_spawn")
 spawn_id = &"from_tangled"
 
