@@ -212,3 +212,18 @@ func test_contract_unchanged() -> void:
 	check_eq(QuestRewardService.entitled_flag(QUEST), ENTITLED, "entitled flag unchanged")
 	check_eq(QuestRewardService.claimed_flag(QUEST), CLAIMED, "claimed flag unchanged")
 	check_eq(SaveSystem.VERSION, 15, "save v15")
+
+
+func test_pending_window_focuses_claim_reward() -> void:
+	_to_edrins_talk()
+	StoryService.notify(character, &"talk:edrin_threat")
+	await _open_haven()
+	var edrin := _edrin()
+	map.player.global_position = edrin.global_position + Vector2(0, 18)
+	for i in 4:
+		await get_tree().physics_frame
+	edrin.interact(map.hud)
+	for i in 3:
+		await get_tree().process_frame
+	var focused := get_viewport().gui_get_focus_owner()
+	check(focused != null and focused.name == &"ClaimReward", "keyboard focus on Claim Reward (got %s)" % [focused.name if focused != null else "none"])

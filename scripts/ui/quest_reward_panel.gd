@@ -44,6 +44,15 @@ func open(target_character: Character, target_site: Node2D = null) -> void:
 	rebuild()
 
 
+## Keyboard focus on "Claim Reward" when a reward can be taken (it sits in the footer,
+## which the base class does not search); otherwise the usual first body button.
+func _focus_first() -> void:
+	if visible and is_inside_tree() and _claim_button.is_visible_in_tree() and not _claim_button.disabled:
+		_claim_button.grab_focus()
+		return
+	super()
+
+
 func _process(_delta: float) -> void:
 	if visible and site != null and (not is_instance_valid(site) or not site.get(&"player_inside")):
 		hide()
