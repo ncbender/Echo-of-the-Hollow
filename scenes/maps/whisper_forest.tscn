@@ -22,6 +22,8 @@
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_config.tres" id="13_warden_cfg"]
 [ext_resource type="Resource" path="res://data/enemies/grove_warden_attacks.tres" id="14_warden_attacks"]
 [ext_resource type="Resource" path="res://data/loot/hollow_grunt_equipment.tres" id="90_grunt_loot"]
+[ext_resource type="Script" path="res://scripts/world/boss_reward_cache.gd" id="91_cache"]
+[ext_resource type="Resource" path="res://data/loot/grove_warden_rare_reward.tres" id="92_warden_rare"]
 
 [sub_resource type="CircleShape2D" id="Circle_pack"]
 radius = 18.0
@@ -213,6 +215,16 @@ item_id = &"pattern_leather_bracers"
 label = "Hunter's Pack"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HuntersPack"]
+shape = SubResource("Circle_pack")
+
+[node name="WardensCache" type="Area2D" parent="."]
+position = Vector2(240, 100)
+script = ExtResource("91_cache")
+boss_id = &"whisper_forest_grove_warden"
+loot_table = ExtResource("92_warden_rare")
+label = "Warden's Cache"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WardensCache"]
 shape = SubResource("Circle_pack")
 
 [node name="Enemies" type="Node2D" parent="."]
