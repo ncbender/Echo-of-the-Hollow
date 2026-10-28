@@ -376,4 +376,4 @@ func test_frozen_rarity_table_matches_the_equipment_data() -> void:
 	for definition: ItemDefinition in db.items.values():
 		if definition.is_equippable():
 			check_eq(SaveMigrations.V14_EQUIPMENT_RARITY.get(String(definition.id), -1), int(definition.rarity), "%s frozen rarity" % definition.id)
-	check_eq(SaveSystem.VERSION, 14, "save version 14")
+	check(SaveSystem.VERSION >= 14, "save version 14 or later (v15: class reward)")
