@@ -88,6 +88,12 @@ func _story_card(quest: StoryQuestDefinition, current: bool) -> Control:
 	box.add_child(title)
 	if not current:
 		box.add_child(UiTheme.styled("Completed", &"SmallLabel"))
+		var reward := reward_text(character, quest)
+		if reward != "":   # NPC Quest Turn-ins T3: pending / received quest reward
+			var line := UiTheme.wrapped(reward, UiTheme.SUCCESS if QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING \
+					else UiTheme.TEXT_MUTED, WIDTH - 40)
+			line.name = "Reward"
+			box.add_child(line)
 		return card
 	box.add_child(UiTheme.wrapped(quest.description, UiTheme.TEXT_SECONDARY, WIDTH - 40))
 	var step_index := character.quests.step(quest.id)
@@ -104,6 +110,20 @@ func _story_card(quest: StoryQuestDefinition, current: bool) -> Control:
 				if objective.amount > 1:
 					box.add_child(UiTheme.styled("      %s  %d / %d" % [objective.description, StoryService.objective_value(character, quest.id, objective_index), objective.amount], &"SmallLabel"))
 	return card
+
+
+## Reward line of a story quest from QuestRewardService (never QuestLog alone):
+## pending -> where to collect it, claimed -> received, none -> "".
+static func reward_text(target: Character, quest: StoryQuestDefinition) -> String:
+	if quest.turn_in_gold <= 0:
+		return ""
+	match QuestRewardService.state(target, quest.id):
+		QuestRewardService.PENDING:
+			var npc: NpcDefinition = target.database.npcs.get(quest.turn_in_npc_id)
+			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_PENDING") % [npc.display_name if npc != null else String(quest.turn_in_npc_id), quest.turn_in_gold]
+		QuestRewardService.CLAIMED:
+			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_CLAIMED") % quest.turn_in_gold
+	return ""
 
 
 ## Quest ids in story order (first quest, then the chain of next quests).

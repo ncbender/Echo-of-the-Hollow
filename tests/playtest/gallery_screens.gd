@@ -8,6 +8,7 @@ const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory"
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
 	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
 	"hud_artisan_stages", "restoration_revitalize", "hud_consumables", "flask_upgrades", "quest_rewards",
+	"quest_rewards_claimed", "quest_rewards_none", "hud_edrin_reward", "hud_edrin_story", "journal_reward",
 	"pause", "save", "load", "options", "confirm"]
 
 
@@ -249,13 +250,23 @@ static func open(gallery: Object, screen: String) -> String:
 			await _stand_at(gallery, mara)
 			hud.open_npc_service(&"hearth_flask", mara)
 			await gallery.frames(3)
-		"quest_rewards":   # The First Binding completed under the reward system: 60 gold pending
-			character.quests.entries[&"the_first_binding"] = {"state": "completed", "step": 3, "progress": {}}
-			character.world.set_flag(QuestRewardService.entitled_flag(&"the_first_binding"))
+		"quest_rewards", "quest_rewards_claimed", "quest_rewards_none":   # Edrin's window: pending / claimed / none
+			_binding_reward(character, screen.trim_prefix("quest_rewards").trim_prefix("_"))
 			var edrin := map.get_node("Edrin") as StoryNpc
 			await _stand_at(gallery, edrin)
 			hud.open_npc_service(&"quest_rewards", edrin)
 			await gallery.frames(3)
+		"hud_edrin_reward":   # "?" over Edrin: reward pending, no story talk
+			_binding_reward(character, "")
+			await _stand_at(gallery, map.get_node("Edrin") as StoryNpc)
+		"hud_edrin_story":   # "!" over Edrin: The First Binding waits for his talk
+			_binding_reward(character, "none")
+			character.quests.entries[&"the_first_binding"] = {"state": "active", "step": 2, "progress": {}}
+			character.world.flags.erase(&"dialogue.edrin_threat")
+			await _stand_at(gallery, map.get_node("Edrin") as StoryNpc)
+		"journal_reward":   # completed quest card with the pending reward line
+			_binding_reward(character, "")
+			hud.toggle_journal()
 		"restoration_revitalize":
 			character.world.set_restoration(&"tanners_lodge", RestorationService.RESTORED)
 			var lodge := map.get_node("Ruins/TannersLodge") as RuinSite
@@ -292,6 +303,19 @@ static func reset(gallery: Object) -> void:
 			break
 		await gallery.frames(1)
 	await gallery.frames(2)
+
+
+## The First Binding completed, its 60 gold reward "" = pending, "claimed" or "none"
+## (no entitlement, like a save from before the reward system).
+static func _binding_reward(character: Character, state: String) -> void:
+	character.quests.entries[&"the_first_binding"] = {"state": "completed", "step": 3, "progress": {}}
+	character.world.set_flag(&"dialogue.edrin_threat")
+	for flag in [QuestRewardService.entitled_flag(&"the_first_binding"), QuestRewardService.claimed_flag(&"the_first_binding")]:
+		character.world.flags.erase(flag)
+	if state != "none":
+		character.world.set_flag(QuestRewardService.entitled_flag(&"the_first_binding"))
+	if state == "claimed":
+		character.world.set_flag(QuestRewardService.claimed_flag(&"the_first_binding"))
 
 
 ## Puts the player into the interaction area of `node` (stations close their

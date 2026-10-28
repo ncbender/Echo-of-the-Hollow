@@ -33,3 +33,6 @@ UI_QUEST_REWARD_GOLD,%d Gold
 UI_QUEST_REWARD_SUCCESS,Received %d Gold.
 UI_QUEST_REWARD_RECEIVED,Reward received.
 UI_QUEST_REWARDS_NONE,No rewards available.
+UI_QUEST_REWARD_JOURNAL_PENDING,Reward available: Return to %s (%d Gold).
+UI_QUEST_REWARD_JOURNAL_CLAIMED,Reward received: %d Gold.
+UI_QUEST_REWARD_TRACKER,Return to %s for your reward.

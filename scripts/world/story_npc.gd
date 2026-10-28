@@ -4,7 +4,8 @@ extends Interactable
 ## in Haven, Edrin at the north gate). Interact (G): the NPC's current
 ## dialogue, otherwise the NPC's service window (Mara: Hearth Flask upgrades)
 ## or a short idle line. A gold "!" marks a dialogue that moves
-## the story on. Which NPC stands where is data (conditions), never code.
+## the story on, a gold "?" a quest reward waiting here (NPC Quest Turn-ins T3).
+## Which NPC stands where is data (conditions), never code.
 
 @export var npc_id: StringName
 @export var condition: StoryCondition
@@ -69,6 +70,29 @@ func interact(hud: GameHud) -> void:
 		say(npc.idle_lines[randi() % npc.idle_lines.size()])
 
 
+## NPC Quest Turn-ins T3: a quest reward of this NPC is pending (QuestRewardService) and
+## can be taken here (service window) - the gold "?" marker; "!" (story) comes first.
+## Read every frame, so a new entitlement, a claim or a load shows at once.
+func has_pending_reward() -> bool:
+	if not offers_service:
+		return false
+	for quest: StoryQuestDefinition in character.database.story_quests.values():
+		if quest.turn_in_gold > 0 and quest.turn_in_npc_id == npc_id \
+				and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
+			return true
+	return false
+
+
+## The marker above the head: "!" a story dialogue (first), "?" a pending reward, else "".
+func marker() -> String:
+	var npc := definition()
+	if character == null or npc == null:
+		return ""
+	if DialogueService.has_story_dialogue(character, npc):
+		return "!"
+	return "?" if has_pending_reward() else ""
+
+
 ## Speech bubble above the head (barks, idle lines).
 func say(text: String, seconds: float = 3.0) -> void:
 	_bark = text
@@ -95,9 +119,11 @@ func _draw() -> void:
 	draw_rect(Rect2(-5, -22, 10, 3), color.darkened(0.45))
 	var title := npc.display_name if npc != null else String(npc_id)
 	WorldText.draw(self, Vector2(-WorldText.width(title, 6) * 0.5, -26), title, 6, color.lightened(0.35), 2, Color.BLACK)
-	if character != null and npc != null and DialogueService.has_story_dialogue(character, npc):
+	var shown := marker()
+	if shown != "":
 		var pulse := 0.6 + 0.4 * sin(Time.get_ticks_msec() * 0.006)
-		WorldText.draw(self, Vector2(-2, -34), "!", 10, Color(1.0, 0.85, 0.3, pulse), 2, Color.BLACK)
+		var x := -2.0 if shown == "!" else -WorldText.width(shown, 10) * 0.5
+		WorldText.draw(self, Vector2(x, -34), shown, 10, Color(1.0, 0.85, 0.3, pulse), 2, Color.BLACK)
 	if _bark_left > 0.0:
 		var alpha := clampf(_bark_left / 0.4, 0.0, 1.0)
 		WorldText.draw(self, Vector2(-WorldText.width(_bark, 6) * 0.5, -44), _bark, 6, Color(1, 1, 0.92, alpha), 2, Color(0, 0, 0, alpha))

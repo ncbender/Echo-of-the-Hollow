@@ -73,6 +73,13 @@ func refresh() -> void:
 		elif not lines.is_empty():
 			lines.append("")
 		lines.append_array(story)
+	var rewards := reward_lines(character)
+	if not rewards.is_empty():   # NPC Quest Turn-ins T3: a hint, not a quest objective
+		if _title.text == "":
+			_title.text = "Journey"
+		elif not lines.is_empty():
+			lines.append("")
+		lines.append_array(rewards)
 	for quest_id in character.quests.active_ids():
 		var quest: ClassQuestDefinition = character.database.quests.get(quest_id)
 		if quest == null:
@@ -84,3 +91,14 @@ func refresh() -> void:
 			lines.append("  " + ObjectiveRules.text(quest.objectives[index], character.quests.progress(quest_id, index)))
 	_lines.text = "\n".join(lines)
 	visible = _title.text != ""
+
+
+## NPC Quest Turn-ins T3: one hint line per pending quest reward (QuestRewardService),
+## also for completed quests; gone once claimed. Never an objective, never reactivates a quest.
+static func reward_lines(character: Character) -> PackedStringArray:
+	var lines: PackedStringArray = []
+	for quest: StoryQuestDefinition in character.database.story_quests.values():
+		if quest.turn_in_gold > 0 and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
+			var npc: NpcDefinition = character.database.npcs.get(quest.turn_in_npc_id)
+			lines.append(TranslationServer.translate("UI_QUEST_REWARD_TRACKER") % (npc.display_name if npc != null else String(quest.turn_in_npc_id)))
+	return lines
