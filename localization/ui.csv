@@ -27,3 +27,9 @@ UI_TRIAL_GATE_OPEN,"Gate: open - the trial awaits beyond it"
 UI_TRIAL_BEGIN_HINT,"Walk this path on its own grounds: you play the class for a while. Passing the trial opens its choice here; nothing is chosen yet."
 UI_TRIAL_VISIT,Visit the trial grounds (preview)
 UI_TRIAL_VISIT_HINT,"Look around this path's trial grounds. This is not the trial and not the final choice: nothing starts and nothing is chosen."
+UI_QUEST_REWARDS,Quest Rewards
+UI_QUEST_REWARD_CLAIM,Claim Reward
+UI_QUEST_REWARD_GOLD,%d Gold
+UI_QUEST_REWARD_SUCCESS,Received %d Gold.
+UI_QUEST_REWARD_RECEIVED,Reward received.
+UI_QUEST_REWARDS_NONE,No rewards available.

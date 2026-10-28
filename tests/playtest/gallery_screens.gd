@@ -7,7 +7,7 @@ const ALL := ["title", "hud", "hud_combat", "hud_boss", "hud_death", "inventory"
 	"forge_affixes", "forge_reforge", "forge_essences", "forge_sockets", "forge_quality", "forge_evolution", "forge_craft",
 	"recipes", "restoration", "dialogue", "choice", "waystones", "journal", "journal_haven", "map", "stash", "stash_materials", "stash_restored",
 	"professions", "professions_locked", "professions_tooltip", "professions_salvage", "professions_gathering", "professions_smithy", "hud_artisan_quarter",
-	"hud_artisan_stages", "restoration_revitalize", "hud_consumables", "flask_upgrades",
+	"hud_artisan_stages", "restoration_revitalize", "hud_consumables", "flask_upgrades", "quest_rewards",
 	"pause", "save", "load", "options", "confirm"]
 
 
@@ -248,6 +248,13 @@ static func open(gallery: Object, screen: String) -> String:
 			var mara := map.get_node("Mara") as StoryNpc
 			await _stand_at(gallery, mara)
 			hud.open_npc_service(&"hearth_flask", mara)
+			await gallery.frames(3)
+		"quest_rewards":   # The First Binding completed under the reward system: 60 gold pending
+			character.quests.entries[&"the_first_binding"] = {"state": "completed", "step": 3, "progress": {}}
+			character.world.set_flag(QuestRewardService.entitled_flag(&"the_first_binding"))
+			var edrin := map.get_node("Edrin") as StoryNpc
+			await _stand_at(gallery, edrin)
+			hud.open_npc_service(&"quest_rewards", edrin)
 			await gallery.frames(3)
 		"restoration_revitalize":
 			character.world.set_restoration(&"tanners_lodge", RestorationService.RESTORED)

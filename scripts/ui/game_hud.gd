@@ -37,6 +37,7 @@ var world_map_panel: WorldMapPanel
 var professions_panel: ProfessionsPanel
 ## Mara's Hearth Flask upgrades (NPC service "hearth_flask").
 var flask_panel: FlaskPanel
+var quest_reward_panel: QuestRewardPanel
 ## Shared confirmation dialog (overwrite, discard, delete ...).
 var confirm_dialog: UiConfirmDialog
 ## Contextual tutorial hint (top centre).
@@ -203,6 +204,8 @@ func _ready() -> void:
 	professions_panel = _add_window(ProfessionsPanel.new()) as ProfessionsPanel
 	flask_panel = _add_window(FlaskPanel.new()) as FlaskPanel
 	flask_panel.hud = self
+	quest_reward_panel = _add_window(QuestRewardPanel.new()) as QuestRewardPanel
+	quest_reward_panel.hud = self
 	pause_menu = _add_window(PauseMenu.new()) as PauseMenu
 	pause_menu.options_requested.connect(_open_options_from_pause)
 	options_panel.process_mode = Node.PROCESS_MODE_ALWAYS   # reachable from the pause menu
@@ -592,10 +595,10 @@ func _layout_hint(canvas: float, margin: float) -> void:
 func open_npc_service(service: StringName, site: Node2D) -> bool:
 	if bridge == null:
 		return false
-	var windows := {&"hearth_flask": flask_panel}
+	var windows := {&"hearth_flask": flask_panel, &"quest_rewards": quest_reward_panel}
 	var window: Variant = windows.get(service)
 	if window == null:
 		return false
 	close_windows()
-	(window as FlaskPanel).open(bridge.character, site)
+	window.open(bridge.character, site)   # every service window: open(character, site)
 	return true
