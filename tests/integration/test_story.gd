@@ -95,10 +95,10 @@ func test_story_data_is_valid_and_chained() -> void:
 		var quest: StoryQuestDefinition = db.story_quests[quest_id]
 		quest_id = quest.next_quest_ids[0] if not quest.next_quest_ids.is_empty() else &""
 	check_eq(chain, [&"a_road_forgotten", &"the_broken_cart", &"shelter_among_the_trees", &"the_whispering_stone",
-		&"the_first_binding", &"the_first_signs"] as Array[StringName], "five prologue quests, then the main quest")
+		&"the_first_binding", &"the_first_signs", &"beyond_the_roots"] as Array[StringName], "five prologue quests, then the main quests")
 	var names: Array = chain.map(func(id: StringName) -> String: return (db.story_quests[id] as StoryQuestDefinition).display_name)
 	check_eq(names, ["A Road Forgotten", "The Broken Cart", "Shelter Among the Trees", "The Whispering Stone",
-		"The First Binding", "The First Signs"], "English quest names")
+		"The First Binding", "The First Signs", "Beyond the Roots"], "English quest names")
 	check_eq((db.story_quests[&"the_first_signs"] as StoryQuestDefinition).chapter, "The Roots Remember", "main quest")
 
 

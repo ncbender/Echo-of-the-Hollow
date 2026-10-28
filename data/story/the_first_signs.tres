@@ -62,9 +62,15 @@ description = "Something rooted still keeps watch over the old post at Warden's 
 objectives = Array[ExtResource("3_obj")]([SubResource("O_watchstone")])
 completion_flag = &"chapter1.watchstone_examined"
 
+[sub_resource type="Resource" id="O_report"]
+script = ExtResource("3_obj")
+event_id = &"talk:edrin_first_signs_report"
+description = "Report to Edrin Vale"
+
 [sub_resource type="Resource" id="S_report"]
 script = ExtResource("2_step")
-description = "The roots have reached even the old watch post. Edrin should hear of this. Your journey continues in a future update."
+description = "The roots have reached even the old watch post. Return to Haven and tell Edrin Vale what you found."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_report")])
 
 [resource]
 script = ExtResource("1_quest")
@@ -73,4 +79,5 @@ display_name = "The First Signs"
 chapter = "The Roots Remember"
 description = "Main quest, chapter one. Whatever walks the woods is drawing closer to Haven."
 steps = Array[ExtResource("2_step")]([SubResource("S_east"), SubResource("S_roots"), SubResource("S_deeper"), SubResource("S_beyond"), SubResource("S_post"), SubResource("S_report")])
-open_ended = true
+completion_flag = &"chapter1.the_first_signs_completed"
+next_quest_ids = Array[StringName]([&"beyond_the_roots"])

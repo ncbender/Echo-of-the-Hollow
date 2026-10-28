@@ -144,8 +144,8 @@ func test_quest_data_extends_the_existing_stub() -> void:
 	var quest: StoryQuestDefinition = db.story_quests[QUEST]
 	check_eq([quest.display_name, quest.chapter], ["The First Signs", "The Roots Remember"], "same quest, same chapter")
 	check(quest.steps.size() >= 3, "reach, examine, then later milestones (M2 extends from index 2)")
-	check(quest.open_ended, "still open-ended: M1 never completes the quest")
-	check(quest.next_quest_ids.is_empty(), "no successor quest")
+	check(not QuestRewardService.has_reward(quest) and quest.turn_in_npc_id == &"", "completes without a quest reward (M4)")
+	check(quest.next_quest_ids.size() <= 1, "at most one successor (M4: the open outlook quest)")
 	check(not QuestRewardService.has_reward(quest), "no turn-in reward")
 	var first := quest.steps[0].objectives
 	check(first.size() == 1 and first[0].event_id == ENTER and not first[0].cumulative and first[0].amount == 1,
@@ -153,7 +153,7 @@ func test_quest_data_extends_the_existing_stub() -> void:
 	var second := quest.steps[1].objectives
 	check(second.size() == 1 and second[0].event_id == EXAMINE and second[0].cumulative and second[0].amount == 1,
 		"step 1: the one-time examination (new id, cumulative)")
-	check(quest.steps[-1].objectives.is_empty(), "last step: placeholder without objective")
+	check(not quest.steps[-1].objectives.is_empty() and not quest.steps[-1].objectives[0].cumulative, "the quest ends only on a live event (M4: Edrin's report), never on a counter")
 	check_eq([quest.steps[0].completion_flag, quest.steps[1].completion_flag],
 		[&"chapter1.tangled_wood_reached", &"chapter1.roots_examined"], "step flags")
 	# the new ids belong to M1 alone: no other quest waits for them

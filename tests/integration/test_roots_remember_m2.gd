@@ -169,9 +169,9 @@ func test_quest_extends_from_index_two() -> void:
 	check(chapel.size() == 1 and chapel[0].event_id == WAYSTONE and chapel[0].cumulative and chapel[0].amount == 1,
 		"step 2: one-time chapel examination (new id, cumulative)")
 	check_eq(steps[2].completion_flag, &"chapter1.chapel_waystone_examined", "step 2 flag")
-	check(steps[-1].objectives.is_empty(), "last step: placeholder without objective")
-	check(steps[3].description.contains("east") and steps[-1].description.contains("future update"), "the trail leads on east")
-	check(quest.open_ended and quest.next_quest_ids.is_empty(), "stays open, no successor")
+	check(not steps[-1].objectives.is_empty() and not steps[-1].objectives[0].cumulative, "the last step needs a live event (M4: Edrin's report)")
+	check(steps[3].description.contains("east"), "the trail leads on east")
+	check(quest.next_quest_ids.size() <= 1 and not QuestRewardService.has_reward(quest), "at most one successor, no reward")
 	check(not QuestRewardService.has_reward(quest), "no turn-in reward")
 	for other: StoryQuestDefinition in db.story_quests.values():
 		if other.id == QUEST:

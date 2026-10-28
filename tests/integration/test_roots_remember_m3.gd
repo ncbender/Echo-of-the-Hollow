@@ -210,9 +210,9 @@ func test_quest_extends_from_index_three() -> void:
 	check(post.size() == 1 and post[0].event_id == WATCHSTONE and post[0].cumulative and post[0].amount == 1,
 		"step 4: one-time watchstone examination (new id, cumulative)")
 	check_eq([steps[3].completion_flag, steps[4].completion_flag], [&"chapter1.wardens_rest_reached", &"chapter1.watchstone_examined"], "M3 flags")
-	check(steps[5].objectives.is_empty() and steps[5].description.contains("Edrin") and steps[5].description.contains("future update"),
-		"step 5: open placeholder pointing back to Edrin")
-	check(quest.open_ended and quest.next_quest_ids.is_empty() and not QuestRewardService.has_reward(quest), "open, no successor, no reward")
+	check(steps[5].objectives.size() == 1 and steps[5].description.contains("Edrin"),
+		"step 5: back to Edrin (M4 gives it its report objective)")
+	check(not QuestRewardService.has_reward(quest) and quest.next_quest_ids.size() <= 1, "no reward, at most one successor")
 	for other: StoryQuestDefinition in db.story_quests.values():
 		if other.id == QUEST:
 			continue

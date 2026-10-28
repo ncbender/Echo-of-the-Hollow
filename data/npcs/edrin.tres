@@ -5,6 +5,51 @@
 [ext_resource type="Script" path="res://scripts/rpg/story/dialogue_line.gd" id="3_line"]
 [ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="4_cond"]
 
+[sub_resource type="Resource" id="C_report"]
+script = ExtResource("4_cond")
+quest_id = &"the_first_signs"
+quest_state = "active"
+min_step = 5
+max_step = 5
+
+[sub_resource type="Resource" id="L_report_1"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "The roots in the Tangled Wood all lean east. Every one of them."
+
+[sub_resource type="Resource" id="L_report_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "Past it there's a ruined chapel with an old waystone. Silent, and wrapped in roots."
+
+[sub_resource type="Resource" id="L_report_3"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "And beyond the chapel?"
+
+[sub_resource type="Resource" id="L_report_4"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "An old watch post. Something rooted stood guard there. Behind it, a split stone - and the same roots, leaning east."
+
+[sub_resource type="Resource" id="L_report_5"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "Then it is no single patch of sick ground. Whatever pulls at those roots reaches further than I feared."
+
+[sub_resource type="Resource" id="L_report_6"]
+script = ExtResource("3_line")
+speaker = &"edrin"
+text = "I can't tell you what waits at the end of that pull. But I would rather we learn it out there than wait for it at this gate."
+
+[sub_resource type="Resource" id="D_report"]
+script = ExtResource("2_dlg")
+id = &"edrin_first_signs_report"
+condition = SubResource("C_report")
+lines = Array[ExtResource("3_line")]([SubResource("L_report_1"), SubResource("L_report_2"), SubResource("L_report_3"), SubResource("L_report_4"), SubResource("L_report_5"), SubResource("L_report_6")])
+event_id = &"talk:edrin_first_signs_report"
+repeatable = false
+
 [sub_resource type="Resource" id="C_threat"]
 script = ExtResource("4_cond")
 quest_id = &"the_first_binding"
@@ -118,6 +163,6 @@ script = ExtResource("1_npc")
 id = &"edrin"
 display_name = "Edrin Vale"
 color = Color(0.45, 0.58, 0.42, 1)
-dialogues = Array[ExtResource("2_dlg")]([SubResource("D_threat"), SubResource("D_intro"), SubResource("D_early"), SubResource("D_shrine")])
+dialogues = Array[ExtResource("2_dlg")]([SubResource("D_report"), SubResource("D_threat"), SubResource("D_intro"), SubResource("D_early"), SubResource("D_shrine")])
 idle_lines = PackedStringArray("The north road is quiet. For now.", "Keep your blade close.")
 service = &"quest_rewards"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+
+[sub_resource type="Resource" id="S_stub"]
+script = ExtResource("2_step")
+description = "The trail continues beyond Warden's Rest. Further story content is not yet available."
+
+[resource]
+script = ExtResource("1_quest")
+id = &"beyond_the_roots"
+display_name = "Beyond the Roots"
+chapter = "Main Quest"
+description = "Main quest. The roots still lean east, past everything you have seen so far."
+steps = Array[ExtResource("2_step")]([SubResource("S_stub")])
+open_ended = true
