@@ -23,3 +23,6 @@ extends Resource
 ## NPC Quest Turn-ins 1.1 M1 (docs/NPC_QUEST_TURNINS_1_1_M1.md): stackable materials handed
 ## out together with the gold, all or nothing (empty = gold-only reward, as T1).
 @export var turn_in_items: Array[ItemCost] = []
+## 1.1 M3 (docs/NPC_QUEST_TURNINS_1_1_M3.md): where the reward is collected, as the journal and
+## tracker name it ("Mara in Haven"). Display text only; empty = the T3 lines with the NPC's name.
+@export var turn_in_place: String = ""

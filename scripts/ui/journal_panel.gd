@@ -113,16 +113,22 @@ func _story_card(quest: StoryQuestDefinition, current: bool) -> Control:
 
 
 ## Reward line of a story quest from QuestRewardService (never QuestLog alone):
-## pending -> where to collect it, claimed -> received, none -> "".
+## pending -> where to collect it, claimed -> received, none -> "". 1.1 M3: the reward parts
+## come from QuestRewardPanel (gold only if > 0, then materials); a quest with a
+## turn_in_place names it and lists the parts on a second line.
 static func reward_text(target: Character, quest: StoryQuestDefinition) -> String:
 	if not QuestRewardService.has_reward(quest):
 		return ""
 	match QuestRewardService.state(target, quest.id):
 		QuestRewardService.PENDING:
+			if quest.turn_in_place != "":
+				return "%s\n%s" % [TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_PENDING_AT") % quest.turn_in_place,
+						TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_PARTS") % ", ".join(QuestRewardPanel.reward_parts(target.database, quest))]
 			var npc: NpcDefinition = target.database.npcs.get(quest.turn_in_npc_id)
-			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_PENDING") % [npc.display_name if npc != null else String(quest.turn_in_npc_id), quest.turn_in_gold]
+			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_PENDING") % [npc.display_name if npc != null else String(quest.turn_in_npc_id),
+					QuestRewardPanel.reward_summary(target.database, quest)]
 		QuestRewardService.CLAIMED:
-			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_CLAIMED") % quest.turn_in_gold
+			return TranslationServer.translate("UI_QUEST_REWARD_JOURNAL_CLAIMED") % QuestRewardPanel.reward_summary(target.database, quest)
 	return ""
 
 

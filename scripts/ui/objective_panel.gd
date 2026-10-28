@@ -95,10 +95,15 @@ func refresh() -> void:
 
 ## NPC Quest Turn-ins T3: one hint line per pending quest reward (QuestRewardService),
 ## also for completed quests; gone once claimed. Never an objective, never reactivates a quest.
+## 1.1 M3: a quest with a turn_in_place names it ("Collect your reward from Mara in Haven."),
+## so the hint may stand on the road although only the Haven NPC pays out.
 static func reward_lines(character: Character) -> PackedStringArray:
 	var lines: PackedStringArray = []
 	for quest: StoryQuestDefinition in character.database.story_quests.values():
 		if QuestRewardService.has_reward(quest) and QuestRewardService.state(character, quest.id) == QuestRewardService.PENDING:
+			if quest.turn_in_place != "":
+				lines.append(TranslationServer.translate("UI_QUEST_REWARD_TRACKER_AT") % quest.turn_in_place)
+				continue
 			var npc: NpcDefinition = character.database.npcs.get(quest.turn_in_npc_id)
 			lines.append(TranslationServer.translate("UI_QUEST_REWARD_TRACKER") % (npc.display_name if npc != null else String(quest.turn_in_npc_id)))
 	return lines

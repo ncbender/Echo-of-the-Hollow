@@ -36,6 +36,10 @@ UI_QUEST_REWARD_BAG_FULL,Not enough inventory space. Make room to claim the full
 UI_QUEST_REWARD_SUCCESS,Received %s.
 UI_QUEST_REWARD_RECEIVED,Reward received.
 UI_QUEST_REWARDS_NONE,No rewards available.
-UI_QUEST_REWARD_JOURNAL_PENDING,Reward available: Return to %s (%d Gold).
-UI_QUEST_REWARD_JOURNAL_CLAIMED,Reward received: %d Gold.
+UI_QUEST_REWARD_JOURNAL_PENDING,Reward available: Return to %s (%s).
+UI_QUEST_REWARD_JOURNAL_PENDING_AT,Reward available: Return to %s.
+UI_QUEST_REWARD_JOURNAL_PARTS,Reward: %s.
+UI_QUEST_REWARD_JOURNAL_CLAIMED,Reward received: %s.
 UI_QUEST_REWARD_TRACKER,Return to %s for your reward.
+UI_QUEST_REWARD_TRACKER_AT,Collect your reward from %s.
+UI_QUEST_REWARD_BACK,Back

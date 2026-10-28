@@ -165,6 +165,12 @@ func rebuild() -> void:
 		button.name = "Talk"
 		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_list.add_child(button)
+	var service := npc.definition().service if npc != null and npc.definition() != null else &""
+	if hud != null and service != &"" and service != &"quest_rewards":   # 1.1 M3: back to Mara's Hearth Flask
+		var back := UiTheme.button(tr("UI_QUEST_REWARD_BACK"), &"", hud.open_npc_service.bind(service, site))
+		back.name = "Back"
+		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_list.add_child(back)
 	var pending := pending_quest()
 	var error := reason_text(QuestRewardService.can_claim(character, pending.id)) if pending != null else ""
 	footer.visible = pending != null or last_message != ""

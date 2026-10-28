@@ -82,3 +82,4 @@ next_quest_ids = Array[StringName]([&"shelter_among_the_trees"])
 turn_in_gold = 30
 turn_in_npc_id = &"mara"
 turn_in_items = Array[ExtResource("4_cost")]([SubResource("Reward_timber"), SubResource("Reward_stone")])
+turn_in_place = "Mara in Haven"
