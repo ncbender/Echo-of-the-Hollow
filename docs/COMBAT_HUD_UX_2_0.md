@@ -211,4 +211,19 @@ Unverändert:
 
 ## 8. Commit
 
-Siehe Abschnitt Commit im Abschlussbericht (wird nach dem Commit ergänzt).
+- **`6ba83e2`**: nur Dateien, deren gesamte Änderung zu diesem Batch gehört.
+  - neue Skripte `hud_vessel`, `hud_badge`, `dash_meter`, `hud_fill_art`;
+  - `test_combat_hud`;
+  - die 8 neuen PNGs mit `.import`;
+  - `effect_bar.gd`, `story_step.gd`, `beyond_the_roots.tres`;
+  - dieses Dokument.
+- Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet** (die Dateien enthalten ältere fremde uncommittete Änderungen oder sind insgesamt untracked;
+  eine saubere Trennung ohne Ausgangsstand war nicht sicher möglich):
+  - `game_hud.gd`, `hud_slot.gd` (untracked), `quick_use_bar.gd`, `skill_bar.gd`, `menu_bar.gd` (untracked),
+    `objective_panel.gd`, `ui_theme.gd`, `story_service.gd`;
+  - Löschung `player_frame.gd`;
+  - Generator und Validator (untracked);
+  - die angepassten Tests und Playtests;
+  - `CLAUDE.md` und die übrigen Doku-Hinweise.
+- Der Commit allein ist daher nicht lauffähig. Lauffähig ist erst der Arbeitsbaum zusammen mit diesen Dateien.
