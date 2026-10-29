@@ -8,10 +8,14 @@ extends HBoxContainer
 ## icon because there is only one potion buff. Display only: it reads the
 ## remaining time from the rules (ConsumableService.active_effects) and never
 ## changes a timer.
+## Combat HUD UX 2.0: also the class buffs of the ClassRuntime (Battle Cry ...) - formerly a text line in the
+## removed PlayerFrame; their full duration is the remaining time when first seen (display only). Every icon
+## names its effect in a tooltip.
 
 var bridge: PlayerProgressionBridge
 
 var _icons: Dictionary = {}   # effect id -> EffectIcon
+var _buff_totals: Dictionary = {}   # class buff key -> duration when first seen
 
 
 func _ready() -> void:
@@ -23,7 +27,30 @@ func _process(_delta: float) -> void:
 	var effects: Array[Dictionary] = []
 	if bridge != null and bridge.is_bound():
 		effects = ConsumableService.active_effects(bridge.character)
+		effects.append_array(class_buffs())
 	refresh(effects)
+
+
+## Running class buffs as effects (kind "buff"): name from the key ("buff:battle_cry" -> "Battle Cry").
+func class_buffs() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var runtime := bridge.class_runtime if bridge != null else null
+	if runtime == null:
+		return result
+	var running := {}
+	for key: StringName in runtime.buffs:
+		var left := runtime.buff_left(key)
+		if left <= 0.0:
+			continue
+		running[key] = true
+		if left > _buff_totals.get(key, 0.0):
+			_buff_totals[key] = left   # a refreshed buff starts a new full ring
+		result.append({"id": key, "name": String(key).trim_prefix("buff:").capitalize(), "color": UiTheme.BRONZE,
+			"left": left, "total": _buff_totals[key], "kind": "buff"})
+	for key: StringName in _buff_totals.keys():
+		if not running.has(key):
+			_buff_totals.erase(key)
+	return result
 
 
 ## Shows exactly `effects` ([{"id", "name", "color", "left", "total"}]).
@@ -53,6 +80,7 @@ class EffectIcon:
 	const EDGE := 44.0
 
 	var effect_name: String = ""
+	var kind: String = ""
 	var color: Color = Color.WHITE
 	var left: float = 0.0
 	var total: float = 1.0
@@ -60,7 +88,7 @@ class EffectIcon:
 	var _time: Label
 
 	func _init() -> void:
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		mouse_filter = Control.MOUSE_FILTER_PASS   # the tooltip names the effect
 		add_theme_constant_override(&"separation", 1)
 		_square = Control.new()
 		_square.name = "Icon"
@@ -75,6 +103,8 @@ class EffectIcon:
 
 	func show_effect(effect: Dictionary) -> void:
 		effect_name = str(effect.get("name", ""))
+		kind = str(effect.get("kind", ""))
+		tooltip_text = effect_name
 		color = effect.get("color", Color.WHITE)
 		left = maxf(0.0, float(effect.get("left", 0.0)))
 		total = maxf(0.001, float(effect.get("total", 1.0)))
@@ -94,10 +124,12 @@ class EffectIcon:
 		var center := rect.get_center()
 		_square.draw_rect(rect, UiTheme.PANEL_INSET)
 		_square.draw_rect(rect, Color(UiTheme.BRONZE_DARK, 0.9), false, 1.0)
-		# the potion: a round flask in the effect's colour
-		_square.draw_circle(center + Vector2(0, 4), 10.0, color)
-		_square.draw_rect(Rect2(center + Vector2(-3, -12), Vector2(6, 8)), color.darkened(0.2))
-		_square.draw_rect(Rect2(center + Vector2(-4, -14), Vector2(8, 3)), UiTheme.PARCHMENT)
+		if kind == "buff":   # a class buff: a bronze diamond
+			_square.draw_colored_polygon(PackedVector2Array([center + Vector2(0, -12), center + Vector2(11, 0), center + Vector2(0, 12), center + Vector2(-11, 0)]), color)
+		else:   # the potion: a round flask in the effect's colour
+			_square.draw_circle(center + Vector2(0, 4), 10.0, color)
+			_square.draw_rect(Rect2(center + Vector2(-3, -12), Vector2(6, 8)), color.darkened(0.2))
+			_square.draw_rect(Rect2(center + Vector2(-4, -14), Vector2(8, 3)), UiTheme.PARCHMENT)
 		# elapsed part dimmed, remaining part as a ring: clockwise from 12 o'clock
 		var start := -PI * 0.5
 		var end := start + TAU * fraction()

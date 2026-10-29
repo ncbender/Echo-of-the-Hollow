@@ -6,6 +6,7 @@
 [sub_resource type="Resource" id="S_stub"]
 script = ExtResource("2_step")
 description = "The trail continues beyond Warden's Rest. Further story content is not yet available."
+hud_goal = "Further story is not yet available."
 
 [resource]
 script = ExtResource("1_quest")
