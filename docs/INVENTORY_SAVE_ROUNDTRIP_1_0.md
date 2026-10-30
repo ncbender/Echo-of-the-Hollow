@@ -133,6 +133,6 @@ bleibt ein eigener Auftrag.
 
 ## 6. Commit und uncommittete Anteile
 
-- Commit: `<hash>`, nur `tests/integration/test_inventory_save_roundtrip.gd` (+ `.uid`) und dieses Dokument.
+- Commit: `b98c662`, nur `tests/integration/test_inventory_save_roundtrip.gd` (+ `.uid`) und dieses Dokument.
 - Alle übrigen lokalen Änderungen des Branches `dev/roots-remember-m4` bleiben unberührt und uncommittet,
   insbesondere `CLAUDE.md`, `project.godot` und die vielen ungetrackten Dateien früherer Arbeiten.
