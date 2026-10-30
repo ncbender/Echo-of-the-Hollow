@@ -1,5 +1,9 @@
 # Combat Telegraphs 1.0 – Batch 3B
 
+> **Abgelöst durch Parry Timing Cue 1.0** (`docs/PARRY_TIMING_CUE_1_0.md`): Die Symbole Kreuzfunke / Schild /
+> gebrochener Ring entfallen. Elites und Bosse zeigen bei parierbaren Angriffen einen kurzen Kreuzblitz zum
+> Parry-Zeitpunkt; Kegel und rote Fläche für nicht abwehrbare Angriffe bleiben. Regeln und Flags unverändert.
+
 Die Angriffsvorbereitung (Startup) jedes Gegnerangriffs zeigt jetzt, wie er abgewehrt werden kann: parierbar, nur
 blockbar oder weder noch. Grundlage sind allein die vorhandenen `defense_flags` und die echte Auswertung in
 `DefenseComponent.resolve`. Keine Änderung an Hitboxen, Reichweiten, Phasenzeiten, Parry-Fenstern, Blockregeln,

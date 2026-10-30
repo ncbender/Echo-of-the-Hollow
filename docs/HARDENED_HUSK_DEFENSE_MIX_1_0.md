@@ -1,5 +1,8 @@
 # Hardened Husk Defense Mix 1.0 (Abschluss Batch 3B)
 
+> **Parry Timing Cue 1.0:** Der Mix bleibt; statt Kreuzfunke/Schild zeigt nur der Swipe einen kurzen Kreuzblitz
+> zum Parry-Zeitpunkt, der Slam kein Signal (`docs/PARRY_TIMING_CUE_1_0.md`).
+
 Jeder Hardened Husk hat jetzt einen Verteidigungsmix: Der **Swipe bleibt parierbar** (Kreuzfunke), der **schwere
 Slam ist nicht parierbar, aber regulär blockbar, ohne Guard Breaking** (bernsteinfarbener Schild). Die Anzeige folgt
 weiter allein `AttackDefinition.telegraph_kind()` – kein Sonderfall für den Husk. Grunts, Wölfe und Bosse unverändert.

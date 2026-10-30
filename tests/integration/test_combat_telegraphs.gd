@@ -1,8 +1,8 @@
 extends GameplayTestCase
-## Combat Telegraphs 1.0 (docs/COMBAT_TELEGRAPHS_1_0.md): the windup symbol follows the real defense rules
+## Combat Telegraphs 1.0 (docs/COMBAT_TELEGRAPHS_1_0.md): the telegraph kind follows the real defense rules
 ## (DefenseComponent.resolve) for every flag combination, every production enemy attack gets its kind from the
-## data, the telegraph shows only during the startup and ends with the active phase, a stagger and death, the
-## symbol never lies on the attack area, and a parry shows no "PARRY" text. Display only - no data or timing changed.
+## data, the telegraph shows only during the startup and ends with the active phase, a stagger and death, and a
+## parry shows no "PARRY" text. The symbols are gone (Parry Timing Cue 1.0, test_parry_timing_cue). Display only.
 
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const K := AttackDefinition.Telegraph
@@ -69,7 +69,7 @@ func test_production_attacks() -> void:
 			check_eq(attack.telegraph_kind(), expected[attack.id], "%s telegraph" % attack.id)
 
 
-## A real grunt: the symbol only during the startup, gone in the active phase, after a stagger and after death.
+## A real grunt: the telegraph only during the startup, gone in the active phase, after a stagger and after death.
 func test_shown_only_during_startup() -> void:
 	spawn_player()
 	var enemy: Enemy = GRUNT_SCENE.instantiate()
@@ -112,23 +112,6 @@ func _kill() -> HitData:
 	var hit := HitData.new()
 	hit.damage = 99999.0
 	return hit
-
-
-## The symbol never lies on the attack area (cone from the enemy in the attack direction), whatever the direction.
-func test_symbol_off_the_area() -> void:
-	spawn_player()
-	var enemy: Enemy = GRUNT_SCENE.instantiate()
-	add_child(enemy)
-	var view := enemy.get_node("View") as EnemyView
-	await wait_physics(1)
-	for attack: AttackDefinition in (load("res://data/enemies/grove_warden_attacks.tres") as WeaponFamily).attacks:
-		for step in 16:
-			var direction := Vector2.from_angle(TAU * step / 16.0)
-			var anchor := view.symbol_anchor(direction)
-			var reach := attack.reach + 8.0   # symbol size and the reach bonus of the current phase
-			var inside := anchor.length() <= reach and absf(direction.angle_to(anchor)) <= deg_to_rad(attack.arc_degrees) * 0.5 + 0.2
-			check(not inside, "%s %d: symbol %s off the area" % [attack.id, step, anchor])
-	enemy.queue_free()
 
 
 # --- Hardened Husk Defense Mix 1.0 ---------------------------------------------------------------------------------
