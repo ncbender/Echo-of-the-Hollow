@@ -95,4 +95,10 @@ an der unteren rechten Ecke, kein Leerrand), `region_partial` (Haven wach, Whisp
 
 ## 8. Commit
 
-Siehe unten (nachgetragen).
+- **`563fecc`**: `waystone_panel.gd` (gemeinsamer `start_travel`), `test_map_ux.gd` (+ `.uid`),
+  `tests/playtest/map_ux_check.gd` (+ `.uid`), dieses Dokument. Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet:** `scripts/ui/world_map_panel.gd` – die Hauptumsetzung. Die Datei enthielt schon vor diesem
+  Batch die uncommittete Map-&-Fog-Arbeit und hängt von weiterhin untracked Dateien ab (`area_map.gd`,
+  `map_markers.gd`, `map_painter.gd`); eine saubere Trennung ist nicht möglich. Ebenso `docs/MAP_AND_FOG_OF_WAR_1_0.md`
+  (untracked, Ablösungshinweise) und `CLAUDE.md`.
+- Der Commit allein ist nicht lauffähig (der Test braucht die neue `world_map_panel.gd`); lauffähig ist der Arbeitsbaum.
