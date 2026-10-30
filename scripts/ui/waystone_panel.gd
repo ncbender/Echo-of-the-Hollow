@@ -78,14 +78,23 @@ func rebuild() -> void:
 
 ## Travel button (UI and tests). Returns "" when the journey started.
 func travel(target_id: StringName) -> String:
-	var from_id := waystone.waystone_id if waystone != null else &""
-	var error := WaystoneService.travel_error(character, from_id, target_id, waystone != null and waystone.enemies_near())
+	var error := start_travel(get_tree(), character, waystone, target_id)
 	if error != "":
 		_status.text = error
 		return error
-	var target: WaystoneDefinition = character.database.waystones[target_id]
-	var session := SessionState.find(get_tree())
 	hide()
+	return ""
+
+
+## Map UX 2.0: the one way a journey starts (this window and the map's place details): from the waystone the
+## player stands at, under WaystoneService.travel_error (awake, not here, no enemies near, no trial). "" = started.
+static func start_travel(tree: SceneTree, target_character: Character, from: Waystone, target_id: StringName) -> String:
+	var from_id := from.waystone_id if from != null else &""
+	var error := WaystoneService.travel_error(target_character, from_id, target_id, from != null and from.enemies_near())
+	if error != "":
+		return error
+	var target: WaystoneDefinition = target_character.database.waystones[target_id]
+	var session := SessionState.find(tree)
 	if session != null:
 		session.travel(target.map_id, target.spawn_id)
 	return ""
