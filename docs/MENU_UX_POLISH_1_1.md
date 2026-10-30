@@ -211,3 +211,8 @@ Abschnitt 5 = menschliche Abnahme (steht aus).
   - Playtests `gallery_screens.gd`, `ui_gallery.gd` (gemischt), `ui_art_check.gd` (untracked);
   - Doku-Hinweise in `MENU_UX_POLISH_1_0.md`, `BOOKTABS_VISUAL_INTEGRATION_1_0.md` (untracked).
 - Der Commit allein ist nicht lauffähig; lauffähig ist der Arbeitsbaum zusammen mit diesen Dateien.
+
+
+> **Playtest Corrections 1.0** (`docs/PLAYTEST_CORRECTIONS_1_0.md`): Details zeigt jetzt immer nur Wirksames (kein
+> Schalter „Only active bonuses“ mehr; immer sichtbar nur Max Health und Armor); die sieben Hauptmenüs haben keinen
+> Close-Button mehr; Talent-Tooltips bleiben im Fenster.
