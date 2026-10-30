@@ -105,4 +105,10 @@ Körperrand; im zweiten Lauf frei sichtbar.
 
 ## 8. Commit
 
-Siehe unten (nachgetragen).
+- Implementierung, Tests, Fensterprüfung, Bericht: `4dcc1c6` (`feat: parry timing cue 1.0 ...`); dieser Nachtrag als
+  eigener Docs-Commit.
+- Committet: `scripts/enemies/parry_cue.gd`, `scripts/enemies/enemy_view.gd`, `tests/integration/test_parry_timing_cue.gd`,
+  `tests/integration/test_combat_telegraphs.gd`, `tests/playtest/parry_cue_check.gd` (+ `.uid`), dieses Dokument,
+  Hinweise in `docs/COMBAT_TELEGRAPHS_1_0.md` und `docs/HARDENED_HUSK_DEFENSE_MIX_1_0.md`.
+- **Uncommittet (gemischt):** `CLAUDE.md` (Stand-Eintrag „Parry Timing Cue 1.0“ zwischen fremden Änderungen).
+- Nicht eingecheckt: Bildfolgen unter `tests/output/parry_cue/` (ignoriert).
