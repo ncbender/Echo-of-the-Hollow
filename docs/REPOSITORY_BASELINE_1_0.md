@@ -125,9 +125,9 @@ nicht erforderlich, nicht verhaltensändernd.** Empfehlung: committen *oder* ver
 Fassung in HEAD ist robuster, falls sich ein Standardwert in einer späteren Engine-Version ändert. Der Editor wird
 die Kurzfassung beim nächsten Speichern der Projekteinstellungen wieder schreiben – Entscheidung des Entwicklers.
 
-**Erster Import:** `check_project.ps1` meldet auf einem frischen Stand im ersten Lauf den fehlenden
-`ui.en.translation`. Möglichkeiten: Datei versionieren, `check_project.ps1` zweimal importieren lassen oder den
-ersten Lauf dokumentiert hinnehmen. Nicht in diesem Auftrag geändert.
+**Erster Import:** behoben durch Fresh Import Reliability 1.0 (`docs/FRESH_IMPORT_RELIABILITY_1_0.md`):
+`check_project.ps1` erzeugt fehlende CSV-Übersetzungen in einer eigenen, streng geprüften Vorbereitungsphase und
+erkennt Problemzeilen case-sensitiv. Der erste Lauf auf einer frischen Ausgabe ist erfolgreich.
 
 **`docs/Design/`, `docs/tasks/`:** ob diese Spezifikationen versioniert werden sollen, entscheidet der Entwickler.
 
@@ -138,7 +138,8 @@ ersten Lauf dokumentiert hinnehmen. Nicht in diesem Auftrag geändert.
 Ein frischer Stand aus Git (`867376b` und folgende) bildet den abgenommenen Spielstand ab: Alle produktiven Quellen,
 Daten, Szenen, UI-Assets, Schriften, Lizenzen, Generator und Validator sind versioniert. Die verbleibende
 `project.godot`-Abweichung ist laut Engine wirkungsgleich. Der Generator erzeugt die Assets byte-identisch neu.
-Einschränkung: Der allererste Import liefert einmalig den Translation-Fehler aus Abschnitt 4. Danach ist die
-Startprüfung sauber, und die gezielten Suites und der Validator sind grün. Nicht geprüft sind die Full-Suite und
+Der Translation-Fehler des allerersten Imports aus Abschnitt 4 ist seit Fresh Import Reliability 1.0 behoben:
+Der erste `check_project.ps1`-Lauf auf einer frischen Ausgabe ist erfolgreich. Die gezielten Suites und der
+Validator sind grün. Nicht geprüft sind die Full-Suite und
 die Gameplay-Loops; die bekannten veralteten Tests (rpg_playtest, test_prologue v3→v4, test_ui_layout 150 %,
 prologue_playtest) wurden unverändert übernommen.
