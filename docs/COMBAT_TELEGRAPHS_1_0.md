@@ -122,7 +122,13 @@ Echtes Godot-Fenster, 1920 × 1080, 100 %:
 
 ## 8. Commit
 
-Siehe unten (nachgetragen).
+- **`b6a444d`**: `attack_definition.gd`, `defense_component.gd`, `enemy_view.gd`, `player.gd` (nur die Parry-Text-
+  Zeilen – der übrige Diff der Datei war bereits leer), `test_combat_feedback.gd`, `test_combat_telegraphs.gd`
+  (+ `.uid`), dieses Dokument. Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet** (gemischt mit älteren fremden Änderungen): `tests/playtest/gallery_screens.gd`
+  (`hud_telegraphs`, `hud_telegraph_fight`, `hud_level_mastery_dash`, `hud_level_both`) und `CLAUDE.md`.
+- Der Commit ist für sich lauffähig, soweit er nicht auf frühere uncommittete Arbeitsstände angewiesen ist
+  (Galerie-Ansichten nur im Arbeitsbaum).
 
 ## Offene Punkte für die gemeinsame Abnahme
 
