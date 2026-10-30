@@ -199,4 +199,15 @@ Abschnitt 5 = menschliche Abnahme (steht aus).
 
 ## 6. Commit
 
-Siehe Abschnitt „Commit“ unten (nachgetragen).
+- **`c1f6810`**: nur Dateien, deren gesamte Änderung zu diesem Batch gehört – `help_button.gd` (+ `.uid`), die drei
+  Klassenquest-Daten, `test_quest_turnin_t3.gd`, dieses Dokument. Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet** (enthalten ältere fremde uncommittete Änderungen oder sind insgesamt untracked; eine
+  saubere Trennung ohne Ausgangsstand war nicht sicher möglich):
+  - `book_tabs.gd`, `ui_window.gd`, `professions_panel.gd`, `class_station_panel.gd`, `talent_tree_view.gd`,
+    `talent_tooltip.gd`, `journal_panel.gd`, `inventory_panel.gd`, `localization/ui.csv`, `CLAUDE.md`;
+  - Tests `test_class_ui`, `test_professions_ui`, `test_quest_turnin_mara_ui`, `test_world_ui` (geändert, gemischt)
+    und die untracked Suites `test_armor_ui`, `test_class_switch_ui`, `test_preset_ui`, `test_quest_ui`,
+    `test_skill_ui`, `test_talent_ui`, `test_ui_usability`, `test_main_window_layout`, `test_ui_window_foundation`;
+  - Playtests `gallery_screens.gd`, `ui_gallery.gd` (gemischt), `ui_art_check.gd` (untracked);
+  - Doku-Hinweise in `MENU_UX_POLISH_1_0.md`, `BOOKTABS_VISUAL_INTEGRATION_1_0.md` (untracked).
+- Der Commit allein ist nicht lauffähig; lauffähig ist der Arbeitsbaum zusammen mit diesen Dateien.
