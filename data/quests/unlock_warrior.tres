@@ -24,6 +24,6 @@ script = ExtResource("3_3hkin")
 id = &"unlock_warrior"
 class_id = &"warrior"
 display_name = "Path of Steel"
-description = "Prove your strength to the Warriors of the Hollow: defeat 8 hollow creatures and bring 3 Hollow Essence and 20 gold to a class station."
+description = "Prove your strength to the Warriors of the Hollow."
 objectives = Array[ExtResource("2_mukqy")]([SubResource("Resource_xxv1t")])
 deliveries = Array[ExtResource("1_st55i")]([SubResource("Resource_ojsxk"), SubResource("Resource_h73jb")])

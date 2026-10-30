@@ -154,7 +154,9 @@ func test_journal_and_tracker_follow_the_reward_state() -> void:
 	await _open_haven()
 	map.hud.toggle_journal()
 	await get_tree().process_frame
-	var card := map.hud.journal_panel.find_child("Story_the_first_binding", true, false)
+	map.hud.journal_panel.select_quest(&"the_first_binding")   # Menu UX Polish 1.1: reward lines are in the details
+	await get_tree().process_frame
+	var card := map.hud.journal_panel.find_child("QuestDetail", true, false).find_child("Story_the_first_binding", true, false)
 	if check(card != null, "completed quest card shown"):
 		var line := card.find_child("Reward", true, false) as Label
 		check(line != null and line.text == PENDING_JOURNAL, "journal card shows the pending line")

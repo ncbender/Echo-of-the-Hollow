@@ -24,6 +24,6 @@ script = ExtResource("3_eumxh")
 id = &"unlock_arcanist"
 class_id = &"arcanist"
 display_name = "Path of the Arcane"
-description = "The Arcanists ask for proof of your resolve: defeat 8 hollow creatures and bring 3 Hollow Essence and 20 gold to a class station."
+description = "The Arcanists ask for proof of your resolve before they share their craft."
 objectives = Array[ExtResource("2_5h53x")]([SubResource("Resource_1tabv")])
 deliveries = Array[ExtResource("1_0xlto")]([SubResource("Resource_7qkeq"), SubResource("Resource_jw4qh")])

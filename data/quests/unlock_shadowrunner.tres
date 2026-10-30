@@ -24,6 +24,6 @@ script = ExtResource("3_rts1y")
 id = &"unlock_shadowrunner"
 class_id = &"shadowrunner"
 display_name = "Path of Shadows"
-description = "The Shadowrunners test your precision: defeat 8 hollow creatures and bring 3 Hollow Essence and 20 gold to a class station."
+description = "The Shadowrunners test your precision before they teach you their ways."
 objectives = Array[ExtResource("2_gytob")]([SubResource("Resource_bv2wu")])
 deliveries = Array[ExtResource("1_2lrxp")]([SubResource("Resource_hnr60"), SubResource("Resource_ebvgk")])
