@@ -77,4 +77,11 @@ Save v15, Statberechnung, Kampf, Karten, Quests und Balancing unverändert; kein
 
 ## Commit
 
-Siehe unten (nachgetragen).
+- **`f98f964`**: `test_playtest_corrections.gd` (+ `.uid`), dieses Dokument, Hinweis in `MENU_UX_POLISH_1_1.md`.
+  Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet** (die Dateien enthalten ältere fremde uncommittete Änderungen; keine sichere Trennung):
+  die Umsetzung selbst in `scripts/ui/ui_window.gd`, `inventory_panel.gd`, `class_station_panel.gd`,
+  `talent_tooltip.gd`, `journal_panel.gd`, `localization/ui.csv`; die angepassten Tests `test_ui_window_foundation`,
+  `test_talent_ui`, `test_main_window_layout` (untracked) und `test_inventory_ui`; `tests/playtest/gallery_screens.gd`;
+  `docs/MAIN_WINDOW_LAYOUT_LOCK_1_0.md` (untracked) und `CLAUDE.md`.
+- Der Commit allein ist nicht lauffähig; lauffähig ist der Arbeitsbaum.
