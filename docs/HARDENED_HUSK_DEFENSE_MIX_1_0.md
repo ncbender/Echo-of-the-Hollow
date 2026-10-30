@@ -57,7 +57,11 @@ KI und Reihenfolge unverändert.
 
 ## Commit
 
-Siehe `docs/COMBAT_TELEGRAPHS_1_0.md` („Hardened Husk Defense Mix 1.0“) und unten (nachgetragen).
+- **`7249cf3`**: `hardened_husk_attacks.tres`, `hardened_husk.tres`, `enemy_config.gd`, `enemy.gd`,
+  `test_combat_telegraphs.gd`, `test_class_trials_m31.gd`, dieses Dokument, Nachtrag in `COMBAT_TELEGRAPHS_1_0.md`.
+  Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet:** `tests/playtest/gallery_screens.gd` (neue Ansicht `hud_husk_mix`; die Datei enthält ältere
+  fremde Änderungen).
 
 ## Offen
 
