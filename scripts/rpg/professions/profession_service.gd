@@ -7,9 +7,10 @@ extends RefCounted
 ## craftable, level, workstation, materials, room for the output), then the
 ## material plan is consumed, the output added and XP granted. A refused craft
 ## changes nothing. Counting and consuming use the SAME material plan.
-## Materials come from the bag; at a Haven workstation, once the Old Storehouse
-## is restored (StashService.is_upgraded), missing amounts are taken from the
-## Haven stash too (bag first).
+## Materials come from the bag; at a Haven workstation missing amounts are taken
+## from the Haven stash too (bag first) - UI Usability & Haven Crafting 1.0: in every
+## stage of the Old Storehouse (the stash itself is usable from the start).
+## Away from a workstation the stash is never touched.
 
 const RANKS: Array = [["Apprentice", 1], ["Journeyman", 21], ["Artisan", 41], ["Expert", 61], ["Master", 81]]
 ## Share of the base XP by how far the profession level is above the recipe
@@ -147,9 +148,9 @@ static func grant_gather_xp(character: Character, profession_id: StringName, amo
 # --- materials --------------------------------------------------------------------
 
 ## True when crafting at `station_id` may also draw on the Haven stash: a Haven
-## workstation (a ruin) and the Old Storehouse restored.
+## workstation (a ruin of Haven). No remote access: &"" (away) never reaches it.
 static func uses_stash(character: Character, station_id: StringName) -> bool:
-	return station_id != &"" and character.database.ruins.has(station_id) and StashService.is_upgraded(character)
+	return station_id != &"" and character.database.ruins.has(station_id)
 
 
 ## The material plan: [{"item_id", "bag", "stash"}] per input plus "missing"
@@ -243,6 +244,7 @@ static func craft(character: Character, recipe_id: StringName, station_id: Strin
 	var levels := character.professions.add_xp(recipe.profession_id, xp)
 	if levels > 0:
 		learn_automatic(character)
+	StoryService.notify(character, StringName("craft:%s" % recipe_id))   # only a finished craft reaches here
 	return {"error": "", "xp": xp, "levels": levels, "first": first}
 
 

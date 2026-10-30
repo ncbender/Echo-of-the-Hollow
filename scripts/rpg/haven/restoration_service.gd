@@ -11,8 +11,8 @@ extends RefCounted
 ## write a milestone (critical) save. A repeated or stale request (double
 ## click) is refused and changes nothing - a stage is never skipped.
 ## Materials: the same plan as profession crafting (ProfessionService.material_plan):
-## the bag, and once the Old Storehouse is restored also the Haven stash (bag first);
-## shown, checked and consumed from one plan.
+## the bag and the Haven stash (bag first; UI Usability & Haven Crafting 1.0: in every
+## stage of the Old Storehouse); shown, checked and consumed from one plan.
 
 const RUINED := &"ruined"
 const RESTORED := &"restored"
@@ -57,11 +57,10 @@ static func costs_for(ruin: RuinDefinition, target: StringName) -> Array[ItemCos
 	return ruin.costs
 
 
-## True when restoring may draw on the Haven stash (bag first): the same rule
-## as the Haven workstations - the Old Storehouse is restored
-## (StashService.is_upgraded). Restoring happens at the ruin in Haven.
-static func uses_stash(character: Character) -> bool:
-	return StashService.is_upgraded(character)
+## True when restoring may draw on the Haven stash (bag first): the same rule as the
+## Haven workstations. Restoring always happens at a ruin in Haven, so always true.
+static func uses_stash(_character: Character) -> bool:
+	return true
 
 
 ## The material plan of the step to `target` ({"plan", "missing"} as in

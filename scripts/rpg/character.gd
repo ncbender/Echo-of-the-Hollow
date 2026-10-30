@@ -73,6 +73,16 @@ func add_class_xp(amount: int) -> int:
 ## returns "" on success or the reason for refusal. The class's own loadout
 ## becomes effective; mastery and inventory are shared and stay untouched.
 func switch_class(class_id: StringName, in_safe_zone: bool) -> String:
+	var error := class_switch_error(class_id, in_safe_zone)
+	if error != "":
+		return error
+	classes.set_active(class_id)
+	return ""
+
+
+## "" if switch_class(`class_id`, `in_safe_zone`) would succeed now, else its reason - the same checks in
+## the same order, nothing changes (the Classes page shows the reason before the click).
+func class_switch_error(class_id: StringName, in_safe_zone: bool) -> String:
 	if not in_safe_zone:
 		return "classes can only be changed at a class station"
 	if classes.in_trial():
@@ -80,10 +90,9 @@ func switch_class(class_id: StringName, in_safe_zone: bool) -> String:
 	if class_id == classes.active_class_id:
 		return "class already active"
 	var error := classes.activation_error(class_id)
-	if error != "":
-		return error
-	classes.set_active(class_id)
-	return ""
+	if error == "":
+		error = equipment.class_switch_error(class_id)   # the old class's gear goes back into the bag
+	return error
 
 
 ## Inventory capacity = rules + bonuses of standing buildings (storage). Never

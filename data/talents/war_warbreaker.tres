@@ -54,8 +54,8 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Crushing Finish"
 description = "+5% heavy finisher power per rank."
-tier = 2
 max_rank = 3
+column = 2
 stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_1fa8v")])
 
 [sub_resource type="Resource" id="Resource_6id28"]
@@ -77,8 +77,7 @@ tree_id = &"war_warbreaker"
 display_name = "Earthshaker"
 description = "Warbreaker also chills its targets (1 stack)."
 kind = 2
-tier = 2
-column = 1
+column = 3
 skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_k2pbt")])
 
 [sub_resource type="Resource" id="Resource_dmomn"]
@@ -100,7 +99,7 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Breaker"
 description = "Breaking an enemy's poise restores 4 rage per rank."
-tier = 3
+tier = 2
 max_rank = 5
 effects = Array[ExtResource("2_nap88")]([SubResource("Resource_xnfs8")])
 
@@ -119,7 +118,7 @@ tree_id = &"war_warbreaker"
 display_name = "Concussive Rush"
 description = "Blade Rush deals 50% more poise damage and unlocks the Piercing Lunge modification for Furious Strike."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_8i355")])
 unlocks_mods = Array[StringName]([&"furious_lunge"])
@@ -136,8 +135,9 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Iron Will"
 description = "+12 maximum health per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_vvmnl")])
 
 [sub_resource type="Resource" id="Resource_1qaj3"]
@@ -159,9 +159,9 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Overpower"
 description = "Heavy finishers deal 8% more damage per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_nap88")]([SubResource("Resource_pa5pc")])
 
 [sub_resource type="Resource" id="Resource_0q14n"]
@@ -185,7 +185,7 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Aftershock"
 description = "Heavy finishers send out an aftershock: 15% of the hit's damage per rank to other enemies within 30 px."
-tier = 5
+tier = 3
 max_rank = 3
 effects = Array[ExtResource("2_nap88")]([SubResource("Resource_k6wfj")])
 
@@ -205,7 +205,7 @@ tree_id = &"war_warbreaker"
 display_name = "Titan's Grip"
 description = "Warbreaker reaches 30% further and deals 20% more damage."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 skill_mods = Array[ExtResource("3_b7a3d")]([SubResource("Resource_mekqr")])
 
@@ -221,8 +221,9 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Bulwark"
 description = "+6 armor per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_uvmbn")])
 
 [sub_resource type="Resource" id="Resource_p1fva"]
@@ -237,9 +238,9 @@ class_id = &"warrior"
 tree_id = &"war_warbreaker"
 display_name = "Juggernaut"
 description = "+6% knockback per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_rxcmf")]([SubResource("Resource_p1fva")])
 
 [sub_resource type="Resource" id="Resource_104h1"]
@@ -279,7 +280,7 @@ tree_id = &"war_warbreaker"
 display_name = "Worldbreaker"
 description = "Capstone - heavy finishers become world-breaking: +30% poise damage, and a quake hits all enemies within 56 px for 60% of the damage (heavy poise, knockback)."
 kind = 2
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_nap88")]([SubResource("Resource_vmkjj"), SubResource("Resource_765un")])
 
 [resource]

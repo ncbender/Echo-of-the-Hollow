@@ -1,19 +1,17 @@
 class_name SkillBar
 extends HBoxContainer
-## HUD row of the four skill slots (Q/E/R/F): key, skill name, resource cost and
-## the remaining cooldown (bar + seconds). A slot that cannot be used says why
-## in words ("Cooldown", "No Rage"), never only by dimming.
+## HUD row of the four skill slots (Q/E/R/F) in the combat bar (UI Layout Lock 1.0): a compact HudSlot each.
+## Combat HUD UX 2.0 (docs/COMBAT_HUD_UX_2_0.md): no permanent words ("Empty", "8 Mana", "Ready") - an empty
+## slot is a quiet frame with its key; a cooldown darkens the slot with its seconds; a skill the resource cannot
+## pay is dimmed with a thin bar of the resource towards its cost. Name, description, cost, cooldown and the
+## reason are in the hover tooltip.
 ## Pure presentation; reads the bridge's ClassRuntime.
 
 const KEYS := ["Q", "E", "R", "F"]
-const SLOT_SIZE := Vector2(156, 76)
 
 var bridge: PlayerProgressionBridge
 
-var _slots: Array[PanelContainer] = []
-var _names: Array[Label] = []
-var _infos: Array[Label] = []
-var _bars: Array[ProgressBar] = []
+var _slots: Array[HudSlot] = []
 
 
 func _ready() -> void:
@@ -21,65 +19,62 @@ func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
 	add_theme_constant_override(&"separation", 6)
 	for index in KEYS.size():
-		var panel := PanelContainer.new()
-		panel.theme_type_variation = &"HudPanel"
-		panel.custom_minimum_size = SLOT_SIZE
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var box := VBoxContainer.new()
-		box.add_theme_constant_override(&"separation", 2)
-		panel.add_child(box)
-		var head := HBoxContainer.new()
-		head.add_theme_constant_override(&"separation", 6)
-		head.add_child(UiTheme.key_chip(KEYS[index]))
-		var name_label := UiTheme.styled("", &"SmallLabel")
-		name_label.clip_text = true
-		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		head.add_child(name_label)
-		var info := UiTheme.styled("", &"CaptionLabel")
-		var bar := UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.RESONANCE)
-		box.add_child(head)
-		box.add_child(info)
-		box.add_child(bar)
-		add_child(panel)
-		_slots.append(panel)
-		_names.append(name_label)
-		_infos.append(info)
-		_bars.append(bar)
+		var slot := HudSlot.new()
+		slot.name = "Skill%s" % KEYS[index]
+		slot.key = KEYS[index]
+		add_child(slot)
+		_slots.append(slot)
 
 
 func _process(_delta: float) -> void:
-	visible = bridge != null and bridge.is_bound() \
-			and bridge.character.builds.get_build().slots.any(func(id: StringName) -> bool: return id != &"")
+	visible = bridge != null and bridge.is_bound()   # Combat HUD UX 2.0: four quiet frames even without a skill (one unit)
 	if visible:
 		refresh()
+
+
+## The short status words of the four slots (tests, gallery).
+func status_texts() -> PackedStringArray:
+	var texts: PackedStringArray = []
+	for slot in _slots:
+		texts.append(slot.status_text())
+	return texts
 
 
 func refresh() -> void:
 	var runtime := bridge.class_runtime
 	for index in KEYS.size():
+		var slot := _slots[index]
 		var skill := runtime.skill_in_slot(index)
 		if skill == null:
-			_names[index].text = "Empty"
-			_names[index].add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
-			_infos[index].text = ""
-			_bars[index].value = 0.0
-			_slots[index].modulate = Color(1, 1, 1, 0.55)
+			slot.glyph = HudSlot.Glyph.EMPTY
+			slot.letter = ""
+			slot.cooldown_ratio = 0.0
+			slot.usable = false
+			slot.cost_ratio = -1.0
+			slot.set_status("")
+			slot.tooltip_text = "%s  [%s]\nNo skill in this slot. Slot skills at a class station." % ["Empty slot", KEYS[index]]
 			continue
 		var params := runtime.params_for(skill)
 		var left := runtime.cooldown_left(skill.id)
 		var pool := runtime.pool
 		var affordable := params.cost <= 0.0 or (pool != null and pool.value + 0.0001 >= params.cost)
-		_names[index].text = skill.display_name
-		_names[index].add_theme_color_override(&"font_color", skill.color.lightened(0.35))
-		var cost := "%d %s" % [roundi(params.cost), pool.definition.display_name if pool != null else ""] if params.cost > 0.0 else "No cost"
+		var resource := pool.definition.display_name if pool != null else ""
+		var cost := "%d %s" % [roundi(params.cost), resource] if params.cost > 0.0 else "No cost"
+		slot.glyph = HudSlot.Glyph.SKILL
+		slot.glyph_color = skill.color.lightened(0.2)
+		slot.letter = skill.display_name.left(1).to_upper()
+		slot.icon = UiSkin.texture(StringName("skills/%s" % skill.id))   # optional art, else the letter glyph
+		slot.cooldown_ratio = left / maxf(params.cooldown, 0.01) if left > 0.0 else 0.0
+		slot.usable = affordable and left <= 0.0
+		slot.set_status("%.1fs" % left if left > 0.0 else "")
+		slot.cost_ratio = (pool.value / params.cost if pool != null else 0.0) if not affordable else -1.0
+		slot.cost_color = pool.definition.color if pool != null else UiTheme.TEXT_MUTED
+		var lines: PackedStringArray = ["%s  [%s]" % [skill.display_name, KEYS[index]]]
+		if skill.description != "":
+			lines.append(skill.description)
+		lines.append("Cost: %s  ·  Cooldown: %.1fs" % [cost, params.cooldown])
 		if left > 0.0:
-			_infos[index].text = "Cooldown  %.1fs" % left
-		elif not affordable:
-			_infos[index].text = "Need %s" % cost
-		else:
-			_infos[index].text = cost
-		_infos[index].add_theme_color_override(&"font_color", UiTheme.WARNING if left > 0.0 or not affordable else UiTheme.TEXT_SECONDARY)
-		_bars[index].max_value = maxf(params.cooldown, 0.01)
-		_bars[index].value = params.cooldown - left
-		_slots[index].modulate = Color.WHITE if affordable and left <= 0.0 else Color(1, 1, 1, 0.7)
+			lines.append("On cooldown: %.1fs." % left)
+		if not affordable:
+			lines.append("Not enough %s: needs %s." % [resource if resource != "" else "resource", cost])
+		slot.tooltip_text = "\n".join(lines)

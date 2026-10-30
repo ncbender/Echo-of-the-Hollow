@@ -13,7 +13,7 @@ extends RefCounted
 static func draw(canvas: CanvasItem, at: Vector2, text: String, size: float, color: Color,
 		outline_size: float = 0.0, outline_color: Color = Color.BLACK) -> void:
 	var scale := _world_to_canvas_scale(canvas)
-	var font := ThemeDB.fallback_font
+	var font := UiTheme.body_font()
 	var font_px := maxi(1, roundi(size * scale))
 	canvas.draw_set_transform(at, 0.0, Vector2.ONE / scale)
 	if outline_size > 0.0:
@@ -25,7 +25,7 @@ static func draw(canvas: CanvasItem, at: Vector2, text: String, size: float, col
 
 ## Width of `text` in world pixels at `size`.
 static func width(text: String, size: float) -> float:
-	return ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, maxi(1, roundi(size))).x
+	return UiTheme.body_font().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, maxi(1, roundi(size))).x
 
 
 static func _world_to_canvas_scale(canvas: CanvasItem) -> float:

@@ -197,11 +197,132 @@ id = &"mara_history"
 condition = SubResource("C_history")
 lines = Array[ExtResource("3_line")]([SubResource("L_history_1"), SubResource("L_history_2"), SubResource("L_history_3")])
 
+[sub_resource type="Resource" id="C_lh_offer"]
+script = ExtResource("4_cond")
+required_flags = Array[StringName]([&"prologue.completed"])
+quest_id = &"the_lost_hunter"
+quest_state = "not_started"
+
+[sub_resource type="Resource" id="L_lh_offer_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Tobin went up the Hunter's Trail three days ago. North of the Split Oak, in the Whisper Forest."
+
+[sub_resource type="Resource" id="L_lh_offer_2"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "He always comes back by the second night. Always."
+
+[sub_resource type="Resource" id="L_lh_offer_3"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "I'll look for him."
+
+[sub_resource type="Resource" id="L_lh_offer_4"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Find his camp. Whatever you find after that - I want to know."
+
+[sub_resource type="Resource" id="D_lh_offer"]
+script = ExtResource("2_dlg")
+id = &"mara_lost_hunter"
+condition = SubResource("C_lh_offer")
+lines = Array[ExtResource("3_line")]([SubResource("L_lh_offer_1"), SubResource("L_lh_offer_2"), SubResource("L_lh_offer_3"), SubResource("L_lh_offer_4")])
+event_id = &"talk:mara_lost_hunter"
+repeatable = false
+
+[sub_resource type="Resource" id="C_lh_hint"]
+script = ExtResource("4_cond")
+quest_id = &"the_lost_hunter"
+quest_state = "active"
+max_step = 3
+
+[sub_resource type="Resource" id="L_lh_hint_1"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "The Hunter's Trail runs north from the Split Oak. His camp should be up there."
+
+[sub_resource type="Resource" id="D_lh_hint"]
+script = ExtResource("2_dlg")
+id = &"mara_lost_hunter_hint"
+condition = SubResource("C_lh_hint")
+lines = Array[ExtResource("3_line")]([SubResource("L_lh_hint_1")])
+
+[sub_resource type="Resource" id="C_lh_return"]
+script = ExtResource("4_cond")
+quest_id = &"the_lost_hunter"
+quest_state = "active"
+min_step = 4
+max_step = 4
+
+[sub_resource type="Resource" id="L_lh_return_1"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "His tracks led to a den at the end of the trail. Something had made its lair there."
+
+[sub_resource type="Resource" id="L_lh_return_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "He wasn't there. Only this."
+
+[sub_resource type="Resource" id="L_lh_return_3"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "His horn. He never went anywhere without it."
+
+[sub_resource type="Resource" id="L_lh_return_4"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Then the woods have him, one way or another. Thank you for going. Few would have."
+
+[sub_resource type="Resource" id="D_lh_return"]
+script = ExtResource("2_dlg")
+id = &"mara_lost_hunter_return"
+condition = SubResource("C_lh_return")
+lines = Array[ExtResource("3_line")]([SubResource("L_lh_return_1"), SubResource("L_lh_return_2"), SubResource("L_lh_return_3"), SubResource("L_lh_return_4")])
+event_id = &"talk:mara_lost_hunter_return"
+repeatable = false
+
+[sub_resource type="Resource" id="C_embers"]
+script = ExtResource("4_cond")
+quest_id = &"embers_of_shelter"
+quest_state = "active"
+min_step = 2
+max_step = 2
+
+[sub_resource type="Resource" id="L_embers_1"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "Past the Tangled Wood there's a ruined chapel. People sheltered there once, and kept a ledger."
+
+[sub_resource type="Resource" id="L_embers_2"]
+script = ExtResource("3_line")
+speaker = &"player"
+text = "They brewed something against the cold. I made it from their notes."
+
+[sub_resource type="Resource" id="L_embers_3"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Then someone out there held on, the same as we do."
+
+[sub_resource type="Resource" id="L_embers_4"]
+script = ExtResource("3_line")
+speaker = &"mara"
+text = "Keep what you learned. Haven will need more fires before this is over."
+
+[sub_resource type="Resource" id="D_embers"]
+script = ExtResource("2_dlg")
+id = &"mara_embers"
+condition = SubResource("C_embers")
+lines = Array[ExtResource("3_line")]([SubResource("L_embers_1"), SubResource("L_embers_2"), SubResource("L_embers_3"), SubResource("L_embers_4")])
+event_id = &"talk:mara_embers"
+repeatable = false
+
 [resource]
 script = ExtResource("1_npc")
 id = &"mara"
 display_name = "Mara Veyne"
 color = Color(0.78, 0.5, 0.32, 1)
-dialogues = Array[ExtResource("2_dlg")]([SubResource("D_return"), SubResource("D_welcome"), SubResource("D_smithy"), SubResource("D_road_end"), SubResource("D_cart"), SubResource("D_crates"), SubResource("D_follow"), SubResource("D_history")])
+dialogues = Array[ExtResource("2_dlg")]([SubResource("D_return"), SubResource("D_welcome"), SubResource("D_smithy"), SubResource("D_road_end"), SubResource("D_cart"), SubResource("D_crates"), SubResource("D_follow"), SubResource("D_lh_return"), SubResource("D_embers"), SubResource("D_lh_offer"), SubResource("D_lh_hint"), SubResource("D_history")])
 idle_lines = PackedStringArray("Keep your guard up.", "Not now!", "Watch the treeline.")
 service = &"hearth_flask"

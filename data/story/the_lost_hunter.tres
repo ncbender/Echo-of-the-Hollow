@@ -1,0 +1,90 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="4_cost"]
+[ext_resource type="Script" path="res://scripts/rpg/story/story_condition.gd" id="5_cond"]
+
+[sub_resource type="Resource" id="O_camp"]
+script = ExtResource("3_obj")
+event_id = &"interact:lost_hunter_camp"
+description = "Find Tobin's camp on the Hunter's Trail"
+cumulative = true
+
+[sub_resource type="Resource" id="S_camp"]
+script = ExtResource("2_step")
+description = "Mara says Tobin went up the Hunter's Trail, north of the Split Oak in the Whisper Forest. Find his camp."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_camp")])
+completion_flag = &"lost_hunter.camp_found"
+
+[sub_resource type="Resource" id="O_tracks"]
+script = ExtResource("3_obj")
+event_id = &"interact:lost_hunter_track"
+amount = 3
+description = "Follow Tobin's tracks"
+cumulative = true
+
+[sub_resource type="Resource" id="S_tracks"]
+script = ExtResource("2_step")
+description = "Tobin's tracks lead away from the camp along the trail. Follow them."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_tracks")])
+completion_flag = &"lost_hunter.tracks_followed"
+
+[sub_resource type="Resource" id="O_den"]
+script = ExtResource("3_obj")
+event_id = &"encounter:lost_hunter_den"
+description = "Clear the den at the end of the trail"
+cumulative = true
+
+[sub_resource type="Resource" id="S_den"]
+script = ExtResource("2_step")
+description = "The tracks end at a den in the east of the trail. Something lairs there."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_den")])
+completion_flag = &"lost_hunter.den_cleared"
+
+[sub_resource type="Resource" id="O_horn"]
+script = ExtResource("3_obj")
+event_id = &"interact:lost_hunter_horn"
+description = "Recover Tobin's horn"
+cumulative = true
+
+[sub_resource type="Resource" id="S_horn"]
+script = ExtResource("2_step")
+description = "There is no sign of Tobin in the den. Recover what he left behind."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_horn")])
+completion_flag = &"lost_hunter.horn_recovered"
+
+[sub_resource type="Resource" id="O_mara"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_lost_hunter_return"
+description = "Return to Mara in Haven"
+
+[sub_resource type="Resource" id="S_mara"]
+script = ExtResource("2_step")
+description = "Bring Tobin's horn back to Mara in Haven."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_mara")])
+
+[sub_resource type="Resource" id="Reward_leather"]
+script = ExtResource("4_cost")
+item_id = &"cured_leather"
+quantity = 2
+
+[sub_resource type="Resource" id="C_start"]
+script = ExtResource("5_cond")
+required_flags = Array[StringName]([&"prologue.completed"])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"the_lost_hunter"
+display_name = "The Lost Hunter"
+chapter = "Side Quest"
+description = "Tobin, a hunter of Haven, went up the Hunter's Trail three days ago and has not come back."
+steps = Array[ExtResource("2_step")]([SubResource("S_camp"), SubResource("S_tracks"), SubResource("S_den"), SubResource("S_horn"), SubResource("S_mara")])
+completion_flag = &"lost_hunter.completed"
+start_event_id = &"talk:mara_lost_hunter"
+start_condition = SubResource("C_start")
+turn_in_gold = 40
+turn_in_npc_id = &"mara"
+turn_in_items = Array[ExtResource("4_cost")]([SubResource("Reward_leather")])
+turn_in_place = "Mara in Haven"

@@ -64,8 +64,8 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Hemorrhage"
 description = "Finishers apply 1 Bleeding stack per rank."
-tier = 2
 max_rank = 3
+column = 2
 effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_8ocer")])
 
 [sub_resource type="Resource" id="Resource_xnowi"]
@@ -76,8 +76,7 @@ tree_id = &"war_bloodblade"
 display_name = "Blood Frenzy"
 description = "Unlocks the active skill Blood Frenzy."
 kind = 1
-tier = 2
-column = 1
+column = 3
 unlocks_skill = &"blood_frenzy"
 
 [sub_resource type="Resource" id="Resource_bf7x8"]
@@ -99,7 +98,7 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Sanguine"
 description = "Each Bleeding tick you cause heals you for 0.3 health per rank."
-tier = 3
+tier = 2
 max_rank = 5
 effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_ov6pj")])
 
@@ -123,7 +122,7 @@ tree_id = &"war_bloodblade"
 display_name = "Lacerating Strike"
 description = "Furious Strike applies 2 Bleeding stacks."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 skill_mods = Array[ExtResource("3_mx2ow")]([SubResource("Resource_ruqws")])
 
@@ -146,8 +145,9 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Bloodletter"
 description = "+3% damage per rank against bleeding targets."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_105jm")])
 
 [sub_resource type="Resource" id="Resource_6wgck"]
@@ -170,9 +170,9 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Thin the Herd"
 description = "Killing a bleeding enemy restores 5 rage per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_03w8h")])
 
 [sub_resource type="Resource" id="Resource_jdkwd"]
@@ -187,7 +187,7 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Deep Cuts"
 description = "+15% bleed damage per rank."
-tier = 5
+tier = 3
 max_rank = 3
 stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_jdkwd")])
 
@@ -211,7 +211,7 @@ tree_id = &"war_bloodblade"
 display_name = "Rending Rush"
 description = "Blade Rush applies 2 Bleeding stacks."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 skill_mods = Array[ExtResource("3_mx2ow")]([SubResource("Resource_r3lvv")])
 
@@ -227,8 +227,9 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Exsanguinate"
 description = "+2% critical hit chance per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_dppgo")])
 
 [sub_resource type="Resource" id="Resource_ikuj0"]
@@ -243,9 +244,9 @@ class_id = &"warrior"
 tree_id = &"war_bloodblade"
 display_name = "Blood Price"
 description = "+10 maximum rage per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_sr28g")]([SubResource("Resource_ikuj0")])
 
 [sub_resource type="Resource" id="Resource_0u0qj"]
@@ -283,7 +284,7 @@ tree_id = &"war_bloodblade"
 display_name = "Blood Oath"
 description = "Capstone - your Bleeding heals you for 30% of its damage, and finishers against targets with 3+ Bleeding stacks rupture them: all stacks are consumed for 8 damage each."
 kind = 2
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_b78jv")]([SubResource("Resource_a0hrv"), SubResource("Resource_uqswc")])
 
 [resource]

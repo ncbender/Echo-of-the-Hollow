@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_rules")
-tier_points = PackedInt32Array(0, 5, 10, 15, 20, 25, 30)
-first_point_level = 10
+tier_points = PackedInt32Array(0, 5, 18, 30)
+first_point_level = 5
 skill_slots = 4
 preset_slots = 5
 respec_currency_item = &"gold_coin"

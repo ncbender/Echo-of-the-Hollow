@@ -20,7 +20,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	var font := UiTheme.body_font()
 	var alpha := clampf(1.5 - _age / lifetime * 1.5, 0.0, 1.0)
 	var size := 10
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x

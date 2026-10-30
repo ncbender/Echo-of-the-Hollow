@@ -1,59 +1,37 @@
 class_name QuickUseBar
 extends HBoxContainer
-## HUD quick use above the player frame: key 1 Hearth Flask (charges left of
-## maximum, heal per charge) and key 2 the slotted special potion (name, count,
-## shared cooldown). A slot that cannot be used says why in words. Pure
-## presentation over Character.consumables (ConsumableService) - never drives
-## a timer.
+## HUD quick use, the left pair of the combat bar (UI Layout Lock 1.0): key 1 Hearth Flask and key 2 the
+## slotted special potion as compact HudSlots. Combat HUD UX 2.0 (docs/COMBAT_HUD_UX_2_0.md): no permanent
+## count - the bottle's liquid shows what is left (flask_fill / potion_fill), the exact number, the name and
+## why it cannot be used are in the hover tooltip; the potion cooldown darkens the slot behind the bottle
+## with its seconds in the corner. Pure presentation over Character.consumables (ConsumableService) - never
+## drives a timer, never changes a rule.
 
-const SLOT_SIZE := Vector2(197, 58)
+## Potion liquid in whole quarters of one bag stack (ItemDefinition.max_stack): the stack is the only limit the
+## data knows - no "largest stack ever", no new capacity. 1 potion is the lowest visible step, a full stack (or
+## more in several stacks) the full bottle; quarters never pretend an exact percentage.
+const POTION_STEPS := 4
 
 var bridge: PlayerProgressionBridge
 
-var _flask_name: Label
-var _flask_info: Label
-var _potion_name: Label
-var _potion_info: Label
-var _potion_bar: ProgressBar
+var _flask: HudSlot
+var _potion: HudSlot
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_theme_constant_override(&"separation", 6)
-	var flask := _slot("1", "FlaskSlot")
-	_flask_name = flask[0]
-	_flask_info = flask[1]
-	var potion := _slot("2", "PotionSlot")
-	_potion_name = potion[0]
-	_potion_info = potion[1]
-	_potion_bar = UiTheme.bar(UiTheme.BAR_HEIGHT_SMALL, UiTheme.RESONANCE)
-	(potion[2] as VBoxContainer).add_child(_potion_bar)
+	_flask = _slot("1", "FlaskSlot", HudSlot.Glyph.FLASK)
+	_potion = _slot("2", "PotionSlot", HudSlot.Glyph.POTION)
 
 
-func _slot(key: String, slot_name: String) -> Array:
-	var panel := PanelContainer.new()
-	panel.name = slot_name
-	panel.theme_type_variation = &"HudPanel"
-	panel.custom_minimum_size = SLOT_SIZE
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override(&"separation", 2)
-	panel.add_child(box)
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override(&"separation", 6)
-	head.add_child(UiTheme.key_chip(key))
-	var title := UiTheme.styled("", &"SmallLabel")
-	title.name = "Name"
-	title.clip_text = true
-	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(title)
-	box.add_child(head)
-	var info := UiTheme.styled("", &"CaptionLabel")
-	info.name = "Info"
-	box.add_child(info)
-	add_child(panel)
-	return [title, info, box]
+func _slot(key: String, slot_name: String, glyph: HudSlot.Glyph) -> HudSlot:
+	var slot := HudSlot.new()
+	slot.name = slot_name
+	slot.key = key
+	slot.glyph = glyph
+	add_child(slot)
+	return slot
 
 
 func _process(_delta: float) -> void:
@@ -62,27 +40,57 @@ func _process(_delta: float) -> void:
 		refresh()
 
 
+## Transient words of the flask and potion slot (tests, gallery): "" or the potion cooldown.
+func status_texts() -> PackedStringArray:
+	return PackedStringArray([_flask.status_text(), _potion.status_text()])
+
+
+## Liquid of the Hearth Flask: charges of the real maximum (ConsumableService.max_charges).
+static func flask_fill(charges: int, maximum: int) -> float:
+	return clampf(float(charges) / float(maxi(1, maximum)), 0.0, 1.0)
+
+
+## Liquid of a potion stack: quarters of one bag stack, at least one quarter while one potion is left.
+static func potion_fill(count: int, stack: int) -> float:
+	if count <= 0:
+		return 0.0
+	var share := float(mini(count, maxi(1, stack))) / float(maxi(1, stack))
+	return clampf(ceilf(share * POTION_STEPS) / POTION_STEPS, 1.0 / POTION_STEPS, 1.0)
+
+
 func refresh() -> void:
 	var character := bridge.character
 	var state := character.consumables
 	var full := ConsumableService.max_charges(character)
-	_flask_name.text = "Hearth Flask"
-	_flask_name.add_theme_color_override(&"font_color", UiTheme.PARCHMENT if state.charges > 0 else UiTheme.TEXT_MUTED)
-	_flask_info.text = ("%d / %d  ·  heals %d%%" % [state.charges, full, roundi(ConsumableService.heal_share(character) * 100.0)]) \
-		if state.charges > 0 else "Empty - rest by a fire"
+	var heal := roundi(ConsumableService.heal_share(character) * 100.0)
+	_flask.glyph = HudSlot.Glyph.FLASK
+	_flask.glyph_color = UiTheme.HEALTH.lightened(0.1)
+	_flask.fill = flask_fill(state.charges, full)
+	_flask.usable = state.charges > 0
+	_flask.set_status("")
+	_flask.tooltip_text = "Hearth Flask  [1]\nCharges: %d / %d\nHeals %d%% of your health per charge.%s" % [state.charges, full, heal,
+		"\nEmpty - rest by a fire to refill it." if state.charges <= 0 else "\nRest by a fire to refill it."]
 	var definition := character.database.get_item(state.potion_slot) if state.potion_slot != &"" else null
 	if definition == null:
-		_potion_name.text = "No potion"
-		_potion_name.add_theme_color_override(&"font_color", UiTheme.TEXT_MUTED)
-		_potion_info.text = "Right-click a potion in your bag"
-		_potion_bar.value = 0.0
+		_potion.glyph = HudSlot.Glyph.EMPTY
+		_potion.usable = false
+		_potion.cooldown_ratio = 0.0
+		_potion.fill = 0.0
+		_potion.set_status("")
+		_potion.tooltip_text = "Potion slot  [2]\nNo potion slotted. Right-click a potion in your bag."
 		return
 	var count := character.inventory.count(state.potion_slot)
-	_potion_name.text = definition.display_name
-	_potion_name.add_theme_color_override(&"font_color", definition.potion_effect.color.lightened(0.3) if count > 0 else UiTheme.TEXT_MUTED)
-	if state.cooldown_left > 0.0:
-		_potion_info.text = "x%d  ·  Cooldown %ds" % [count, ceili(state.cooldown_left)]
-	else:
-		_potion_info.text = "x%d" % count if count > 0 else "None left"
 	var cooldown := character.database.rules.potion_cooldown
-	_potion_bar.value = 100.0 * (1.0 - state.cooldown_left / cooldown) if cooldown > 0.0 else 100.0
+	var error := ConsumableService.potion_error(character)
+	_potion.glyph = HudSlot.Glyph.POTION
+	_potion.glyph_color = definition.potion_effect.color.lightened(0.1) if definition.potion_effect != null else UiTheme.RESONANCE
+	_potion.fill = potion_fill(count, definition.max_stack)
+	_potion.cooldown_ratio = state.cooldown_left / cooldown if cooldown > 0.0 and state.cooldown_left > 0.0 else 0.0
+	_potion.usable = error == ""
+	_potion.set_status("%ds" % ceili(state.cooldown_left) if state.cooldown_left > 0.0 else "")
+	var lines: PackedStringArray = ["%s  [2]" % definition.display_name, "In your bag: %d" % count]
+	if definition.potion_effect != null and definition.potion_effect.summary != "":
+		lines.append(definition.potion_effect.summary)
+	if error != "":
+		lines.append(error)
+	_potion.tooltip_text = "\n".join(lines)

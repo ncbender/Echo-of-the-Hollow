@@ -7,6 +7,9 @@ extends Node2D
 @export var map_id: StringName = &"test_arena"
 ## Debug enemy spawns (F2) stay inside this rectangle.
 @export var spawn_area: Rect2 = Rect2(-280, -160, 560, 320)
+## World area the camera may show (large maps). Zero size = no limits, as on the small maps.
+## Purely visual: zoom and the visible world size stay untouched.
+@export var camera_bounds: Rect2 = Rect2()
 
 const GRUNT_SCENE: PackedScene = preload("res://scenes/enemies/grunt.tscn")
 const DEBUG_MASTERY_XP := 100
@@ -31,6 +34,12 @@ var session: SessionState
 var bridge: PlayerProgressionBridge
 ## Equipment drop rolls of this map (Hollowwood Loot Integration 1.0); tests may seed it.
 var loot_rng := RandomNumberGenerator.new()
+## Map & Fog of War 1.0: this map's picture (minimap, area map) and its fog of war (null on
+## maps not shown on the world map - trial grounds: everything known there).
+var area_map: AreaMap
+var fog: MapFog
+var _fog_cell := Vector2i(-99999, -99999)
+var _area_dirty: bool = false
 
 @onready var player: Player = $Player
 @onready var hud: GameHud = $GameHud
@@ -42,6 +51,7 @@ func _ready() -> void:
 	audio.name = "CombatAudio"
 	add_child(audio)
 	player.input_blocker = hud.is_window_open   # open windows / pause menu hold the combat input
+	_apply_camera_bounds()
 	session = SessionState.find(get_tree())
 	if session == null:
 		return
@@ -57,6 +67,7 @@ func _ready() -> void:
 	MapDefinition.resolve_saved_location(session.database, character.world)   # trial grounds save as the altar
 	character.world.set_map_value(map_id, "visits", int(character.world.get_map_value(map_id, "visits", 0)) + 1)
 	bridge = session.bind_player(player)
+	_setup_area_map(character)
 	hud.setup(bridge)
 	hud.objectives.show_prologue_hint = map_id == session.database.rules.prologue_map_id
 	if character.classes.in_trial() and not map_id in session.database.rules.trial_map_ids:
@@ -68,6 +79,56 @@ func _ready() -> void:
 	_remove_defeated_enemies(character)
 	session.map_ready()
 	StoryService.notify(character, StringName("enter:%s" % map_id))
+
+
+## Map & Fog of War 1.0: the picture is built once from the scene; the fog is loaded from the
+## character's world (missing or invalid: unexplored) and the arrival spot explored at once.
+func _setup_area_map(character: Character) -> void:
+	area_map = AreaMap.new(self)
+	var map_def: MapDefinition = session.database.maps.get(map_id)
+	if map_def != null and map_def.show_on_map:
+		fog = MapFog.new(area_map.bounds)
+		fog.load_from(character.world, map_id)
+		_update_fog()
+	character.world.flag_changed.connect(_on_world_flag_changed)
+	character.quests.changed.connect(_on_quests_changed)
+
+
+func _on_world_flag_changed(_flag: StringName, _value: Variant) -> void:
+	_area_dirty = true   # a story barrier may have opened: rebuilt next frame (after StoryConditional)
+
+
+func _on_quests_changed() -> void:
+	_area_dirty = true
+
+
+## Explores around the player when it entered a new fog cell; the state is written to the
+## character's world at once (saved with the next regular save - never a save of its own).
+func _update_fog() -> void:
+	if fog == null or session == null:
+		return
+	var cell := fog.cell_of(player.global_position)
+	if cell == _fog_cell:
+		return
+	_fog_cell = cell
+	if fog.reveal(player.global_position, area_map) > 0:
+		fog.store_in(session.get_character().world, map_id)
+
+
+func _process(_delta: float) -> void:
+	if area_map == null:
+		return
+	if _area_dirty:
+		_area_dirty = false
+		area_map.build(self)
+		_fog_cell = Vector2i(-99999, -99999)   # explore again with the new walls
+	_update_fog()
+
+
+func _exit_tree() -> void:
+	if session != null and session.get_character() != null \
+			and session.get_character().world.flag_changed.is_connected(_on_world_flag_changed):
+		session.get_character().world.flag_changed.disconnect(_on_world_flag_changed)
 
 
 ## Local hitstop for the player and every enemy placed in the map.
@@ -171,7 +232,21 @@ func place_player(spawn_id: StringName) -> bool:
 		player.global_position = target.global_position
 	player.set_spawn_position(player.global_position)
 	player.reset_physics_interpolation()
+	var camera := player.get_node_or_null("Camera2D") as Camera2D
+	if camera != null and camera_bounds.has_area():
+		camera.reset_smoothing()   # arrive on the spawn instead of panning across a large map
 	return found
+
+
+## Clamps the player's camera to `camera_bounds` (no-op without bounds).
+func _apply_camera_bounds() -> void:
+	var camera := player.get_node_or_null("Camera2D") as Camera2D
+	if camera == null or not camera_bounds.has_area():
+		return
+	camera.limit_left = floori(camera_bounds.position.x)
+	camera.limit_top = floori(camera_bounds.position.y)
+	camera.limit_right = ceili(camera_bounds.end.x)
+	camera.limit_bottom = ceili(camera_bounds.end.y)
 
 
 func find_spawn(spawn_id: StringName) -> SpawnPoint:

@@ -72,6 +72,7 @@ func _card(target: ItemInstance, header: String, compact: bool = false, width: f
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = &"WindowPanel"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.draw.connect(_draw_shadow.bind(panel))   # skinned window panels: the hard pixel shadow
 	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override(&"separation", 3)
@@ -173,3 +174,7 @@ func _place() -> void:
 		y = below if below + want.y <= view.y - margin else _anchor.position.y - GAP - want.y
 		y = clampf(y, margin, maxf(margin, view.y - margin - want.y))
 	global_position = Vector2(x, y).floor()
+
+
+func _draw_shadow(panel: Control) -> void:
+	UiTheme.draw_hard_shadow(panel)

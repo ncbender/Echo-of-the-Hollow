@@ -89,6 +89,6 @@ func _draw() -> void:
 	var title := trial().display_name if trial() != null else String(trial_id)
 	if done:
 		title += "  (walked)"
-	var font := ThemeDB.fallback_font
+	var font := UiTheme.body_font()
 	var width := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 	WorldText.draw(self, Vector2(-width * 0.5, -30), title, 7, color.lightened(0.3), 2, Color.BLACK)

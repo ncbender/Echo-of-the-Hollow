@@ -34,6 +34,8 @@ func validate(rules: TalentRules) -> PackedStringArray:
 		errors.append("talent tree without id or class")
 	var seen := {}
 	var capacity := {}   # tier -> total max ranks
+	if rules.tier_points.size() != TalentRules.TIERS:
+		errors.append("talent rules: %d tier gates, %d tiers expected" % [rules.tier_points.size(), TalentRules.TIERS])
 	for node in nodes:
 		if node == null or node.id == &"":
 			errors.append("%s: node without id" % id)
@@ -47,11 +49,13 @@ func validate(rules: TalentRules) -> PackedStringArray:
 			errors.append("%s: node %s has an invalid rank or tier" % [id, node.id])
 		if node.kind == TalentNodeDefinition.Kind.ACTIVE and node.unlocks_skill == &"":
 			errors.append("%s: active node %s unlocks no skill" % [id, node.id])
+		if node.column < 0 or node.column >= TalentRules.COLUMNS:
+			errors.append("%s: node %s has column %d (0..%d)" % [id, node.id, node.column, TalentRules.COLUMNS - 1])
 		if node.is_capstone() and node.max_rank != 1:
 			errors.append("%s: capstone %s must have exactly one rank" % [id, node.id])
 		capacity[node.tier] = capacity.get(node.tier, 0) + node.max_rank
 	if capstones().size() != 1:
-		errors.append("%s: needs exactly one tier 7 capstone" % id)
+		errors.append("%s: needs exactly one tier %d capstone" % [id, TalentRules.TIERS])
 	# Reachability: the ranks of tiers below t must be able to pay tier t's gate.
 	var below := 0
 	for tier in range(1, rules.tier_points.size() + 1):

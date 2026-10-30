@@ -43,6 +43,6 @@ func _draw() -> void:
 	draw_arc(Vector2.ZERO, 18.0, 0.0, TAU, 32, color, 2.0)
 	draw_set_transform(Vector2.ZERO)
 	if label != "":
-		var font := ThemeDB.fallback_font
+		var font := UiTheme.body_font()
 		var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 		WorldText.draw(self, Vector2(-width * 0.5, -24), label, 7, Color(0.85, 0.8, 1.0), 2, Color.BLACK)

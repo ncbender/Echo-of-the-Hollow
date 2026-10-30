@@ -64,8 +64,8 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Ambush"
 description = "+6% damage per rank within 3 s after Shadowstep."
-tier = 2
 max_rank = 3
+column = 2
 effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_e2lk1")])
 
 [sub_resource type="Resource" id="Resource_qmxhe"]
@@ -76,8 +76,7 @@ tree_id = &"sr_nighthunter"
 display_name = "Smoke Veil"
 description = "Unlocks the active skill Smoke Veil."
 kind = 1
-tier = 2
-column = 1
+column = 3
 unlocks_skill = &"smoke_veil"
 
 [sub_resource type="Resource" id="Resource_qr3pw"]
@@ -92,7 +91,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Nightstalker"
 description = "+5 armor per rank."
-tier = 3
+tier = 2
 max_rank = 5
 stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_qr3pw")])
 
@@ -115,7 +114,7 @@ tree_id = &"sr_nighthunter"
 display_name = "Choking Smoke"
 description = "Smoke Veil also chills enemies inside."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 prerequisites = Array[StringName]([&"sr_nh_smoke"])
 skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_ig8dh")])
@@ -132,8 +131,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Unseen"
 description = "+2% critical hit chance per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_8btp4")])
 
 [sub_resource type="Resource" id="Resource_2dpnp"]
@@ -156,9 +156,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Vanish"
 description = "Kills reduce Shadowstep's cooldown by 1 s per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_gqwb4")])
 
 [sub_resource type="Resource" id="Resource_u8d0b"]
@@ -180,7 +180,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Dusk Blade"
 description = "+6% damage per rank against Smoked targets."
-tier = 5
+tier = 3
 max_rank = 3
 effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_6riwd")])
 
@@ -216,7 +216,7 @@ tree_id = &"sr_nighthunter"
 display_name = "Phantom Step"
 description = "Shadowstep ends with a strike around you that exposes Weak Points."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_3gt20")])
 
@@ -232,8 +232,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Patient Hunter"
 description = "+6 maximum focus per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_gnifq")])
 
 [sub_resource type="Resource" id="Resource_a8r4g"]
@@ -248,9 +249,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_nighthunter"
 display_name = "Deep Shadows"
 description = "+8% critical damage per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_w47ow")]([SubResource("Resource_a8r4g")])
 
 [sub_resource type="Resource" id="Resource_su0wk"]
@@ -296,7 +297,7 @@ tree_id = &"sr_nighthunter"
 display_name = "Nightfall"
 description = "Capstone - Smoke Veil covers 40% more area; for 3 s after Shadowstep your hits deal 25% more damage and expose Weak Points."
 kind = 2
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_axpo8")]([SubResource("Resource_xji35"), SubResource("Resource_4v5j1")])
 skill_mods = Array[ExtResource("3_qoylg")]([SubResource("Resource_6f6kg")])
 

@@ -36,7 +36,7 @@ func _draw() -> void:
 				draw_rect(Rect2(at, Vector2(8, 8)), Color(0.55, 0.42, 0.26))
 				draw_rect(Rect2(at, Vector2(8, 8)), Color(0.3, 0.22, 0.12), false, 1.0)
 	if label != "":
-		var font := ThemeDB.fallback_font
+		var font := UiTheme.body_font()
 		var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 		var at := Vector2(-width * 0.5, -size.y * 0.5 - 14)
 		WorldText.draw(self, at, label, 7, Color(1.0, 0.92, 0.75), 2, Color.BLACK)

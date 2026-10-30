@@ -15,299 +15,624 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/grunt.tscn" id="13_grunt"]
 [ext_resource type="Resource" path="res://data/enemies/rootbound_sentinel.tres" id="14_sentinel_cfg"]
 [ext_resource type="Resource" path="res://data/enemies/sentinel_attacks.tres" id="15_sentinel_attacks"]
+[ext_resource type="Script" path="res://scripts/world/encounter.gd" id="16_enc"]
+[ext_resource type="Script" path="res://scripts/world/encounter_spawn.gd" id="17_espawn"]
+[ext_resource type="Resource" path="res://data/enemies/rootbound_husk.tres" id="14_husk"]
+[ext_resource type="Resource" path="res://data/enemies/hollowfang_wolf.tres" id="15_wolf"]
+[ext_resource type="Script" path="res://scripts/world/checkpoint.gd" id="18_checkpoint"]
+[ext_resource type="Script" path="res://scripts/world/story_trigger.gd" id="19_trigger"]
+[ext_resource type="PackedScene" path="res://scenes/world/resource_node.tscn" id="20_node"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/rich_iron_vein.tres" id="def_rich_vein"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/forest_rock.tres" id="def_forest_rock"]
+[ext_resource type="Resource" path="res://data/world/resource_nodes/oak_tree.tres" id="def_oak_tree"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="21_cost"]
+[ext_resource type="Script" path="res://scripts/world/map_landmark.gd" id="99_landmark"]
+[ext_resource type="Script" path="res://scripts/world/boss_reward_cache.gd" id="91_cache"]
+[ext_resource type="Resource" path="res://data/loot/grove_warden_rare_reward.tres" id="92_chapter_rare"]
 
 [sub_resource type="RectangleShape2D" id="Rect_door"]
 size = Vector2(12, 48)
 
+[sub_resource type="RectangleShape2D" id="Rect_east_hint"]
+size = Vector2(40, 72)
+
 [sub_resource type="CircleShape2D" id="Circle_use"]
 radius = 20.0
+
+[sub_resource type="CircleShape2D" id="Circle_rest"]
+radius = 18.0
 
 [sub_resource type="Resource" id="C_sentinel_defeated"]
 script = ExtResource("12_cond")
 required_flags = Array[StringName]([&"defeated.wardens_rest_rootbound_sentinel"])
 
+[sub_resource type="Resource" id="Find_planks"]
+script = ExtResource("21_cost")
+item_id = &"oak_plank"
+quantity = 2
+
+[sub_resource type="Resource" id="Find_leather"]
+script = ExtResource("21_cost")
+item_id = &"cured_leather"
+quantity = 1
+
 [node name="WardensRest" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_map")
 map_id = &"wardens_rest"
-spawn_area = Rect2(-300, -180, 600, 360)
+spawn_area = Rect2(-600, -472, 1200, 944)
+camera_bounds = Rect2(-672, -544, 1344, 1088)
 
 [node name="Floor" type="Node2D" parent="."]
 z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-320, -200, 640, 400)
+area = Rect2(-640, -512, 1280, 1024)
+tile_size = 32.0
 color_a = Color(0.11, 0.16, 0.12, 1)
 color_b = Color(0.13, 0.18, 0.13, 1)
 
-[node name="PathWest" type="Node2D" parent="."]
-z_index = -9
+[node name="ForecourtFloor" type="Node2D" parent="."]
+z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-320, -20, 230, 40)
-tile_size = 20.0
-color_a = Color(0.27, 0.22, 0.16, 1)
-color_b = Color(0.29, 0.24, 0.17, 1)
+area = Rect2(-605, -150, 365, 300)
+tile_size = 24.0
+color_a = Color(0.18, 0.2, 0.16, 1)
+color_b = Color(0.2, 0.22, 0.17, 1)
 
 [node name="Yard" type="Node2D" parent="."]
-z_index = -9
+z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-90, -150, 330, 300)
-tile_size = 30.0
+area = Rect2(-240, -208, 672, 416)
+tile_size = 32.0
 color_a = Color(0.26, 0.24, 0.21, 1)
 color_b = Color(0.28, 0.26, 0.22, 1)
 
 [node name="HutFloor" type="Node2D" parent="."]
-z_index = -9
+z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(166, -200, 154, 64)
+area = Rect2(340, -480, 280, 190)
 tile_size = 16.0
 color_a = Color(0.24, 0.22, 0.2, 1)
 color_b = Color(0.26, 0.24, 0.21, 1)
 
-[node name="MossYardWest" type="Node2D" parent="."]
-z_index = -8
+[node name="BarracksFloor" type="Node2D" parent="."]
+z_index = -10
 script = ExtResource("2_floor")
-area = Rect2(-84, 96, 60, 48)
+area = Rect2(40, 250, 540, 230)
+tile_size = 24.0
+color_a = Color(0.22, 0.21, 0.19, 1)
+color_b = Color(0.24, 0.23, 0.2, 1)
+
+[node name="MossYard" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_floor")
+area = Rect2(-90, 100, 80, 60)
 tile_size = 12.0
 color_a = Color(0.2, 0.3, 0.18, 1)
 color_b = Color(0.22, 0.32, 0.19, 1)
 
-[node name="MossYardEast" type="Node2D" parent="."]
-z_index = -8
+[node name="SidePaths" type="Node2D" parent="."]
+
+[node name="Side1" type="Node2D" parent="SidePaths"]
+z_index = -9
 script = ExtResource("2_floor")
-area = Rect2(176, -40, 60, 50)
-tile_size = 12.0
-color_a = Color(0.2, 0.3, 0.18, 1)
-color_b = Color(0.22, 0.32, 0.19, 1)
+area = Rect2(384, -320, 64, 96)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side2" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(352, -256, 32, 96)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side3" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(384, -224, 32, 32)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side4" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(384, -32, 256, 64)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side5" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(192, 160, 32, 128)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side6" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(160, 192, 32, 64)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="Side7" type="Node2D" parent="SidePaths"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(224, 224, 32, 64)
+tile_size = 32.0
+color_a = Color(0.21, 0.18, 0.13, 1)
+color_b = Color(0.23, 0.19, 0.14, 1)
+
+[node name="MainRoad" type="Node2D" parent="."]
+
+[node name="Road1" type="Node2D" parent="MainRoad"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(-640, -64, 416, 128)
+tile_size = 32.0
+color_a = Color(0.27, 0.22, 0.16, 1)
+color_b = Color(0.29, 0.24, 0.17, 1)
+
+[node name="Road2" type="Node2D" parent="MainRoad"]
+z_index = -9
+script = ExtResource("2_floor")
+area = Rect2(-224, -32, 32, 64)
+tile_size = 32.0
+color_a = Color(0.27, 0.22, 0.16, 1)
+color_b = Color(0.29, 0.24, 0.17, 1)
 
 [node name="Walls" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="North" type="StaticBody2D" parent="Walls"]
-position = Vector2(0, -208)
+[node name="Forest1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-608, -288)
 script = ExtResource("3_wall")
-size = Vector2(672, 16)
+size = Vector2(64, 448)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="South" type="StaticBody2D" parent="Walls"]
-position = Vector2(0, 208)
+[node name="Forest2" type="StaticBody2D" parent="Walls"]
+position = Vector2(-560, -304)
 script = ExtResource("3_wall")
-size = Vector2(672, 16)
+size = Vector2(32, 416)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="WestTop" type="StaticBody2D" parent="Walls"]
-position = Vector2(-328, -112)
+[node name="Forest3" type="StaticBody2D" parent="Walls"]
+position = Vector2(-512, -320)
 script = ExtResource("3_wall")
-size = Vector2(16, 176)
+size = Vector2(64, 384)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="WestBottom" type="StaticBody2D" parent="Walls"]
-position = Vector2(-328, 112)
+[node name="Forest4" type="StaticBody2D" parent="Walls"]
+position = Vector2(-432, -336)
 script = ExtResource("3_wall")
-size = Vector2(16, 176)
+size = Vector2(96, 352)
 color = Color(0.14, 0.21, 0.14, 1)
 top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="East" type="StaticBody2D" parent="Walls"]
-position = Vector2(328, 0)
+[node name="Forest5" type="StaticBody2D" parent="Walls"]
+position = Vector2(-352, -320)
 script = ExtResource("3_wall")
-size = Vector2(16, 432)
-color = Color(0.3, 0.21, 0.13, 1)
-top_color = Color(0.42, 0.3, 0.18, 1)
+size = Vector2(64, 384)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
 
-[node name="RampartNorth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-110, -120)
+[node name="Forest6" type="StaticBody2D" parent="Walls"]
+position = Vector2(-304, -304)
 script = ExtResource("3_wall")
-size = Vector2(14, 160)
+size = Vector2(32, 416)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest7" type="StaticBody2D" parent="Walls"]
+position = Vector2(-256, -288)
+script = ExtResource("3_wall")
+size = Vector2(64, 448)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest8" type="StaticBody2D" parent="Walls"]
+position = Vector2(64, -352)
+script = ExtResource("3_wall")
+size = Vector2(576, 320)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest9" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, -496)
+script = ExtResource("3_wall")
+size = Vector2(256, 32)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest10" type="StaticBody2D" parent="Walls"]
+position = Vector2(624, -272)
+script = ExtResource("3_wall")
+size = Vector2(32, 480)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest11" type="StaticBody2D" parent="Walls"]
+position = Vector2(368, -272)
+script = ExtResource("3_wall")
+size = Vector2(32, 32)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest12" type="StaticBody2D" parent="Walls"]
+position = Vector2(528, -160)
+script = ExtResource("3_wall")
+size = Vector2(160, 256)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest13" type="StaticBody2D" parent="Walls"]
+position = Vector2(432, -128)
+script = ExtResource("3_wall")
+size = Vector2(32, 192)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest14" type="StaticBody2D" parent="Walls"]
+position = Vector2(496, 144)
+script = ExtResource("3_wall")
+size = Vector2(160, 224)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest15" type="StaticBody2D" parent="Walls"]
+position = Vector2(608, 272)
+script = ExtResource("3_wall")
+size = Vector2(64, 480)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest16" type="StaticBody2D" parent="Walls"]
+position = Vector2(-608, 288)
+script = ExtResource("3_wall")
+size = Vector2(64, 448)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest17" type="StaticBody2D" parent="Walls"]
+position = Vector2(-256, 288)
+script = ExtResource("3_wall")
+size = Vector2(64, 448)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest18" type="StaticBody2D" parent="Walls"]
+position = Vector2(-560, 304)
+script = ExtResource("3_wall")
+size = Vector2(32, 416)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest19" type="StaticBody2D" parent="Walls"]
+position = Vector2(-304, 304)
+script = ExtResource("3_wall")
+size = Vector2(32, 416)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest20" type="StaticBody2D" parent="Walls"]
+position = Vector2(-512, 320)
+script = ExtResource("3_wall")
+size = Vector2(64, 384)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest21" type="StaticBody2D" parent="Walls"]
+position = Vector2(-352, 320)
+script = ExtResource("3_wall")
+size = Vector2(64, 384)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest22" type="StaticBody2D" parent="Walls"]
+position = Vector2(-432, 336)
+script = ExtResource("3_wall")
+size = Vector2(96, 352)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest23" type="StaticBody2D" parent="Walls"]
+position = Vector2(-96, 352)
+script = ExtResource("3_wall")
+size = Vector2(256, 320)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest24" type="StaticBody2D" parent="Walls"]
+position = Vector2(96, 224)
+script = ExtResource("3_wall")
+size = Vector2(128, 64)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest25" type="StaticBody2D" parent="Walls"]
+position = Vector2(240, 208)
+script = ExtResource("3_wall")
+size = Vector2(32, 32)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest26" type="StaticBody2D" parent="Walls"]
+position = Vector2(336, 224)
+script = ExtResource("3_wall")
+size = Vector2(160, 64)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="Forest27" type="StaticBody2D" parent="Walls"]
+position = Vector2(304, 496)
+script = ExtResource("3_wall")
+size = Vector2(544, 32)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="FrameWest1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-648, -276)
+script = ExtResource("3_wall")
+size = Vector2(16, 504)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="FrameWest2" type="StaticBody2D" parent="Walls"]
+position = Vector2(-648, 276)
+script = ExtResource("3_wall")
+size = Vector2(16, 504)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="FrameEast1" type="StaticBody2D" parent="Walls"]
+position = Vector2(648, 0)
+script = ExtResource("3_wall")
+size = Vector2(16, 1056)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="FrameNorth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -520)
+script = ExtResource("3_wall")
+size = Vector2(1312, 16)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="FrameSouth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 520)
+script = ExtResource("3_wall")
+size = Vector2(1312, 16)
+color = Color(0.14, 0.21, 0.14, 1)
+top_color = Color(0.2, 0.3, 0.19, 1)
+
+[node name="RampartNorth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(54, -200)
+script = ExtResource("3_wall")
+size = Vector2(588, 16)
 color = Color(0.38, 0.38, 0.41, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
-[node name="RampartSouth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-110, 120)
+[node name="RampartNorth2" type="StaticBody2D" parent="Walls"]
+position = Vector2(422, -200)
 script = ExtResource("3_wall")
-size = Vector2(14, 160)
+size = Vector2(20, 16)
 color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartSouth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-36, 200)
+script = ExtResource("3_wall")
+size = Vector2(408, 16)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartSouth2" type="StaticBody2D" parent="Walls"]
+position = Vector2(332, 200)
+script = ExtResource("3_wall")
+size = Vector2(200, 16)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartWest1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-232, -116)
+script = ExtResource("3_wall")
+size = Vector2(16, 152)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartWest2" type="StaticBody2D" parent="Walls"]
+position = Vector2(-232, 116)
+script = ExtResource("3_wall")
+size = Vector2(16, 152)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartEast1" type="StaticBody2D" parent="Walls"]
+position = Vector2(424, -112)
+script = ExtResource("3_wall")
+size = Vector2(16, 160)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="RampartEast2" type="StaticBody2D" parent="Walls"]
+position = Vector2(424, 112)
+script = ExtResource("3_wall")
+size = Vector2(16, 160)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="HutNorth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, -474)
+script = ExtResource("3_wall")
+size = Vector2(280, 12)
+color = Color(0.36, 0.36, 0.39, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="HutSouth1" type="StaticBody2D" parent="Walls"]
+position = Vector2(364, -296)
+script = ExtResource("3_wall")
+size = Vector2(48, 12)
+color = Color(0.36, 0.36, 0.39, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="HutSouth2" type="StaticBody2D" parent="Walls"]
+position = Vector2(536, -296)
+script = ExtResource("3_wall")
+size = Vector2(168, 12)
+color = Color(0.36, 0.36, 0.39, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="HutWest1" type="StaticBody2D" parent="Walls"]
+position = Vector2(346, -385)
+script = ExtResource("3_wall")
+size = Vector2(12, 166)
+color = Color(0.36, 0.36, 0.39, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="HutEast1" type="StaticBody2D" parent="Walls"]
+position = Vector2(614, -385)
+script = ExtResource("3_wall")
+size = Vector2(12, 166)
+color = Color(0.36, 0.36, 0.39, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
 [node name="GateTowerNorth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-110, -54)
+position = Vector2(-232, -64)
 script = ExtResource("3_wall")
-size = Vector2(28, 28)
+size = Vector2(32, 32)
 color = Color(0.36, 0.36, 0.39, 1)
 top_color = Color(0.46, 0.46, 0.5, 1)
 
 [node name="GateTowerSouth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-110, 54)
+position = Vector2(-232, 64)
 script = ExtResource("3_wall")
-size = Vector2(28, 28)
+size = Vector2(32, 32)
 color = Color(0.36, 0.36, 0.39, 1)
 top_color = Color(0.46, 0.46, 0.5, 1)
 
 [node name="Watchstone" type="StaticBody2D" parent="Walls"]
-position = Vector2(110, -122)
+position = Vector2(100, -165)
 script = ExtResource("3_wall")
 size = Vector2(20, 26)
 color = Color(0.4, 0.4, 0.43, 1)
 top_color = Color(0.52, 0.52, 0.56, 1)
 
 [node name="WatchstoneRootWest" type="StaticBody2D" parent="Walls"]
-position = Vector2(90, -112)
+position = Vector2(80, -158)
 script = ExtResource("3_wall")
 size = Vector2(18, 6)
 color = Color(0.3, 0.21, 0.13, 1)
 top_color = Color(0.42, 0.3, 0.18, 1)
 
 [node name="WatchstoneRootEast" type="StaticBody2D" parent="Walls"]
-position = Vector2(132, -114)
+position = Vector2(122, -160)
 script = ExtResource("3_wall")
 size = Vector2(20, 6)
 color = Color(0.3, 0.21, 0.13, 1)
 top_color = Color(0.42, 0.3, 0.18, 1)
 
-[node name="BrokenPillarWest" type="StaticBody2D" parent="Walls"]
-position = Vector2(10, 70)
+[node name="PillarNW" type="StaticBody2D" parent="Walls"]
+position = Vector2(-150, -140)
 script = ExtResource("3_wall")
 size = Vector2(16, 16)
 color = Color(0.38, 0.38, 0.41, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
-[node name="BrokenPillarEast" type="StaticBody2D" parent="Walls"]
-position = Vector2(200, 70)
+[node name="PillarSW" type="StaticBody2D" parent="Walls"]
+position = Vector2(-150, 140)
 script = ExtResource("3_wall")
 size = Vector2(16, 16)
 color = Color(0.38, 0.38, 0.41, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
-[node name="HutWallWest" type="StaticBody2D" parent="Walls"]
-position = Vector2(160, -168)
+[node name="PillarNE" type="StaticBody2D" parent="Walls"]
+position = Vector2(330, -120)
 script = ExtResource("3_wall")
-size = Vector2(12, 64)
-color = Color(0.36, 0.36, 0.39, 1)
+size = Vector2(16, 16)
+color = Color(0.38, 0.38, 0.41, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
-[node name="HutWallSouthA" type="StaticBody2D" parent="Walls"]
-position = Vector2(180, -130)
+[node name="PillarSE" type="StaticBody2D" parent="Walls"]
+position = Vector2(350, 140)
 script = ExtResource("3_wall")
-size = Vector2(52, 12)
-color = Color(0.36, 0.36, 0.39, 1)
-top_color = Color(0.33, 0.42, 0.3, 1)
-
-[node name="HutWallSouthB" type="StaticBody2D" parent="Walls"]
-position = Vector2(282, -130)
-script = ExtResource("3_wall")
-size = Vector2(76, 12)
-color = Color(0.36, 0.36, 0.39, 1)
+size = Vector2(16, 16)
+color = Color(0.38, 0.38, 0.41, 1)
 top_color = Color(0.33, 0.42, 0.3, 1)
 
 [node name="HutBunk" type="StaticBody2D" parent="Walls"]
-position = Vector2(205, -186)
+position = Vector2(400, -462)
 script = ExtResource("3_wall")
 size = Vector2(32, 10)
 color = Color(0.33, 0.24, 0.16, 1)
 top_color = Color(0.42, 0.31, 0.2, 1)
 
 [node name="HutRack" type="StaticBody2D" parent="Walls"]
-position = Vector2(262, -188)
+position = Vector2(500, -464)
 script = ExtResource("3_wall")
 size = Vector2(28, 6)
 color = Color(0.33, 0.24, 0.16, 1)
 top_color = Color(0.42, 0.31, 0.2, 1)
 
+[node name="BarracksWallA" type="StaticBody2D" parent="Walls"]
+position = Vector2(150, 300)
+script = ExtResource("3_wall")
+size = Vector2(12, 70)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
+[node name="BarracksWallB" type="StaticBody2D" parent="Walls"]
+position = Vector2(430, 300)
+script = ExtResource("3_wall")
+size = Vector2(90, 12)
+color = Color(0.38, 0.38, 0.41, 1)
+top_color = Color(0.33, 0.42, 0.3, 1)
+
 [node name="RubbleA" type="StaticBody2D" parent="Walls"]
-position = Vector2(282, 120)
+position = Vector2(520, 440)
 script = ExtResource("3_wall")
 size = Vector2(30, 20)
 color = Color(0.36, 0.36, 0.39, 1)
 top_color = Color(0.46, 0.46, 0.5, 1)
 
 [node name="RubbleB" type="StaticBody2D" parent="Walls"]
-position = Vector2(262, 172)
+position = Vector2(220, 455)
 script = ExtResource("3_wall")
 size = Vector2(20, 14)
 color = Color(0.36, 0.36, 0.39, 1)
 top_color = Color(0.46, 0.46, 0.5, 1)
 
-[node name="RootWestNorth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-210, -120)
+[node name="ForecourtTree" type="StaticBody2D" parent="Walls"]
+position = Vector2(-340, -120)
 script = ExtResource("3_wall")
-size = Vector2(80, 8)
+size = Vector2(14, 14)
+color = Color(0.2, 0.15, 0.1, 1)
+top_color = Color(0.14, 0.26, 0.13, 1)
+
+[node name="ForecourtRoot" type="StaticBody2D" parent="Walls"]
+position = Vector2(-470, 120)
+script = ExtResource("3_wall")
+size = Vector2(60, 8)
 color = Color(0.3, 0.21, 0.13, 1)
 top_color = Color(0.42, 0.3, 0.18, 1)
 
-[node name="RootWestSouth" type="StaticBody2D" parent="Walls"]
-position = Vector2(-200, 130)
+[node name="EastRoots" type="StaticBody2D" parent="Walls"]
+position = Vector2(596, 0)
 script = ExtResource("3_wall")
-size = Vector2(90, 8)
+size = Vector2(16, 112)
 color = Color(0.3, 0.21, 0.13, 1)
 top_color = Color(0.42, 0.3, 0.18, 1)
-
-[node name="RootRampart" type="StaticBody2D" parent="Walls"]
-position = Vector2(-96, -150)
-script = ExtResource("3_wall")
-size = Vector2(14, 40)
-color = Color(0.3, 0.21, 0.13, 1)
-top_color = Color(0.42, 0.3, 0.18, 1)
-
-[node name="RootSouthEdge" type="StaticBody2D" parent="Walls"]
-position = Vector2(60, 172)
-script = ExtResource("3_wall")
-size = Vector2(80, 8)
-color = Color(0.3, 0.21, 0.13, 1)
-top_color = Color(0.42, 0.3, 0.18, 1)
-
-[node name="RootEastEdge" type="StaticBody2D" parent="Walls"]
-position = Vector2(290, 20)
-script = ExtResource("3_wall")
-size = Vector2(10, 70)
-color = Color(0.3, 0.21, 0.13, 1)
-top_color = Color(0.42, 0.3, 0.18, 1)
-
-[node name="Tree1" type="StaticBody2D" parent="Walls"]
-position = Vector2(-260, -150)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
-
-[node name="Tree2" type="StaticBody2D" parent="Walls"]
-position = Vector2(-250, 160)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
-
-[node name="Tree3" type="StaticBody2D" parent="Walls"]
-position = Vector2(-170, -170)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
-
-[node name="Tree4" type="StaticBody2D" parent="Walls"]
-position = Vector2(-160, 175)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
-
-[node name="Tree5" type="StaticBody2D" parent="Walls"]
-position = Vector2(300, 70)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
-
-[node name="Tree6" type="StaticBody2D" parent="Walls"]
-position = Vector2(-20, -178)
-script = ExtResource("3_wall")
-size = Vector2(14, 14)
-color = Color(0.2, 0.15, 0.1, 1)
-top_color = Color(0.14, 0.26, 0.13, 1)
 
 [node name="ScratchedTally" type="Area2D" parent="."]
-position = Vector2(296, -168)
+position = Vector2(560, -440)
 script = ExtResource("10_read")
 persistent_id = &"wardens_rest_tally"
 title = "Scratched Tally"
@@ -324,7 +649,7 @@ script = ExtResource("11_cond_node")
 condition = SubResource("C_sentinel_defeated")
 
 [node name="SplitWatchstone" type="Area2D" parent="AfterSentinel"]
-position = Vector2(110, -84)
+position = Vector2(100, -128)
 script = ExtResource("10_read")
 persistent_id = &"wardens_rest_watchstone"
 title = "Split Watchstone"
@@ -336,21 +661,165 @@ event_id = &"interact:wardens_rest_watchstone"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterSentinel/SplitWatchstone"]
 shape = SubResource("Circle_use")
 
+[node name="HutFind" type="Node2D" parent="."]
+y_sort_enabled = true
+script = ExtResource("11_cond_node")
+condition = SubResource("C_sentinel_defeated")
+
+[node name="Footlocker" type="Area2D" parent="HutFind"]
+position = Vector2(440, -440)
+script = ExtResource("10_read")
+persistent_id = &"wardens_rest_footlocker"
+title = "Warden's Footlocker"
+verb = "Open"
+text = "A footlocker under the bunk, its lock long broken. Inside lie the post's last stores: oak planks for repairs and a roll of cured leather."
+look = 1
+rewards = Array[ExtResource("21_cost")]([SubResource("Find_planks"), SubResource("Find_leather")])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HutFind/Footlocker"]
+shape = SubResource("Circle_use")
+
+[node name="SentinelCache" type="Area2D" parent="."]
+position = Vector2(100, 128)
+script = ExtResource("91_cache")
+boss_id = &"wardens_rest_rootbound_sentinel"
+loot_table = ExtResource("92_chapter_rare")
+label = "Sentinel's Cache"
+taken_flags = Array[StringName]([&"boss_reward.whisper_forest_grove_warden"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SentinelCache"]
+shape = SubResource("Circle_rest")
+
+[node name="Lore" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="CaptainsLog" type="Area2D" parent="Lore"]
+position = Vector2(480, 410)
+script = ExtResource("10_read")
+persistent_id = &"wardens_rest_captains_log"
+title = "Watch Captain's Log"
+verb = "Read"
+text = "Third night the roots came up through the yard. We cut them back at dusk; by dawn they stood again, every one bent east. The watchstone has started to crack."
+look = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lore/CaptainsLog"]
+shape = SubResource("Circle_use")
+
+[node name="EastRootsHint" type="Area2D" parent="."]
+position = Vector2(560, 0)
+script = ExtResource("19_trigger")
+hint = "The roots run on east, thicker than any wall. There is no way through."
+hint_id = &"wardens_rest_east_roots"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastRootsHint"]
+shape = SubResource("Rect_east_hint")
+
+[node name="Resources" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="BarracksRichVein" parent="Resources" instance=ExtResource("20_node")]
+position = Vector2(320, 440)
+definition = ExtResource("def_rich_vein")
+node_id = &"wr_rich_vein"
+prompt = "Gather"
+
+[node name="BarracksRock" parent="Resources" instance=ExtResource("20_node")]
+position = Vector2(100, 440)
+definition = ExtResource("def_forest_rock")
+node_id = &"wr_rock"
+prompt = "Gather"
+
+[node name="ForecourtOak" parent="Resources" instance=ExtResource("20_node")]
+position = Vector2(-520, -110)
+definition = ExtResource("def_oak_tree")
+node_id = &"wr_oak"
+prompt = "Gather"
+
+[node name="GateRest" type="Area2D" parent="."]
+position = Vector2(-300, 70)
+script = ExtResource("18_checkpoint")
+spawn_id = &"wardens_rest_gate"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GateRest"]
+shape = SubResource("Circle_rest")
+
+[node name="QuestAnchors" type="Node2D" parent="."]
+
+[node name="WardenFootlocker" type="Marker2D" parent="QuestAnchors"]
+position = Vector2(440, -440)
+
+[node name="Encounters" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Forecourt" type="Node2D" parent="Encounters"]
+position = Vector2(-430, 0)
+script = ExtResource("16_enc")
+encounter_id = &"wr_forecourt"
+trigger_radius = 110.0
+
+[node name="A" type="Marker2D" parent="Encounters/Forecourt"]
+position = Vector2(-20, -40)
+script = ExtResource("17_espawn")
+config = ExtResource("14_husk")
+
+[node name="B" type="Marker2D" parent="Encounters/Forecourt"]
+position = Vector2(30, 40)
+script = ExtResource("17_espawn")
+config = ExtResource("14_husk")
+
+[node name="BarracksWolves" type="Node2D" parent="Encounters"]
+position = Vector2(300, 350)
+script = ExtResource("16_enc")
+encounter_id = &"wr_barracks_wolves"
+trigger_radius = 90.0
+persistent = false
+
+[node name="A" type="Marker2D" parent="Encounters/BarracksWolves"]
+position = Vector2(-40, -15)
+script = ExtResource("17_espawn")
+config = ExtResource("15_wolf")
+
+[node name="B" type="Marker2D" parent="Encounters/BarracksWolves"]
+position = Vector2(40, 20)
+script = ExtResource("17_espawn")
+config = ExtResource("15_wolf")
+
+[node name="Landmarks" type="Node2D" parent="."]
+
+[node name="Forecourt" type="Marker2D" parent="Landmarks"]
+position = Vector2(-430, 0)
+script = ExtResource("99_landmark")
+label = "Forecourt"
+
+[node name="WatchPost" type="Marker2D" parent="Landmarks"]
+position = Vector2(100, 0)
+script = ExtResource("99_landmark")
+label = "Watch Post"
+
+[node name="GuardHut" type="Marker2D" parent="Landmarks"]
+position = Vector2(480, -385)
+script = ExtResource("99_landmark")
+label = "Guard Hut"
+
+[node name="Barracks" type="Marker2D" parent="Landmarks"]
+position = Vector2(310, 365)
+script = ExtResource("99_landmark")
+label = "Barracks"
+
 [node name="Player" parent="." instance=ExtResource("4_player")]
-position = Vector2(-280, 0)
+position = Vector2(-600, 0)
 
 [node name="Enemies" type="Node2D" parent="."]
 y_sort_enabled = true
 
 [node name="RootboundSentinel" parent="Enemies" instance=ExtResource("13_grunt")]
-position = Vector2(110, -50)
+position = Vector2(100, 0)
 config = ExtResource("14_sentinel_cfg")
 attacks = ExtResource("15_sentinel_attacks")
 persistent_id = &"wardens_rest_rootbound_sentinel"
-defeat_milestone = true
 
 [node name="ToChapel" type="Area2D" parent="."]
-position = Vector2(-332, 0)
+position = Vector2(-652, 0)
 script = ExtResource("9_transition")
 target_map_id = &"chapel"
 target_spawn_id = &"from_wardens_rest"
@@ -360,11 +829,11 @@ label = "The Chapel"
 shape = SubResource("Rect_door")
 
 [node name="SpawnDefault" type="Marker2D" parent="."]
-position = Vector2(-280, 0)
+position = Vector2(-600, 0)
 script = ExtResource("8_spawn")
 
 [node name="SpawnFromChapel" type="Marker2D" parent="."]
-position = Vector2(-280, 0)
+position = Vector2(-600, 0)
 script = ExtResource("8_spawn")
 spawn_id = &"from_chapel"
 

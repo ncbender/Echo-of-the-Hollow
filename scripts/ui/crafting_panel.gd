@@ -728,14 +728,19 @@ func _recipe_row(recipe: RecipeDefinition) -> Control:
 	var box := card.get_node("Box") as VBoxContainer
 	var output := character.database.get_item(recipe.output_item_id)
 	box.add_child(UiTheme.label("%s  ->  %d x %s" % [recipe.display_name, recipe.output_quantity, output.display_name if output else String(recipe.output_item_id)], UiTheme.PARCHMENT))
+	var with_stash := _forge_uses_stash()
 	for input in recipe.inputs:
 		var item := character.database.get_item(input.item_id)
-		var have := character.inventory.count(input.item_id)
-		box.add_child(UiTheme.stat_row("%dx %s" % [input.quantity, item.display_name if item else String(input.item_id)], "have %d" % have,
+		var in_bag := character.inventory.count(input.item_id)
+		var have := in_bag + (character.stash.count(input.item_id) if with_stash else 0)
+		var text := "%d / %d" % [have, input.quantity]
+		if have != in_bag:
+			text += "  (bag %d, stash %d)" % [in_bag, have - in_bag]
+		box.add_child(UiTheme.stat_row(item.display_name if item else String(input.item_id), text,
 			UiTheme.SUCCESS if have >= input.quantity else UiTheme.DANGER))
-	var error := BaseBuilder.craft_error(character, recipe)
+	var error := BaseBuilder.craft_error(character, recipe, with_stash)
 	var button := UiTheme.button("Craft", &"PrimaryButton", func() -> void:
-		var result := BaseBuilder.craft(character, recipe)
+		var result := BaseBuilder.craft(character, recipe, _forge_uses_stash())
 		_last_craft = result if result != "" else "Crafted %s." % recipe.display_name
 		rebuild())
 	button.name = "Craft_%s" % recipe.id
@@ -743,6 +748,13 @@ func _recipe_row(recipe: RecipeDefinition) -> Control:
 	button.tooltip_text = error
 	box.add_child(button)
 	return card
+
+
+## The forge stands in a Haven ruin (the Old Smithy): its recipes reach the Haven stash too, by the
+## same rule as the profession workstations (ProfessionService.uses_stash).
+func _forge_uses_stash() -> bool:
+	var ruin_site := plot as RuinSite
+	return ruin_site != null and is_instance_valid(ruin_site) and ProfessionService.uses_stash(character, ruin_site.ruin_id)
 
 
 func _pick_affix(index: int) -> void:

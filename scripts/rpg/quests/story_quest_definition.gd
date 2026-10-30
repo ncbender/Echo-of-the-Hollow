@@ -15,6 +15,11 @@ extends Resource
 @export var next_quest_ids: Array[StringName] = []
 ## Stub quests (the story continues in a later update) never complete.
 @export var open_ended: bool = false
+## Side quests (Region 1 Paket C, docs/SIDE_QUESTS_1_0.md): started by this story event (a dialogue,
+## a readable ...) instead of a quest chain, while `start_condition` holds. Empty = only through
+## next_quest_ids / the prologue. The start event never counts for the quest's own steps.
+@export var start_event_id: StringName
+@export var start_condition: StoryCondition
 ## NPC Quest Turn-ins 1.0 (docs/NPC_QUEST_TURNINS_1_0_T1.md): gold handed out once by
 ## `turn_in_npc_id` after the quest was completed under the reward system (0 = no reward).
 ## Completion itself never waits for it; QuestRewardService holds the claim rules.

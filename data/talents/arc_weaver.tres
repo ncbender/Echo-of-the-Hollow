@@ -61,8 +61,8 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Elemental Attunement"
 description = "+4% skill damage per rank."
-tier = 2
 max_rank = 3
+column = 2
 stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_x7aee")])
 
 [sub_resource type="Resource" id="Resource_2jakh"]
@@ -84,8 +84,7 @@ tree_id = &"arc_weaver"
 display_name = "Shatterbolt"
 description = "Arcane Bolt also chills (1 stack)."
 kind = 2
-tier = 2
-column = 1
+column = 3
 skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_rwa43")])
 
 [sub_resource type="Resource" id="Resource_pbb1m"]
@@ -100,7 +99,7 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Glacial Ward"
 description = "+6 armor per rank."
-tier = 3
+tier = 2
 max_rank = 5
 stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_pbb1m")])
 
@@ -124,7 +123,7 @@ tree_id = &"arc_weaver"
 display_name = "Frozen Pulse"
 description = "Mana Pulse chills (2 stacks)."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_ujsme")])
 
@@ -147,8 +146,9 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Hypothermia"
 description = "Skill hits on chilled targets restore 1 mana per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_3wisn")])
 
 [sub_resource type="Resource" id="Resource_ac2qq"]
@@ -163,9 +163,9 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Permafrost"
 description = "+3% cooldown reduction per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_ac2qq")])
 
 [sub_resource type="Resource" id="Resource_ov0v0"]
@@ -188,7 +188,7 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Cold Snap"
 description = "Killing a chilled enemy reduces all cooldowns by 0.5 s per rank."
-tier = 5
+tier = 3
 max_rank = 3
 effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_yjpte")])
 
@@ -208,7 +208,7 @@ tree_id = &"arc_weaver"
 display_name = "Ice Lance"
 description = "Frostbind pierces 2 more targets and deals 20% more damage."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 skill_mods = Array[ExtResource("3_notog")]([SubResource("Resource_w7l78")])
 
@@ -224,8 +224,9 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Winter Mind"
 description = "+6 maximum mana per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_emui0")])
 
 [sub_resource type="Resource" id="Resource_dnfgi"]
@@ -240,9 +241,9 @@ class_id = &"arcanist"
 tree_id = &"arc_weaver"
 display_name = "Brittle"
 description = "+8% critical damage per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_iptmi")]([SubResource("Resource_dnfgi")])
 
 [sub_resource type="Resource" id="Resource_c2yjj"]
@@ -283,7 +284,7 @@ tree_id = &"arc_weaver"
 display_name = "Winter's Grasp"
 description = "Capstone - hits on targets with 3 Chill stacks deal 40% more damage; your skill hits shatter such targets: the chill is consumed for 10 frost damage per stack."
 kind = 2
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_wjwrw")]([SubResource("Resource_t5hhg"), SubResource("Resource_lw2xs")])
 
 [resource]

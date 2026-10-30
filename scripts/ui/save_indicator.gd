@@ -7,6 +7,8 @@ extends PanelContainer
 
 const SHOW_SUCCESS := 2.0
 const SHOW_FAILURE := 5.0
+## Slot height before the theme is known (GameHud measures the real one, slot_height).
+const FALLBACK_HEIGHT := 46.0
 
 var session: SessionState
 var _label: Label
@@ -17,7 +19,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # also while the pause menu saves
 	theme_type_variation = &"HudPanel"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_label = UiTheme.label("", UiTheme.COLOR_TEXT)
+	_label = UiTheme.label("Progress saved", UiTheme.COLOR_TEXT)   # one line from the start: a stable slot
 	add_child(_label)
 	visible = false
 	session = SessionState.find(get_tree())
@@ -57,6 +59,13 @@ func show_text(text: String, color: Color, seconds: float, allowed: bool = true)
 	_left = seconds
 	modulate.a = 1.0
 	visible = true
+
+
+## Height of the indicator's slot: its HUD panel around one line of text - the same for every
+## message and whether it is shown or not (HUD Notification Collision Fix 1.0: the loot feed sits
+## above this slot; a hard-coded 26 px let the 46 px panel grow up into the feed).
+func slot_height() -> float:
+	return maxf(get_combined_minimum_size().y, size.y) if is_inside_tree() else FALLBACK_HEIGHT
 
 
 func text() -> String:

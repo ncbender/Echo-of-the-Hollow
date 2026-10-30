@@ -6,7 +6,9 @@ extends RefCounted
 ## Guarantees: no negative or zero quantities, no stack above max_stack, no two
 ## instances with the same id, no unknown definitions. All multi-step operations
 ## are validated first and then applied, so they either fully succeed or change
-## nothing. Equipped items stay in the inventory (equipment only references them).
+## nothing. Equipped items stay owned by the inventory (equipment references them by id), but
+## Equipment Inventory Separation 1.0: an item in an equipment slot of the active class
+## (`equipped_check`, CharacterEquipment.in_equipment) is located there and takes no bag slot.
 
 signal changed
 ## Emitted after an instance left the inventory (equipment drops its references).
@@ -16,6 +18,9 @@ signal item_removed(instance_id: String)
 const CURRENCY_ROOM := 1 << 30
 
 var capacity: int = 40
+## instance id -> true while the item sits in an equipment slot (set by CharacterEquipment; a
+## method Callable, so no reference cycle). Empty for containers without equipment (the stash).
+var equipped_check: Callable
 var _db: GameDatabase
 var _items: Array[ItemInstance] = []
 var _by_id: Dictionary = {}
@@ -33,13 +38,23 @@ func items() -> Array[ItemInstance]:
 func used_slots() -> int:
 	var used := 0
 	for item in _items:
-		if _takes_slot(item.definition_id):
+		if takes_slot(item):
 			used += 1
 	return used
 
 
 func free_slots() -> int:
 	return maxi(0, capacity - used_slots())
+
+
+## True when `item` uses a bag slot: not currency and not in an equipment slot.
+func takes_slot(item: ItemInstance) -> bool:
+	return _takes_slot(item.definition_id) and not in_equipment(item.instance_id)
+
+
+## True while the instance sits in an equipment slot (see `equipped_check`).
+func in_equipment(instance_id: String) -> bool:
+	return equipped_check.is_valid() and bool(equipped_check.call(instance_id))
 
 
 ## False for currency: its stacks live in the inventory without a bag slot.
@@ -118,6 +133,18 @@ func add_item(item_id: StringName, amount: int = 1, origin: StringName = &"", it
 ## Adds an existing instance unchanged (transfer, loading). Keeps its identity.
 ## Returns "" on success or the reason for refusal.
 func add_instance(item: ItemInstance) -> String:
+	var error := _restorable(item)
+	if error == "" and is_full() and takes_slot(item):
+		error = "inventory full"
+	if error != "":
+		return error
+	_insert(item)
+	changed.emit()
+	return ""
+
+
+## "" if `item` may be inserted as it is (known definition, unique id, valid quantity) - room aside.
+func _restorable(item: ItemInstance) -> String:
 	if item == null:
 		return "no item"
 	var definition := _db.get_item(item.definition_id)
@@ -127,10 +154,6 @@ func add_instance(item: ItemInstance) -> String:
 		return "duplicate or missing instance id"
 	if item.quantity <= 0 or item.quantity > definition.max_stack:
 		return "invalid quantity %d" % item.quantity
-	if is_full() and _takes_slot(item.definition_id):
-		return "inventory full"
-	_insert(item)
-	changed.emit()
 	return ""
 
 
@@ -240,14 +263,19 @@ func to_array() -> Array:
 
 
 ## Restores items. Entries that cannot be restored (unknown definition, bad
-## data, duplicates, over capacity) are returned raw in `orphans` so the save
-## system can keep them instead of silently deleting player property.
+## data, duplicates) are returned raw in `orphans` so the save system can keep
+## them instead of silently deleting player property. Room is not checked here:
+## which items sit in equipment slots (no bag slot) and the final capacity are
+## only known once the loadouts and buildings are loaded - a saved item is never
+## dropped for room (Character.refresh_inventory_capacity: never drops items).
 func from_array(data: Array, warnings: PackedStringArray, orphans: Array) -> void:
 	_items.clear()
 	_by_id.clear()
 	for entry: Variant in data:
 		var item := ItemInstance.from_dict(entry)
-		var error := "invalid item data" if item == null else add_instance(item)
+		var error := "invalid item data" if item == null else _restorable(item)
+		if error == "":
+			_insert(item)
 		if error != "":
 			warnings.append("item not restored (%s): %s" % [error, JSON.stringify(entry)])
 			orphans.append(entry)

@@ -67,8 +67,8 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Focused Strikes"
 description = "Direct weapon hits have a 25% chance to grant 3 bonus Focus per rank (at most once per swing; skills, statuses and triggered hits never count)."
-tier = 2
 max_rank = 3
+column = 2
 effects = Array[ExtResource("2_ebvwv")]([SubResource("Effect_focused_strikes")])
 
 [sub_resource type="Resource" id="Resource_xcibj"]
@@ -79,8 +79,7 @@ tree_id = &"sr_bladestorm"
 display_name = "Blade Fan"
 description = "Unlocks the active skill Blade Fan."
 kind = 1
-tier = 2
-column = 1
+column = 3
 unlocks_skill = &"blade_fan"
 
 [sub_resource type="Resource" id="Resource_mdp3a"]
@@ -95,7 +94,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Serrated Knives"
 description = "+3% bleed chance per rank."
-tier = 3
+tier = 2
 max_rank = 5
 stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_mdp3a")])
 
@@ -114,7 +113,7 @@ tree_id = &"sr_bladestorm"
 display_name = "Fan of Knives"
 description = "Blade Fan throws 2 more knives."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 prerequisites = Array[StringName]([&"sr_bs_fan"])
 skill_mods = Array[ExtResource("3_g1gdp")]([SubResource("Resource_y6l6n")])
@@ -131,8 +130,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Tempo"
 description = "+3% physical damage per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_5dadv")])
 
 [sub_resource type="Resource" id="Resource_ju3sl"]
@@ -154,9 +154,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Riposte Rhythm"
 description = "Finishers reduce Blade Fan's cooldown by 1 s per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_73xcn")])
 
 [sub_resource type="Resource" id="Resource_trlpq"]
@@ -171,7 +171,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Whirling Steel"
 description = "+2% critical hit chance per rank."
-tier = 5
+tier = 3
 max_rank = 3
 stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_trlpq")])
 
@@ -190,7 +190,7 @@ tree_id = &"sr_bladestorm"
 display_name = "Piercing Blades"
 description = "Blade Fan knives pierce 2 targets."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 prerequisites = Array[StringName]([&"sr_bs_fan"])
 skill_mods = Array[ExtResource("3_g1gdp")]([SubResource("Resource_qfqln")])
@@ -207,8 +207,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Endless Flurry"
 description = "+2% attack speed per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_h2vgl")])
 
 [sub_resource type="Resource" id="Resource_sdilh"]
@@ -223,9 +224,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_bladestorm"
 display_name = "Bloodied Steel"
 description = "+10% bleed damage per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 stat_modifiers = Array[ExtResource("4_f0ysi")]([SubResource("Resource_sdilh")])
 
 [sub_resource type="Resource" id="Resource_jtlyr"]
@@ -256,7 +257,7 @@ tree_id = &"sr_bladestorm"
 display_name = "Thousand Cuts"
 description = "Capstone - light finishers release a ring of blades: 50% of the hit's damage to all other enemies within 50 px, applying Bleeding."
 kind = 2
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_ebvwv")]([SubResource("Resource_dpqj6")])
 
 [resource]

@@ -2,8 +2,8 @@ class_name InventoryPanel
 extends UiWindow
 ## Inventory & character window (I): paper doll with all 15 equipment slots of
 ## the ACTIVE class, character overview and detailed stats, the bag with
-## category tabs and sorting, gold as a wallet counter, and the selected item's
-## description (same order as every tooltip) with its comparison.
+## category tabs and sorting, gold as a wallet counter. Item descriptions and the
+## comparison with the worn gear are the hover tooltip (ItemTooltip).
 ## Interaction (no action buttons): hover shows the ItemTooltip at once (item +
 ## equipped comparison), right click equips (CharacterEquipment.quick_slot) or
 ## unequips, drag & drop picks a specific slot (Ring 2, Off Hand). There is no
@@ -11,11 +11,10 @@ extends UiWindow
 ## Only calls public Character / CharacterEquipment methods; holds no item state
 ## except the selected instance id. Drag & drop between bag and paper doll goes
 ## through the same equip/unequip calls (an item is never copied).
-## Layout: three columns in a flow container - side by side when the canvas is
-## wide enough, stacked (vertical scrolling) at high UI scales / small windows.
+## Layout (Main Window Layout Lock 1.0): one main window frame, two columns - the left page (paper doll /
+## overview / details) and the bag - each scrolling on its own; nothing else moves when a page changes.
 
-const BAG_COLUMNS := 8
-const DETAILS_WIDTH := 360
+const BAG_COLUMNS := 9
 const DOLL_WIDTH := 420
 const CATEGORIES := ["All", "Equipment", "Materials", "Consumables", "Quest"]
 const SORTS := ["Default", "Rarity", "Type", "Name"]
@@ -28,22 +27,35 @@ const DOLL_WEAPONS := [EquipSlot.Slot.MAIN_HAND, EquipSlot.Slot.OFF_HAND]
 ## Overview stats; the Details page lists every stat.
 const CORE_STATS: Array[StringName] = [Stats.MAX_HEALTH, Stats.ARMOR, Stats.PHYSICAL_DAMAGE, Stats.CRIT_CHANCE,
 	Stats.ATTACK_SPEED, Stats.POISE_DAMAGE]
+## Playtest Corrections 1.0: the base values the Details page always shows (every other stat only when in effect).
+const BASE_STATS: Array[StringName] = [Stats.MAX_HEALTH, Stats.ARMOR]
+## Menu UX Polish 1.1: the Details page's groups, by what each stat does (a view only - values unchanged).
+const DETAIL_GROUPS := [
+	["Defense", [Stats.MAX_HEALTH, Stats.ARMOR, Stats.DAMAGE_REDUCTION, Stats.PHYSICAL_RESISTANCE, Stats.MAGIC_RESISTANCE,
+		Stats.STATUS_RESISTANCE, Stats.POISE, Stats.BLOCK_EFFICIENCY]],
+	["Attack", [Stats.PHYSICAL_DAMAGE, Stats.DAMAGE_DEALT, Stats.ATTACK_SPEED, Stats.ATTACK_RECOVERY_SPEED, Stats.CRIT_CHANCE,
+		Stats.CRIT_DAMAGE, Stats.POISE_DAMAGE, Stats.FINISHER_POWER, Stats.KNOCKBACK_POWER, Stats.LIFE_ON_HIT]],
+	["Elements and status", [Stats.SHOCK_DAMAGE, Stats.BLEED_CHANCE, Stats.BLEED_DAMAGE, Stats.CHILL_CHANCE]],
+	["Skills and resource", [Stats.SKILL_DAMAGE, Stats.COOLDOWN_REDUCTION, Stats.SKILL_RECOVERY_SPEED, Stats.MAX_RESOURCE,
+		Stats.RESOURCE_GAIN, Stats.RESOURCE_EFFICIENCY]],
+	["Movement", [Stats.MOVE_SPEED]],
+]
 
 var character: Character
 var category: String = "All"
 var sort_mode: String = "Default"
 var left_page: String = "Equipment"
 
-var _columns: HFlowContainer
+var _columns: HBoxContainer
 var _left_tabs: UiTabs
+var _left_column: VBoxContainer
+var _doll_width: float = 0.0
 var _left: VBoxContainer
 var _bag_title: Label
 var _middle: VBoxContainer
-var _bag_hint: Label
 var _bag_tabs: UiTabs
 var _sort: OptionButton
 var _grid: GridContainer
-var _details: VBoxContainer
 var _status: Label
 var _gold: Label
 var _selected_id: String = ""
@@ -54,12 +66,15 @@ var tooltip: ItemTooltip
 func _ready() -> void:
 	set_title("Inventory")
 	set_close_text("Close [I / Esc]")
-	_columns = HFlowContainer.new()
+	main_window = true   # Main Window Layout Lock 1.0
+	_columns = HBoxContainer.new()
 	_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_columns.add_theme_constant_override(&"h_separation", UiTheme.GAP * 3)
+	_columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_columns.add_theme_constant_override(&"separation", UiTheme.GAP * 3)
 	body.add_child(_columns)
 
 	var left_column := VBoxContainer.new()
+	_left_column = left_column
 	left_column.custom_minimum_size = Vector2(DOLL_WIDTH, 0)
 	_columns.add_child(left_column)
 	_left_tabs = UiTabs.new()
@@ -67,14 +82,17 @@ func _ready() -> void:
 		_left_tabs.add_tab(page, page)
 	_left_tabs.tab_selected.connect(func(id: String) -> void:
 		left_page = id
+		reset_scroll()
 		rebuild())
 	left_column.add_child(_left_tabs)
-	_left = VBoxContainer.new()
-	left_column.add_child(_left)
+	left_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left_column.add_child(_pane("LeftScroll", func(box: VBoxContainer) -> void: _left = box))
 
 	var middle := VBoxContainer.new()
 	_middle = middle
-	middle.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP), 0)
+	middle.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP) + 26.0, 0)
+	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_columns.add_child(middle)
 	var header := HFlowContainer.new()
 	_bag_title = UiTheme.styled("", &"SubheadingLabel")
@@ -101,6 +119,7 @@ func _ready() -> void:
 		_bag_tabs.add_tab(id, id)
 	_bag_tabs.tab_selected.connect(func(id: String) -> void:
 		category = id
+		reset_scroll()
 		rebuild())
 	middle.add_child(_bag_tabs)
 	var bag_panel := UiTheme.card(&"InsetPanel")
@@ -108,35 +127,28 @@ func _ready() -> void:
 	_grid = GridContainer.new()
 	_grid.columns = BAG_COLUMNS
 	bag_panel.get_node("Box").add_child(_grid)
-	middle.add_child(bag_panel)
-	var hint := UiTheme.styled("Hover: details and comparison  ·  Right-click: equip / unequip, potion to slot [2]  ·  Drag onto a slot to choose it (Ring 2, Off Hand)  ·  Ctrl+click: favourite  ·  Alt+click: lock", &"CaptionLabel")
-	_bag_hint = hint
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size = Vector2(BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP), 0)
-	middle.add_child(hint)
-
-	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(DETAILS_WIDTH, 0)
-	_columns.add_child(right)
-	var details_card := UiTheme.card(&"CardPanel")
-	_details = details_card.get_node("Box") as VBoxContainer
-	_details.add_theme_constant_override(&"separation", 4)
-	right.add_child(details_card)
-	_status = UiTheme.wrapped("", UiTheme.WARNING, DETAILS_WIDTH)
+	middle.add_child(_pane("BagScroll", func(box: VBoxContainer) -> void: box.add_child(bag_panel)))
+	# Menu UX Polish 1.0: no visible usage hint - hover shows the ItemTooltip, the controls are unchanged.
+	_status = UiTheme.wrapped("", UiTheme.WARNING, BAG_COLUMNS * (ItemCell.SIZE.x + UiTheme.SLOT_GAP))
 	_status.name = "Status"
-	right.add_child(_status)
+	middle.add_child(_status)
 	tooltip = ItemTooltip.new()
 	add_child(tooltip)
 	visibility_changed.connect(func() -> void: if not visible: tooltip.hide_tooltip())
 
 
-## All three columns side by side; the flow container stacks them when narrower.
-func preferred_body_size() -> Vector2:
-	var width := 0.0
-	for column: Control in _columns.get_children():
-		width += column.get_combined_minimum_size().x
-	width += _columns.get_theme_constant(&"h_separation") * maxi(0, _columns.get_child_count() - 1)
-	return Vector2(width, body.get_combined_minimum_size().y)
+## A vertical scroll area that fills the rest of its column (its own scrollbar; the window never scrolls).
+func _pane(pane_name: String, fill: Callable) -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.name = pane_name
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.custom_minimum_size = Vector2(0, 120)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(box)
+	fill.call(box)
+	return scroll
 
 
 func open(target_character: Character) -> void:
@@ -161,7 +173,7 @@ func rebuild() -> void:
 	_bag_title.text = "Bag  %d / %d" % [character.inventory.used_slots(), character.inventory.capacity]
 	_gold.text = "Gold  %s" % gold_text(gold())
 	tooltip.hide_tooltip()   # cells are rebuilt; the next hover shows it again
-	_fit_bag_columns()
+	_hold_left_width()
 	_clear(_left)
 	match left_page:
 		"Overview":
@@ -171,31 +183,22 @@ func rebuild() -> void:
 		_:
 			_build_paper_doll()
 	_rebuild_grid()
-	_show_details()
 
 
-## Fewer bag columns on narrow canvases (high UI scale), so paper doll, bag and
-## details stay side by side as long as possible.
-func _fit_bag_columns() -> void:
-	var available := get_viewport_rect().size.x - 2.0 * UiTheme.SCREEN_MARGIN - _chrome_size().x - 24.0
-	var gaps := _columns.get_theme_constant(&"h_separation") * 2.0
-	var cell := ItemCell.SIZE.x + UiTheme.SLOT_GAP
-	var columns := BAG_COLUMNS
-	while columns > 5 and DOLL_WIDTH + DETAILS_WIDTH + gaps + columns * cell + 30.0 > available:
-		columns -= 1
-	_grid.columns = columns
-	_middle.custom_minimum_size.x = columns * cell + 26.0
-	_bag_hint.custom_minimum_size.x = columns * cell
+## The left column is as wide as the widest page (the paper doll), measured once: Equipment,
+## Overview and Details then share one width and the window never changes size between them.
+func _hold_left_width() -> void:
+	if _doll_width <= 0.0:
+		_clear(_left)
+		_build_paper_doll()
+		_doll_width = _left.get_combined_minimum_size().x
+	_left_column.custom_minimum_size.x = maxf(DOLL_WIDTH, _doll_width)
 
 
 # --- paper doll ---------------------------------------------------------------
 
 func _build_paper_doll() -> void:
 	var class_def := character.classes.get_active_definition()
-	var caption := UiTheme.styled("Equipment of %s  (only the active class's gear is in effect)" % (class_def.display_name if class_def else "-"), &"CaptionLabel")
-	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	caption.custom_minimum_size = Vector2(DOLL_WIDTH, 0)
-	_left.add_child(caption)
 	var doll := HBoxContainer.new()
 	doll.add_theme_constant_override(&"separation", UiTheme.GAP)
 	doll.add_child(_slot_column(DOLL_LEFT, true))
@@ -241,8 +244,6 @@ func _slot_entry(slot: int, caption_left: bool) -> HBoxContainer:
 	state.clip_text = true
 	state.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	state.custom_minimum_size = Vector2(96, 0)
-	if item != null:
-		state.add_theme_color_override(&"font_color", UiTheme.rarity_color(item.effective_rarity(character.database.get_item(item.definition_id))))
 	info.add_child(name_label)
 	info.add_child(state)
 	if caption_left:
@@ -261,10 +262,10 @@ func _slot_state(slot: int, item: ItemInstance) -> String:
 		var definition := character.database.get_item(item.definition_id)
 		if slot == EquipSlot.Slot.OFF_HAND and definition.slot_kind == ItemDefinition.SlotKind.ONE_HAND_WEAPON:
 			return "Dual wield"
-		return definition.display_name
+		return ""   # Menu UX Polish 1.0: the item's name lives only in its hover tooltip
 	if slot == EquipSlot.Slot.OFF_HAND and _main_hand_is_two_handed():
 		return "Two-hander"
-	return "Empty"
+	return ""   # an empty slot shows its frame and its name, nothing else
 
 
 func _main_hand_is_two_handed() -> bool:
@@ -302,12 +303,44 @@ func _build_overview() -> void:
 		_left.add_child(UiTheme.stat_row(family.display_name if family != null else String(family_id), "Level %d" % character.mastery.get_level(family_id)))
 
 
+## Menu UX Polish 1.1: every stat of Stats.ALL in its group (DETAIL_GROUPS; a stat no group names lands in
+## "Other", so nothing is ever left out). Playtest Corrections 1.0: always only what is in effect - a bonus that is 0
+## (as shown, to 0.1) is hidden, positive and negative ones stay, the base values (BASE_STATS: Max Health, Armor)
+## always stay; a group without a shown value is left out whole (heading and rule). The earlier "Only active
+## bonuses" switch kept Physical Damage %, Attack Speed %, Crit Chance % and Poise Damage % at 0 because it spared
+## all of CORE_STATS (the Overview list), not only the base values. Rebuilt on every stats_changed (equipment,
+## class switch, talents, buffs - the Character's own signal).
 func _build_detailed_stats() -> void:
-	_left.add_child(UiTheme.styled("Every stat of the active class, resolved from base, class, gear, sets and talents.", &"CaptionLabel"))
 	var stats := character.get_stats()
+	var grouped := {}
 	for stat in Stats.ALL:
+		grouped[stat] = false
+	for group: Array in DETAIL_GROUPS:
+		_add_stat_group(group[0], group[1].filter(func(stat: StringName) -> bool: return grouped.has(stat)), stats, grouped)
+	var rest: Array = Stats.ALL.filter(func(stat: StringName) -> bool: return not grouped[stat])
+	_add_stat_group("Other", rest, stats, grouped)
+
+
+## Details shows `stat`: a base value always, any other only when it is not 0 as displayed.
+static func shows_stat(stat: StringName, value: float) -> bool:
+	return stat in BASE_STATS or not is_zero_approx(snappedf(value, 0.1))
+
+
+func _add_stat_group(title: String, members: Array, stats: Dictionary, grouped: Dictionary) -> void:
+	var rows: Array[Control] = []
+	for stat: StringName in members:
+		grouped[stat] = true
 		var value: float = stats.get(stat, 0.0)
-		_left.add_child(UiTheme.stat_row(Stats.display_name(stat), _format(value), UiTheme.TEXT_PRIMARY if value != 0.0 else UiTheme.TEXT_MUTED))
+		if not shows_stat(stat, value):
+			continue
+		var row := UiTheme.stat_row(Stats.display_name(stat), _format(value), UiTheme.WARNING if value < 0.0 else UiTheme.TEXT_PRIMARY)
+		row.name = "Stat_%s" % stat
+		rows.append(row)
+	if rows.is_empty():
+		return
+	_left.add_child(UiTheme.section(title))
+	for row in rows:
+		_left.add_child(row)
 
 
 # --- bag ------------------------------------------------------------------------
@@ -341,6 +374,8 @@ func visible_items() -> Array[ItemInstance]:
 		var definition := character.database.get_item(item.definition_id)
 		if definition == null or definition.is_currency:
 			continue   # gold is shown as the wallet counter, not as a bag item
+		if character.inventory.in_equipment(item.instance_id):
+			continue   # sits in its equipment slot (paper doll), not in the bag
 		if category == "All" or ItemDescriber.category_tab(definition) == category:
 			result.append(item)
 	var db := character.database
@@ -372,24 +407,7 @@ func _select(instance_id: String) -> void:
 	rebuild()
 
 
-# --- details & actions --------------------------------------------------------------
-
-func _show_details() -> void:
-	_clear(_details)
-	var item := character.inventory.find(_selected_id)
-	if item == null:
-		_details.add_child(UiTheme.heading("No item selected"))
-		_details.add_child(UiTheme.wrapped("Hover an item for its details and a comparison with your gear. Click it to keep it here.",
-			UiTheme.TEXT_SECONDARY, DETAILS_WIDTH - 30))
-		return
-	ItemDescriber.build(_details, character, item, DETAILS_WIDTH - 30)
-	var definition := character.database.get_item(item.definition_id)
-	if definition.is_equippable():
-		var equipped := character.equipment.active_loadout().slot_of(item.instance_id) >= 0
-		var hint := UiTheme.styled("Right-click to unequip." if equipped else "Right-click to equip.", &"CaptionLabel")
-		hint.add_theme_color_override(&"font_color", UiTheme.RESONANCE)
-		_details.add_child(hint)
-
+# --- actions ------------------------------------------------------------------------
 
 ## Cell callbacks: immediate tooltip on hover/focus, quick equip on right click.
 func _wire(cell: ItemCell) -> void:
@@ -404,9 +422,9 @@ func _on_cell_hovered(cell: ItemCell) -> void:
 	tooltip.show_for(character, cell.item(), cell)
 
 
-## Right click: an equipped item (paper doll, or marked in the bag) is
-## unequipped - it stays in the bag, so no free slot is needed (items live only
-## in the inventory). Other equippable items go to CharacterEquipment.quick_slot.
+## Right click: an equipped item (paper doll) is unequipped back into the bag -
+## refused with a message while the bag has no free slot (it stays equipped).
+## Other equippable items go to CharacterEquipment.quick_slot (a swap reuses the slot).
 func _on_right_click(cell: ItemCell) -> void:
 	var item := cell.item()
 	if item == null:
@@ -531,5 +549,5 @@ class PaperDollFigure:
 			draw_line(c + Vector2(30 * side, -92), c + Vector2(44 * side, -10), line, 6.0)
 			draw_line(c + Vector2(12 * side, 12), c + Vector2(16 * side, 120), line, 8.0)
 		if title != "":
-			var width := ThemeDB.fallback_font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_SMALL).x
-			draw_string(ThemeDB.fallback_font, Vector2(c.x - width * 0.5, size.y - 4), title, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_SMALL, UiTheme.BRONZE)
+			var width := UiTheme.body_font().get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_SMALL).x
+			draw_string(UiTheme.body_font(), Vector2(c.x - width * 0.5, size.y - 4), title, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_SMALL, UiTheme.BRONZE)

@@ -61,8 +61,8 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Cold Blood"
 description = "+8% critical damage per rank."
-tier = 2
 max_rank = 3
+column = 2
 stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_livcj")])
 
 [sub_resource type="Resource" id="Resource_o1u2i"]
@@ -80,8 +80,7 @@ tree_id = &"sr_assassin"
 display_name = "Marked for Death"
 description = "Expose Weakness covers 40% more area."
 kind = 2
-tier = 2
-column = 1
+column = 3
 skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_o1u2i")])
 
 [sub_resource type="Resource" id="Resource_djp1m"]
@@ -103,7 +102,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Opportunist"
 description = "Hits on Weak Points restore 2 focus per rank."
-tier = 3
+tier = 2
 max_rank = 5
 effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_oaixv")])
 
@@ -122,7 +121,7 @@ tree_id = &"sr_assassin"
 display_name = "Guillotine"
 description = "Execution deals 25% more damage."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_qtiul")])
 
@@ -138,8 +137,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Lethality"
 description = "+3% physical damage per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_2fcqr")])
 
 [sub_resource type="Resource" id="Resource_hcgn7"]
@@ -162,9 +162,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Swift Kill"
 description = "Kills reduce Execution's cooldown by 1.5 s per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_d62a6")])
 
 [sub_resource type="Resource" id="Resource_4axxa"]
@@ -179,7 +179,7 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Ruthless"
 description = "+5% skill damage per rank."
-tier = 5
+tier = 3
 max_rank = 3
 stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_4axxa")])
 
@@ -200,7 +200,7 @@ tree_id = &"sr_assassin"
 display_name = "Exposing Strike"
 description = "Shadow Strike deals 30% more damage and 50% more against Weak Points."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 skill_mods = Array[ExtResource("3_34iqq")]([SubResource("Resource_ilqub")])
 
@@ -216,8 +216,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Assassin's Focus"
 description = "+6 maximum focus per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_bpfhj")]([SubResource("Resource_bdh03")])
 
 [sub_resource type="Resource" id="Resource_btwqs"]
@@ -239,9 +240,9 @@ class_id = &"shadowrunner"
 tree_id = &"sr_assassin"
 display_name = "Killing Edge"
 description = "Critical hits restore 3 focus per rank."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_b1fi5")])
 
 [sub_resource type="Resource" id="Resource_od2cj"]
@@ -278,7 +279,7 @@ tree_id = &"sr_assassin"
 display_name = "Death Mark"
 description = "Capstone - unlocks Death Mark. Your hits on death-marked targets deal 60% more damage, and killing one resets 4 s of all cooldowns and restores 30 focus."
 kind = 1
-tier = 7
+tier = 4
 effects = Array[ExtResource("2_lmw4q")]([SubResource("Resource_284po"), SubResource("Resource_i86pr")])
 unlocks_skill = &"death_mark"
 

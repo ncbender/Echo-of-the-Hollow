@@ -1,7 +1,9 @@
 keys,en
 UI_CLASS_STATION,Class Station
-UI_CHARACTER_WINDOW,"Character - Class, Talents & Skills"
-UI_CLOSE_CLASS,Close [G / C / Esc]
+UI_CHARACTER_WINDOW,"Skills & Talents"
+UI_CLOSE_CLASS,Close [G / Esc]
+UI_CLOSE_TALENTS,Close [T / Esc]
+UI_CLOSE,Close
 UI_PAGE_CLASSES,Classes
 UI_PAGE_TALENTS,Talents
 UI_PAGE_SKILLS,Skills
@@ -11,6 +13,9 @@ UI_PAGE_ARMOR,Armor
 UI_PAGE_WEAPONS,Weapons
 UI_SKILL_SLOTS,Skill slots
 UI_SKILLS_AND_MODS,Skills and modifications
+UI_SKILL_EMPTY_SLOT,Empty
+UI_SKILL_EQUIP,Equip to slot
+UI_SKILL_MODIFICATIONS,Modifications
 UI_ONLY_AT_STATION,Only at a class station.
 UI_AWAY_FROM_STATION,"Viewing away from a class station: you can learn talents; skills, mods, presets, respecs, class changes and quests need a class station."
 UI_CHOOSE_CLASS_TITLE,Choose Your Path
@@ -43,3 +48,4 @@ UI_QUEST_REWARD_JOURNAL_CLAIMED,Reward received: %s.
 UI_QUEST_REWARD_TRACKER,Return to %s for your reward.
 UI_QUEST_REWARD_TRACKER_AT,Collect your reward from %s.
 UI_QUEST_REWARD_BACK,Back
+UI_JOURNAL_EARLIER,Earlier chapters

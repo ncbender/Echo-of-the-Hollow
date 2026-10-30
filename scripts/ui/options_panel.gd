@@ -13,7 +13,7 @@ const CONTROLS := [
 	[&"attack_light", "Quick attack (bow: Quick Shot)"], [&"attack_heavy", "Heavy attack (bow: Precision Stance)"], [&"dash", "Dash (movement direction; standing still: towards the cursor)"],
 	[&"defensive", "Block / parry"], [&"ability_1", "Skill 1"], [&"ability_2", "Skill 2"], [&"ability_3", "Skill 3"],
 	[&"ability_4", "Skill 4"], [&"use_flask", "Hearth Flask"], [&"use_potion", "Special potion (potion slot)"], [&"interact", "Interact / talk / continue"],
-	[&"ui_inventory", "Inventory"], [&"ui_character", "Character, talents and skills"], [&"ui_journal", "Journal"],
+	[&"ui_inventory", "Inventory"], [&"ui_character", "Character"], [&"ui_talents", "Skills and talents"], [&"ui_journal", "Journal"],
 	[&"ui_map", "Map"], [&"ui_professions", "Professions"], [&"ui_options", "Options"], [&"ui_cancel", "Pause menu / close"], [&"toggle_fullscreen", "Fullscreen"],
 ]
 
@@ -22,6 +22,7 @@ var page: String = "Display"
 
 var _tabs: UiTabs
 var _pages: Dictionary = {}   # page -> VBoxContainer
+var _page_scroll: ScrollContainer
 var _scale_buttons: Dictionary = {}   # float -> Button
 var _windowed: Button
 var _fullscreen: Button
@@ -34,6 +35,7 @@ var _motion: CheckButton
 
 
 func _ready() -> void:
+	main_window = true   # Main Window Layout Lock 1.0: tabs and Reset stay, the page scrolls on its own
 	set_title("Options")
 	set_close_text("Close [O / Esc]")
 	_tabs = UiTabs.new()
@@ -41,12 +43,22 @@ func _ready() -> void:
 		_tabs.add_tab(id, id)
 	_tabs.tab_selected.connect(show_page)
 	body.add_child(_tabs)
+	var scroll := ScrollContainer.new()
+	scroll.name = "PageScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.custom_minimum_size = Vector2(0, 160)
+	body.add_child(scroll)
+	_page_scroll = scroll
+	var pages := VBoxContainer.new()
+	pages.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(pages)
 	for id in PAGES:
 		var box := VBoxContainer.new()
 		box.name = "Page%s" % id
 		box.custom_minimum_size = Vector2(WIDTH, 0)
 		box.add_theme_constant_override(&"separation", UiTheme.GAP)
-		body.add_child(box)
+		pages.add_child(box)
 		_pages[id] = box
 	_build_display(_pages["Display"])
 	_build_audio(_pages["Audio"])
@@ -61,6 +73,10 @@ func _ready() -> void:
 
 
 func show_page(id: String) -> void:
+	if id != page:
+		reset_scroll()   # a new page starts at its top (UI Usability 1.0)
+		if _page_scroll != null:
+			_page_scroll.scroll_vertical = 0
 	page = id
 	_tabs.select(id)
 	for key: String in _pages:
@@ -144,14 +160,15 @@ func _build_accessibility(box: VBoxContainer) -> void:
 func _build_controls(box: VBoxContainer) -> void:
 	box.add_child(_small("Mouse and keyboard. Rebinding keys is not available yet."))
 	var grid := GridContainer.new()
-	grid.columns = 2
+	grid.columns = 4   # two action / key pairs per row (Main Window Layout Lock 1.0: the wide frame, half the height)
 	grid.add_theme_constant_override(&"h_separation", UiTheme.GAP * 4)
 	grid.add_theme_constant_override(&"v_separation", 4)
 	for entry: Array in CONTROLS:
 		if not InputMap.has_action(entry[0]):
 			continue
 		var label := UiTheme.label(entry[1], UiTheme.TEXT_SECONDARY)
-		label.custom_minimum_size = Vector2(300, 0)
+		label.custom_minimum_size = Vector2(330, 0)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # long actions wrap in their column
 		grid.add_child(label)
 		grid.add_child(UiTheme.key_chip(binding_text(entry[0])))
 	box.add_child(grid)

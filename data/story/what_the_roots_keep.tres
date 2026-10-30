@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+
+[sub_resource type="Resource" id="O_marks"]
+script = ExtResource("3_obj")
+event_id = &"interact:roots_keep_mark"
+amount = 3
+description = "Find the carved marks"
+cumulative = true
+
+[sub_resource type="Resource" id="S_marks"]
+script = ExtResource("2_step")
+description = "The same three-lined sign is carved where the roots run thickest: one along the northern path where the old cart lies swallowed, one deep in the hollow to the south, one on the way down to the sunken grove. Find them."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_marks")])
+completion_flag = &"roots_keep.marks_found"
+
+[sub_resource type="Resource" id="O_cache"]
+script = ExtResource("3_obj")
+event_id = &"interact:roots_keep_cache"
+description = "Search the sunken grove"
+cumulative = true
+
+[sub_resource type="Resource" id="S_cache"]
+script = ExtResource("2_step")
+description = "The marks all point to the sunken grove in the south-west. Find what the roots are keeping there."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_cache")])
+
+[resource]
+script = ExtResource("1_quest")
+id = &"what_the_roots_keep"
+display_name = "What the Roots Keep"
+chapter = "Side Quest"
+description = "Someone marked the roots of the Tangled Wood long ago. The marks lead somewhere."
+steps = Array[ExtResource("2_step")]([SubResource("S_marks"), SubResource("S_cache")])
+completion_flag = &"roots_keep.completed"
+start_event_id = &"interact:roots_keep_marker"

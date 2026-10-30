@@ -41,10 +41,14 @@ static func build(character: Character, plot: BuildingPlotDefinition, building: 
 	return ""
 
 
-static func craft_error(character: Character, recipe: RecipeDefinition) -> String:
+## Building recipes (the Old Smithy's forge). UI Usability & Haven Crafting 1.0: `with_stash`
+## (true at a Haven workstation, ProfessionService.uses_stash) counts and consumes the bag first,
+## then the Haven stash - one material plan for display, check and consumption, as the
+## profession crafts do.
+static func craft_error(character: Character, recipe: RecipeDefinition, with_stash: bool = false) -> String:
 	if recipe == null or character.database.get_item(recipe.output_item_id) == null:
 		return "invalid recipe"
-	var missing := missing_items(character, recipe.inputs)
+	var missing: PackedStringArray = ProfessionService.material_plan(character, recipe.inputs, with_stash).missing
 	if not missing.is_empty():
 		return "missing: %s" % ", ".join(missing)
 	# Conservative: requires room before inputs are removed.
@@ -53,13 +57,17 @@ static func craft_error(character: Character, recipe: RecipeDefinition) -> Strin
 	return ""
 
 
-static func craft(character: Character, recipe: RecipeDefinition) -> String:
-	var error := craft_error(character, recipe)
+## One transaction: everything checked first, then the plan consumed and the output added;
+## should the output still not fit, the plan is given back and nothing changed.
+static func craft(character: Character, recipe: RecipeDefinition, with_stash: bool = false) -> String:
+	var error := craft_error(character, recipe, with_stash)
 	if error != "":
 		return error
-	for input in recipe.inputs:
-		character.inventory.remove_quantity(input.item_id, input.quantity)
-	character.inventory.add_item(recipe.output_item_id, recipe.output_quantity, ItemInstance.ORIGIN_CRAFTED)
+	var plan: Array = ProfessionService.material_plan(character, recipe.inputs, with_stash).plan
+	ProfessionService.consume_plan(character, plan)
+	if character.inventory.add_item(recipe.output_item_id, recipe.output_quantity, ItemInstance.ORIGIN_CRAFTED).is_empty():
+		ProfessionService.refund_plan(character, plan)
+		return "inventory full"
 	return ""
 
 

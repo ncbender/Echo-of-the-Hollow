@@ -2,11 +2,18 @@ class_name TalentRules
 extends Resource
 ## Binding talent and build rules (docs/TALENT_SYSTEM.md).
 
-## Points needed in lower tiers of the same tree, per tier 1..7.
-@export var tier_points: PackedInt32Array = [0, 5, 10, 15, 20, 25, 30]
+## Tiers per tree (Talent Structure Rework 1.0): tiers 1-3 hold the free
+## choices of a tree, the last tier its one capstone.
+const TIERS := 4
+## Places in one tier row (node column 0..COLUMNS - 1).
+const COLUMNS := 4
+
+## Points needed in lower tiers of the same tree, per tier 1..TIERS. 18 lets a
+## build open tier 3 in at most two trees, 30 a capstone in only one (56 points).
+@export var tier_points: PackedInt32Array = [0, 5, 18, 30]
 ## First class level that grants a talent point; one point per level from here
-## (level 60 = 51 points).
-@export var first_point_level: int = 10
+## (level 60 = 56 points). Points are derived from the level, never stored.
+@export var first_point_level: int = 5
 @export var skill_slots: int = 4
 @export var preset_slots: int = 5
 

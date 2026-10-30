@@ -5,7 +5,7 @@ extends Control
 ## glyph for the item kind (blade, armour, ring, potion, ore ...). Replace with
 ## sprite icons later by setting `texture` - the frame stays.
 
-const SIZE := Vector2(40, 40)
+const SIZE := UiTheme.ICON_SIZE
 const K = ItemDefinition.SlotKind
 
 var definition: ItemDefinition
@@ -47,18 +47,19 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(4 + index * 6, size.y - 6), Vector2(4, 3)), color)
 	var center := size * 0.5 + Vector2(0, -2)
 	var s := minf(size.x, size.y) / 40.0
-	if texture != null:
-		draw_texture_rect(texture, rect.grow(-5), false)
+	var art := texture if texture != null else UiSkin.texture(StringName("items/%s" % definition.id))
+	if art != null:
+		draw_texture_rect(art, rect.grow(-5), false)
 	else:
 		_draw_glyph(center, s, color.lerp(UiTheme.PARCHMENT, 0.4))
 	if quantity > 1:
 		var text := str(quantity)
-		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION).x
-		draw_string_outline(ThemeDB.fallback_font, Vector2(size.x - width - 3, size.y - 4), text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION, 4, Color.BLACK)
-		draw_string(ThemeDB.fallback_font, Vector2(size.x - width - 3, size.y - 4), text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION, UiTheme.PARCHMENT)
+		var width := UiTheme.body_font().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION).x
+		draw_string_outline(UiTheme.body_font(), Vector2(size.x - width - 3, size.y - 4), text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION, 4, Color.BLACK)
+		draw_string(UiTheme.body_font(), Vector2(size.x - width - 3, size.y - 4), text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiTheme.FONT_CAPTION, UiTheme.PARCHMENT)
 	if equipped:
 		draw_rect(Rect2(Vector2(2, 2), Vector2(9, 9)), UiTheme.RESONANCE_DIM)
-		draw_string(ThemeDB.fallback_font, Vector2(3, 10), "E", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiTheme.PARCHMENT)
+		draw_string(UiTheme.body_font(), Vector2(3, 10), "E", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiTheme.PARCHMENT)
 	if favorite:   # a bronze diamond
 		var at := Vector2(size.x - 7, 7)
 		draw_colored_polygon(PackedVector2Array([at + Vector2(0, -5), at + Vector2(5, 0), at + Vector2(0, 5), at + Vector2(-5, 0)]), UiTheme.BRONZE)

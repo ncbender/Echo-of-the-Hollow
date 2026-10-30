@@ -10,6 +10,9 @@ extends Interactable
 @export var boss_id: StringName
 @export var loot_table: EquipmentLootTable
 @export var label: String = "Warden's Cache"
+## Further flags that count as this reward taken (BossRewardService taken_flags). Chapter 1
+## Rare Reward 1.0: the Sentinel's cache stays closed for the frozen Grove Warden rare claim.
+@export var taken_flags: Array[StringName] = []
 
 var character: Character
 var session: SessionState
@@ -34,7 +37,7 @@ func _exit_tree() -> void:
 
 
 func refresh() -> void:
-	visible = character != null and BossRewardService.has_claim(character, boss_id)
+	visible = character != null and BossRewardService.has_claim(character, boss_id, taken_flags)
 
 
 ## WorldState emits flag_changed only on a real change, so the defeat of the boss
@@ -49,7 +52,7 @@ func _on_flag_changed(flag: StringName, _value: Variant) -> void:
 func open(claimed: Array[ItemInstance] = []) -> String:
 	if character == null:
 		return "The cache is sealed."
-	var error := BossRewardService.claim(character, boss_id, loot_table, rng, claimed)
+	var error := BossRewardService.claim(character, boss_id, loot_table, rng, claimed, taken_flags)
 	refresh()
 	if error == "" and session != null:
 		session.request_critical_save("boss reward %s" % boss_id)
@@ -66,7 +69,9 @@ func interact(hud: GameHud) -> void:
 	var definition := character.database.get_item(item.definition_id)
 	if hud.bridge != null:
 		hud.bridge.item_received.emit(item.definition_id, item.quantity, item)   # loot feed with the instance rarity
-	hud.notify("%s: %s (%s)" % [label, definition.display_name, UiTheme.rarity_name(item.effective_rarity(definition))])
+	else:
+		hud.notify("%s: %s (%s)" % [label, definition.display_name, UiTheme.rarity_name(item.effective_rarity(definition))])
+	# Loot & Progress Feedback 1.0: one message per reward - the loot feed's row (no second toast with the bridge)
 
 
 func _process(_delta: float) -> void:

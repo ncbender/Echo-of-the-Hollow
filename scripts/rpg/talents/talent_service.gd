@@ -5,8 +5,10 @@ extends RefCounted
 ## so there is exactly one place that knows the rules:
 ##  * points: one per class level from TalentRules.first_point_level
 ##  * tiers: a node of tier t needs tier_points[t-1] points invested in LOWER
-##    tiers of the same tree (trees can be mixed freely)
-##  * ranks, class level, prerequisites (no cycles, checked on data load)
+##    tiers of the same tree (trees can be mixed freely); every node of an open
+##    tier is a free choice
+##  * ranks, class level, prerequisites (only direct upgrades; no cycles,
+##    checked on data load)
 
 
 static func rules(character: Character) -> TalentRules:

@@ -12,6 +12,9 @@ const BOSS_WIDTH := 640.0
 
 var bridge: PlayerProgressionBridge
 var target: Enemy
+## Width each side column takes from the top edge (player status left, minimap and tracker
+## right), set by GameHud's layout; 0 = the old rule (quest tracker width).
+var side_reserve: float = 0.0
 
 var _name: Label
 var _rank: Label
@@ -66,14 +69,17 @@ func _process(delta: float) -> void:
 	visible = true
 	var config := shown.config
 	var is_boss := config.rank == 2
-	# never wider than the room between the side columns (quest tracker)
-	var room := get_viewport_rect().size.x - 2.0 * (UiTheme.HUD_COLUMN_WIDTH + UiTheme.SCREEN_MARGIN * 2)
+	# never wider than the room between the side columns (player status, minimap / tracker)
+	var reserve: float = side_reserve if side_reserve > 0.0 else float(UiTheme.HUD_COLUMN_WIDTH + UiTheme.SCREEN_MARGIN * 2)
+	var room := get_viewport_rect().size.x - 2.0 * reserve
 	custom_minimum_size.x = minf(BOSS_WIDTH if is_boss else WIDTH, room)
 	_name.text = config.display_name
 	if is_boss:
 		_name.add_theme_font_override(&"font", UiTheme.display_font())
+		_name.add_theme_font_size_override(&"font_size", UiTheme.FONT_SECTION)   # Silkscreen on its grid
 	else:
 		_name.remove_theme_font_override(&"font")
+		_name.remove_theme_font_size_override(&"font_size")
 	_name.add_theme_color_override(&"font_color", UiTheme.BRONZE if is_boss else UiTheme.TEXT_PRIMARY)
 	_rank.text = ["", "ELITE", "BOSS"][clampi(config.rank, 0, 2)]
 	_rank.add_theme_color_override(&"font_color", UiTheme.WARNING if config.rank > 0 else UiTheme.TEXT_MUTED)

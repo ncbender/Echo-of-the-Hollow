@@ -69,6 +69,6 @@ func _draw() -> void:
 		y += 9.0
 	var plot := definition()
 	var text := plot.display_name if plot != null else String(plot_id)
-	var font := ThemeDB.fallback_font
+	var font := UiTheme.body_font()
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
 	WorldText.draw(self, Vector2(-width * 0.5, 3), text, 7, color, 2, Color.BLACK)

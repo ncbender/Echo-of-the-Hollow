@@ -57,8 +57,8 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Resonant Marks"
 description = "+6% damage per rank against targets with an Arcane Mark."
-tier = 2
 max_rank = 3
+column = 2
 effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_2pwve")])
 
 [sub_resource type="Resource" id="Resource_ec0rl"]
@@ -69,8 +69,7 @@ tree_id = &"arc_runemaster"
 display_name = "Arcane Rift"
 description = "Unlocks the active skill Arcane Rift."
 kind = 1
-tier = 2
-column = 1
+column = 3
 unlocks_skill = &"arcane_rift"
 
 [sub_resource type="Resource" id="Resource_4psj4"]
@@ -92,7 +91,7 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Detonation"
 description = "+5% damage per rank on hits that detonate Arcane Marks."
-tier = 3
+tier = 2
 max_rank = 5
 effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_cs1kt")])
 
@@ -115,7 +114,7 @@ tree_id = &"arc_runemaster"
 display_name = "Sigil of Binding"
 description = "Rune Sigil also chills (1 stack per pulse)."
 kind = 2
-tier = 3
+tier = 2
 column = 1
 skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_6krfd")])
 
@@ -131,8 +130,9 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Mana Flow"
 description = "+3% resource efficiency per rank."
-tier = 4
+tier = 2
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_xl2v1")])
 
 [sub_resource type="Resource" id="Resource_lj6db"]
@@ -154,9 +154,9 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Echoing Marks"
 description = "Detonating Arcane Marks restores 2 mana per rank."
-tier = 4
+tier = 2
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_pi17g")])
 
 [sub_resource type="Resource" id="Resource_cverd"]
@@ -171,7 +171,7 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Runic Precision"
 description = "+3% critical hit chance per rank."
-tier = 5
+tier = 3
 max_rank = 3
 stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_cverd")])
 
@@ -190,7 +190,7 @@ tree_id = &"arc_runemaster"
 display_name = "Grand Rift"
 description = "Arcane Rift covers 30% more area."
 kind = 2
-tier = 5
+tier = 3
 column = 1
 prerequisites = Array[StringName]([&"arc_rm_rift"])
 skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_3h6du")])
@@ -207,8 +207,9 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Arcane Reservoir"
 description = "+6 maximum mana per rank."
-tier = 6
+tier = 3
 max_rank = 5
+column = 2
 stat_modifiers = Array[ExtResource("4_i0wan")]([SubResource("Resource_4id1k")])
 
 [sub_resource type="Resource" id="Resource_2tywv"]
@@ -231,9 +232,9 @@ class_id = &"arcanist"
 tree_id = &"arc_runemaster"
 display_name = "Mark of Ruin"
 description = "+6% damage per rank against targets with 3 Arcane Marks."
-tier = 6
+tier = 3
 max_rank = 3
-column = 1
+column = 3
 effects = Array[ExtResource("2_dojwb")]([SubResource("Resource_d6to4")])
 
 [sub_resource type="Resource" id="Resource_bok24"]
@@ -284,7 +285,7 @@ tree_id = &"arc_runemaster"
 display_name = "Glyph Cascade"
 description = "Capstone - Rune Sigil covers 20% more area and inscribes a second sigil that arms after 1.2 s."
 kind = 2
-tier = 7
+tier = 4
 skill_mods = Array[ExtResource("3_308gy")]([SubResource("Resource_lv2p0")])
 
 [resource]

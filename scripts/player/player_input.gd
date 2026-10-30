@@ -10,10 +10,23 @@ const AIM_DEADZONE := 4.0
 const ABILITY_ACTIONS: Array[StringName] = [&"ability_1", &"ability_2", &"ability_3", &"ability_4"]
 
 var _pending := InputFrame.new()
+## UI Layout Lock 1.0: a held attack button counts only while its press began on the
+## playfield (reached _unhandled_input). A press on a HUD button or window is taken by the
+## GUI and never arms it - holding it over the UI, or keeping it held after a window closes,
+## starts no attack and no charge.
+var _light_armed: bool = false
+var _heavy_armed: bool = false
 
 
 func _ready() -> void:
 	GameHud.ensure_input_actions()   # use_flask / use_potion and the other runtime actions
+
+
+## Forgets the held attack buttons (a blocking window opened): they arm again only with a
+## new press on the playfield.
+func release_holds() -> void:
+	_light_armed = false
+	_heavy_armed = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -21,8 +34,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"attack_light"):
 		_pending.light_pressed = true
+		_light_armed = true
 	elif event.is_action_pressed(&"attack_heavy"):
 		_pending.heavy_pressed = true
+		_heavy_armed = true
 	elif event.is_action_released(&"attack_heavy"):
 		_pending.heavy_released = true
 	elif event.is_action_pressed(&"dash"):
@@ -45,8 +60,10 @@ func poll(character: Node2D) -> InputFrame:
 	frame.move = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
 	var to_mouse := character.get_global_mouse_position() - character.global_position
 	frame.aim_direction = to_mouse.normalized() if to_mouse.length() > AIM_DEADZONE else Vector2.ZERO
-	frame.light_held = Input.is_action_pressed(&"attack_light")
-	frame.heavy_held = Input.is_action_pressed(&"attack_heavy")
+	_light_armed = _light_armed and Input.is_action_pressed(&"attack_light")
+	_heavy_armed = _heavy_armed and Input.is_action_pressed(&"attack_heavy")
+	frame.light_held = _light_armed
+	frame.heavy_held = _heavy_armed
 	frame.interact_held = Input.is_action_pressed(&"interact")
 	frame.light_pressed = _pending.light_pressed
 	frame.heavy_pressed = _pending.heavy_pressed

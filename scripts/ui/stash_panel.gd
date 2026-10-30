@@ -169,13 +169,13 @@ func _gold_amount() -> int:
 	return total
 
 
-## Bag items as shown (gold is the counter above).
+## Bag items as shown (gold is the counter above, equipped gear is in its slots).
 func _bag_items() -> Array[ItemInstance]:
 	var result: Array[ItemInstance] = []
 	for item in character.inventory.items():
 		var definition := character.database.get_item(item.definition_id)
-		if definition != null and not definition.is_currency:
-			result.append(item)
+		if definition != null and not definition.is_currency and not character.inventory.in_equipment(item.instance_id):
+			result.append(item)   # equipped gear sits in its slot, not in the bag
 	return result
 
 

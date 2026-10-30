@@ -8,6 +8,12 @@ extends RefCounted
 ## loadout is effective, and within one loadout an instance appears at most once.
 ## Displaced items (replaced slot, two-hander vs. off-hand) simply lose their
 ## reference and stay in the inventory - nothing can be lost or duplicated.
+##
+## Equipment Inventory Separation 1.0 (docs/EQUIPMENT_SYSTEM.md): an item in a slot of the
+## ACTIVE class's loadout is located in that equipment slot and takes no bag slot
+## (Inventory.equipped_check -> in_equipment). Items of inactive loadouts stay bag items.
+## Equip, unequip, presets and class switches are refused (nothing changes) when the
+## items coming back would not fit into the bag; a direct swap reuses the freed slot.
 
 ## Emitted after any loadout change (stats, effects and weapon must refresh).
 signal changed
@@ -20,6 +26,11 @@ var _loadouts: Dictionary = {}   # class id -> Loadout
 var _trial_loadout: Loadout
 ## Instance ids unequipped as a side effect of the last equip() call.
 var last_displaced: Array[String] = []
+## The real class during a trial: its loadout keeps deciding where items are located
+## (the trial copy is temporary, so a trial never moves items into or out of the bag).
+var _trial_source: StringName = &""
+
+const BAG_FULL := "Your bag is full - make room first."
 
 
 func _init(database: GameDatabase, inventory: Inventory, classes: CharacterClasses) -> void:
@@ -27,6 +38,7 @@ func _init(database: GameDatabase, inventory: Inventory, classes: CharacterClass
 	_inventory = inventory
 	_classes = classes
 	_inventory.item_removed.connect(_on_item_removed)
+	_inventory.equipped_check = in_equipment
 
 
 func loadout_for(class_id: StringName) -> Loadout:
@@ -58,6 +70,59 @@ func equipped_items() -> Array[ItemInstance]:
 
 func is_equipped(instance_id: String, class_id: StringName = &"") -> bool:
 	return loadout_for(_class_or_active(class_id)).slot_of(instance_id) >= 0
+
+
+## True while the instance is located in an equipment slot (the active class's loadout,
+## during a trial the real class's): such an item takes no bag slot.
+func in_equipment(instance_id: String) -> bool:
+	return instance_id != "" and _location_loadout().slot_of(instance_id) >= 0
+
+
+func _location_loadout() -> Loadout:
+	if _trial_loadout != null and _trial_source != &"":
+		return loadout_for(_trial_source)
+	return active_loadout()
+
+
+## Bag slots in use if `class_id` were the active class (its loadout decides what is in
+## equipment slots). Used to refuse a class switch that would overfill the bag.
+func bag_slots_if_active(class_id: StringName) -> int:
+	var now := _location_loadout()
+	var then := loadout_for(class_id)
+	var used := _inventory.used_slots()
+	for instance_id in now.instance_ids():
+		if then.slot_of(instance_id) < 0 and _inventory.has(instance_id):
+			used += 1   # leaves its equipment slot -> back into the bag
+	for instance_id in then.instance_ids():
+		if now.slot_of(instance_id) < 0 and _inventory.has(instance_id):
+			used -= 1   # goes into an equipment slot
+	return used
+
+
+## "" if switching the active class to `class_id` leaves the bag within its capacity
+## (or no fuller than now), otherwise the reason.
+func class_switch_error(class_id: StringName) -> String:
+	var used := bag_slots_if_active(class_id)
+	if used > _inventory.capacity and used > _inventory.used_slots():
+		return "Your bag is too full to change class - free %d slot%s first." % [used - _inventory.capacity, "" if used - _inventory.capacity == 1 else "s"]
+	return ""
+
+
+## Keeps a loadout change only if the bag still fits: restores `before` (and returns the
+## reason) when items coming back from equipment slots would overfill it. A change that
+## does not make the bag fuller is always kept (an over-full old save never blocks).
+func _keep_if_bag_fits(loadout: Loadout, before: Dictionary, used_before: int) -> String:
+	var used := _inventory.used_slots()
+	if _overfills(used, used_before):
+		loadout.slots = before
+		last_displaced.clear()
+		return BAG_FULL
+	return ""
+
+
+## The bag rule of every loadout change: over capacity AND fuller than before (an over-full old save never blocks).
+func _overfills(used: int, used_before: int) -> bool:
+	return used > _inventory.capacity and used > used_before
 
 
 ## True if any class loadout references the instance.
@@ -147,6 +212,8 @@ func equip(instance_id: String, slot: int = -1, class_id: StringName = &"") -> S
 	var previous_slot := loadout.slot_of(instance_id)
 	if previous_slot == slot:
 		return ""
+	var before := loadout.slots.duplicate()
+	var used_before := _inventory.used_slots()
 	if previous_slot >= 0:
 		loadout.set_id(previous_slot, "")
 	# 2. Whatever occupied the target slot is unequipped (stays in the inventory).
@@ -157,15 +224,25 @@ func equip(instance_id: String, slot: int = -1, class_id: StringName = &"") -> S
 	elif slot == EquipSlot.Slot.OFF_HAND and _holds_two_hander(loadout):
 		_displace(loadout, EquipSlot.Slot.MAIN_HAND)
 	loadout.set_id(slot, instance_id)
+	# 4. The new item frees its bag slot, displaced ones need one (a swap reuses it).
+	var full := _keep_if_bag_fits(loadout, before, used_before)
+	if full != "":
+		return full
 	changed.emit()
 	return ""
 
 
+## Empties `slot`; the item goes back into the bag - refused (still equipped) without room.
 func unequip(slot: int, class_id: StringName = &"") -> String:
 	var loadout := loadout_for(_class_or_active(class_id))
 	if loadout.get_id(slot) == "":
 		return "slot is empty"
+	var before := loadout.slots.duplicate()
+	var used_before := _inventory.used_slots()
 	loadout.set_id(slot, "")
+	var full := _keep_if_bag_fits(loadout, before, used_before)
+	if full != "":
+		return full
 	changed.emit()
 	return ""
 
@@ -287,6 +364,7 @@ func _on_item_removed(instance_id: String) -> void:
 ## is dropped by end_trial() and never saved.
 func begin_trial(class_id: StringName, source_class_id: StringName) -> void:
 	_trial_loadout = null
+	_trial_source = source_class_id
 	var trial := Loadout.new()
 	var source := loadout_for(source_class_id)
 	for slot: int in source.slots:
@@ -297,16 +375,58 @@ func begin_trial(class_id: StringName, source_class_id: StringName) -> void:
 
 func end_trial() -> void:
 	_trial_loadout = null
+	_trial_source = &""
 
 
 ## Replaces the loadout of `class_id` with `slots` (slot key -> instance id, a
 ## preset). All references are checked first; nothing changes on an error.
 func apply_loadout(class_id: StringName, slots: Dictionary) -> String:
+	var plan := _plan_loadout(class_id, slots)
+	if plan.error != "":
+		return plan.error
+	var loadout := loadout_for(class_id)
+	var before := loadout.slots.duplicate()
+	var used_before := _inventory.used_slots()
+	loadout.slots = (plan.target as Loadout).slots
+	var full := _keep_if_bag_fits(loadout, before, used_before)
+	if full != "":
+		return full
+	changed.emit()
+	return ""
+
+
+## Preset Activation Atomicity Fix 1.0: "" if apply_loadout(`class_id`, `slots`) would succeed now, else its
+## reason - the same checks, and the bag measured in the real target state (items leaving equipment slots
+## take bag slots, items going in free theirs); the loadout is restored before returning, nothing is emitted.
+func loadout_error(class_id: StringName, slots: Dictionary) -> String:
+	var plan := _plan_loadout(class_id, slots)
+	if plan.error != "":
+		return plan.error
+	var loadout := loadout_for(class_id)
+	var before := loadout.slots.duplicate()
+	var used_before := _inventory.used_slots()
+	loadout.slots = (plan.target as Loadout).slots
+	var used := _inventory.used_slots()
+	loadout.slots = before
+	return BAG_FULL if _overfills(used, used_before) else ""
+
+
+## Puts back a loadout state taken before apply_loadout (rollback of a preset activation whose later step
+## failed): exactly the saved slot -> instance mapping, no checks, no item moves.
+func restore_loadout(class_id: StringName, slots_before: Dictionary) -> void:
+	loadout_for(class_id).slots = slots_before.duplicate()
+	last_displaced.clear()
+	changed.emit()
+
+
+## The target loadout of a preset (`slots`: slot key -> instance id) for `class_id` and the first reason it
+## cannot be applied: {target: Loadout, error: String}. Shared by apply_loadout and loadout_error.
+func _plan_loadout(class_id: StringName, slots: Dictionary) -> Dictionary:
 	var target := Loadout.new()
 	var warnings: PackedStringArray = []
 	target.from_dict(slots, warnings)
 	if not warnings.is_empty():
-		return warnings[0]
+		return {"target": target, "error": warnings[0]}
 	# One weapon slot (Weapon Mastery 1.4): an older preset's off-hand weapon is left out.
 	var off_item := _inventory.find(target.get_id(EquipSlot.Slot.OFF_HAND))
 	var off_def := _db.get_item(off_item.definition_id) if off_item != null else null
@@ -315,14 +435,12 @@ func apply_loadout(class_id: StringName, slots: Dictionary) -> String:
 	for slot: int in target.slots:
 		var error := can_equip(target.slots[slot], slot, class_id)
 		if error != "":
-			return error
+			return {"target": target, "error": error}
 	if _holds_two_hander(target) and target.get_id(EquipSlot.Slot.OFF_HAND) != "":
-		return "A two-handed weapon leaves no room for an off-hand item."
+		return {"target": target, "error": "A two-handed weapon leaves no room for an off-hand item."}
 	var seen := {}
 	for slot: int in target.slots:
 		if seen.has(target.slots[slot]):
-			return "An item is used twice in the preset."
+			return {"target": target, "error": "An item is used twice in the preset."}
 		seen[target.slots[slot]] = true
-	loadout_for(class_id).slots = target.slots
-	changed.emit()
-	return ""
+	return {"target": target, "error": ""}

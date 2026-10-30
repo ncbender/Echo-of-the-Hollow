@@ -4,6 +4,8 @@ extends UiWindow
 ## Header with the building's description and effect, then one card per recipe:
 ## output icon and name, what it makes, every cost with "have / need", and the
 ## Craft button (or the reason it is disabled). Calls BaseBuilder only.
+## UI Usability & Haven Crafting 1.0: recipes of a Haven ruin (the Old Smithy's forge) read bag + Haven
+## stash through the one material plan ("have / need  (bag x, stash y)"); building costs stay bag-only.
 
 const CARD_WIDTH := 620
 
@@ -64,7 +66,8 @@ func rebuild() -> void:
 
 
 func _recipe_card(recipe: RecipeDefinition) -> Control:
-	var error := BaseBuilder.craft_error(character, recipe)
+	var with_stash := uses_stash()
+	var error := BaseBuilder.craft_error(character, recipe, with_stash)
 	var output := character.database.get_item(recipe.output_item_id)
 	var card := UiTheme.card(&"CardPanel")
 	card.name = "Recipe_%s" % recipe.id
@@ -87,7 +90,7 @@ func _recipe_card(recipe: RecipeDefinition) -> Control:
 		names.add_child(makes)
 	head.add_child(names)
 	var button := UiTheme.button("Craft", &"PrimaryButton", func() -> void:
-		var result := BaseBuilder.craft(character, recipe)
+		var result := BaseBuilder.craft(character, recipe, uses_stash())
 		_say(result, "Crafted %s." % recipe.display_name))
 	button.name = "Craft_%s" % recipe.id
 	button.disabled = error != ""
@@ -97,10 +100,16 @@ func _recipe_card(recipe: RecipeDefinition) -> Control:
 	box.add_child(head)
 	if output != null and output.description != "":
 		box.add_child(_small(output.description, UiTheme.TEXT_SECONDARY))
-	_add_costs(box, recipe.inputs)
+	_add_costs(box, recipe.inputs, with_stash)
 	if error != "":
 		box.add_child(_small(error, UiTheme.WARNING))
 	return card
+
+
+## True when this building stands in a Haven ruin: its recipes may use the Haven stash.
+func uses_stash() -> bool:
+	var ruin_site := plot as RuinSite
+	return ruin_site != null and is_instance_valid(ruin_site) and ProfessionService.uses_stash(character, ruin_site.ruin_id)
 
 
 func _build_card(plot_def: BuildingPlotDefinition, building: BuildingDefinition) -> Control:
@@ -130,16 +139,21 @@ func _build_card(plot_def: BuildingPlotDefinition, building: BuildingDefinition)
 	return card
 
 
-## One row per cost: item name, "have / need" in green (enough) or red.
-func _add_costs(box: VBoxContainer, costs: Array[ItemCost]) -> void:
+## One row per cost: item name, "have / need" in green (enough) or red; with the stash in reach
+## the total counts both and the split is shown when the stash holds some.
+func _add_costs(box: VBoxContainer, costs: Array[ItemCost], with_stash := false) -> void:
 	if costs.is_empty():
 		return
 	box.add_child(UiTheme.section("COST"))
 	for cost in costs:
 		var definition := character.database.get_item(cost.item_id)
-		var have := character.inventory.count(cost.item_id)
+		var in_bag := character.inventory.count(cost.item_id)
+		var have := in_bag + (character.stash.count(cost.item_id) if with_stash else 0)
+		var text := "%d / %d" % [have, cost.quantity]
+		if have != in_bag:
+			text += "  (bag %d, stash %d)" % [in_bag, have - in_bag]
 		box.add_child(UiTheme.stat_row(definition.display_name if definition != null else String(cost.item_id),
-			"%d / %d" % [have, cost.quantity], UiTheme.SUCCESS if have >= cost.quantity else UiTheme.DANGER))
+			text, UiTheme.SUCCESS if have >= cost.quantity else UiTheme.DANGER))
 
 
 func _say(error: String, success: String) -> void:

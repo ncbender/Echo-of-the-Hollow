@@ -1,0 +1,58 @@
+[gd_resource type="Resource" script_class="StoryQuestDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_quest_definition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://scripts/rpg/quests/story_objective.gd" id="3_obj"]
+[ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="4_cost"]
+
+[sub_resource type="Resource" id="O_box"]
+script = ExtResource("3_obj")
+event_id = &"interact:shelter_hearth_box"
+description = "Search the chapel's shelter rooms"
+cumulative = true
+
+[sub_resource type="Resource" id="S_box"]
+script = ExtResource("2_step")
+description = "Those who sheltered in the chapel kept a hearth burning. Search the shelter rooms for what they left behind."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_box")])
+completion_flag = &"embers.hearth_box_found"
+
+[sub_resource type="Resource" id="O_brew"]
+script = ExtResource("3_obj")
+event_id = &"craft:al_ember_draught"
+description = "Brew an Ember Draught at the Alchemist's Cottage"
+
+[sub_resource type="Resource" id="S_brew"]
+script = ExtResource("2_step")
+description = "The ledger tells of a warming draught: two duskleaf, a sliver of timber. Brew an Ember Draught at the Alchemist's Cottage in Haven."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_brew")])
+completion_flag = &"embers.draught_brewed"
+
+[sub_resource type="Resource" id="O_mara"]
+script = ExtResource("3_obj")
+event_id = &"talk:mara_embers"
+description = "Tell Mara in Haven"
+
+[sub_resource type="Resource" id="S_mara"]
+script = ExtResource("2_step")
+description = "Tell Mara about the shelter in the chapel."
+objectives = Array[ExtResource("3_obj")]([SubResource("O_mara")])
+
+[sub_resource type="Resource" id="Reward_duskleaf"]
+script = ExtResource("4_cost")
+item_id = &"duskleaf"
+quantity = 4
+
+[resource]
+script = ExtResource("1_quest")
+id = &"embers_of_shelter"
+display_name = "Embers of Shelter"
+chapter = "Side Quest"
+description = "The chapel was a shelter once. Its keepers wrote down how they lasted the cold."
+steps = Array[ExtResource("2_step")]([SubResource("S_box"), SubResource("S_brew"), SubResource("S_mara")])
+completion_flag = &"embers.completed"
+start_event_id = &"interact:shelter_ledger"
+turn_in_gold = 30
+turn_in_npc_id = &"mara"
+turn_in_items = Array[ExtResource("4_cost")]([SubResource("Reward_duskleaf")])
+turn_in_place = "Mara in Haven"

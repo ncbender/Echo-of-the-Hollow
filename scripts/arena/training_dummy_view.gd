@@ -42,6 +42,6 @@ func _draw() -> void:
 
 
 func _draw_label(text: String, at: Vector2, color: Color) -> void:
-	var font := ThemeDB.fallback_font
+	var font := UiTheme.body_font()
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
 	WorldText.draw(self, at - Vector2(width * 0.5, 0), text, 8, color, 2, Color.BLACK)

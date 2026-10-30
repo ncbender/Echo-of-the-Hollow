@@ -131,5 +131,5 @@ func _draw() -> void:
 				draw_circle(Vector2(cos(a) * radius, -6 + sin(a * 2.0) * 4.0), 1.2, Color(color.lightened(0.3), 0.7))
 		Style.TEXT:
 			var font_size := 8
-			var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+			var width := UiTheme.body_font().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 			WorldText.draw(self, Vector2(-width * 0.5, -22 - 10.0 * t), text, font_size, Color(color, fade), 2, Color(0, 0, 0, fade))

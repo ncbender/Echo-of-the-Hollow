@@ -84,7 +84,10 @@ static func activation_cost(character: Character, class_id: StringName, preset: 
 
 
 ## Every reason why `preset` cannot be activated now (empty = valid). Missing
-## items are reported, never recreated.
+## items are reported, never recreated. Preset Activation Atomicity Fix 1.0: also
+## the loadout change itself (CharacterEquipment.loadout_error - the checks of
+## apply_loadout, bag measured in the real target state), so activate() never
+## starts a change that its equipment step would refuse.
 static func validate(character: Character, class_id: StringName, preset: Dictionary) -> PackedStringArray:
 	var errors: PackedStringArray = []
 	var db := character.database
@@ -118,6 +121,7 @@ static func validate(character: Character, class_id: StringName, preset: Diction
 			if error != "":
 				errors.append("%s: %s" % [_skill_name(db, skill_id), error])
 	var equipment: Variant = preset.get("equipment", {})
+	var item_errors := errors.size()
 	if equipment is Dictionary:
 		for slot_key: String in equipment:
 			var instance_id := str(equipment[slot_key])
@@ -128,6 +132,10 @@ static func validate(character: Character, class_id: StringName, preset: Diction
 				errors.append("Missing item for %s (it is no longer in the inventory)." % EquipSlot.display_name(slot) if slot >= 0 else "Missing item.")
 			elif slot < 0 or character.equipment.can_equip(instance_id, slot, class_id) != "":
 				errors.append("Item in %s cannot be equipped." % slot_key)
+	if errors.size() == item_errors:   # every reference is fine: can the whole loadout be applied?
+		var loadout_error := character.equipment.loadout_error(class_id, equipment if equipment is Dictionary else {})
+		if loadout_error != "":
+			errors.append(loadout_error)
 	var cost := activation_cost(character, class_id, preset)
 	var currency := db.rules.talent_rules().respec_currency_item
 	if cost > 0 and character.inventory.count(currency) < cost:
@@ -135,8 +143,11 @@ static func validate(character: Character, class_id: StringName, preset: Diction
 	return errors
 
 
-## Activates preset `index` of `class_id` at a class station: pays the respec
-## cost if the talents differ, then applies talents, skills, mods and equipment.
+## Activates preset `index` of `class_id` at a class station - all or nothing (Preset Activation Atomicity
+## Fix 1.0): validate() checks everything first (talents, skills, mods, items, the loadout change with the bag in
+## its target state, gold); nothing changes on a refusal. Then, in an order that can be undone: the loadout
+## (apply_loadout, itself atomic), the respec cost if the talents differ (a failed payment restores the loadout),
+## and last the in-memory build (talents, slots, mods only - cannot fail).
 static func activate(character: Character, class_id: StringName, index: int, at_station: bool) -> String:
 	if not at_station:
 		return "Presets can only be activated at a class station."
@@ -148,20 +159,28 @@ static func activate(character: Character, class_id: StringName, index: int, at_
 		return errors[0]
 	var build := character.builds.get_build(class_id)
 	var talents := _talents_of(preset)
-	if talents != build.talents:
-		var cost := activation_cost(character, class_id, preset)
-		if cost > 0 and not character.inventory.remove_quantity(character.database.rules.talent_rules().respec_currency_item, cost):
-			return "Payment failed."
-		build.respecs += 1
-	var presets := build.presets
-	build.from_dict(preset, PackedStringArray())
-	build.presets = presets
-	build.talents = talents
-	SkillBook.sanitize(character, class_id)
+	var talents_change := talents != build.talents
+	var cost := activation_cost(character, class_id, preset) if talents_change else 0
 	var equipment: Dictionary = preset.get("equipment", {}) if preset.get("equipment") is Dictionary else {}
+	var loadout_before := character.equipment.loadout_for(class_id).slots.duplicate()
 	var error := character.equipment.apply_loadout(class_id, equipment)
+	if error != "":
+		return error   # apply_loadout changed nothing; nothing else has changed yet
+	if cost > 0 and not character.inventory.remove_quantity(character.database.rules.talent_rules().respec_currency_item, cost):
+		character.equipment.restore_loadout(class_id, loadout_before)
+		return "Payment failed."
+	# only what a preset holds (talents, Q/E/R/F, mods); the respec count, unlocks from other sources, presets
+	# and extra stay (a whole from_dict used to reset them - the next reset was free again)
+	var stored := ClassBuild.new(class_id, build.slots.size())
+	stored.from_dict(preset, PackedStringArray())
+	build.talents = talents
+	build.slots = stored.slots
+	build.mods = stored.mods
+	if talents_change:
+		build.respecs += 1
+	SkillBook.sanitize(character, class_id)
 	character.builds.notify(class_id)
-	return error
+	return ""
 
 
 ## Fake character view whose build for `class_id` is `build` (validation only).

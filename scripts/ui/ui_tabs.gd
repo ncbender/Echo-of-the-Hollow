@@ -30,10 +30,14 @@ func add_tab(id: String, text: String, tooltip: String = "") -> Button:
 
 func select(id: String, emit: bool = false) -> void:
 	current = id
+	var focus := get_viewport().gui_get_focus_owner() if is_inside_tree() else null
 	for child in get_children():
 		var button := child as Button
 		if button != null:
-			button.set_pressed_no_signal(button.name == "Tab%s" % id.validate_node_name())
+			var chosen := button.name == "Tab%s" % id.validate_node_name()
+			button.set_pressed_no_signal(chosen)
+			if chosen and focus != null and focus != button and focus.get_parent() == self:
+				button.grab_focus()   # the focus frame follows the shown page (never on another tab)
 	if emit:
 		tab_selected.emit(id)
 

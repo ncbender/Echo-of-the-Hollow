@@ -16,11 +16,12 @@ enum Kind { PASSIVE, ACTIVE, TRANSFORMATIVE }
 ## Effect text. "{rank}" / "{max}" are replaced in the UI.
 @export_multiline var description: String
 @export var kind: Kind = Kind.PASSIVE
-## 1..7. A node of tier t needs TalentRules.tier_points[t - 1] points invested in
-## LOWER tiers of the same tree.
-@export_range(1, 7) var tier: int = 1
+## 1..TalentRules.TIERS. A node of tier t needs TalentRules.tier_points[t - 1]
+## points invested in LOWER tiers of the same tree; inside an open tier every
+## node is a free choice (prerequisites only for direct upgrades).
+@export_range(1, 4) var tier: int = 1
 @export var max_rank: int = 1
-## Horizontal position inside its tier row (UI only).
+## Horizontal position inside its tier row, 0..3 (UI only).
 @export var column: int = 0
 ## Node ids that need at least one rank first (same class).
 @export var prerequisites: Array[StringName] = []
@@ -41,7 +42,7 @@ enum Kind { PASSIVE, ACTIVE, TRANSFORMATIVE }
 
 
 func is_capstone() -> bool:
-	return tier == 7
+	return tier == TalentRules.TIERS
 
 
 ## Stat modifiers for `rank` ranks.
