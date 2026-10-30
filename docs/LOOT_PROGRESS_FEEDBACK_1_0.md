@@ -147,4 +147,12 @@ nur blockbar, unblockbar), eine Galerieansicht pro Fall, Tests prüfen nur „Da
 
 ## 8. Commit
 
-Siehe unten (nachgetragen).
+- **`6d89999`**: nur Dateien, deren gesamte Änderung zu diesem Batch gehört – `loot_feed.gd`, `progress_notice.gd`,
+  `level_up_fx.gd` (+ `.uid`), `player_progression_bridge.gd`, `resource_node.gd`, `readable.gd`, `story_pickup.gd`,
+  `dash_meter.gd`, `test_combat_hud.gd`, `test_loot_progress_feedback.gd` (+ `.uid`), dieses Dokument und der
+  Ablösungshinweis in `COMBAT_HUD_UX_2_0.md`. Ein Folge-Commit trägt diesen Abschnitt nach.
+- **Bewusst uncommittet** (enthalten ältere fremde uncommittete Änderungen; keine sichere Trennung):
+  `scripts/ui/game_hud.gd` (Einbindung von `ProgressNotice` und `profession_xp`), `scripts/world/boss_reward_cache.gd`
+  (keine doppelte Cache-Meldung), `tests/integration/test_hud.gd`, `tests/playtest/gallery_screens.gd`
+  (`hud_loot_feed`, `hud_level_hero`, `hud_level_mastery`), `CLAUDE.md`.
+- Der Commit allein ist nicht lauffähig (er braucht die `game_hud.gd`-Einbindung); lauffähig ist der Arbeitsbaum.
