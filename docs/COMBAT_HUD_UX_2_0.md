@@ -53,6 +53,7 @@ Unverändert:
   - Trial-Hinweis: im Tooltip des Level-Abzeichens;
   - Konter-Fenster („Counter!“) und Parry-Abklingzeit („Parry 1.2s“): als kurzes Wort unter den Dash-Segmenten,
     nur solange relevant.
+    **Abgelöst durch Loot & Progress Feedback 1.0:** beide Wörter entfallen, keine Parry-Anzeige im HUD.
 
 ## 2. Füllstände
 

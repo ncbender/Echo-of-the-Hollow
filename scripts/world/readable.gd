@@ -44,9 +44,13 @@ func interact(hud: GameHud) -> void:
 			return   # nothing taken, nothing marked: read it again later
 	character.world.set_flag(read_flag())
 	for reward in rewards:
-		character.inventory.add_item(reward.item_id, reward.quantity, ItemInstance.ORIGIN_FOUND)
-		var definition := character.database.get_item(reward.item_id)
-		hud.notify("Found: %d x %s" % [reward.quantity, definition.display_name if definition != null else String(reward.item_id)])
+		if character.inventory.add_item(reward.item_id, reward.quantity, ItemInstance.ORIGIN_FOUND).is_empty():
+			continue
+		if hud.bridge != null:   # Loot & Progress Feedback 1.0: what was found goes to the loot feed
+			hud.bridge.item_received.emit(reward.item_id, reward.quantity, null)
+		else:
+			var definition := character.database.get_item(reward.item_id)
+			hud.notify("Found: %d x %s" % [reward.quantity, definition.display_name if definition != null else String(reward.item_id)])
 	if event_id != &"":
 		StoryService.notify(character, event_id)
 

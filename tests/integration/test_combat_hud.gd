@@ -208,7 +208,11 @@ func test_dash_meter_under_the_hero() -> void:
 	check(map.player.dash.charges == map.player.dash.config.max_charges and not meter.visible, "recharged: hidden again")
 	map.player.defense.counter_left = 0.4
 	await _frames(1)
-	check(meter.visible and meter.defense_word == "Counter!", "the counter window shows under the hero")
+	check(not meter.visible, "Loot & Progress Feedback 1.0: the counter window shows no text under the hero")
+	map.player.defense.cooldown_left = 1.0
+	await _frames(1)
+	check(not meter.visible, "and neither does the parry cooldown")
+	map.player.defense.cooldown_left = 0.0
 	map.player.defense.counter_left = 0.0
 
 

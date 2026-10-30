@@ -15,6 +15,12 @@ signal message(text: String)
 ## An item went into the character's inventory from the world (loot feed). `item` = the
 ## received instance (its own rarity is shown), null for plain item_id/quantity pickups.
 signal item_received(item_id: StringName, quantity: int, item: ItemInstance)
+## Loot & Progress Feedback 1.0: profession XP that was really granted (a gathering step) - the loot feed's XP row.
+signal profession_xp(profession_id: StringName, amount: int)
+## A real level-up after a grant (never on load, class switch or sync - the character only emits these in add_xp):
+## kind &"hero" (the active class's level, `id` = class id) or &"mastery" (`id` = weapon family); `detail` = a new
+## combo or technique name ("" for a plain level). One emit per level / unlock; ProgressNotice coalesces them.
+signal progress(kind: StringName, id: StringName, level: int, detail: String)
 
 var player: Player
 var character: Character
@@ -250,21 +256,22 @@ func _grant_item_xp(hit: HitData) -> void:
 		message.emit("%s is ready to evolve (Resonance Forge)" % definition.display_name)
 
 
+## Loot & Progress Feedback 1.0: mastery level-ups and their unlocks go to the progress notice (one compact
+## message with the family, the level and a new combo) instead of separate toasts.
 func _on_mastery_leveled_up(family_id: StringName, level: int) -> void:
 	refresh_unlocks()
-	message.emit("%s mastery reached level %d" % [_family_name(family_id), level])
+	progress.emit(&"mastery", family_id, level, "")
 
 
 func _on_mastery_unlocked(family_id: StringName, unlock: MasteryUnlock) -> void:
 	refresh_unlocks()
-	var kind := "Technique" if unlock.is_technique() else "Milestone"
-	message.emit("%s unlocked: %s (%s)" % [kind, unlock.display_name, _family_name(family_id)])
+	progress.emit(&"mastery", family_id, character.mastery.get_level(family_id), unlock.display_name)
 
 
 ## A mastery level unlocked a real combo path (Weapon Mastery 1.4).
 func _on_path_unlocked(family_id: StringName, path: ComboPathDefinition) -> void:
 	refresh_unlocks()
-	message.emit("Combo unlocked: %s (%s, %s)" % [path.display_name, path.input_label(), _family_name(family_id)])
+	progress.emit(&"mastery", family_id, character.mastery.get_level(family_id), "%s (%s)" % [path.display_name, path.input_label()])
 
 
 func _on_active_class_changed(class_id: StringName) -> void:
@@ -273,8 +280,13 @@ func _on_active_class_changed(class_id: StringName) -> void:
 	message.emit("Class changed: %s" % _class_name(class_id))
 
 
+## The hero level is the active class's level (the EXP bar's, Character.classes). Another class's level-up
+## (only possible through debug grants) keeps the short toast.
 func _on_class_leveled_up(class_id: StringName, level: int) -> void:
-	message.emit("%s reached level %d" % [_class_name(class_id), level])
+	if class_id == character.classes.active_class_id:
+		progress.emit(&"hero", class_id, level, "")
+	else:
+		message.emit("%s reached level %d" % [_class_name(class_id), level])
 
 
 func _on_class_unlocked(class_id: StringName) -> void:

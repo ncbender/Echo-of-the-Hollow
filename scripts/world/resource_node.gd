@@ -79,31 +79,32 @@ func complete_step() -> Dictionary:
 	_update_prompt()
 	queue_redraw()
 	step_completed.emit(result)
-	if _hud != null and is_instance_valid(_hud):
-		_hud.notify(_step_text(result, character))
+	_report(result)
 	return result
 
 
-func _step_text(result: Dictionary, character: Character) -> String:
+## Loot & Progress Feedback 1.0: a successful step reports only what was really granted - the items and the
+## profession XP go to the loot feed (bundled there); no "Duskleaf 1/3" step text. A failed step keeps its
+## concrete reason as a message (e.g. "inventory full"). The node's own progress drawing stays.
+func _report(result: Dictionary) -> void:
+	if _hud == null or not is_instance_valid(_hud):
+		return
 	if String(result.error) != "":
-		return String(result.error)
-	var text := "%s %d/%d" % [definition.display_name, int(result.step), int(result.steps)]
+		_hud.notify(String(result.error))
+		return
+	if _hud.bridge == null:
+		return
 	if int(result.items) > 0:
-		text += "  ·  +%d %s" % [int(result.items), _session.database.get_item(result.item).display_name]
-	var profession: ProfessionDefinition = _session.database.professions.get(definition.profession_id)
-	if profession != null:
-		text += "  ·  %s %d" % [profession.display_name, character.professions.level(profession.id)]
-	if result.exhausted:
-		text += "  ·  exhausted"
-	return text
+		_hud.bridge.item_received.emit(StringName(result.item), int(result.items), null)
+	if int(result.xp) > 0:
+		_hud.bridge.profession_xp.emit(definition.profession_id, int(result.xp))
 
 
 func _update_prompt() -> void:
 	if definition == null:
 		return
 	if is_available():
-		var done := ResourceGathering.steps_done(_session.get_character().world, _map_id, node_id) if _session != null else 0
-		prompt = "Hold to gather %s  (%d/%d)" % [definition.display_name, done, maxi(1, definition.steps)]
+		prompt = "Hold to gather %s" % definition.display_name   # no step counter (the node shows its progress)
 	elif definition.respawn_seconds <= 0.0:
 		prompt = "%s (exhausted)" % definition.display_name
 	else:

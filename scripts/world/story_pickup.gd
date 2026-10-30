@@ -67,6 +67,9 @@ func take() -> String:
 func interact(hud: GameHud) -> void:
 	var error := take()
 	var definition := character.database.get_item(item_id) if character != null else null
+	if error == "" and definition != null and hud.bridge != null:
+		hud.bridge.item_received.emit(item_id, quantity, null)   # Loot & Progress Feedback 1.0: the loot feed's row
+		return
 	hud.notify(error if error != "" else "Recovered: %s" % (definition.display_name if definition != null else label))
 
 
