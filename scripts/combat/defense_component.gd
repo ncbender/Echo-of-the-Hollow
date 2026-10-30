@@ -114,8 +114,8 @@ func resolve(hit: HitData, defender_position: Vector2, facing: Vector2) -> Outco
 	var active := profile()
 	if active == null or not is_defending() or hit.attack == null:
 		return Outcome.NONE
-	var flags := hit.attack.defense_flags
-	if flags & (AttackDefinition.DEFENSE_BLOCKABLE | AttackDefinition.DEFENSE_PARRYABLE) == 0:
+	var attack := hit.attack   # Combat Telegraphs 1.0: the flags are read through AttackDefinition (same as the telegraph)
+	if attack.is_unblockable():
 		hit.tags.append(&"unblockable")
 		return Outcome.NONE
 	var from := defender_position
@@ -123,14 +123,14 @@ func resolve(hit: HitData, defender_position: Vector2, facing: Vector2) -> Outco
 		from = (hit.attacker as Node2D).global_position
 	var to_attacker := from - defender_position
 	var angle := absf(facing.angle_to(to_attacker)) if to_attacker.length() > 0.5 else 0.0
-	if state == State.PARRY and flags & AttackDefinition.DEFENSE_PARRYABLE \
+	if state == State.PARRY and attack.is_parryable() \
 			and angle <= deg_to_rad(active.parry_arc_degrees) * 0.5:
 		_parry(hit, active)
 		return Outcome.PARRIED
-	if not active.can_block or flags & AttackDefinition.DEFENSE_BLOCKABLE == 0 \
+	if not active.can_block or not attack.is_blockable() \
 			or angle > deg_to_rad(active.block_arc_degrees) * 0.5:
 		return Outcome.NONE
-	if flags & AttackDefinition.DEFENSE_GUARD_BREAK:
+	if attack.breaks_guard():
 		hit.tags.append(&"guard_break")
 		_enter(State.RECOVERY, active.guard_break_recovery)
 		last_outcome = Outcome.GUARD_BROKEN

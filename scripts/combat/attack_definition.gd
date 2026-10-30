@@ -155,3 +155,38 @@ func is_projectile() -> bool:
 
 func is_unblockable() -> bool:
 	return defense_flags & (DEFENSE_BLOCKABLE | DEFENSE_PARRYABLE) == 0
+
+
+# --- Combat Telegraphs 1.0: the one reading of defense_flags (DefenseComponent.resolve and the telegraph) ------
+
+## Kind of an enemy's windup telegraph, from what the defender can really do (docs/COMBAT_TELEGRAPHS_1_0.md).
+enum Telegraph { PARRYABLE, BLOCK_ONLY, UNDEFENDABLE }
+
+
+## A parry (inside its arc and window) turns this attack away.
+func is_parryable() -> bool:
+	return defense_flags & DEFENSE_PARRYABLE != 0
+
+
+## A block may meet this attack (Blockable flag) - it still fails against Guard Breaking.
+func is_blockable() -> bool:
+	return defense_flags & DEFENSE_BLOCKABLE != 0
+
+
+## A block meeting this attack is broken (no damage reduction, guard-break recovery).
+func breaks_guard() -> bool:
+	return defense_flags & DEFENSE_GUARD_BREAK != 0
+
+
+## A block really holds: blockable and not guard breaking.
+func block_holds() -> bool:
+	return is_blockable() and not breaks_guard()
+
+
+## Parryable (whatever a block would do) > a holding block only > neither (unblockable, or a block that breaks).
+func telegraph_kind() -> Telegraph:
+	if is_parryable():
+		return Telegraph.PARRYABLE
+	if block_holds():
+		return Telegraph.BLOCK_ONLY
+	return Telegraph.UNDEFENDABLE

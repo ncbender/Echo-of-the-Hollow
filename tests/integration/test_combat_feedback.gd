@@ -126,6 +126,7 @@ func test_poise_break_and_parry_feedback() -> void:
 	var words := _fx(CombatFx.Style.TEXT).map(func(fx: CombatFx) -> String: return fx.text)
 	check("BREAK" in words, "poise break shows BREAK: %s" % [words])
 	var numbers_before := find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.get_script() == preload("res://scripts/fx/damage_number.gd")).size()
+	var stars_before := _fx(CombatFx.Style.STAR).size()
 	var f := frame()
 	f.defend_pressed = true
 	f.defend_held = true
@@ -137,6 +138,8 @@ func test_poise_break_and_parry_feedback() -> void:
 	player.hurtbox.receive_hit(swipe)
 	await tick(frame(), 1)
 	words = _fx(CombatFx.Style.TEXT).map(func(fx: CombatFx) -> String: return fx.text)
-	check("PARRY" in words, "parry shows PARRY")
+	# Combat Telegraphs 1.0: no "PARRY" word any more - the parry star and flash remain
+	check(not "PARRY" in words, "parry shows no PARRY text: %s" % [words])
+	check(_fx(CombatFx.Style.STAR).size() > stars_before and _fx(CombatFx.Style.FLASH).size() >= 1, "parry star and flash shown")
 	var numbers_after := get_tree().current_scene.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.get_script() == preload("res://scripts/fx/damage_number.gd")).size() if get_tree().current_scene != null else numbers_before
 	check(numbers_after <= numbers_before, "no damage number for a parried hit")

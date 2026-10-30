@@ -143,6 +143,7 @@ func apply_input_block(frame: InputFrame) -> void:
 	if blocked and not _input_was_blocked:
 		combat.clear_inputs()
 		stop_gather(GATHER_MENU)
+		input.release_holds()   # a button held into the window never attacks once it closes
 	_input_was_blocked = blocked
 	if blocked:
 		frame.light_pressed = false
@@ -526,8 +527,8 @@ func _on_parried(_hit: HitData) -> void:
 	var world := CombatFx.world_of(self)
 	CombatFx.spawn(world, _defense_fx_point(), CombatFx.Style.STAR, Color(1.0, 0.97, 0.8), 18.0, 0.35)
 	CombatFx.spawn(world, _defense_fx_point(), CombatFx.Style.FLASH, Color(1.0, 1.0, 0.9), 10.0, 0.18)
-	var label := CombatFx.spawn(world, global_position, CombatFx.Style.TEXT, Color(1.0, 0.95, 0.6), 0.0, 0.6)
-	label.text = "PARRY"
+	# Combat Telegraphs 1.0: no floating "PARRY" word - the star, the flash, the sound and the enemy's flash and daze
+	# (EnemyView._on_parried, EnemyConfig.parry_daze) say it
 
 
 func _on_blocked(_hit: HitData) -> void:
