@@ -13,6 +13,30 @@ Loadout der **aktiven** Klasse. Innerhalb eines Loadouts höchstens einmal.
 *Begründung:* Kein Transfer beim Klassenwechsel nötig, Duplikation und Verlust sind strukturell
 ausgeschlossen (es gibt genau einen Speicherort), Verwerfen entfernt automatisch alle Referenzen.
 
+## Equipment Inventory Separation 1.0 ✅ (Ort eines Items)
+Ein Item hat genau einen Ort: **Tasche**, **Ausrüstungs-Slot** oder **Haven-Lager** (`Character.stash`).
+Besitzer bleibt das Inventar (Save v15 unverändert: Items in `inventory`, Loadouts referenzieren IDs), der Ort
+ergibt sich daraus:
+- Steckt die Instanz im Loadout der **aktiven Klasse** (während eines Trials: im Loadout der echten Klasse), liegt
+  sie im Ausrüstungs-Slot: `Inventory.in_equipment` / `takes_slot` = kein Taschenplatz, nicht im Taschenraster
+  (Inventar- und Lagerfenster), nur in der Paper Doll. Zählung über `Inventory.equipped_check` →
+  `CharacterEquipment.in_equipment` (Methoden-Callable, kein Zyklus).
+- Items **inaktiver** Klassen-Loadouts sind Taschen-Items (belegen einen Platz).
+- **Anlegen:** das neue Item macht seinen Platz frei, Verdrängtes braucht einen (direkter Tausch nutzt den
+  freigewordenen Platz). **Ablegen:** braucht einen freien Platz. **Presets** (`apply_loadout`) und
+  **Klassenwechsel** (`Character.switch_class` → `class_switch_error`) genauso. Passt es nicht, wird abgelehnt
+  (`CharacterEquipment.BAG_FULL` bzw. „too full to change class“) und **nichts** ändert sich - atomar,
+  ohne Verlust oder Duplikat. Eine Änderung, die die Tasche nicht voller macht, ist immer erlaubt.
+  `loadout_error` liefert das Urteil von `apply_loadout` ohne Änderung (gemeinsames `_plan_loadout`, Tasche im
+  Zielzustand gemessen); `PresetService.validate` nutzt es, damit eine Preset-Aktivierung alles oder nichts ist
+  (`TALENT_SYSTEM.md`, Preset Activation Atomicity Fix 1.0). `restore_loadout` stellt einen gesicherten Zustand
+  exakt wieder her (Rollback).
+- **Laden:** `Inventory.from_array` prüft keinen Platz mehr (welche Items in Slots liegen und die Endkapazität
+  sind erst nach Loadouts und Gebäuden bekannt) - kein gespeichertes Item wird wegen Platzmangel verworfen.
+  Alte v15-Saves laden unverändert (deterministisch, idempotent); die Tasche hat danach nur mehr Platz.
+- Bewusst offen: Prolog-Klassenwahl (`PrologueService.choose_starting_class`) und das Ende eines Trials werden
+  nicht abgelehnt; sie können eine Tasche theoretisch überfüllen (kein Verlust, nur kein neues Item, bis Platz ist).
+
 ## Waffenregeln ✅
 | Fall | Regel |
 |---|---|
@@ -23,7 +47,8 @@ ausgeschlossen (es gibt genau einen Speicherort), Verwerfen entfernt automatisch
 | Klassen-/Familienregeln | `required_class_ids`; jede Klasse darf jede Waffenfamilie führen (`allowed_weapon_families` leer) |
 
 **Sichere Transferregel:** Alles, was durch ein Ausrüsten verdrängt wird, verliert nur die Referenz und
-bleibt im Inventar; die UI meldet „Moved back to inventory: …“ (`CharacterEquipment.last_displaced`).
+kommt zurück in die Tasche (braucht dort Platz, sonst wird das Ausrüsten abgelehnt); die UI meldet „Moved back
+to the bag: …“ (`CharacterEquipment.last_displaced`).
 
 Die **Combat-Waffenfamilie folgt der Hauptwaffe** (Wechsel erst, wenn die Aktionsschicht frei ist).
 Ohne Hauptwaffe: `fallback_weapon_family` (Platzhalter bis waffenloser Kampf existiert).

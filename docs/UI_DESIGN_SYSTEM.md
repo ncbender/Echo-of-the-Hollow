@@ -4,7 +4,8 @@ Verbindlich für alle spielerseitigen Oberflächen. Technische Grundregeln (Desi
 `UiWindow`-Größenregel) stehen in `DISPLAY_AND_UI_STANDARD.md`.
 
 ## Leitlinien
-- Dark Fantasy und matt: dunkle grüngraue Flächen, verwitterte Bronze für Rahmen und Titel,
+- Dark Classic Pixel Art und matt: neutrale Charcoal-/Slate-Flächen (UI Visual Consistency 1.0, ohne
+  Grünstich), verwitterte Bronze für Rahmen und Titel,
   Pergamenttöne für Text, sparsames Resonanz-Cyan für Aktives, Fokus und Magisches.
 - Wenig Dekor: Bronze-Eckwinkel an Fenstern, dünne Trennlinien, keine Goldornamente, kein Leuchten
   ohne Grund.
@@ -15,12 +16,12 @@ Verbindlich für alle spielerseitigen Oberflächen. Technische Grundregeln (Desi
 ## Tokens (`UiTheme`)
 | Token | Wert | Verwendung |
 |---|---|---|
-| `BG` | `#171C1A` | tiefster Hintergrund, HUD-Panels (transparent) |
-| `PANEL` | `#252E28` | Fenster, Panels |
-| `PANEL_ELEVATED` | `#303A33` | Karten, ausgewählte Bereiche, Popups |
-| `PANEL_INSET` | `#1C2320` | Listen, Slots, Eingabefelder |
+| `BG` | `#16181C` | tiefster Hintergrund, HUD-Panels (transparent) |
+| `PANEL` | `#23262C` | Fenster, Panels |
+| `PANEL_ELEVATED` | `#30343B` (Slate) | Karten, ausgewählte Bereiche, Popups |
+| `PANEL_INSET` | `#191B20` (Charcoal) | Listen, Slots, Eingabefelder |
 | `BRONZE` / `BRONZE_DIM` / `BRONZE_DARK` | `#C5AD85` / `#7D6C52` / `#4A4134` | Titel, Rahmen, Trennlinien |
-| `TEXT_PRIMARY` / `TEXT_SECONDARY` / `TEXT_MUTED` | `#E9DDC5` / `#AFB9AD` / `#7F877E` | Text-Hierarchie |
+| `TEXT_PRIMARY` / `TEXT_SECONDARY` / `TEXT_MUTED` | `#E9DDC5` / `#B3AEA4` / `#85827B` | Text-Hierarchie |
 | `RESONANCE` / `RESONANCE_DIM` | `#78B8C5` / `#4D7A83` | Aktiv, Fokus, Fortschritt, Magie |
 | `SUCCESS` / `WARNING` / `DANGER` | `#9CBF7E` / `#D9B46A` / `#D27461` | Status, Kosten erfüllt/fehlend, Fehler |
 | `HEALTH` / `POISE` / `PARCHMENT` | `#B4493F` / `#C9A95C` / `#EADCB8` | Leisten, hervorgehobener Text |
@@ -30,17 +31,23 @@ Alte Namen (`COLOR_TEXT`, `COLOR_ACCENT` …) sind Aliase dieser Tokens.
 ## Typografie
 | Stufe | Größe | Variation |
 |---|---|---|
-| Display (Titelbildschirm) | 60 | `DisplayLabel` (Serif) |
-| Fenstertitel | 28 | `TitleLabel` (Serif, Bronze) |
-| Überschrift | 22 | `HeaderLabel` (Serif, Bronze) |
+| Display (Titelbildschirm) | 64 | `DisplayLabel` (Silkscreen) |
+| Fenstertitel | 32 | `TitleLabel` (Silkscreen, Bronze) |
+| Überschrift | 24 | `HeaderLabel` (Silkscreen, Bronze) |
+| Kurzer Abschnittstitel (Tracker, Bossname) | 16 | `FONT_SECTION` (Silkscreen) |
 | Zwischenüberschrift | 20 | `SubheadingLabel` |
 | Fließtext | 18 | Standard |
 | Klein | 15 | `SmallLabel` |
 | Beschriftung | 14 | `CaptionLabel`; Abschnittsköpfe in Versalien und Bronze |
 
-- Serifenschrift: System-Serif (Georgia → Palatino → Cambria → Times) mit eingebauter Sans als
-  Fallback. **Provisorisch**, bis eine lizenzierte Spielschrift gewählt ist.
-- Fließtext: die eingebaute Sans.
+
+Dichte Menüseiten (Menu UX Polish 1.0, `docs/MENU_UX_POLISH_1_0.md`; Skills, Quests, Professions, Journal): eigene
+Variationen, globale Werte unverändert - `MenuHeadingLabel` 16 (Silkscreen, Bronze), `MenuTitleLabel` 18,
+`MenuTextLabel` 15 (Fließtext, Aufgaben), `MenuMetaLabel` 14 (Metadaten, sekundär); Helfer `UiTheme.menu_text`.
+
+- Schriften (UI Font Integration 1.0, `docs/UI_FONT_INTEGRATION_1_0.md`): **IBM Plex Mono Regular** für allen Text
+  (`UiTheme.body_font()`), **Silkscreen** nur für Titel, Überschriften und Display (`UiTheme.display_font()`,
+  8-px-Raster: 16 / 24 / 32 / 64). Keine weiteren Schriften, keine biomeabhängigen Fonts.
 
 ## Abstände
 - Fensterrand und HUD: 16
@@ -116,8 +123,10 @@ Alte Namen (`COLOR_TEXT`, `COLOR_ACCENT` …) sind Aliase dieser Tokens.
 
 ## HUD-Layout
 - Oben Mitte: Ziel-/Bossrahmen, darunter Hinweis. Breite nie größer als der Raum zwischen den Spalten.
-- Oben rechts: Quest-Tracker. Unten links: Spielerrahmen. Unten rechts: Loot-Feed über der
-  Save-Anzeige.
+- Oben links: aktive Effekte (`EffectBar`). Oben rechts: Minimap, darunter der Journey-Tracker. Unten links: die
+  Menüleiste. Unten rechts: Loot-Feed über der Save-Anzeige.
+- Unten Mitte (Combat HUD UX 2.0, `docs/COMBAT_HUD_UX_2_0.md`): die Kampfeinheit HP-Gefäß | 1 2 + Q E R F |
+  Ressourcengefäß, darunter Level-Abzeichen | EXP-Balken | Pressure-Abzeichen; Dash-Segmente unter der Spielfigur.
 - Unten Mitte: Spalte mit Toasts, Charge-Leiste, Interaktionshinweis und Skillleiste (Inhaltsbreite).
   Auf schmalen Canvases (150 %/200 %) rückt die Spalte nach rechts, bis sie den Spielerrahmen nicht mehr
   berührt. Passt die Skillleiste gar nicht daneben, steht sie zentriert über dem Rahmen

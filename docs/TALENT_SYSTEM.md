@@ -6,7 +6,7 @@ Status-Legende: ✅ implementiert · 🟡 teilweise · 🔧 nur vorbereitet · �
 | Datei | Rolle |
 |---|---|
 | `TalentTreeDefinition` (`data/talents/*.tres`) | ein Baum: ID, Klasse, Name, Farbe, Knoten |
-| `TalentNodeDefinition` (Sub-Resource) | ID, Klassen-ID, Baum-ID, Tier 1–7, Max-Rang, Spalte, Voraussetzungen, Klassenlevel, Effekte |
+| `TalentNodeDefinition` (Sub-Resource) | ID, Klassen-ID, Baum-ID, Tier 1–4, Max-Rang, Spalte 0–3, Voraussetzungen, Klassenlevel, Effekte |
 | `TalentRules` (`data/progression/talent_rules.tres`) | Tier-Schwellen, erster Punkt, Slots, Presets, Respec-Kosten |
 | `ClassBuild` (Laufzeit, gespeichert) | Ränge, Skill-Slots, Mods, Sonder-Freischaltungen, Respecs, Presets |
 | `ClassBuilds` | alle Builds eines Charakters + temporärer Trial-Build |
@@ -28,20 +28,24 @@ Generische Talent-Effekte (keine Sonderfälle):
 (Snapshot vor dem Treffer), Ressourcenquote, Pressure, kürzlich gewirkten Skill, Kill, Haltungsbruch
 und Krit.
 
-## Punkteschwellen ✅ (verbindlich)
-| Tier | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
-|---|---|---|---|---|---|---|---|
-| Punkte in **niedrigeren** Tiers desselben Baums | 0 | 5 | 10 | 15 | 20 | 25 | 30 |
+## Punkteschwellen ✅ (verbindlich, Talent Structure Rework 1.0 - `TALENT_STRUCTURE_REWORK_1_0.md`)
+| Tier | 1 | 2 | 3 | 4 (Endtalent) |
+|---|---|---|---|---|
+| Punkte in **niedrigeren** Tiers desselben Baums | 0 | 5 | 18 | 30 |
 
-- Bäume sind frei mischbar; nur Punkte im eigenen Baum zählen.
-- Endtalent (Tier 7) kostet selbst einen Punkt → 31 Punkte; mit 51 Punkten ist höchstens ein
-  Endtalent möglich (getestet).
+- Ein Tier öffnet nur über Punkte im eigenen Baum; innerhalb eines offenen Tiers ist **jedes** Talent frei wählbar.
+  Bäume sind frei mischbar; Punkte anderer Bäume zählen nie.
+- Voraussetzungen (`prerequisites`) nur für direkte Upgrades des Skills eines Aktiv-Talents (6 Stück), nie für
+  Endtalente oder Passives.
+- Endtalent (Tier 4) kostet selbst einen Punkt → 31 Punkte; mit 56 Punkten (ab Level 5, Level 60) ist höchstens ein
+  Endtalent möglich (2 × 31 > 56), Tier 3 in höchstens zwei Bäumen (3 × 19 > 56), Tier 2 in allen dreien (getestet).
 - Geprüft werden außerdem Max-Rang, verfügbare Punkte, Klassenlevel, Voraussetzungen.
 - Datenprüfung beim Laden: keine Zyklen, Voraussetzungen gleiche Klasse und gleicher oder
   niedrigerer Tier, jeder Tier erreichbar (Rangkapazität darunter ≥ Schwelle), genau ein Endtalent
-  pro Baum, Skills/Mods existieren.
-- Jeder Baum: 13 Knoten (je Tier 1–6 zwei Knoten, Tier 7 ein Endtalent), Kapazität unterhalb von
-  Tier 7 ≥ 30.
+  pro Baum, Spalte 0–3, `tier_points` hat `TalentRules.TIERS` (4) Einträge, Skills/Mods existieren.
+- Jeder Baum: 13 Knoten (Tier 1–3 je vier, Tier 4 ein Endtalent), Kapazität unterhalb des Endtalents 36–38 ≥ 30.
+- Talentseite (Skills & Talents UX 2.0 Phase 2): ein Baum zur Zeit, vier Plätze je Tier-Zeile, Linien nur für echte
+  Voraussetzungen; Klick wählt aus, gelernt wird nur über den Learn-Button im Detailbereich.
 
 ## Talentbäume (39 Knoten je Klasse, alle mit echtem Effekt)
 Vollständige Werte stehen in den `.tres` und in den Tooltips. Beispiele:
@@ -91,9 +95,45 @@ Vor dem Aktivieren prüft `PresetService.validate`:
 - Talente (gleiche Regeln wie beim Lernen)
 - Skills und Mods gegen einen Probe-Build mit den Preset-Talenten
 - vorhandene Iteminstanzen und Ausrüstungsregeln
+- den ganzen Ausrüstungswechsel (`CharacterEquipment.loadout_error`, siehe unten)
 - das Gold
 
-Fehlende Items werden gemeldet, nie neu erzeugt. Eine ungültige Aktivierung ändert nichts.
+Fehlende Items werden gemeldet, nie neu erzeugt.
+
+### Aktivierung: alles oder nichts ✅ (Preset Activation Atomicity Fix 1.0)
+
+**Bisheriger Fehler.** `activate` lief so ab: Prüfung → Gold zahlen und Respec zählen → Talente, Slots und Mods
+übernehmen → erst zuletzt `apply_loadout`. `apply_loadout` prüft mehr als `validate`:
+- die Tasche im Zielzustand,
+- eine Zweihandwaffe mit Nebenhand-Item,
+- dasselbe Item doppelt.
+
+Scheiterte es (z. B. volle Tasche), waren Talente, Skills, Mods und Gold schon gewechselt. Zusätzlich setzte
+`build.from_dict(preset)` alles zurück, was ein Preset nicht enthält: den Respec-Zähler (der nächste Reset war
+wieder kostenlos), Freischaltungen aus anderen Quellen (`unlocked_skills` / `unlocked_mods`). Die Preset-Felder
+(`name`, `equipment`, …) landeten in `build.extra`.
+
+**Jetzt.**
+- **Vollständige Vorprüfung:** `validate` ruft nach den Einzelprüfungen der Item-Referenzen
+  `CharacterEquipment.loadout_error(class, equipment)` auf. Das ist das Urteil von `apply_loadout` ohne Änderung:
+  - dieselben Prüfungen über das gemeinsame `_plan_loadout`;
+  - die Tasche wird im **echten Zielzustand** gemessen (Loadout kurz gesetzt, `used_slots` gezählt, sofort
+    zurückgesetzt);
+  - frei werdende Plätze zählen, Tausch bei voller Tasche ist erlaubt;
+  - abgelehnt nur, wenn die Tasche über der Kapazität **und** voller als vorher wäre (`_overfills`, dieselbe
+    Regel wie bei jedem Loadout-Wechsel).
+- **Durchführung in umkehrbarer Reihenfolge**, erst nach bestandener Prüfung:
+  1. `apply_loadout` (selbst atomar);
+  2. die Reset-Kosten, nur bei anderen Talenten (scheitert die Zahlung, stellt `restore_loadout` das Loadout
+     exakt wieder her);
+  3. zuletzt der Build im Speicher - **nur** Talente, Q/E/R/F und Mods aus dem Preset (kann nicht scheitern).
+     Respec-Zähler +1 nur bei Talentwechsel; Freischaltungen, andere Presets und `extra` bleiben.
+- Eine abgelehnte Aktivierung lässt Talente, Skills, Mods, Respec-Zähler, alle Loadouts, Tasche, Lager und Gold
+  unverändert. Die Presets-Seite zeigt den Grund (z. B. „Your bag is full - make room first.“) vorher und sperrt
+  Activate.
+- Keine Änderung an Preset-Format, Slotregeln, Kapazität (40), Reset-Preisen; Save v15.
+- Tests: `test_preset_atomicity` (Fälle A-O, voller Zustandsvergleich vor / nach einer abgelehnten Aktivierung),
+  `test_preset_ui` (Grund sichtbar, Activate gesperrt, nichts geändert).
 
 ## Laden
 `TalentService.sanitize_build` repariert geladene Builds:

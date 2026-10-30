@@ -12,7 +12,7 @@ Details: `TALENT_SYSTEM.md` (Talente, Respec, Presets), `SKILL_SYSTEM.md` (Skill
   Skill-Freischaltungen, 4 Skill-Slots, Mods, Loadout (Instanz-Referenzen), 5 Build-Presets.
 - Klassenwechsel nur an einer **Klassenstation** (`Character.switch_class`), nie während einer Trial.
 - Nur die aktive Klasse bekommt Klassen-XP (Treffer, Kills; Skill-/Statuskills ebenfalls).
-- Talentpunkte: ab Level 10 einer pro Level → **51 auf Level 60** (`TalentRules`).
+- Talentpunkte: ab Level 5 einer pro Level → **56 auf Level 60** (`TalentRules`; Talent Progression Fix 1.0, vorher ab 10).
 - XP-Kurve der 60er-Klassen: `100 × 1,07^(Level−1)` (vorläufig, nicht balanciert).
 
 ## Klassen
@@ -56,7 +56,7 @@ Grundangriffe (Light/Heavy) bleiben kostenlos und unverändert.
 
 ## Klassenstation & Fenster ✅
 `ClassStationPanel` – mit **G** an einer Klassenstation (alles erlaubt) oder **C** überall (nur
-ansehen + Talente lernen). Seiten: Klassen, Talente (drei Bäume, Linien, Tooltips), Skills
+ansehen + Talente lernen). Seiten: Klassen, Talente (Baum-Buttons, ein Baum, Detailbereich mit Learn; `SKILLS_TALENTS_UX_2_0.md`), Skills
 (Slots + Form/Resonance), Presets, Quests. HUD: Klasseninfo (Ressource, Pressure), Skill-Leiste
 Q/E/R/F (Kosten, Cooldown), Ziele-Panel (Trial/Quests).
 

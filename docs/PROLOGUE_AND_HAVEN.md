@@ -68,7 +68,7 @@ wiederholbar). Erster passender Dialog gewinnt. `DialoguePanel`: G/Enter weiter,
   1. Ziel prüfen: genau die nächste Stufe (wiederholte oder veraltete Anfragen, z. B. Doppelklick, werden
      abgelehnt - nie wird eine Stufe übersprungen), Bedingung, Materialplan.
   2. Den Materialplan einmal verbrauchen (`ProfessionService.material_plan`/`consume_plan`, derselbe Plan wie
-     an den Werkbänken: Tasche, nach Restaurierung des Old Storehouse auch das Haven-Lager, Tasche zuerst).
+     an den Werkbänken: Tasche und immer auch das Haven-Lager, Tasche zuerst; UI Usability & Haven Crafting 1.0).
   3. Flag `haven.<id>.restored` bzw. `haven.<id>.revitalized` setzen.
   4. Stufe setzen. `WorldState.restoration_changed` löst den Meilenstein-Save aus.
   5. Kapazität neu berechnen.

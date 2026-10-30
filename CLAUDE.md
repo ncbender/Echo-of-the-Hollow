@@ -14,6 +14,117 @@ Stand: Combat-Prototyp + RPG-Fundament + Welt/Basis-Loop (Overnight 3) + Combat 
 + Weapon Base Damage 1.0–1.2 (Instanz-Basis bei Erzeugung, Angriffsmultiplikatoren, Forged V3, Spezialwaffen V2, Local-Affixe; Save v13).
 + Loot Foundation 1.0 (Instanz-Rarity, Fünf-Tier-Affixe, gemeinsamer Affix-Kern `AffixRoller`, `ItemCreation.generate`; Save v14).
 + Hollowwood Loot Integration 1.0 (Grunt-/Wolf-Equipment-Drops über `EquipmentLootTable`/`EquipmentLoot`, Instanz-Pickups).
++ Region 1 World Expansion A 1.0 (große Whisper Forest/Tangled Wood, `GameMap.camera_bounds`; `docs/WORLD_EXPANSION_A_1_0.md`)
+  + World Expansion B 1.0 (große Chapel/Warden's Rest; `docs/WORLD_EXPANSION_B_1_0.md`)
+  + Side Quests 1.0 (The Lost Hunter, What the Roots Keep, Embers of Shelter; `docs/SIDE_QUESTS_1_0.md`).
+  Nebenquests starten nur über `StoryQuestDefinition.start_event_id` (nie Schritt 0, nie in `next_quest_ids`);
+  `ProfessionService.craft` meldet nach Erfolg `craft:<recipe_id>`.
+  + Gameplay Polish 1.0 (kompakter Tracker für Nebenquests, Roots-Keep-Hinweise, drei optionale Funde;
+  `docs/GAMEPLAY_POLISH_1_0.md`).
+  + UI Layout Lock 1.0 / UI-Paket 1 (HUD-Zonen, eine Icon-Menüleiste I C T P J M O, Kampfleiste 1 2 | Q E R F,
+  Minimap-Platzhalter; `docs/UI_LAYOUT_LOCK_1_0.md`). Gehaltene Maus-Angriffe zählen nur vom Spielfeld aus.
+  + Map & Fog of War 1.0 / UI-Paket 2 (Minimap, Karte M mit Area/Region, Fog pro Karte in
+  `WorldState.map_states[map]["fog"]`, Save v15 unverändert; `docs/MAP_AND_FOG_OF_WAR_1_0.md`). Aufdecken nur
+  über `GameMap._update_fog` (echte Bewegung), Marker nur über `MapMarkers` (nur erkundete Zellen, nie Gegner/Loot).
+  + UI Window Foundation 1.0 / UI-Paket 3 (Journal: Main Story/Side/Class/Completed/Haven, Einteilung nur über
+  `StoryService.is_main_story` = Kette ab FIRST_QUEST; HUD tritt hinter Fenstern zurück; optionale UI-Art nur über
+  `UiSkin` (`res://assets/ui/<id>.png`, sonst prozeduraler Fallback); `docs/UI_WINDOW_FOUNDATION_1_0.md`,
+  Asset-Liste `docs/UI_ASSET_CATALOG_1_0.md`).
+  + HUD EXP Bar 1.0 (genau ein `HudXpBar` 426 × 14, 6 px unter der Kampfleiste in `GameHud._combat_column`;
+  nur Prozent der aktiven Klasse bzw. „MAX“, Daten nur aus `CharacterClasses`; `docs/HUD_EXP_BAR_1_0.md`).
+  + UI Font Integration 1.0: genau zwei Schriften - IBM Plex Mono (`UiTheme.body_font()`, alle Texte, auch
+  Zeichen-Code statt `ThemeDB.fallback_font`) und Silkscreen (`UiTheme.display_font()`, nur Titel/Überschriften,
+  8-px-Raster); `docs/UI_FONT_INTEGRATION_1_0.md`.
+  + UI Visual Consistency 1.0: neutrale UiTheme-Flächen nach den Art-Ankern (Charcoal/Slate, kein Grünstich),
+  ein Theme für alles; semantische Farben unverändert; `docs/UI_VISUAL_CONSISTENCY_1_0.md`.
+  + UI Core States & Map Palette 1.0 (Button-/Slot-/Tab-Zustände, HUD-Slot disabled, neutrale Karten-
+  töne FLOOR/WALL = zugleich `is_solid`-Klassen, Abstand > 0,01 halten; `docs/UI_CORE_STATES_1_0.md`).
+  + UI Panels & Primary Controls 1.0 (Primary-Buttons inkl. Disabled-Hook, HUD-/Card-/Inset-/Tooltip-Panels;
+  `docs/UI_PANELS_PRIMARY_1_0.md`).
+  + UI Selection & Surface Polish 1.0 (Auswahl = Gold über Card-Art auch für `CardButton`, Fokus bleibt eigene
+  Resonanz-Kontur; harter Pixel-Schatten außerhalb skinned Fenster über `UiTheme.draw_hard_shadow`;
+  `docs/UI_SELECTION_POLISH_1_0.md`).
+  + UI Scrollbars & Input Fields 1.0 (`scroll/track`, `scroll/grabber` 10 × 10, Rand 3, diagonal-symmetrisch für H und V;
+  `input/normal|focus|disabled` 24 × 24, Rand 4 → LineEdit normal/focus/read_only; Fokus = Resonanz, nie Gold;
+  35 PNGs, alte byte-identisch; `docs/UI_SCROLL_INPUT_1_0.md`).
+  + UI Secondary Controls 1.0 (Dropdown-Pfeil/-Radio, Check-Icons, Slider-Füllung/-Griff, Key-Chip; Theme-Icons nur
+  über `UiTheme.SKINNED_ICONS`; Gold = an/gewählt, Cyan = Fokus; 48 PNGs; `docs/UI_SECONDARY_CONTROLS_1_0.md`).
+  + Main Window Layout Lock 1.0 (die sieben Hauptmenüs I C T P J M O: ein Rahmen `UiTheme.MAIN_WINDOW_SIZE` 1120 × 760,
+  gleiche Position über `UiWindow.main_window`, Inhalte über `body_room()`; innere Scrollbereiche;
+  `docs/MAIN_WINDOW_LAYOUT_LOCK_1_0.md`).
+  + BookTabs Visual Integration 1.0 (`booktab/normal|hover|selected` 24 × 24, Rand 4, rechts offen; Auswahl Gold,
+  Fokus Cyan außen; alle inaktiven Register 112 px; 51 PNGs; `docs/BOOKTABS_VISUAL_INTEGRATION_1_0.md`).
+  + HUD Bars Visual Integration 1.0 (alle Leisten: `bar/frame` + Tönungsmaske `bar/fill` ohne Seitenränder, Farbe per
+  `UiTheme.fill_box`, Füllung 1 px eingerückt; `UiSkin.PATCH` darf `Vector4i` sein; 53 PNGs;
+  `docs/HUD_BARS_VISUAL_INTEGRATION_1_0.md`).
+  + HUD Resource Text Readability 1.0 (Ressourcenwert = `SplitBarText`: dunkel über heller Füllung (< 3:1), hell über
+  der Rinne, pixelgenau an der Füllkante geteilt; Resource Bar Height Final Fix 1.0: Leiste 14 px, Text 12 px,
+  Glyphen in der Rinne, nur die Kontur unter Unterlängen auf der Rahmenzeile (16 px nötig);
+  `docs/HUD_RESOURCE_TEXT_READABILITY_1_0.md`).
+  + Map Markers Pixel Art 1.0 (`map/player|exit|waystone|waystone_silent|rest|npc|landmark|quest` 16 × 16, 1:1 über
+  `MapPainter.marker_rect` im Bild, Spielerpfeil in 90°-Schritten; Sichtbarkeit nur `MapMarkers`; 61 PNGs;
+  `docs/MAP_MARKERS_PIXEL_ART_1_0.md`).
+  + Skill Icons Pixel Art 1.0 (`skills/<skill id>` 40 × 40 für alle 21 aktiven Skills der spielbaren Klassen,
+  1:1 in Kampfleiste und Klassenstation über `UiTheme.skill_icon`; Validator gleicht die IDs mit `data/` ab; 82 PNGs;
+  `docs/SKILL_ICONS_PIXEL_ART_1_0.md`).
+  + Skills & Talents UX 2.0 Phase 1 - Weapons (nur die Familie der Hauptwaffe, Combo-Raster + Details; Icons
+  `combos/<Form>_<Folge>[_<Effekt>]` nur über `ComboIcons` aus den Daten; Auswahl ändert nie Kampf/Eingaben; 126 PNGs;
+  `docs/SKILLS_TALENTS_UX_2_0.md`). Phase 2 - Talents: drei Baum-Buttons (Name · Punkte), ein Baum, fester
+  Detailbereich; Klick wählt nur, Lernen nur über `LearnTalent` (`TalentService.learn`); Linien nur für echte
+  Voraussetzungen; Skill-Art nur bei Aktiv-Talenten. Phase 3 - Skills: Q/E/R/F-Leiste oben, kompakte Liste,
+  Details mit fester Equip-Zeile (Equip / Replace / Swap über `SkillBook.assign_slot`) und Mods nur des gewählten
+  Skills; Auswahl rüstet nie aus. Phase 4 - Presets: fünf kompakte Zeilen (Save/Overwrite), Name/Rename/Delete des
+  gewählten, Build-Details (Punkte je Baum, Q/E/R/F + Mods, Item-Referenzen mit Zustand) mit Activate-Fuß; alles über
+  das unveränderte `PresetService`. Phase 5 - Quests: Klassen-Freischaltquests (charakterweit) als kompakte Liste mit
+  echtem Status (Locked/Available/Active/Ready to Turn In/Completed/Class unlocked), Details mit Zielen, Lieferungen,
+  Anforderungen, Belohnung und einer Aktion (Take quest / Turn in über `QuestService`). Phase 6 - Classes: kompakte
+  Karten (ACTIVE/UNLOCKED/LOCKED, Level, Tagline), Details mit Ressource, Spielstil, Spezialisierungen, Gear bzw.
+  Freischaltung; Karte wählt nur, „Switch to <Klasse>“ nur wenn `Character.class_switch_error` (= Prüfungen von
+  `switch_class`) leer ist, sonst der Grund; die Startklasse nur solange sie aktiv ist. Phase 7 - Armor: Burden
+  oben (Werte aus `ArmorMasteryService`/`ArmorMasteryRules`), 2×2 Mastery-Karten (WORN n% getrennt von Gold-Auswahl),
+  Details mit Meilensteinen; nur Anzeige. Alle sieben Tabs umgesetzt.
+  + UI Usability & Haven Crafting 1.0 (Balkenzahlen nur über `BarText` - auf die Ziffern zentriert, passend
+  verkleinert; Tab-Fenster mit fester Außengröße über `UiWindow.stable_size`; Berufe: begrenzte Rezeptliste mit
+  Suche, Mausrad nur über der Liste; an jeder Haven-Werkbank und der Schmiede immer Tasche + Lager (Tasche zuerst,
+  ein Materialplan, atomar), außerhalb nie; Save v15 unverändert; `docs/UI_USABILITY_HAVEN_CRAFTING_1_0.md`).
+  + Talent Structure Rework 1.0 (4 Tiers je Baum: Tier 1–3 je vier frei wählbare Talente, Tier 4 Endtalent; Schwellen
+  0 / 5 / 18 / 30 Punkte in niedrigeren Tiers desselben Baums; Prereqs nur für direkte Skill-Upgrades; alte Verteilungen
+  bleiben gültig, Save v15 unverändert; `docs/TALENT_STRUCTURE_REWORK_1_0.md`).
+  + Menu UX Polish 1.0 Batch 1 (Inventar ohne Hilfetext/Slot-Itemnamen - Name nur im Tooltip; Talents: Baum volle
+  Breite + kompakte Aktionszeile `TalentDetail`, Effekte nur im Tooltip, Blockiergrund `TalentTooltip.block_reason`;
+  dichte Menütexte nur über `MenuHeading/Title/Text/MetaLabel` (16/18/15/14), globale Größen unverändert; Professions-
+  Seiten als Tabs in der Titelzeile über `UiWindow.set_title_tabs`; Journal-Close ohne Tastenhinweis; Hauptmenüs:
+  Korn `window/backdrop` + ruhige gravierte Seite `window/page` über `UiWindow._draw_main_ground`; 128 PNGs;
+  `docs/MENU_UX_POLISH_1_0.md`).
+  + Combat HUD UX 2.0 Batch 2 (ersetzt den PlayerFrame oben links: `HudVessel` HP links / Klassenressource rechts der
+  Kampfleiste, 52 × 66, Zahl innen, Name/Max im Tooltip, ohne Ressource leer + Tooltip; Level/Pressure als `HudBadge`
+  in der EXP-Zeile; Slots ohne Dauertexte, Flask/Trank als Flüssigkeitsstand (Flask = Ladungen/Max, Trank = Viertel
+  eines `max_stack`); Dash-Segmente unter dem Helden (`HudDashMeter`, nur während Aufladung); Klassen-Buffs in der
+  `EffectBar`; Menüleiste 34 px; Journey-Tracker mit Titel + Ziel aus `StoryService.tracker_entries`/`short_goal`,
+  optional `StoryStep.hud_goal`; Art nur über `HudFillArt`; 136 PNGs; `docs/COMBAT_HUD_UX_2_0.md`).
+  + Menu UX Polish 1.1 (gemeinsame Außenreiter `BookTabs` hinter dem Rahmen, gewählter verbindet zur Seite; Professions:
+  Bereiche außen, Berufe als Titelzeilen-Tabs, Salvage nur `SalvageService.SALVAGE_PROFESSIONS`, Werkstatt + Grund nur
+  in der Aktionszone; Hilfe nur über `HelpButton` (Hover + Fokus); Talent-Zustand „Open“ = Voraussetzungen erfüllt,
+  kein Punkt (`TalentTreeView.node_state`); Equip/Replace/Swap/Move/Equipped nach `assign_slot`; Journal-Liste nur
+  Titel + Status, frühere Kapitel eingeklappt; Inventar-Details gruppiert + „Only active bonuses“; `docs/MENU_UX_POLISH_1_1.md`).
+  + Loot & Progress Feedback 1.0 (ein Loot-Feed `LootFeed` für Items, Gold, Berufs-XP – nur nach echter Vergabe über
+  `bridge.item_received` / `bridge.profession_xp`, gebündelt, max. 5 Zeilen + Warteschlange; Level-ups nur über
+  `bridge.progress` → `ProgressNotice` + `LevelUpFx`, zusammengefasst, Hero vor Mastery; keine Gathering-Schrittzähler,
+  keine Parry-Texte im HUD; `docs/LOOT_PROGRESS_FEEDBACK_1_0.md`).
+  + Combat Telegraphs 1.0 (Flags nur über `AttackDefinition.is_parryable/is_blockable/breaks_guard/block_holds/
+  telegraph_kind` – auch in `DefenseComponent.resolve`; `EnemyView` zeigt im Startup Kegel + ein Symbol: Kreuzfunke =
+  parierbar, Schild = nur blockbar, roter gebrochener Ring = weder noch; kein Blinken, kein „!!“/„PARRY“-Text;
+  `docs/COMBAT_TELEGRAPHS_1_0.md`).
+  + Map UX 2.0 (Karte M: Area im ganzzahligen Maßstab, beim Öffnen auf den Spieler zentriert, Ziehen/Pfeiltasten/
+  Zentrierknopf über `WorldMapPanel.PanCanvas`; Region als kompaktes Ortsnetz mit Waystone-Zustand am Knoten und
+  Detailzone; Reisen nur über „Travel“ an einem wachen Waystone, gemeinsam mit `WaystonePanel.start_travel`;
+  `docs/MAP_UX_2_0.md`).
+  + Playtest Corrections 1.0 (Gesamtstand vom Entwickler abgenommen; Inventar-Details nur Wirksames, immer Max Health/
+  Armor (`InventoryPanel.shows_stat`); Hauptmenüs ohne Close-Button – `UiWindow.main_window` blendet ihn aus, andere
+  Fenster behalten ihn; Talent-Tooltips im Fenster (`TalentTooltip.bounds_rect`); `docs/PLAYTEST_CORRECTIONS_1_0.md`).
+  + Parry Timing Cue 1.0 (ersetzt die Telegraph-Symbole: nur Elites/Bosse (`EnemyConfig.rank`) mit parierbarem Angriff
+  zeigen einen kurzen Kreuzblitz REACTION + Fenster/2 vor dem Treffer – `ParryCue`, `EnemyView`; Kegel und rote Fläche
+  bleiben; `docs/PARRY_TIMING_CUE_1_0.md`).
 Roadmap: `docs/DEVELOPMENT_ROADMAP.md`.
 Hauptszene: `scenes/ui/title_screen.tscn` (New Game → `old_road`); Haven: `scenes/maps/home_base.tscn`;
 Combat-Testarena: `scenes/arena/test_arena.tscn`.
@@ -48,7 +159,11 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
 - Combat ↔ RPG nur über `PlayerProgressionBridge`; Items wirken über `AttackModifier`, nie über
   geänderte `AttackDefinition`-Daten oder eigene Schadenslogik.
 - Items existieren nur in einem besitzenden `Inventory` (Tasche oder Haven-Lager `Character.stash`); Loadouts und
-  Presets referenzieren Instanz-IDs der Tasche (Shared-Item-Policy). Lagertransfers nur über `StashService`
+  Presets referenzieren Instanz-IDs der Tasche (Shared-Item-Policy). Equipment Inventory Separation 1.0: Items im
+  Loadout der aktiven Klasse liegen im Slot und belegen keinen Taschenplatz (`Inventory.takes_slot`); Anlegen/
+  Ablegen/Presets/Klassenwechsel lehnen ohne Platz atomar ab (`docs/EQUIPMENT_SYSTEM.md`). Preset-Aktivierung ist
+  alles oder nichts: `PresetService.validate` prüft vorab auch den Loadout-Wechsel (`CharacterEquipment.loadout_error`,
+  Tasche im Zielzustand), `activate` übernimmt nur Talente/Slots/Mods (Respec-Zähler, Freischaltungen bleiben). Lagertransfers nur über `StashService`
   (atomar, Kategorien sind Ansichten; `docs/STASH.md`).
 - Stats immer über `StatResolver` neu berechnen, nie inkrementell addieren.
 - Einziges Autoload: `GameSession` (hält den Character über Szenenwechsel). Keine weiteren ohne Begründung.
@@ -78,6 +193,9 @@ Combat-Testarena: `scenes/arena/test_arena.tscn`.
   explizite `AffixTierWeights`-Eingabe, nie Standardverteilung; neue Loot-Items nur über `ItemCreation.generate`.
   Equipment-Drops nur über `EquipmentLoot.roll` mit einer `EquipmentLootTable` (`docs/HOLLOWWOOD_LOOT_INTEGRATION_1_0.md`):
   ein Wurf pro Ereignis, erzeugte Instanz unverändert über `GameMap.spawn_item_pickup` / `ItemPickup.item`.
+  Kapitel-1-Rare (`docs/CHAPTER_1_RARE_REWARD_1_0.md`): nur Sentinel's Cache in Warden's Rest (`BossRewardService`);
+  Warden's Cache = einmalige Materialien. `boss_reward.whisper_forest_grove_warden` ist eingefrorener Legacy-Beleg
+  (nie mehr setzen) und schließt beide Caches (`BossRewardCache.taken_flags`).
 - Klassen (`docs/CLASS_DESIGN.md`, `TALENT_SYSTEM.md`, `SKILL_SYSTEM.md`, `CLASS_QUESTS.md`): Talent-/Skill-/
   Preset-/Prolog-/Quest-Regeln nur in `TalentService`, `SkillBook`, `PresetService`, `PrologueService`,
   `QuestService`; Inhalte sind Daten (`data/skills`, `skill_mods`, `talents`, `trials`, `quests`, `status`).

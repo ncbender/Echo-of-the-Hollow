@@ -62,8 +62,9 @@ Danach wird der **Materialplan** verbraucht, das Ergebnis hinzugefügt (Fehler �
 markiert und XP vergeben. Schnelle Wiederholungen sind unabhängige Transaktionen und werden jeweils neu geprüft.
 Ergebnisse sind normale Iteminstanzen aus dem bestehenden Itemmodell. Die Forge-Affixe bleiben unverändert.
 
-**Lager-Materialien:** An einer Haven-Werkbank (eine Ruine) zählt nach der Restaurierung des Old Storehouse
-(`StashService.is_upgraded`) auch das Haven-Lager. Zuerst wird die Tasche verbraucht, dann das Lager.
+**Lager-Materialien:** An jeder Haven-Werkbank (eine Ruine, auch die Schmiede-Rezepte der Old Smithy über
+`BaseBuilder`) zählt immer auch das Haven-Lager - in jeder Stufe des Old Storehouse (UI Usability & Haven
+Crafting 1.0, `docs/UI_USABILITY_HAVEN_CRAFTING_1_0.md`). Zuerst wird die Tasche verbraucht, dann das Lager.
 `material_plan` erzeugt den Plan einmal; Anzeige („bag 18, stash 6“), Prüfung und Verbrauch nutzen denselben Plan,
 jede Einheit wird über `Inventory.count` einmal gezählt. Ohne Werkbank wird nie aufs Lager zugegriffen.
 

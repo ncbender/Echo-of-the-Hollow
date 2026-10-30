@@ -61,8 +61,11 @@ Wirkung:
 - **Physical Damage Reduction:** physischer erlittener Schaden.
 
 ## UI
-Character-Buch (C), Seite „Armor“:
-- Burden mit Stufe und Strafen, Inhalt der fünf Slots
-- je Track: Stufe, XP-Balken, getragene Abdeckung, Meilensteine (erreicht/aktuell wirksam)
+Skills & Talents (C / Klassenstation), Seite „Armor“ (Skills & Talents UX 2.0 Phase 7, `SKILLS_TALENTS_UX_2_0.md`):
+- oben Burden: Punkte und Stufe, Strafen, Iron Discipline, Stufenbereiche aus den Regeln, die fünf Slots
+- 2 × 2 Mastery-Karten: Stufe, XP-Balken, „WORN n%“, wirksame Boni (je Stat summiert), nächster Meilenstein
+- Details des gewählten Tracks: Fortschritt, getragene Slots, alle Meilensteine (jetzt wirksam / erreicht, aber
+  nicht getragen / nächster / offen)
+- Auswahl ändert nichts; nur Anzeige über `ArmorMasteryService`
 
 Das Fenster nimmt immer die volle Größe ein; die Book Tabs springen beim Seitenwechsel nicht.
