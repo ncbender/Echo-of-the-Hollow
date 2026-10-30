@@ -385,7 +385,7 @@ func test_full_bag_pays_nothing_then_claims_after_making_room() -> void:
 	check_eq(_mara().marker(), "?", "still ?")
 	# make room while the window is open: the button unlocks
 	for item in character.inventory.items():
-		if item.definition_id == FILLER:
+		if item.definition_id == FILLER and character.inventory.takes_slot(item):   # never the worn starting gear
 			character.inventory.remove_instance(item.instance_id)
 			break
 	check(not _button().disabled, "room made: Claim Reward enabled again")
@@ -407,7 +407,7 @@ func test_partial_stacks_are_topped_up_and_a_failed_claim_keeps_them() -> void:
 	check_eq(QuestRewardService.claim(character, QUEST), QuestRewardService.BAG_FULL, "refused")
 	check_eq(_snapshot(), before, "existing stacks unchanged")
 	for item in character.inventory.items():
-		if item.definition_id == FILLER:
+		if item.definition_id == FILLER and character.inventory.takes_slot(item):   # never the worn starting gear
 			character.inventory.remove_instance(item.instance_id)
 			break
 	check_eq(QuestRewardService.claim(character, QUEST), "", "claimed")
@@ -464,7 +464,9 @@ func test_mara_and_edrin_never_claim_each_others_reward() -> void:
 	check_eq(_mara().marker(), "?", "Mara: ?")
 	check_eq((map.get_node("Edrin") as StoryNpc).marker(), "?", "Edrin: ?")
 	check(await _open_maras_rewards(), "Mara's window")
-	check_eq(_panel().quests().map(func(q: StoryQuestDefinition) -> StringName: return q.id), [QUEST], "Mara lists only The Broken Cart")
+	# Side Quests 1.0: The Lost Hunter and Embers of Shelter are Mara's too - never Edrin's First Binding
+	check_eq(_panel().quests().map(func(q: StoryQuestDefinition) -> StringName: return q.id), [&"embers_of_shelter", QUEST, &"the_lost_hunter"],
+		"Mara lists her own quests only")
 	var gold := character.inventory.count(GOLD)
 	check_eq(_panel().claim(), "", "Mara's claim")
 	check_eq(character.inventory.count(GOLD), gold + 30, "30 gold, not 60")
@@ -515,7 +517,7 @@ func test_material_only_rewards_count_as_rewards_in_the_ui_paths() -> void:
 	quest.turn_in_gold = 0   # synthetic: materials only
 	_to_haven_welcomed()
 	check_eq(QuestRewardService.state(character, QUEST), QuestRewardService.PENDING, "materials alone register a claim")
-	check_eq(QuestRewardPanel.quests_for(character, &"mara").size(), 1, "panel lists it")
+	check(QuestRewardPanel.quests_for(character, &"mara").has(quest), "panel lists it")
 	check(QuestRewardPanel.has_rewards_for(character, &"mara"), "Flask button")
 	check_eq(QuestRewardPanel.reward_parts(db, quest), PackedStringArray(["3 Timber", "2 Stone"]), "card rows")
 	check_eq(QuestRewardPanel.reward_summary(db, quest), "3 Timber and 2 Stone", "success summary")

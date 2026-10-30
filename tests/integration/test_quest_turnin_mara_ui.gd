@@ -167,7 +167,7 @@ func _tracker_text() -> String:
 	for panel in map.hud.find_children("*", "ObjectivePanel", true, false):
 		var objective := panel as ObjectivePanel
 		objective.refresh()
-		return objective._lines.text
+		return objective.full_text()
 	return ""
 
 
@@ -181,6 +181,8 @@ func _journal_texts() -> PackedStringArray:
 func _state() -> String:
 	var payload := character.to_dict()
 	payload.erase("play_time")   # ticks with the map, not guidance
+	for map_state: Dictionary in (payload.world.map_states as Dictionary).values():
+		map_state.erase("fog")   # explored where the player stands (_stand_at), not guidance (Map & Fog of War 1.0)
 	return JSON.stringify(payload)
 
 
@@ -245,11 +247,20 @@ func test_journal_window_shows_the_line_on_the_completed_card() -> void:
 	for i in 3:
 		await get_tree().process_frame
 	check(map.hud.journal_panel.visible, "journal open")
+	# Menu UX Polish 1.1: the list says "reward waiting"; the reward line itself is in the chosen quest's details
+	var fold := map.hud.journal_panel.find_child("EarlierChapters", true, false) as Button
+	check(fold != null and fold.text.contains("reward waiting"), "the folded earlier chapters say a reward is waiting")
+	map.hud.journal_panel.select_quest(QUEST)
+	for i in 2:
+		await get_tree().process_frame
 	check(JOURNAL_PENDING in _journal_texts(), "pending line on the card: %s" % [_journal_texts()])
 	map.hud.close_windows()
 	QuestRewardService.claim(character, QUEST)
 	map.hud.toggle_journal()
 	for i in 3:
+		await get_tree().process_frame
+	map.hud.journal_panel.select_quest(QUEST)
+	for i in 2:
 		await get_tree().process_frame
 	check(JOURNAL_CLAIMED in _journal_texts(), "received line on the card")
 
@@ -277,7 +288,7 @@ func test_both_open_rewards_stay_findable_after_the_story_lines() -> void:
 	check(TRACKER in lines and EDRIN_TRACKER in lines, "Mara and Edrin: %s" % [lines])
 	await _open_haven()
 	var text := _tracker_text()
-	var story := StoryService.tracker_lines(character)
+	var story := StoryService.tracker_entries(character, true).map(func(e: Dictionary) -> String: return e.title)   # Combat HUD UX 2.0: title + goal
 	check(not story.is_empty(), "a story hint is running")
 	check(text.find(story[0]) >= 0 and text.find(story[0]) < text.find(TRACKER) and text.find(story[0]) < text.find(EDRIN_TRACKER),
 			"story lines stay first: %s" % text)
@@ -299,7 +310,7 @@ func test_trial_lines_keep_priority() -> void:
 	var text := _tracker_text()
 	var trial: TrialDefinition = db.trials[&"trial_warrior"]
 	var panel := map.hud.find_children("*", "ObjectivePanel", true, false)[0] as ObjectivePanel
-	check_eq(panel._title.text, trial.display_name, "trial keeps the title")
+	check(panel.full_text().begins_with(trial.display_name), "the trial comes first, under its name (Combat HUD UX 2.0: the header stays Journey)")
 	check(text.find(TRACKER) > text.find(tr("UI_TRIAL_CLASS") % db.get_class_def(trial.class_id).display_name), "reward hint after the trial lines")
 	check_eq(QuestRewardService.claim(character, QUEST), "Finish or leave the current trial first.", "claim locked in the trial")
 	character.classes.end_trial()
@@ -384,7 +395,7 @@ func test_bag_full_keeps_pending_and_room_unlocks_the_claim() -> void:
 	check_eq(QuestRewardService.state(character, QUEST), QuestRewardService.PENDING, "pending")
 	check_eq(_mara().marker(), "?", "still ?")
 	for item in character.inventory.items():
-		if item.definition_id == FILLER:
+		if item.definition_id == FILLER and character.inventory.takes_slot(item):   # a bag sword, never the worn one
 			character.inventory.remove_instance(item.instance_id)
 			break
 	check(not claim.disabled or not _button(_panel(), "ClaimReward").disabled, "room: Claim Reward enabled")

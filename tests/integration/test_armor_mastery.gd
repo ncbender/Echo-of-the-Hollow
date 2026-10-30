@@ -264,7 +264,7 @@ func test_armor_page() -> void:
 	_wear([P, P, P, P, P])
 	if not await _open_haven():
 		return
-	map.hud.toggle_character()
+	map.hud.toggle_talents()
 	var panel := map.hud.class_panel
 	panel.show_page("Armor")
 	for i in 3:

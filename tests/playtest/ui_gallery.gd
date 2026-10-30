@@ -140,8 +140,8 @@ func _check_layout(label: String) -> void:
 	_check_list(controls, label)
 	# HUD elements never cover each other
 	var hud := map.hud
-	var parts: Array[Control] = [hud.player_frame, hud.skill_bar, hud.objectives, hud.target_frame, hud.hint_panel, hud.loot_feed, hud.save_indicator,
-		hud.quick_use, hud.effect_bar]
+	var parts: Array[Control] = [hud.health_vessel, hud.resource_vessel, hud.skill_bar, hud.objectives, hud.target_frame, hud.hint_panel, hud.loot_feed,
+		hud.save_indicator, hud.quick_use, hud.effect_bar, hud.menu_bar, hud.xp_bar, hud.level_badge, hud.pressure_badge, hud.minimap_frame]   # Combat HUD UX 2.0
 	# hidden parts and empty feeds take no room
 	parts.assign(parts.filter(func(part: Control) -> bool: return part.is_visible_in_tree() and part.size.x > 2.0 and part.size.y > 2.0))
 	var overlaps: PackedStringArray = []
@@ -150,6 +150,16 @@ func _check_layout(label: String) -> void:
 			if parts[a].get_global_rect().grow(-1.0).intersects(parts[b].get_global_rect().grow(-1.0)):
 				overlaps.append("%s %s x %s %s" % [parts[a].name, parts[a].get_global_rect(), parts[b].name, parts[b].get_global_rect()])
 	_check(overlaps.is_empty(), "%s %s HUD without overlaps (%s)" % [tag, label, "; ".join(overlaps)])
+	# Menu UX Polish 1.1: an open window's book registers are on screen and no HUD part covers them
+	for window: UiWindow in hud.find_children("*", "UiWindow", true, false):
+		if not window.is_visible_in_tree() or window.side_tabs == null:
+			continue
+		var tabs := window.side_tabs.get_global_rect()
+		var covered: PackedStringArray = []
+		for part in parts:
+			if part.get_global_rect().grow(-1.0).intersects(tabs):
+				covered.append(String(part.name))
+		_check(root.get_visible_rect().encloses(tabs) and covered.is_empty(), "%s %s registers on screen, not covered (%s %s)" % [tag, label, tabs, ", ".join(covered)])
 
 
 func _check_controls(node: Node, label: String) -> void:

@@ -402,6 +402,6 @@ func test_location_display_on_the_grounds() -> void:
 	check(&"broken_bastion" not in WorldMapPanel.known_maps(character), "grounds are never drawn on the world map")
 	check(map.hud.objectives.visible, "trial objectives shown")
 	map.hud.objectives.refresh()
-	var text: String = map.hud.objectives._lines.text
+	var text: String = map.hud.objectives.full_text()
 	check(text.contains("Warrior") and text.contains(tr("UI_TRIAL_GATE_SEALED")) and text.contains("Bastion Guardian") \
 		and text.contains(tr("UI_LEAVE_TRIAL_GROUNDS_HINT")), "trial class, gate, boss goal and leave hint shown: %s" % text)

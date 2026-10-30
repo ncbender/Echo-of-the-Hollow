@@ -85,10 +85,11 @@ func _run() -> void:
 		(map.get_node(path) as Enemy).queue_free()
 	warden = map.get_node("Enemies/GroveWarden") as Enemy
 	var home := warden.global_position
-	_place(Vector2(290, -156))
+	var approach := (map.get_node("EastPath/ToTangledWood") as Node2D).global_position + Vector2(-42, 0)
+	_place(approach)
 	await _physics(120)
 	_log("measured east exit: player %.0f px from the Warden (aggro %.0f), Warden moved %.2f px, state %s"
-		% [Vector2(290, -156).distance_to(home), warden.config.aggro_range, warden.global_position.distance_to(home), warden.combat.state])
+		% [approach.distance_to(home), warden.config.aggro_range, warden.global_position.distance_to(home), warden.combat.state])
 	_check(warden.global_position.distance_to(home) < 0.5, "the Warden stays calm at the east exit")
 	await _shot("04_east_exit_warden_calm")
 	var input := InputFrame.new()

@@ -94,7 +94,7 @@ func test_full_loop() -> void:
 	for item_id: StringName in [&"timber", &"stone", &"iron_ore"]:
 		check(character.inventory.count(item_id) > 0, "%s in inventory" % item_id)
 	# 6. return home through the west door
-	await _teleport(forest, Vector2(-290, 0))
+	await _teleport(forest, forest.find_spawn(&"from_home").global_position)
 	f.move = Vector2.LEFT
 	home = await _await_map(&"home_base", 600)
 	if home == null:

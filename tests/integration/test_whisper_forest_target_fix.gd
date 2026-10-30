@@ -190,11 +190,12 @@ func test_east_exit_keeps_the_warden_calm_and_works() -> void:
 		return
 	var warden := forest.get_node("Enemies/GroveWarden") as Enemy
 	var home := warden.global_position
-	for at: Vector2 in [Vector2(290, -156), forest.find_spawn(&"from_tangled").global_position]:
+	var approach := (forest.get_node("EastPath/ToTangledWood") as Node2D).global_position + Vector2(-42, 0)
+	for at: Vector2 in [approach, forest.find_spawn(&"from_tangled").global_position]:
 		check(at.distance_to(home) > warden.config.aggro_range, "%s lies outside the Warden's aggro (%.0f px)" % [at, at.distance_to(home)])
 	for path in GRUNTS:
 		(forest.get_node(path) as Enemy).queue_free()   # only the Warden matters here
-	_place(forest, Vector2(290, -156))
+	_place(forest, approach)
 	for i in 120:
 		await get_tree().physics_frame
 	check(warden.global_position.distance_to(home) < 0.5 and warden.combat.state == CombatComponent.State.IDLE, "the Warden stays calm at the exit")
@@ -251,8 +252,8 @@ func test_defeated_warden_cache_and_values_unchanged() -> void:
 		var grunt := forest.get_node(path) as Enemy
 		check(grunt.config == load("res://data/enemies/grunt_config.tres") and grunt.equipment_loot == load("res://data/loot/hollow_grunt_equipment.tres"),
 			"%s config and loot unchanged" % path)
-	var cache := forest.get_node("WardensCache") as BossRewardCache
-	check(cache.loot_table == load("res://data/loot/grove_warden_rare_reward.tres") and cache.boss_id == WARDEN_ID, "cache unchanged")
+	var cache := forest.get_node("WardensCache") as StoryPickup   # Chapter 1 Rare Reward 1.0: materials, no Rare
+	check(cache.item_id == &"iron_ingot" and cache.condition.required_flags == ([&"defeated.whisper_forest_grove_warden"] as Array[StringName]), "cache gated by the kill")
 	check(not cache.visible, "cache hidden before the kill")
 	var lethal := HitData.new()
 	lethal.damage = 1000000.0
@@ -260,7 +261,7 @@ func test_defeated_warden_cache_and_values_unchanged() -> void:
 	for i in 5:
 		await get_tree().process_frame
 	check(character.world.has_flag(&"defeated.whisper_forest_grove_warden"), "defeat flag")
-	check(cache.visible and BossRewardService.has_claim(character, WARDEN_ID), "cache open after the kill")
+	check(cache.visible and forest.find_children("*", "BossRewardCache", true, false).is_empty(), "cache open after the kill, no Rare cache")
 	await _travel(&"home_base", &"from_forest")
 	forest = await _travel(&"whisper_forest", &"from_home")
 	await get_tree().process_frame

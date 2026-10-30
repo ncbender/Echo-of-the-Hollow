@@ -13,7 +13,12 @@ const PATH := DIR + "/slot_1.save.json"
 const GATHERING := [&"mining", &"herbalism", &"woodcutting", &"skinning"]
 ## Walk plans from the map's arrival point: waypoints, then the node.
 const ROUTES := {
-	&"whisper_forest": {"StagRemainsB": [], "StagRemains": [], "TreeA": [], "FlaxA": [], "RockA": [Vector2(-150, -10)]},
+	&"whisper_forest": {  # World Expansion A: the Forager's Path south of the entrance
+		"StagRemainsB": [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-1110, 500), Vector2(-1110, 560), Vector2(-1150, 600)],
+		"StagRemains": [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-1000, 496)],
+		"TreeA": [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-1080, 276)],
+		"FlaxA": [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-1090, 396)],
+		"RockA": [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-800, 346)]},
 	&"whispering_stone": {"OldOak": [], "RichIronVein": [], "DuskleafCluster": [Vector2(-210, 280)],
 		"ElkRemains": [Vector2(240, 280), Vector2(240, 60)]},
 }
@@ -150,7 +155,7 @@ func test_nodes_and_pack_are_reachable_on_foot() -> void:
 		var routes: Dictionary = ROUTES[map_id]
 		if map_id == &"whisper_forest":
 			routes = routes.duplicate()
-			routes["HuntersPack"] = []
+			routes["HuntersPack"] = [Vector2(-1100, 10), Vector2(-1100, 200), Vector2(-1110, 500), Vector2(-1110, 560), Vector2(-1150, 600)]
 		for node_name: String in routes:
 			var target := map.find_child(node_name, true, false) as Area2D
 			if not check(target != null, "%s: %s placed" % [map_id, node_name]):

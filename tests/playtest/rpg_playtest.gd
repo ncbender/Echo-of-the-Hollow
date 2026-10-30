@@ -62,7 +62,9 @@ func _class_station_flow() -> void:
 	hud.class_panel.rebuild()
 	await _ticks(2)
 	_check(session.character.classes.is_unlocked(&"warrior"), "warrior unlocked (stand-in for the prologue choice)")
-	_click_button(hud.class_panel, "Activate")
+	hud.class_panel.select_class(&"warrior")   # Skills & Talents UX 2.0 Phase 6: a card only selects, the switch is the button
+	await _ticks(2)
+	_click_button(hud.class_panel, "Switch to Warrior")
 	await _ticks(2)
 	_check(session.character.classes.active_class_id == &"warrior", "warrior active")
 	_check(is_equal_approx(player.health.max_health, session.character.get_stat(Stats.MAX_HEALTH)) and player.health.max_health > 120.0, "warrior health (class + inherited gear) applied to player")

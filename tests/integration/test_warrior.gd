@@ -56,7 +56,7 @@ func _talents(talents: Dictionary) -> void:
 	character.builds.notify(&"warrior")
 
 
-## 5 points in each lower tier of `tree` (first node of each tier, up to `below`).
+## The points tier `below` of `tree` needs, spent in its lower tiers (nodes in data order, no upgrades).
 func _fill(tree_id: StringName, below: int) -> Dictionary:
 	var result := {}
 	var tree: TalentTreeDefinition = db.talent_trees[tree_id]
@@ -160,7 +160,7 @@ func test_berserker_talents_change_combat() -> void:
 func test_transformation_furious_cleave_hits_behind() -> void:
 	_level(40)
 	_bind()
-	var talents := _fill(&"war_berserker", 5)
+	var talents := _fill(&"war_berserker", 3)
 	talents[&"war_b_cleave"] = 1
 	_talents(talents)
 	bridge.class_runtime.pool.gain(100.0)
@@ -175,7 +175,7 @@ func test_transformation_furious_cleave_hits_behind() -> void:
 func test_bloodblade_bleeding_and_blood_oath() -> void:
 	_level(60)
 	_bind()
-	var talents := _fill(&"war_bloodblade", 7)
+	var talents := _fill(&"war_bloodblade", TalentRules.TIERS)
 	talents[&"war_bb_hemorrhage"] = 3
 	talents[&"war_bb_oath"] = 1
 	_talents(talents)
@@ -200,7 +200,7 @@ func test_bloodblade_bleeding_and_blood_oath() -> void:
 func test_worldbreaker_heavy_finisher() -> void:
 	_level(60)
 	_bind()
-	var talents := _fill(&"war_warbreaker", 7)
+	var talents := _fill(&"war_warbreaker", TalentRules.TIERS)
 	talents[&"war_wb_worldbreaker"] = 1
 	_talents(talents)
 	var target := _dummy(Vector2(26, 0))
@@ -239,7 +239,7 @@ func test_weapon_switch_keeps_skills_working() -> void:
 
 func test_respec_and_save_load_roundtrip() -> void:
 	_level(30)
-	_talents(_fill(&"war_warbreaker", 5))
+	_talents(_fill(&"war_warbreaker", 3))
 	_slot(&"warbreaker", 2)
 	SkillBook.set_mod(character, &"warrior", &"furious_strike", SkillModDefinition.Slot.FORM, &"furious_wide_arc", true)
 	var health := character.get_stat(Stats.MAX_HEALTH)

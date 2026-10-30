@@ -127,7 +127,11 @@ func test_workshop_opens_its_profession_and_crafts_by_click() -> void:
 	await _frames()
 	check(panel.visible, "professions window opened")
 	check(panel.station_id == &"tanners_lodge" and panel.profession_id == &"leatherworking", "at the Tanner's Lodge: Leatherworking")
-	check(panel.side_tabs != null and panel.side_tabs.current == "Crafting", "book registers, Crafting page")
+	# Menu UX Polish 1.1: areas = book registers outside, professions of the area = tabs in the title row
+	check(panel.side_tabs != null and panel._pages.current == "Crafting", "Crafting register chosen")
+	check_eq(panel._tabs.current, "leatherworking", "its profession tab chosen in the title row")
+	check_eq(panel._tabs.get_child_count(), 5, "the five crafting professions as tabs")
+	check(panel.find_child("Cards", true, false) == null, "no vertical profession list any more")
 	check_eq(panel.recipe_id, &"lw_tan_hide", "first craftable recipe selected")
 	var craft := panel.find_child("Craft", true, false) as Button
 	check(craft != null and not craft.disabled, "Craft enabled at the workstation")
@@ -254,9 +258,17 @@ func test_window_fits_every_ui_scale() -> void:
 			var rect := panel.get_global_rect()
 			var tag := "%d %% %s" % [roundi(value * 100.0), page_name]
 			check(view.grow(-UiTheme.SCREEN_MARGIN + 1.0).encloses(rect), "%s: window inside the canvas (%s in %s)" % [tag, rect, view.size])
-			check(view.encloses(panel.side_tabs.get_global_rect()), "%s: book registers on screen" % tag)
-			for card: Control in panel.find_children("Prof_*", "Button", true, false):
-				check(card.size.x <= ProfessionsPanel.CARD_WIDTH + 1.0 and card.size.y <= 80.0, "%s: compact card %s (%s)" % [tag, card.name, card.size])
+			check(rect.encloses(panel._tabs.get_global_rect()), "%s: profession tabs inside the window" % tag)
+			check(view.encloses(panel.side_tabs.get_global_rect()), "%s: area registers on screen (%s)" % [tag, panel.side_tabs.get_global_rect()])
+			check(panel._title.get_global_rect().end.x < panel._tabs.get_global_rect().position.x and absf(panel._title.get_global_rect().get_center().y - panel._tabs.get_global_rect().get_center().y) < 8.0,
+				"%s: tabs right of the title, one row (%s / %s)" % [tag, panel._title.get_global_rect(), panel._tabs.get_global_rect()])
+			check(panel._tabs.get_global_rect().end.y <= (panel.find_child("Detail", true, false) as Control).get_global_rect().position.y, "%s: tabs above the page content" % tag)
+			var font := UiTheme.body_font()
+			for tab: Button in panel._tabs.get_children():
+				var profession: ProfessionDefinition = session.database.professions[StringName(String(tab.name).trim_prefix("Tab"))]
+				check(tab.text == profession.display_name and tab.size.x + 0.5 >= font.get_string_size(tab.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tab.get_theme_font_size(&"font_size")).x,
+					"%s: whole name on the tab %s" % [tag, tab.text])
+				check(absf(tab.get_global_rect().position.y - panel._tabs.get_global_rect().position.y) < 1.0, "%s: %s in the one tab row" % [tag, tab.text])
 			if page_name == "Crafting":
 				var craft := panel.find_child("Craft", true, false) as Button
 				check(craft != null and panel.footer.is_ancestor_of(craft), "%s: Craft sits in the fixed footer" % tag)

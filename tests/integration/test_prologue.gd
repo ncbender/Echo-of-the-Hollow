@@ -192,7 +192,7 @@ func test_migration_v3_to_v4() -> void:
 	var restored := Character.from_dict(upgraded, db, warnings)
 	check(restored.classes.is_unlocked(&"warrior"), "nothing unlocked is locked again")
 	check_eq(restored.classes.get_level(&"warrior"), 5, "level kept")
-	check_eq(TalentService.points_total(restored, &"warrior"), 0, "points from level (none before 10)")
+	check_eq(TalentService.points_total(restored, &"warrior"), 1, "points from level (level 5: the first point)")
 	var fresh: Dictionary = SaveMigrations.migrate({"classes": {"active": "basic_adventurer", "progress": {}}}, 3, errors)
 	check_eq(fresh.prologue.stage, "not_started", "untouched characters start the prologue")
 	check(SaveSystem.VERSION >= 4, "save version at least 4")

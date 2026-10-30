@@ -283,7 +283,7 @@ func test_full_bag_gives_no_partial_reward() -> void:
 	# making room is enough to claim later
 	var removed := 0
 	for item in character.inventory.items():
-		if item.definition_id == FILLER and removed < 2:
+		if item.definition_id == FILLER and removed < 2 and character.inventory.takes_slot(item):   # never the worn starting gear
 			character.inventory.remove_instance(item.instance_id)
 			removed += 1
 	check_eq(QuestRewardService.claim(character, QUEST, session), "", "claim after making room")
@@ -400,6 +400,8 @@ func test_shipped_data_have_materials_only_at_the_broken_cart() -> void:
 	for other: StoryQuestDefinition in db.story_quests.values():
 		if other.id == &"the_broken_cart":
 			continue   # 1.1 M2: 30 gold + 3 timber + 2 stone at Mara (test_quest_turnin_mara)
+		if other.id in [&"the_lost_hunter", &"embers_of_shelter"]:
+			continue   # Side Quests 1.0: gold + materials at Mara (test_side_quests)
 		check(other.turn_in_items.is_empty(), "%s has no material reward" % other.id)
 		if other.id != QUEST:
 			check(not QuestRewardService.has_reward(other), "%s has no reward" % other.id)

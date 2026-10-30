@@ -297,7 +297,7 @@ func test_prologue_players_cannot_reach_the_wood() -> void:
 	if forest == null:
 		return
 	check(not (forest.get_node("EastPath/ToTangledWood") as MapTransition).can_process(), "forest exit closed during the prologue")
-	_walk(forest, Vector2(290, -156), Vector2.RIGHT)
+	_walk(forest, (forest.get_node("EastPath/ToTangledWood") as Node2D).global_position + Vector2(-42, 0), Vector2.RIGHT)
 	for i in 60:
 		await get_tree().physics_frame
 	check(get_tree().current_scene == forest, "no map change")
@@ -310,7 +310,7 @@ func test_wood_and_chapel_both_ways() -> void:
 	var wood := await _travel(&"tangled_wood", &"from_forest")
 	if wood == null:
 		return
-	_walk(wood, Vector2(300, 40), Vector2.RIGHT)
+	_walk(wood, (wood.get_node("ToChapel") as Node2D).global_position + Vector2(-32, 0), Vector2.RIGHT)
 	var chapel := await _await_map(&"chapel")
 	if chapel == null:
 		return
@@ -325,7 +325,7 @@ func test_wood_and_chapel_both_ways() -> void:
 	# repeated changes, then the M1 way out still works
 	await _travel(&"chapel", &"from_tangled")
 	wood = await _travel(&"tangled_wood", &"from_chapel")
-	_walk(wood, Vector2(-300, 0), Vector2.LEFT)
+	_walk(wood, (wood.get_node("ToWhisperForest") as Node2D).global_position + Vector2(32, 0), Vector2.LEFT)
 	var forest := await _await_map(&"whisper_forest")
 	check(forest != null and forest.player.global_position.distance_to(forest.find_spawn(&"from_tangled").global_position) < 1.0,
 		"M1 route back to the Whisper Forest unchanged")
@@ -342,14 +342,22 @@ func test_spawns_free_and_no_false_prompts() -> void:
 	check(Interactable.find_active(get_tree()) == null, "no prompt at the chapel arrival")
 	for point: SpawnPoint in chapel.find_children("*", "SpawnPoint", true, false):
 		check(_blocked_at(chapel, point.global_position).is_empty(), "chapel spawn %s free" % point.spawn_id)
+	# World Expansion B: optional lore and gathering joined the two story interactions; none of them moves the story
 	var names: Array = []
 	for node in get_tree().get_nodes_in_group(&"interactable"):
 		names.append(String((node as Node).name))
-	names.sort()
-	check_eq(names, ["ChapelWaystone", "FadedNote"], "the only interactions in the chapel")
+		var readable := node as Readable
+		if readable != null and readable.name != "ChapelWaystone" and not chapel.get_node("EmbersOfShelter").is_ancestor_of(readable):
+			check(readable.event_id == &"", "%s: no story event" % readable.name)
+			# Gameplay Polish 1.0: only the optional finds (Finds/*) hand something out
+			check(readable.rewards.is_empty() or chapel.get_node("Finds").is_ancestor_of(readable), "%s: no reward outside the finds" % readable.name)
+		check(readable != null or node is ResourceNode, "%s: only readables and gathering nodes" % node.name)
+	check(names.has("ChapelWaystone") and names.has("FadedNote"), "waystone and note present")
 	for name: String in ["ChapelWaystone", "FadedNote"]:
 		check(_blocked_at(chapel, chapel.get_node(name).global_position).is_empty(), "%s reachable" % name)
-	check(chapel.find_children("*", "Checkpoint", true, false).is_empty(), "no rest point")
+	var rests := chapel.find_children("*", "Checkpoint", true, false)
+	check(rests.size() == 1 and (rests[0] as Node2D).global_position.distance_to(chapel.find_spawn(&"from_tangled").global_position) > 300.0,
+		"one rest point, in the shelter, away from the arrival")
 	check(chapel.find_children("*", "StoryPickup", true, false).is_empty(), "no pickups")
 	var exits := chapel.find_children("*", "MapTransition", true, false).filter(func(exit: MapTransition) -> bool: return exit.can_process())
 	check(exits.size() == 1 and (exits[0] as MapTransition).target_map_id == &"tangled_wood", "only active exit before the waystone: back west")
@@ -368,11 +376,12 @@ func test_sealed_way_east_stays_closed() -> void:
 	var chapel := await _travel(&"chapel", &"from_tangled")
 	if chapel == null:
 		return
-	_walk(chapel, Vector2(280, -162), Vector2.RIGHT)
+	var sealed := chapel.get_node("SealedEast/SealedWay") as Node2D
+	_walk(chapel, (chapel.get_node("OpenEast/ToWardensRest") as Node2D).global_position + Vector2(-52, 0), Vector2.RIGHT)
 	for i in 90:
 		await get_tree().physics_frame
 	check(get_tree().current_scene == chapel and not session.is_traveling(), "no map change in the east")
-	check(chapel.player.global_position.x < 320.0, "roots and stone block the way (x = %.1f)" % chapel.player.global_position.x)
+	check(chapel.player.global_position.x < sealed.global_position.x - 8.0, "roots and stone block the way (x = %.1f)" % chapel.player.global_position.x)
 	check(character.world.has_flag(&"hint.chapel_east_way"), "hint explains the closed way")
 	check(Interactable.find_active(get_tree()) == null, "no interaction prompt at the sealed way")
 
@@ -439,9 +448,12 @@ func test_chapel_encounter_reuses_existing_patterns() -> void:
 	if chapel == null:
 		return
 	var encounters := chapel.find_children("*", "Encounter", true, false)
-	check_eq(encounters.size(), 1, "one small encounter")
+	check_eq(encounters.size(), 2, "the yard fight and the optional cloister")
 	var yard := chapel.get_node("Encounters/ChapelYard") as Encounter
-	check(not yard.persistent and yard.condition == null and yard.completion_loot == null, "per visit, unconditional, no equipment table")
+	# World Expansion B: the yard lies on the main way and is one-time, so the way back never repeats it
+	check(yard.persistent and yard.condition == null and yard.completion_loot == null, "one-time, unconditional, no equipment table")
+	var cloister := chapel.get_node("Encounters/Cloister") as Encounter
+	check(not cloister.persistent and cloister.completion_loot == null, "the optional cloister fight comes back per visit")
 	var configs: Array = yard.get_children().map(func(spawn: EncounterSpawn) -> StringName: return spawn.config.id)
 	configs.sort()
 	check_eq(configs, [&"hollowfang_wolf", &"rootbound_husk", &"rootbound_husk"], "existing melee enemies only")
@@ -454,11 +466,12 @@ func test_chapel_encounter_reuses_existing_patterns() -> void:
 		var hit := HitData.new()
 		hit.damage = 10000.0
 		enemy.hurtbox.receive_hit(hit)
-	check(yard.done and not character.world.has_flag(yard.cleared_flag()), "cleared for this visit only")
+	check(yard.done and character.world.has_flag(yard.cleared_flag()), "cleared for good")
 	check_eq(StoryService.counter(character, &"encounter:chapel_yard"), 1, "encounter event")
 	await _travel(&"tangled_wood", &"from_chapel")
 	chapel = await _travel(&"chapel", &"from_tangled")
 	if chapel == null:
 		return
-	check((chapel.get_node("Encounters/ChapelYard") as Encounter).can_start(), "back on the next visit")
+	check(not (chapel.get_node("Encounters/ChapelYard") as Encounter).can_start(), "not back on the next visit")
+	check((chapel.get_node("Encounters/Cloister") as Encounter).can_start(), "the optional cloister fight is")
 	check(StoryService.at_step(character, QUEST, 3), "fighting changed no story step")

@@ -171,7 +171,7 @@ func test_random_equipment_operations_keep_invariants() -> void:
 		_add(item_id)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
-	var total_items := character.inventory.used_slots()
+	var total_items := character.inventory.items().size()   # bag + equipment slots (Equipment Inventory Separation 1.0)
 	for i in 400:
 		var items := character.inventory.items()
 		match rng.randi() % 4:
@@ -183,10 +183,11 @@ func test_random_equipment_operations_keep_invariants() -> void:
 			3:
 				character.switch_class(WARRIOR if character.classes.active_class_id == ADVENTURER else ADVENTURER, true)
 		var errors := equipment.integrity_errors()
+		errors.append_array(character.inventory.integrity_errors())   # never over the bag capacity
 		if not errors.is_empty():
 			fail("step %d: %s" % [i, errors])
 			return
-	check_eq(character.inventory.used_slots(), total_items, "no item lost or created")
+	check_eq(character.inventory.items().size(), total_items, "no item lost or created")
 
 
 func test_weapon_follows_main_hand() -> void:

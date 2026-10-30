@@ -123,6 +123,11 @@ func _walk(map: GameMap, from: Vector2, direction: Vector2) -> void:
 	map.player.feed_input(input)
 
 
+## Just west of the Whisper Forest's east exit (World Expansion A: read from the scene, not a fixed point).
+func _east_approach(forest: GameMap) -> Vector2:
+	return (forest.get_node("EastPath/ToTangledWood") as Node2D).global_position + Vector2(-42, 0)
+
+
 ## Static bodies (walls, roots, resource nodes) overlapping a player-sized circle at `at`.
 func _blocked_at(map: GameMap, at: Vector2) -> Array:
 	var query := PhysicsShapeQueryParameters2D.new()
@@ -308,11 +313,11 @@ func test_east_exit_is_closed_during_the_prologue() -> void:
 	var exit := forest.get_node("EastPath/ToTangledWood") as MapTransition
 	check(roots.is_visible_in_tree() and roots.can_process(), "root barrier present")
 	check(not path.visible and not exit.can_process(), "transition disabled")
-	_walk(forest, Vector2(290, -156), Vector2.RIGHT)
+	_walk(forest, _east_approach(forest), Vector2.RIGHT)
 	for i in 90:
 		await get_tree().physics_frame
 	check(get_tree().current_scene == forest and not session.is_traveling(), "no map change")
-	check(forest.player.global_position.x < 320.0, "the roots block the way (x = %.1f)" % forest.player.global_position.x)
+	check(forest.player.global_position.x < exit.global_position.x - 12.0, "the roots block the way (x = %.1f)" % forest.player.global_position.x)
 	check(character.world.has_flag(&"hint.east_roots"), "the existing hint explains the barrier")
 	check_eq(StoryService.counter(character, ENTER), 0, "the Tangled Wood was never entered")
 
@@ -325,13 +330,13 @@ func test_transitions_both_ways_after_the_prologue() -> void:
 		return
 	check(not forest.get_node("EastRoots").visible, "barrier gone")
 	check((forest.get_node("EastPath/ToTangledWood") as MapTransition).can_process(), "transition active")
-	_walk(forest, Vector2(290, -156), Vector2.RIGHT)
+	_walk(forest, _east_approach(forest), Vector2.RIGHT)
 	var wood := await _await_map(&"tangled_wood")
 	if wood == null:
 		return
 	check(wood.player.global_position.distance_to(wood.find_spawn(&"from_forest").global_position) < 1.0, "arrived at the west entrance")
 	check(StoryService.at_step(character, QUEST, 1), "arrival advanced the quest")
-	_walk(wood, Vector2(-300, 0), Vector2.LEFT)
+	_walk(wood, (wood.get_node("ToWhisperForest") as Node2D).global_position + Vector2(32, 0), Vector2.LEFT)
 	forest = await _await_map(&"whisper_forest")
 	if forest == null:
 		return
@@ -361,7 +366,8 @@ func test_spawns_are_free_and_away_from_the_warden() -> void:
 	var warden := forest.get_node("Enemies/GroveWarden") as Enemy
 	check(spawn.distance_to(warden.global_position) > warden.config.aggro_range,
 		"returning never wakes the Grove Warden (%.0f px)" % spawn.distance_to(warden.global_position))
-	check(spawn.distance_to(Vector2(290, -156)) > 0.0 and Vector2(290, -156).distance_to(warden.global_position) > warden.config.aggro_range,
+	var approach := _east_approach(forest)
+	check(spawn.distance_to(approach) > 0.0 and approach.distance_to(warden.global_position) > warden.config.aggro_range,
 		"the approach to the exit stays out of the Warden's reach")
 	var wood := await _travel(&"tangled_wood", &"from_forest")
 	if wood == null:

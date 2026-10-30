@@ -132,9 +132,11 @@ func test_refused_actions_explain_why() -> void:
 	var crate := character.inventory.add_item(&"supply_crate", 1)[0]
 	panel.rebuild()
 	await get_tree().process_frame
-	await _right_click(_cell("Bag", sword))
+	# Equipment Inventory Separation 1.0: equipped gear sits in its slot, not in the bag column
+	check(_cell("Bag", sword) == null, "the equipped sword is not offered from the bag")
+	check(StashService.deposit_error(character, sword.instance_id).contains("equipped") and character.inventory.has(sword.instance_id),
+		"equipped: the service still refuses with a reason")
 	var status := panel.find_child("Status", true, false) as Label
-	check(status.text.contains("equipped") and character.inventory.has(sword.instance_id), "equipped: refused with a reason (%s)" % status.text)
 	await _right_click(_cell("Bag", crate))
 	check(status.text.contains("quest item") and character.inventory.has(crate.instance_id), "quest item: refused (%s)" % status.text)
 

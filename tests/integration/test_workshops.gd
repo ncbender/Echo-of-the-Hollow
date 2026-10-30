@@ -157,20 +157,13 @@ func test_repeated_requests_never_skip_a_stage() -> void:
 	check(RestorationService.advance(character, null, RestorationService.RESTORED).begins_with("Unknown"), "unknown ruin refused")
 
 
-## Restoring draws on the Haven stash like the workstations do: only once the
-## Old Storehouse is restored, bag first, every unit counted once, all or nothing.
+## Restoring draws on the Haven stash like the workstations do (UI Usability & Haven Crafting 1.0:
+## in every stage of the Old Storehouse), bag first, every unit counted once, all or nothing.
 func test_restoring_uses_the_stash_once_the_storehouse_stands() -> void:
 	var lodge: RuinDefinition = db.ruins[&"tanners_lodge"]   # 6 timber, 3 stone, 2 raw hide
 	for cost in lodge.costs:
 		character.stash.add_item(cost.item_id, cost.quantity)
-	# locked: the storehouse is still a ruin - the stash is not counted
-	check(not RestorationService.uses_stash(character), "ruined storehouse: bag only")
-	var bag := character.inventory.to_array()
-	var stash := character.stash.to_array()
-	check(RestorationService.restore(character, lodge).begins_with("Missing: Timber 0/6"), "stash not counted while locked")
-	check(character.inventory.to_array() == bag and character.stash.to_array() == stash, "nothing moved while locked")
-	character.world.set_restoration(&"old_storehouse", RestorationService.RESTORED)
-	check(RestorationService.uses_stash(character), "restored storehouse: the stash is in reach")
+	check(RestorationService.uses_stash(character), "the stash is in reach (storehouse still a ruin)")
 	# stash only, exactly enough
 	var plan: Dictionary = RestorationService.material_plan(character, lodge, RestorationService.RESTORED)
 	check((plan.missing as PackedStringArray).is_empty(), "the plan finds everything in the stash")
@@ -184,8 +177,8 @@ func test_restoring_uses_the_stash_once_the_storehouse_stands() -> void:
 	character.stash.add_item(&"timber", 1)   # 5 of 6
 	character.inventory.add_item(&"stone", 3)
 	character.stash.add_item(&"flax_fiber", 4)
-	bag = character.inventory.to_array()
-	stash = character.stash.to_array()
+	var bag := character.inventory.to_array()
+	var stash := character.stash.to_array()
 	check(RestorationService.restore(character, house).begins_with("Missing: Timber 5/6"), "one short across bag and stash")
 	check(character.inventory.to_array() == bag and character.stash.to_array() == stash, "nothing moved when one short")
 	character.stash.add_item(&"timber", 3)   # bag 4 + stash 4 = 8

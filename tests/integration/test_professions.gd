@@ -142,10 +142,8 @@ func test_stash_materials_at_haven_workstations() -> void:
 	character.inventory.add_item(&"iron_ore", 1)
 	character.stash.add_item(&"iron_ore", 4)   # bag: 1, stash: 4
 	check_eq(character.inventory.count(&"iron_ore"), 1, "1 ore in the bag")
-	check(not ProfessionService.uses_stash(character, SMITHY), "ruined storehouse: bag only")
-	check(ProfessionService.craft(character, &"bs_smelt_iron", SMITHY).error.contains("Iron Ore 1/3"), "the stash is not counted yet")
-	character.world.set_restoration(&"old_storehouse", &"restored")
-	check(ProfessionService.uses_stash(character, SMITHY), "restored storehouse: Haven workstations reach the stash")
+	# UI Usability & Haven Crafting 1.0: the stash is in reach at every Haven workstation (ruined storehouse too)
+	check(ProfessionService.uses_stash(character, SMITHY), "Haven workstation: bag + stash, storehouse still a ruin")
 	check_eq(ProfessionService.available(character, &"iron_ore", SMITHY), 5, "1 + 4, each unit counted once")
 	check_eq(ProfessionService.craft(character, &"bs_smelt_iron", SMITHY).error, "", "crafted with stash materials")
 	check(character.inventory.count(&"iron_ore") == 0 and character.stash.count(&"iron_ore") == 2, "bag first (1), then stash (2)")

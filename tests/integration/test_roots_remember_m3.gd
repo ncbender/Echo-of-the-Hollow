@@ -333,7 +333,7 @@ func test_route_topology_behind_the_gates() -> void:
 				ways.append([other.id, gate.condition.required_flags if gate != null and gate.condition != null else []])
 		if other.id == &"wardens_rest":
 			check(scene.find_children("*", "Waystone", true, false).is_empty(), "no Waystone node")
-			check(scene.find_children("*", "BossRewardCache", true, false).is_empty(), "no reward cache")
+			check_eq(scene.find_children("*", "BossRewardCache", true, false).size(), 1, "only the Sentinel's Cache (Chapter 1 Rare Reward 1.0)")
 		scene.free()
 	check_eq(ways, [[&"chapel", [&"chapter1.chapel_waystone_examined"] as Array[StringName]]],
 		"reached only from the Chapel, behind the waystone examination (the Chapel itself only behind the prologue gate)")
@@ -352,13 +352,13 @@ func test_chapel_way_opens_after_the_waystone_and_both_ways_work() -> void:
 		await get_tree().physics_frame
 	check(not chapel.get_node("SealedEast").visible, "roots gone")
 	check((chapel.get_node("OpenEast/ToWardensRest") as MapTransition).can_process(), "open after the waystone")
-	_walk(chapel, Vector2(290, -162), Vector2.RIGHT)
+	_walk(chapel, (chapel.get_node("OpenEast/ToWardensRest") as Node2D).global_position + Vector2(-42, 0), Vector2.RIGHT)
 	var rest := await _await_map(&"wardens_rest")
 	if rest == null:
 		return
 	check(rest.player.global_position.distance_to(rest.find_spawn(&"from_chapel").global_position) < 1.0, "arrived at the old access")
 	check(StoryService.at_step(character, QUEST, 4), "arrival finished step 3")
-	_walk(rest, Vector2(-300, 0), Vector2.LEFT)
+	_walk(rest, (rest.get_node("ToChapel") as Node2D).global_position + Vector2(32, 0), Vector2.LEFT)
 	chapel = await _await_map(&"chapel")
 	if chapel == null:
 		return
@@ -385,15 +385,17 @@ func test_spawns_free_no_false_prompts_and_safe_arrival() -> void:
 		check(point.global_position.distance_to(sentinel.global_position) > sentinel.config.aggro_range + 100.0, "spawn %s far from the Sentinel" % point.spawn_id)
 	check(Interactable.find_active(get_tree()) == null, "no prompt at the arrival")
 	check(sentinel.velocity.length() < 0.1 and sentinel.combat.state == CombatComponent.State.IDLE, "the Sentinel does not wake on arrival")
-	var gate := Vector2(-110, 0)
+	var gate := ((rest.get_node("Walls/GateTowerNorth") as Node2D).global_position + (rest.get_node("Walls/GateTowerSouth") as Node2D).global_position) * 0.5
 	check(gate.distance_to(sentinel.global_position) > sentinel.config.aggro_range, "passing the gate does not wake it either")
 	var exit := rest.get_node("ToChapel") as MapTransition
-	check(exit.global_position.distance_to(Vector2(-90, 0)) > 200.0, "the exit lies well away from the arena edge")
+	check(exit.global_position.distance_to(gate) > 200.0, "the exit lies well away from the arena gate")
 	var visible: Array = []
 	for node in get_tree().get_nodes_in_group(&"interactable"):
 		if (node as Interactable).is_visible_in_tree():
 			visible.append(String((node as Node).name))
-	check_eq(visible, ["ScratchedTally"], "before the defeat only the optional tally can be used")
+			var readable := node as Readable
+			check(readable == null or (readable.event_id == &"" and readable.rewards.is_empty()), "%s: optional, no event, no reward" % node.name)
+	check(visible.has("ScratchedTally") and not visible.has("SplitWatchstone"), "before the defeat only optional finds can be used")
 	check(not _watchstone(rest).is_visible_in_tree() and not _watchstone(rest).can_process(), "the watchstone find waits for the defeat")
 	for name: String in ["ScratchedTally", "AfterSentinel/SplitWatchstone"]:
 		check(_blocked_at(rest, rest.get_node(name).global_position).is_empty(), "%s reachable" % name)

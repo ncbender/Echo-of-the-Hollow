@@ -61,6 +61,16 @@ func test_paper_doll_shows_all_fifteen_slots() -> void:
 	panel.rebuild()
 	var off_hand := panel.find_child("Slot_OFF_HAND", true, false)
 	check(_texts(off_hand).has("Two-hander"), "off hand shows the two-hander block")
+	# Menu UX Polish 1.0: the item name only in the hover tooltip, no usage hint in the window
+	var main_hand := panel.find_child("Slot_MAIN_HAND", true, false)
+	check(not _texts(main_hand).has(character.database.get_item(&"steel_greatsword").display_name), "no item name beside the slot")
+	check(not " ".join(_texts(panel)).contains("Hover:") and not " ".join(_texts(panel)).contains("Right-click"), "no visible usage hint")
+	var cell := main_hand.get_node("Cell") as ItemCell
+	cell.hovered.emit(cell)
+	await get_tree().process_frame
+	check(panel.tooltip.visible and " ".join(_texts(panel.tooltip)).contains(character.database.get_item(&"steel_greatsword").display_name),
+		"hover: the tooltip names the item")
+	panel.tooltip.hide_tooltip()
 
 
 func test_categories_and_sorting() -> void:
@@ -75,7 +85,8 @@ func test_categories_and_sorting() -> void:
 	var sorted := names.duplicate()
 	sorted.sort()
 	check_eq(names, sorted, "sorted by name")
-	check_eq(panel.visible_items().size(), character.inventory.items().size(), "sorting never hides or duplicates items")
+	var bag := character.inventory.items().filter(func(i: ItemInstance) -> bool: return character.inventory.takes_slot(i))
+	check_eq(panel.visible_items().size(), bag.size(), "sorting never hides or duplicates bag items (equipped gear is in its slots)")
 
 
 func test_description_order_and_comparison() -> void:
@@ -144,9 +155,11 @@ func test_right_click_equips_and_unequips_with_predictable_slots() -> void:
 	var doll := panel.find_child("Slot_RING_2", true, false).find_child("Cell", true, false) as ItemCell
 	await _right_click(doll)
 	check(character.equipment.get_item(EquipSlot.Slot.RING_2) == null and character.inventory.has(copper.instance_id), "paper doll right click unequips")
-	# right click on an equipped item in the bag unequips it too
-	await _right_click(_bag_cell(third))
-	check(not character.equipment.is_equipped(third.instance_id), "bag right click on equipped item unequips")
+	# Equipment Inventory Separation 1.0: an equipped item is only in its slot, not in the bag grid
+	check(_bag_cell(third) == null, "the equipped ring is not shown in the bag")
+	var ring_1 := panel.find_child("Slot_RING_1", true, false).find_child("Cell", true, false) as ItemCell
+	await _right_click(ring_1)
+	check(not character.equipment.is_equipped(third.instance_id) and _bag_cell(third) != null, "unequipped from the paper doll -> back in the bag")
 	# one weapon slot (Weapon Mastery 1.4): every one-hander goes to the main hand and replaces the previous one
 	for hand: int in [EquipSlot.Slot.MAIN_HAND, EquipSlot.Slot.OFF_HAND]:
 		character.equipment.unequip(hand)
@@ -241,5 +254,38 @@ func test_overview_and_details_pages() -> void:
 	check(_texts(panel).has("Max Health"), "overview lists core stats")
 	panel.left_page = "Details"
 	panel.rebuild()
-	for stat in Stats.ALL:
-		check(_texts(panel).has(Stats.display_name(stat)), "details list %s" % stat)
+	var stats := character.get_stats()
+	for stat in Stats.ALL:   # Playtest Corrections 1.0: only what is in effect (base values always)
+		check(_texts(panel).has(Stats.display_name(stat)) == InventoryPanel.shows_stat(stat, float(stats.get(stat, 0.0))), "details list %s only when in effect" % stat)
+
+
+## Equipment Inventory Separation 1.0: drag & drop and right click move gear between bag and slots;
+## the bag count follows; with a full bag unequipping is refused with a message (item stays worn).
+func test_drag_and_drop_and_full_bag_refusal() -> void:
+	var boots := _instance(&"worn_boots")
+	if not check(boots != null, "carried boots"):
+		return
+	var used := character.inventory.used_slots()
+	var feet := panel.find_child("Slot_FEET", true, false).find_child("Cell", true, false) as ItemCell
+	feet._drop_data(Vector2.ZERO, {"instance_id": boots.instance_id, "from_slot": -1, "from_stash": false})   # bag -> slot
+	await get_tree().process_frame
+	check(character.equipment.get_item(EquipSlot.Slot.FEET) == boots, "dropped onto the feet slot: equipped")
+	check(_bag_cell(boots) == null and character.inventory.used_slots() == used - 1, "not in the bag grid, one bag slot free")
+	check(panel._bag_title.text.contains("%d / " % (used - 1)), "bag count follows (%s)" % panel._bag_title.text)
+	var empty := panel._grid.get_children().filter(func(n: Node) -> bool: return n is ItemCell and (n as ItemCell).item() == null)
+	if check(not empty.is_empty(), "an empty bag cell"):
+		(empty[0] as ItemCell)._drop_data(Vector2.ZERO, {"instance_id": boots.instance_id, "from_slot": EquipSlot.Slot.FEET, "from_stash": false})   # slot -> bag
+		await get_tree().process_frame
+		check(character.equipment.get_item(EquipSlot.Slot.FEET) == null and _bag_cell(boots) != null, "dragged back into the bag")
+	# full bag: right click on the paper doll is refused, the item stays worn
+	character.equipment.equip(boots.instance_id, EquipSlot.Slot.FEET)
+	while character.inventory.free_slots() > 0:
+		character.inventory.add_item(&"leather_cap", 1)
+	panel.rebuild()
+	await get_tree().process_frame
+	feet = panel.find_child("Slot_FEET", true, false).find_child("Cell", true, false) as ItemCell
+	await _right_click(feet)
+	var status := panel.find_child("Status", true, false) as Label
+	check(character.equipment.get_item(EquipSlot.Slot.FEET) == boots, "full bag: still equipped")
+	check(status != null and status.text == CharacterEquipment.BAG_FULL, "a clear message (%s)" % (status.text if status else "-"))
+	check(character.equipment.integrity_errors().is_empty() and character.inventory.integrity_errors().is_empty(), "consistent")

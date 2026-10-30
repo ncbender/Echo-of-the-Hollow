@@ -103,17 +103,18 @@ func _ui_pass(resolution: Vector2i, scale: float) -> void:
 	session.settings.reset_to_defaults()
 
 
-## Real mouse on the talent page: hover nodes in all three trees (left, right
-## edge, top row, bottom row / capstone) - the tooltip shows the node and stays
-## on screen; a real click learns a rank; real clicks on the book tabs switch
-## pages (also while the tree area is scrolled) and back.
+## Real mouse on the talent page (Skills & Talents UX 2.0 Phase 2: one tree at a time): hover nodes in all
+## three trees (left, right edge, top row, capstone) - the tooltip shows the node and stays on screen; a real
+## click only selects, a real click on Learn learns a rank; real clicks on the book tabs switch pages (also
+## while the tree area is scrolled) and back.
 func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
-	var targets: Array = [[0, &"war_b_temper"], [2, &"war_bb_veins"], [1, &"war_wb_hands"], [1, &"war_wb_worldbreaker"], [2, &"war_bb_price"]]
+	var targets: Array = [[&"war_berserker", &"war_b_temper"], [&"war_bloodblade", &"war_bb_veins"], [&"war_warbreaker", &"war_wb_hands"],
+		[&"war_warbreaker", &"war_wb_worldbreaker"], [&"war_bloodblade", &"war_bb_price"]]
 	for target: Array in targets:
-		var view: TalentTreeView = panel._trees[target[0]]
+		panel.show_tree(target[0])
+		await _frames(3)
+		var view: TalentTreeView = panel._trees[0]
 		var button := view.button_for(target[1])
-		if button == null:
-			button = view.button_for(view.tree.nodes[view.tree.nodes.size() - 1].id)
 		var at := await _bring_into_view(panel, button)
 		await _hover(at)
 		var tooltip := panel.talent_tooltip
@@ -122,17 +123,18 @@ func _talent_mouse(tag: String, panel: ClassStationPanel) -> void:
 		_check(not tooltip.get_global_rect().intersects(button.get_global_rect().grow(-2.0)), "%s tooltip of %s does not cover the node" % [tag, button.name])
 		await _shot(tag, "talent_tooltip_%s" % button.name)
 	var character := session.character
+	panel.show_tree(&"war_berserker")
+	await _frames(3)
 	var temper := panel.tree_view(&"war_berserker").button_for(&"war_b_temper")
 	var temper_at := await _bring_into_view(panel, temper)
 	await _hover(temper_at)
 	var rank := character.builds.get_build().rank(&"war_b_temper")
 	await _click(temper_at, MOUSE_BUTTON_LEFT)
-	_check(character.builds.get_build().rank(&"war_b_temper") == mini(rank + 1, 3), "%s real mouse click learned a talent rank" % tag)
-	var new_temper := panel.tree_view(&"war_berserker").button_for(&"war_b_temper")
-	if new_temper.get_global_rect().has_point(panel.get_global_mouse_position()):
-		_check(panel.talent_tooltip.visible, "%s tooltip back after learning (mouse unmoved)" % tag)
-	else:   # the OS cursor (warp) did not end where the synthetic events were - nothing to judge
-		_log("%s tooltip-after-learning check skipped: Godot mouse %s not on the node" % [tag, panel.get_global_mouse_position()])
+	_check(character.builds.get_build().rank(&"war_b_temper") == rank and panel.selected_talent() == &"war_b_temper", "%s real mouse click only selected" % tag)
+	var learn := panel.find_child("LearnTalent", true, false) as Button
+	await _click(root.get_final_transform() * learn.get_global_rect().get_center(), MOUSE_BUTTON_LEFT)
+	await _frames(2)
+	_check(character.builds.get_build().rank(&"war_b_temper") == mini(rank + 1, 3), "%s real click on Learn learned a talent rank" % tag)
 	# book tabs: Skills and back, with the tree area scrolled down if it can scroll
 	var scroll := panel.find_child("TreeScroll", true, false) as ScrollContainer
 	if scroll != null:
