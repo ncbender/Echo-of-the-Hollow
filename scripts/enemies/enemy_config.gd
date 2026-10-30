@@ -14,6 +14,10 @@ extends Resource
 ## Overrides of the scene's HealthComponent (0 = keep the scene value).
 @export var max_health: float = 0.0
 @export var max_poise: float = 0.0
+## Hardened Husk Defense Mix 1.0: the attack family of this variant (null = the enemy's own, i.e. the scene's
+## grunt attacks or a family given by the placement / spawn). Set, it is used wherever the variant appears
+## (maps, encounters, trials) - data, no check of the enemy id.
+@export var attacks: WeaponFamily
 
 @export_group("Movement")
 

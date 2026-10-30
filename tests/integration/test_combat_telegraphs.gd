@@ -57,9 +57,12 @@ func test_production_attacks() -> void:
 		&"grunt_swipe": K.PARRYABLE, &"grunt_slam": K.PARRYABLE,
 		&"warden_swipe": K.BLOCK_ONLY, &"warden_slam": K.UNDEFENDABLE,
 		&"sentinel_strike": K.PARRYABLE, &"sentinel_root_slam": K.BLOCK_ONLY,
+		&"husk_swipe": K.PARRYABLE, &"husk_slam": K.BLOCK_ONLY,   # Hardened Husk Defense Mix 1.0
 	}
-	var flags := {&"grunt_swipe": 3, &"grunt_slam": 7, &"warden_swipe": 1, &"warden_slam": 0, &"sentinel_strike": 3, &"sentinel_root_slam": 1}
-	for path: String in ["res://data/enemies/grunt_attacks.tres", "res://data/enemies/grove_warden_attacks.tres", "res://data/enemies/sentinel_attacks.tres"]:
+	var flags := {&"grunt_swipe": 3, &"grunt_slam": 7, &"warden_swipe": 1, &"warden_slam": 0, &"sentinel_strike": 3, &"sentinel_root_slam": 1,
+		&"husk_swipe": 3, &"husk_slam": 1}
+	for path: String in ["res://data/enemies/grunt_attacks.tres", "res://data/enemies/grove_warden_attacks.tres", "res://data/enemies/sentinel_attacks.tres",
+			"res://data/enemies/hardened_husk_attacks.tres"]:
 		var family := load(path) as WeaponFamily
 		for attack: AttackDefinition in family.attacks:
 			check_eq(attack.defense_flags, int(flags[attack.id]), "%s flags unchanged" % attack.id)
@@ -126,3 +129,114 @@ func test_symbol_off_the_area() -> void:
 			var inside := anchor.length() <= reach and absf(direction.angle_to(anchor)) <= deg_to_rad(attack.arc_degrees) * 0.5 + 0.2
 			check(not inside, "%s %d: symbol %s off the area" % [attack.id, step, anchor])
 	enemy.queue_free()
+
+
+# --- Hardened Husk Defense Mix 1.0 ---------------------------------------------------------------------------------
+
+const HUSK := preload("res://data/enemies/hardened_husk.tres")
+const HUSK_ATTACKS := preload("res://data/enemies/hardened_husk_attacks.tres")
+const GRUNT_ATTACKS := preload("res://data/enemies/grunt_attacks.tres")
+## The only differences the mix may have from the grunt attacks it is copied from.
+const OWN := [&"id", &"display_name", &"weapon_family_id", &"defense_flags", &"resource_path", &"resource_name", &"script"]
+
+
+## Every value and timing of the husk attacks equals the grunt attack it comes from - only the ids and the slam's
+## flags differ (swipe 3 = parryable, slam 1 = blockable only, no guard break); the grunt data is untouched.
+func test_husk_family_is_the_grunt_family_with_new_flags() -> void:
+	check_eq([HUSK_ATTACKS.root_light, HUSK_ATTACKS.root_heavy], [&"husk_swipe", &"husk_slam"], "light and heavy roots")
+	for pair: Array in [[&"grunt_swipe", &"husk_swipe"], [&"grunt_slam", &"husk_slam"]]:
+		var grunt := GRUNT_ATTACKS.get_attack(pair[0])
+		var husk := HUSK_ATTACKS.get_attack(pair[1])
+		var differ: PackedStringArray = []
+		for property: Dictionary in grunt.get_property_list():
+			if property.usage & PROPERTY_USAGE_STORAGE == 0 or StringName(property.name) in OWN:
+				continue
+			if _value(grunt.get(property.name)) != _value(husk.get(property.name)):
+				differ.append(property.name)
+		check(differ.is_empty(), "%s: same values and timings as %s (%s)" % [pair[1], pair[0], differ])
+	check_eq([GRUNT_ATTACKS.get_attack(&"grunt_swipe").defense_flags, GRUNT_ATTACKS.get_attack(&"grunt_slam").defense_flags], [3, 7], "grunt flags unchanged")
+	check_eq([HUSK_ATTACKS.get_attack(&"husk_swipe").defense_flags, HUSK_ATTACKS.get_attack(&"husk_slam").defense_flags], [3, 1], "husk: swipe parryable, slam block only")
+	check(HUSK.attacks == HUSK_ATTACKS, "the Hardened Husk config carries its family")
+
+
+## Real defense against the husk: the swipe is parried; the slam is not parried, is blocked with the same damage
+## reduction as any held block, and never breaks the guard.
+func test_husk_defense_outcomes() -> void:
+	spawn_player()
+	await wait_physics(2)
+	var swipe := HUSK_ATTACKS.get_attack(&"husk_swipe")
+	var slam := HUSK_ATTACKS.get_attack(&"husk_slam")
+	check_eq(_outcome(DefenseComponent.State.PARRY, swipe), DefenseComponent.Outcome.PARRIED, "swipe parried")
+	check(_outcome(DefenseComponent.State.PARRY, slam) != DefenseComponent.Outcome.PARRIED, "slam not parried")
+	var reference := HitData.new()
+	reference.attack = _attack(AttackDefinition.DEFENSE_BLOCKABLE)
+	reference.damage = 20.0
+	var blocked := HitData.new()
+	blocked.attack = slam
+	blocked.damage = 20.0
+	for hit: HitData in [reference, blocked]:
+		player.defense.cancel()
+		player.defense.state = DefenseComponent.State.BLOCK
+		player.defense.state_left = 1.0
+		check_eq(player.defense.resolve(hit, Vector2.ZERO, Vector2.RIGHT), DefenseComponent.Outcome.BLOCKED, "%s blocked" % hit.attack.id)
+	check(is_equal_approx(blocked.damage, reference.damage) and blocked.damage < 20.0, "normal block reduction (%.1f)" % blocked.damage)
+	check(not &"guard_break" in blocked.tags and player.defense.last_outcome != DefenseComponent.Outcome.GUARD_BROKEN, "no guard break")
+	player.defense.cancel()
+
+
+## The config decides the husk's attacks wherever it is spawned (maps, encounters, trials all spawn through the same
+## Enemy._ready); enemies without EnemyConfig.attacks keep theirs (scene grunt attacks, or a boss family).
+func test_husk_spawns_use_the_family_others_keep_theirs() -> void:
+	spawn_player()
+	var husk: Enemy = GRUNT_SCENE.instantiate()
+	husk.config = HUSK
+	add_child(husk)
+	var grunt: Enemy = GRUNT_SCENE.instantiate()
+	grunt.config = load("res://data/enemies/grunt_config.tres")
+	add_child(grunt)
+	var wolf: Enemy = GRUNT_SCENE.instantiate()
+	wolf.config = load("res://data/enemies/hollowfang_wolf.tres")
+	add_child(wolf)
+	var warden: Enemy = GRUNT_SCENE.instantiate()
+	warden.config = load("res://data/enemies/grove_warden_config.tres")
+	warden.attacks = load("res://data/enemies/grove_warden_attacks.tres")
+	add_child(warden)
+	await wait_physics(1)
+	check(husk.attacks == HUSK_ATTACKS and husk.combat.weapon == HUSK_ATTACKS, "husk fights with its family")
+	check(grunt.attacks == GRUNT_ATTACKS and wolf.attacks == GRUNT_ATTACKS, "grunt and wolf keep the grunt attacks")
+	check_eq(warden.attacks.id, &"warden_claws", "a boss keeps its own family")
+	for config_path: String in ["res://data/enemies/grunt_config.tres", "res://data/enemies/hollowfang_wolf.tres", "res://data/enemies/rootbound_husk.tres",
+			"res://data/enemies/grove_warden_config.tres", "res://data/enemies/rootbound_sentinel.tres"]:
+		check((load(config_path) as EnemyConfig).attacks == null, "%s has no override" % config_path.get_file())
+	for enemy in [husk, grunt, wolf, warden]:
+		enemy.queue_free()
+
+
+## Every placed or spawned Hardened Husk refers to the one config (no placement carries its own attacks).
+func test_every_husk_placement_uses_the_config() -> void:
+	var placements := 0
+	for path: String in ["res://scenes/maps/old_road.tscn", "res://scenes/maps/tangled_wood.tscn", "res://scenes/maps/whisper_forest.tscn"]:
+		var text := FileAccess.get_file_as_string(path)
+		var husk_ids: PackedStringArray = []
+		for line in text.split("\n"):
+			if line.contains("hardened_husk.tres"):
+				husk_ids.append(line.get_slice(" id=\"", 1).get_slice("\"", 0))   # " id=", not the "uid="
+		for block in text.split("[node "):
+			for husk_id in husk_ids:
+				if block.contains("config = ExtResource(\"%s\")" % husk_id):
+					placements += 1
+					check(not block.contains("attacks = "), "%s: a husk placement without its own attacks" % path.get_file())
+	check_eq(placements, 4, "four placed Hardened Husks (old road 1, tangled wood 2, whisper forest 1)")
+	var trial := load("res://data/trials/trial_warrior.tres")
+	check(trial.enemy_configs.has(HUSK), "the warrior trial spawns the same config")
+
+
+## A comparable form of a stored value: a sub-resource (the charge profile) by its own stored values.
+func _value(value: Variant) -> String:
+	if value is Resource:
+		var parts: PackedStringArray = []
+		for property: Dictionary in (value as Resource).get_property_list():
+			if property.usage & PROPERTY_USAGE_STORAGE != 0 and not StringName(property.name) in [&"resource_path", &"resource_name", &"resource_local_to_scene"]:
+				parts.append("%s=%s" % [property.name, str((value as Resource).get(property.name))])
+		return "{%s}" % ", ".join(parts)
+	return str(value)

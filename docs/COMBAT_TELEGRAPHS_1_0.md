@@ -138,3 +138,10 @@ Echtes Godot-Fenster, 1920 × 1080, 100 %:
 4. Warnton `unblockable_warn` nur bei `is_unblockable()` (Flags 0 und 4), nicht bei 5 (blockbar + Guard Breaking) – unverändert übernommen.
 5. Kampflesbarkeit und Spielgefühl lassen sich aus Tests und Standbildern nicht abschließend beurteilen.
 6. 75/125/150 % beim Entwickler.
+
+## Nachtrag: Hardened Husk Defense Mix 1.0
+
+Umgesetzt nach Abschnitt 7: Der Husk nutzt über das neue optionale `EnemyConfig.attacks` die Familie
+`hardened_husk_attacks.tres` – Swipe parierbar (Kreuzfunke), schwerer Slam nur blockbar ohne Guard Breaking (Schild).
+Werte, Timings und Reihenfolge wie beim Grunt; Grunts, Wölfe und Bosse unverändert. Details, Tests und Screenshots:
+`docs/HARDENED_HUSK_DEFENSE_MIX_1_0.md`.

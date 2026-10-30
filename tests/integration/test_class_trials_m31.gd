@@ -169,7 +169,14 @@ func test_sanctum_warden_follows_the_hardened_husk_reference() -> void:
 	var husk: EnemyConfig = load("res://data/enemies/hardened_husk.tres")
 	check_eq(warden.id, &"sanctum_warden", "stable variant id")
 	check_eq(warden.rank, 2, "boss rank (boss bar)")
-	check_eq(_combat_values(warden), _combat_values(husk), "every combat value from the Hardened Husk")
+	# Hardened Husk Defense Mix 1.0: the husk got its own attack family (EnemyConfig.attacks); the warden, a boss,
+	# keeps the grunt claws - every other combat value still follows the husk
+	var husk_values := _combat_values(husk)
+	husk_values.erase("attacks")
+	var warden_values := _combat_values(warden)
+	warden_values.erase("attacks")
+	check_eq(warden_values, husk_values, "every combat value from the Hardened Husk")
+	check(warden.attacks == null, "the warden keeps the grunt claws (no own family)")
 	check(warden.drops.is_empty() and warden.mastery_xp_reward == 0 and warden.class_xp_reward == 0, "no drops, no XP")
 	var scene: GameMap = load("res://scenes/maps/trial_arcanist.tscn").instantiate()
 	var spawns: Array = scene.get_node("Finale").find_children("*", "EncounterSpawn", false, false)

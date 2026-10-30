@@ -50,6 +50,8 @@ func _ready() -> void:
 	status.resistances = config.status_resistances
 	status.max_slow_cap = config.max_slow
 	knockback.deceleration = config.knockback_decay
+	if config.attacks != null:
+		attacks = config.attacks   # the variant's own attacks (EnemyConfig.attacks); without one nothing changes
 	combat.set_weapon(attacks)
 	combat.attack_finished.connect(func(_attack: AttackDefinition) -> void: _cooldown = config.attack_cooldown)
 	hurtbox.invulnerability_check = health.is_dead

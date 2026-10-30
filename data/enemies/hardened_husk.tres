@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/enemies/enemy_config.gd" id="1_cfg"]
 [ext_resource type="Script" path="res://scripts/rpg/base/item_cost.gd" id="2_cost"]
+[ext_resource type="Resource" path="res://data/enemies/hardened_husk_attacks.tres" id="3_attacks"]
 
 [sub_resource type="Resource" id="Drop_essence"]
 script = ExtResource("2_cost")
@@ -21,6 +22,7 @@ body_color = Color(0.36, 0.3, 0.2, 1)
 body_radius = 10.0
 max_health = 160.0
 max_poise = 70.0
+attacks = ExtResource("3_attacks")
 move_speed = 50.0
 aggro_range = 240.0
 attack_cooldown = 1.2
